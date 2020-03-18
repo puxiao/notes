@@ -12,42 +12,59 @@
 
 #### keys命令
 计算redis所有的键：keys *
+
 keys pu* (找出以pu开头的所有key的集合)
+
 keys pu? (找出以pu开头，长度为3的key的集合)
+
 keys pu[a-g]* (找出以pu开头，后面为a-g范围内的字母，*结尾并不限制的key的集合)
 
 #### key相关命令
 计算key的总数：dbsize
+
 判断一个key是否存在：exists key
+
 删除key：del key[key ...]
+
 设置key在5秒以后过期：expire key 5 (对于字符串类型比较特别，如果调用了set方法重新赋值，那么原来的过期时间会自动删除)
+
 查看key的剩余过期时间：ttl key (如果返回-2则表示key不存在，如果返回-1则表示该key存在且永远不过期)
+
 删除key的过期时间(key不再会过期)：persist key
+
 查看key的类型：type key (返回类型可能为：string、hash、list、set、zset、none)
 
 #### Object命令
 
 1、查看某个key在redis内部中记录的编码类型：object encoding key
+
 int：整数
+
 raw：一般字符串
+
 embstr：在2.8版本里不存在、3.0版本里一般字符串小于39字节字符串、3.2版本里小于44字节的字符串
 
 zipmap：比较小的嘻哈表
+
 hashtable：任意哈希表
 
 ziplist：节约大小并且较小的列
+
 linkedlist：任意列表
 
 intset：值储存数字的小集合
+
 hashtable：任意集合
 
 ziplist：比较小的有序集合
+
 skiplist：任何有序集合
 
 2、查看某个key空闲时间(没有被读取或写入)：object idletime key
+
 返回空闲秒数
 
-3、查看引用所储存值的次数：object refcount key
+3、查看引用所储存值的次数：object refcount key 
 暂时没明白含义
 
 #### type命令
