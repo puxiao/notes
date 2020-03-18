@@ -25,7 +25,7 @@ keys pu[a-g]* (找出以pu开头，后面为a-g范围内的字母，*结尾并�
 
 判断一个key是否存在：exists key
 
-删除key：del key[key ...]
+删除key：del key1 key2
 
 设置key在5秒以后过期：expire key 5 (对于字符串类型比较特别，如果调用了set方法重新赋值，那么原来的过期时间会自动删除)
 
