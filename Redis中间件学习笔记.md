@@ -124,4 +124,4 @@ client.watch("mynode",watchErr => {
 如果想针对某个哈希类型的某个field，可以使用  
 client.watch('key','field',watchErr => {...});
 
-欢迎指正。
+上述学习笔记，若有不正确的地方，欢迎指正。
