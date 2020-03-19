@@ -70,11 +70,11 @@ redis数据类型有：string (字符串)、hash (哈希表)、list (列表)、s
 
 若针对key同时设置多条field的value，例如mset示例代码：
 
-    client.set('mynode','nodejs','koa',(err,reply) =>{ });
+    client.mset('mynode','nodejs','koa',(err,reply) =>{ });
     //或
-    client.set('mynode',['nodejs','koa'],(err,reply) =>{ });
+    client.mset('mynode',['nodejs','koa'],(err,reply) =>{ });
     //或
-    client.set(['mynode','nodejs','koa'],(err,reply) =>{ });
+    client.mset(['mynode','nodejs','koa'],(err,reply) =>{ });
 
 无论那种数据类型对应的操作语法都以此类推，不再过多叙述。  
 
