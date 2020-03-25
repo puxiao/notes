@@ -119,7 +119,7 @@ CentOS安装Nginx：yum install nginx -y
 通过gzip on来压缩文件  
 
 
-##感谢
+## 感谢
 
 极客时间：Nginx核心知识100讲：[https://time.geekbang.org/course/intro/138](https://time.geekbang.org/course/intro/138)  
 动力节点：2020最新Nginx详细教程(nginx快速上手)：[https://www.bilibili.com/video/BV1zE411N7m9](https://www.bilibili.com/video/BV1zE411N7m9)
