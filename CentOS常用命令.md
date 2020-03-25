@@ -53,7 +53,7 @@ root用户操作关机：shutdown -h [time]  [time]如果为now立即关机、10
 
 
 ## 下载
-下载某文件：wget http://www.xxxx.com/xxx.xx
+下载某文件：wget http://xxx.xxxx.xxx/xxx.xx
 
 
 ## 查看/编辑某文档
