@@ -1,4 +1,4 @@
-# Redis学习笔记
+# Redis常见命令
 
 启用redis：redis-cli -h [ip] -p [6379] -a [password]
 
