@@ -5,6 +5,10 @@
 #### 安装方式 一：通过yum安装
 CentOS安装Nginx：yum install nginx -y
 
+#### 请注意：  
+Nginx默认配置文件位置：/etc/nginx/nginx.conf  
+配置文件中，默认网站文件目录：/usr/share/nginx/html
+
 #### 安装方式 二：手工下载，编译，配置，安装
 
 以下操作，均通过shell命令进行。
