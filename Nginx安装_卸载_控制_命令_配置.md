@@ -27,7 +27,7 @@ Nginx默认配置文件位置：/etc/nginx/nginx.conf
 
 继续下面操作：  
 
-    生成中间文件：./configure --prefix=/software/nginx   --prefix为你要设定的安装目录  
+    生成中间文件：./configure --prefix=/software/nginx   --prefix为你要设定的安装目录，我这里将安装目录设定为/software/nginx  
     
     若生成失败，则需要你先安装 pcre-devel 和 openssl-devel，再执行一遍生成中间文件。  
     安装必要文件：yum -y install pcre-devel openssl openssl-devel  
