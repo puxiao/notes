@@ -22,6 +22,11 @@
 查看已全局安装的模块列表(仅一级主模块)：npm list -g --depth 0  
 
 
+## 清除缓存
+
+强制清除缓存：npm cache clean --force 或 npm cache clean -f  
+
+
 ## 发布自己的npm包
 
 #### 第一步：检查本机npm源
