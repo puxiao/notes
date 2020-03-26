@@ -34,6 +34,13 @@
 强制清除缓存：npm cache clean --force 或 npm cache clean -f  
 
 
+## 初始化项目
+
+进入空白项目目录，初始化：npm init  过程中需要询问，可以修改或摁回车采用默认值  
+
+或者直接采用默认值，过程中不询问：npm init -y  可以在初始化后手工修改package.json中的值 
+
+
 ## 发布自己的npm包
 
 #### 第一步：检查本机npm源
