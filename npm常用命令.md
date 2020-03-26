@@ -10,7 +10,7 @@
 
 全局安装：npm install -g xxx  
 
-安装特定版本：npm install xxx@x.x  特定版本形式为 xxx + @ + 版本号  
+安装特定版本：npm install xxx@x.x.x  特定版本形式为 xxx + @ + 版本号  
 
 安装某模块下的子模块(这个比较特殊，我目前仅遇到过一个)： npm install @types/node  子模块形式为 @ + xxx + / + xxx  
 
