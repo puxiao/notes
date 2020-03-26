@@ -11,6 +11,13 @@
 全局安装：npm install -g xxx  
 
 
+## 卸载模块
+
+当前项目卸载模块：npm uninstall --save | --save-dev xxx  
+
+全局卸载模块：npm uninstall -g xxx  
+
+
 ## 查看安装模块  
 
 查看全局安装模块的目录：npm root -g  
