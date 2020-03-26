@@ -2,6 +2,8 @@
 
 ## 安装模块
 
+安装当前项目中package.json中所有声明的依赖模块(创建和下载node_modules)：npm install  新拿到别人的项目，需要此命令来下载各种依赖  
+
 当前项目安装模块(仅下载到node_modules文件夹中)：npm install xxx 或 npm i xxx  
 
 当前项目安装(保存到package.json中的运行依赖)：npm install --save xxx 或 npm i -S xxx  
@@ -59,7 +61,9 @@
 
 
 ## 执行脚本
-执行package.json中scripts中定义好的脚本：npm run xxx  其中xxx在package.json中scripts里定义的脚本
+执行package.json中scripts中定义好的脚本：npm run xxx  其中xxx在package.json中scripts里定义的脚本  
+
+查看当前可执行脚本的列表：npm run  将列出可执行脚本的列表  
 
 
 ## 关于package.json中scripts定义的特别说明：  
