@@ -1,5 +1,6 @@
 ## 我的学习笔记
-技术栈：Nodejs/Koa/Middleware/Mysql/Redis/Nginx/Npm/CentOS
+后端技术栈：Nodejs/Koa/Middleware/Mysql/Redis/Nginx/Npm/CentOS
+前端技术栈：React/Webpack
 
 持续添加更新中...
 
