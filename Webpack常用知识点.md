@@ -143,7 +143,7 @@ npx webpack --watch 或 在package.json中scripts设定：  "scripts":{"watch":w
 2、配置package.json："scripts":{"start":"webpack-dev-server"}  
 3、配置webpack.config.js：devServer:{contentBase:'/dist',open:true,host:'127.0.0.1',port:80,compress:true}  
 
-注意：若想使用热更新(HMR)，则需要再添加2个属性：hot:true 热更新、hotOnly=true 即使热更新失败也不自动刷新
+注意：若host为内网IPv4的值(例如192.168.xx.xx，则同局域网电脑均可访问)、若想使用热更新(HMR)，则需要再添加2个属性：hot:true 热更新、hotOnly=true 即使热更新失败也不自动刷新
 
 终端执行代码：npm run start  
 
@@ -201,6 +201,8 @@ server.js代码类似如下：
       hot:true,
       hotOnly:true
     }
+
+注意：若host写的是内网IPv4的地址，例如192.168.xx.xx，那么同局域网电脑均可访问该地址。  
 
 配置pubgins：
 
