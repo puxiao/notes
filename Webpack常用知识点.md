@@ -269,5 +269,7 @@ server.js代码类似如下：
 5、在webpack.dev.js和webpack.prod.js中，均引入webpack-merge和webpack.common.js，将合并后的配置文件作为导出(module.exports)对象。  
 6、在package.json的scripts中，设定{"dev":"webpack --config webpack.dev.js","build":"webpack-dev-server --config webpack.prod.js"}  
 
+还可以创建一个build目录，将上述3个.js文件都放到这个目录里，然后修改dev和build中 --config参数路径，例如 dev --config 的值由 webpack.dev.js改为 ./build/webpack.dev.js。  
+
 这样配置以后，想执行开发环境(创建调试网页、热更新等)：npm run start、想执行生产环境(打包输出文件)：npm run build  
 
