@@ -252,3 +252,20 @@ server.js代码类似如下：
 
 
 #### 综上所述，如果不采用Vue、React、Angular这些框架，纯手写JS，不建议使用热更新。
+
+
+
+# 使用webpack-merge合并多个配置文件
+
+默认情况下webpack对应的配置文件为webpack.config.js。但实际项目中我们经常需要在开发环境和生产环境中来回切换，如果单纯每次靠修改配置文件会比较麻烦。  
+
+#### 推荐做法是：  
+1、创建webpack.dev.js，储存开发环境所需的独有配置内容。    
+2、创建webpack.prod.js，储存生产环境所需的独有配置内容。  
+3、创建webpack.common.js，储存开发环境和生产环境共有的配置内容。  
+4、安装webpack-merge模块：npm install --save-dev webpack-merge (具体使用方法参见该模块官方文档)。  
+5、在webpack.dev.js和webpack.prod.js中，均引入webpack-merge和webpack.common.js，将合并后的配置文件作为导出(module.exports)对象。  
+6、在package.json的scripts中，设定{"dev":"webpack --config webpack.dev.js","build":"webpack-dev-server --config webpack.prod.js"}  
+
+这样配置以后，想执行开发环境(创建调试网页、热更新等)：npm run start、想执行生产环境(打包输出文件)：npm run build  
+
