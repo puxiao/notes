@@ -332,8 +332,8 @@ optimization:{splitChunks:{chunks:"all"}}
 与此同时，要修改webpack.config.js中的ouput配置参数，新增chunkFilename属性：  
 ouput:{main:'xxx',chunkFilename: '[name].bundle.js',path:xxxxxxxx}  
 
-优点：实现动态加载(导入)，代码拆分更加细致化
-缺点：业务代码编写方式相对静态导入，稍显复杂
+优点：实现动态加载(导入)，代码拆分更加细致化。
+缺点：业务代码编写方式相对静态导入，稍显复杂。
 
 #### 第4种：预取、预加载 (webpack v4.6.0以上版本才支持，目前仅为beta测试版)
 
