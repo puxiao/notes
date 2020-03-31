@@ -76,7 +76,7 @@
 1、脚本定义形式为 "xxx":"xxxx xxxx"  
 2、若脚本中需要同时执行2个不同命令，形式为："xxx":"xxxx xxx01 && xxx02"  注意是2个&  
 3、若脚本中需要先后执行 2个不同命令，形式为： "xxx":"xxxx xxx01 & xxx02"  注意是1个&  
-4、npm内置了2个脚本简写：npm test 是 npm run test的简写、 npm start 是 npm run start的简写  
+4、npm内置了4个脚本简写："test"、"start"、"stop"、"restart"。 例如npm test 是 npm run test的简写、 npm start 是 npm run start的简写  
 5、通常执行命令要加参数，采用 --xxxx的形式  
 6、在windows和linux中，环境变量书写方式不同，因此如果想在执行 node xxx.js 中想加入环境变量，为了确保环境变量兼容，通常需要使用cross-env这个模块(需要先npm i cross-env --save-dev)，脚本形式为："xxx":"cross-env NODE_ENV=xx node xxx.js"，NODE\_ENV为约定的环境变量名，xx为变量的值。  
 7、若执行命令不是node xxx.js，而是使用 npx xxx 执行node_modules中某模块，在package.json中的scripts中可省略掉npx。例如npx webpack对应scripts中的写法 "build":"npx webpack" 可简写为 "build":"webpack" 
