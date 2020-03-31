@@ -271,5 +271,75 @@ server.js代码类似如下：
 
 还可以创建一个build目录，将上述3个.js文件都放到这个目录里，然后修改dev和build中 --config参数路径，例如 dev --config 的值由 webpack.dev.js改为 ./build/webpack.dev.js。  
 
+注意，如果采用将配置文件放入build目录，切记一定要做以下修改：  
+1、webpack.common.js中output.path的路径增加"../"，否则dist目录会创建在build目录下(而不是根目录)。  
+2、相对旧的版本，最新版本clean-webpack-plugin已经支持自动识别删除output.path对应的目录(dist目录)，因此无需做任何更改。 
+
 这样配置以后，想执行开发环境(创建调试网页、热更新等)：npm run start、想执行生产环境(打包输出文件)：npm run build  
 
+
+
+# 代码拆分(code splitting) —— 代码优化(optimization)
+
+项目代码一般包含2个部分：引入的公共代码类库和我们自己编写的业务代码。  
+如果把所有代码均打包输出为1个js文件，那么会存在以下风险：  
+1、这1个js文件体积会比较大。  
+2、若更改业务代码，重新整体打包，客户端需要重新加载这个js(体积大加载慢)。  
+
+为了解决这个问题，应该将项目代码进行拆分，比较简单的方式就是将公共类库输出为1个js、业务代码输出为1个js。  
+若业务代码发生变更，客户端仅仅需要重新加载业务代码js，而公共类库js可以选择使用之前的缓存。  
+
+稍微复杂点的拆分做法是按需动态加载，例如假设项目运行有A模块、B模块、C模块，当需要用到哪个模块时才加载哪个模块。
+
+### 在webpack中有3种代码拆分方式：  
+
+#### 第1种：手工拆分  
+
+实现方式：通过手工方式将引入的公共库单独创建一个js文件(例如xxx.js)，在webpack.config.js的入口entry中，配置如下：
+entry:{main:'../src/index.js',xxx:'../src/xxx.js'}，这样在输出打包时会将xxx.js和业务代码进行拆分成2个js文件。  
+
+优点：能够体现出开发人员代码拆分主观意识比较强 (看，纯手工！)  
+缺点：麻烦并且不见得拆分的合理(很可能会重复引用)  
+
+#### 第2种：使用SplitChunksPlugin(无需安装，webpack已内置该插件)
+
+实现方法：在webpack.config.js中，添加optimization(优化)项，并配置splitChunks中的chunks值为"all"，配置如下：  
+optimization:{splitChunks:{chunks:"all"}}  
+此时打包输出，除业务逻辑代码js外，会额外创建一个以"vendors"开头的js文件(例如vendors~main.bundle.js)，里面是拆分出来的公共类库代码。  
+
+优点：自动，简单  
+缺点：只是简单讲公共类库和业务代码进行拆分，并未做到不同业务模块拆分，实现按需加载  
+
+#### 第3种：动态加载(动态导入)  
+
+实现方法：修改业务代码，将需要动态导入的业务代码(函数或模块)通过import()来进行动态导入。  
+
+大致实现模式是：  
+
+    async function getComponent(){
+      const { default: xxx } = await import('xxxxx');
+      //此时xxx为引入的类模块(公共类库或者自己拆分出的业务模块js)
+      //编写业务代码，例如生成自己的组件mycomp
+      let mycomp = xxxxxx....
+      ......
+      return mycomp;
+    }
+    
+    getComponent().then(component => {
+      document.body.appendChild(component);
+    })
+
+与此同时，要修改webpack.config.js中的ouput配置参数，新增chunkFilename属性：  
+ouput:{main:'xxx',chunkFilename: '[name].bundle.js',path:xxxxxxxx}  
+
+优点：实现动态加载(导入)，代码拆分更加细致化
+缺点：业务代码编写方式相对静态导入，稍显复杂
+
+#### 第4种：预取、预加载 (webpack v4.6.0以上版本才支持，目前仅为beta测试版)
+
+实现方式：在import时，使用2个内置关键词prefetch(预取)和preload(预加载)
+
+预取和预加载两者的区别，主要体现在“触发发生”的阶段不同。  
+1、当父级chunk开始加载时，预加载同步进行、当父级chunk加载完成时，预取才开始进行。  
+2、无论当前浏览器是否空闲，预加载都会进行、只有当浏览器空闲时，预取才会开始进行。  
+3、当预加载完成后，当前模块可以立即使用、当预取完成后，可能将来某个时刻才会使用到。  
