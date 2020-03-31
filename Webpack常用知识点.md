@@ -237,7 +237,7 @@ server.js代码类似如下：
 
 5、终端执行代码：npm run start  
 
-由于"start"这个词是npm内置的(另外一个内置词是"test")，因此执行代码可以简写为：npm start  
+由于"start"这个词是npm内置的(另外3个内置词是"test"、"stop"、"restart")，因此执行代码可以简写为：npm start  
 若要结束热更新监听，则在终端执行：ctr+c 
 
 ### 特别说明：  
