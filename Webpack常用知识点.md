@@ -89,7 +89,7 @@ npm install --save @babel/polyfill
 如果不希望将css样式内嵌在打包输出的js中(该js会通过style-loader将css样式内嵌到网页<style>标签中)。  
 虽然可以通过 sytle-loader(配置options:{injectType:'linkTag'}) + file-loader来实现，但是这样做的一个缺点，因为没有使用css-loader，所以在编写业务代码时无法方便使用css样式属性。 
 
-为了解决这个问题，可以使用 mini-css-extract-plugin 来解决这个问题。  
+为了解决这个问题，可以使用 mini-css-extract-plugin。  
 
 使用方法：  
 
