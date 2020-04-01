@@ -374,10 +374,64 @@ optimization:{splitChunks:{chunks:'all',cacheGroups:{verdors:false,default:false
 预取和预加载两者的区别，主要体现在“触发发生”的阶段不同。  
 1、当父级chunk开始加载时，预加载同步进行、当父级chunk加载完成时，预取才开始进行。  
 2、无论当前浏览器是否空闲，预加载都会进行、只有当浏览器空闲时，预取才会开始进行。  
-3、当预加载完成后，当前模块可以立即使用、当预取完成后，可能将来某个时刻才会使用到。  
+3、当预加载完成后，当前模块可以立即使用、当预取完成后，可能将来某个时刻才会使用到。 
+
+#### 实用技巧： 使用谷歌浏览器的coverage功能来查看网页代码覆盖率(代码默认使用占比)，来帮助我们分析优化代码的可拆分性。  
 
 # 魔法注释
 #### webpack在使用动态加载(导入)或懒加载(预取和预加载)中，目前有3个魔法注释：  
 1、设定加载模块打包输出文件名(如果不设定，则采用默认的以数字为文件名的规则)：/* webpackChunkName:'xxxxx' */  
 2、设定懒加载的方式为预取：/\* webpackPrefetch: true */  
 3、设定懒加载的方式为预加载：/\* webpackPreload: true */  
+
+
+# 打包分析(bundle analysis)
+
+为了分析项目打包过程中的细节、打包完成后结果，需要做一项工作：打包分析。  
+
+实现方法，大体分为两个步骤。  
+
+#### 第一步：生成打包细节文档stats.json  
+在执行webpack打包命令时，添加参数 --profile --json > stats.json，可以记录打包过程中的各个细节，并在打包完成后生成一个 stats.json 文件，该文件储存位置为整个项目的根目录(并不是dist目录)。  
+
+例如我们可以在package.json的scripts中添加一条执行命令：  
+{"analysis":"webpack --profile --json > stats.json --config './build/webpack.analysis.js'"}  
+
+webpack.analysis.js是我们专门为了打包分析设定的webpack配置文件，具体配置项在第二步中会有详细说明。
+
+当然你也可以继续使用原来的开发环境或生产环境配置文件。
+
+#### 第二步：分析stats.json文件，获得可视化的分析结果
+
+如果直接打开stats.json文件，不够直观，需要我们通过第三方工具来进行可视化分析。  
+
+##### 推荐使用以下2种可视化分析工具：
+
+##### 第1种：webpack官方提供的打包分析可视化网站：[http://webpack.github.com/analyse](http://webpack.github.com/analyse)  
+
+使用方法：访问该网站，上传stats.json文件，该网站即可进行可视化分析结果展示。  
+
+##### 第2种：使用webpack-bundle-analyzer
+
+使用方法：  
+1、安装webpack-bundle-analyzer：npm install --save-dev webpack-bundle-analyzer  
+2、创建打包分析对应的webpack配置文件，例如第一步(生成打包细节文档stats.json)中提到的./build/webpack.analysis.js。
+
+    const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+    const merge = require('webpack-merge');
+    const common = require('./webpack.common'); 
+    //webpack.common.js为我们已配置好的共有配置选项文件，可参考本文档中"使用webpack-merge合并多个配置文件"这一部分
+
+    //因为webpack.analysis.js仅仅用来做打包分析，所以他不需要设置mode、devtool、devServer以及HtmlWebpackPlugin等
+    //不设置，那么就会使用webpack默认值即可
+    const config = {
+      plugins:[
+        new BundleAnalyzerPlugin()
+      ]
+    }
+    
+    module.exports = merge(common,config);
+
+
+终端执行命令：npm run analysis  
+打包完成后，浏览器会自动打开 http://127.0.0.1:8888，里面就是可视化打包分析结果。  
