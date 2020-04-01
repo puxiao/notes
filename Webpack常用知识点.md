@@ -338,7 +338,7 @@ optimization:{splitChunks:{chunks:'all',cacheGroups:{verdors:false,default:false
 
 无论静态分割还是动态导入，都需要用到webpack默认自带插件splitChunksPlugin，以及对它的配置。  
 
-优点：实现动态加载(导入)，代码拆分更加细致化。
+优点：实现动态加载(导入)，代码拆分更加细致化。  
 缺点：业务代码编写方式相对静态导入，稍显复杂。
 
 #### 第4种：预取、预加载 (webpack v4.6.0以上版本才支持，目前仅为beta测试版)
