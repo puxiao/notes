@@ -307,7 +307,10 @@ entry:{main:'../src/index.js',xxx:'../src/xxx.js'}，这样在输出打包时会
 optimization:{splitChunks:{chunks:"all"}}  
 此时打包输出，除业务逻辑代码js外，会额外创建一个以"vendors"开头的js文件(例如vendors~main.bundle.js)，里面是拆分出来的公共类库代码。 
 
-这里说的"公共类库代码"默认仅仅指从node_modules目录里引入的代码，当然你可以通过修改splitChunks.cacheGroups.vendors.test的值来确定哪些算是“公共类库”。  
+优点：自动，简单  
+缺点：只是简单讲公共类库和业务代码进行拆分，并未做到不同业务模块拆分，实现按需加载  
+
+这里说的公共类库代码默认仅仅指从node_modules目录里引入的代码，当然你可以通过修改splitChunks.cacheGroups.vendors.test的值来确定哪些算是“公共类库”。  
 
 注意：splitChunks有很多属性配置，其中有一个默认属性miniSize:30000，意思是只有当你引入的模块代码超过30K以后，才会进行拆分。如果引入的模块代码总共不超过30K，即使做了拆分配置，也不会进行拆分。  
 
@@ -316,8 +319,18 @@ optimization:{splitChunks:{chunks:"all"}}
 当然也可以自定义输出文件名字(例如引用node_modules目录里的代码模块打包文件名字叫vendors.js，引用其他地方的代码模块打包文件名字叫common.js)，以及文件存放位置(例如存放到dist的js目录里)，只需做一下配置修改：  
 optimization:{splitChunks:{chunks:"all",cacheGroups:{vendors:{filename:'js/vendors.js'}},default:{filename:'js/common.js'}}}  
 
-优点：自动，简单  
-缺点：只是简单讲公共类库和业务代码进行拆分，并未做到不同业务模块拆分，实现按需加载  
+#### vendors组与default组的区别：  
+vendors组有属性test:/[\\/]node_modules[\\/]/，打包时会判断引入的代码模块是否在node_modules目录里。而default组没有test属性，没有test属性意味着default组可以匹配任何目录内的代码模块。 
+
+那么问题来了，引用node_modules目录里的代码模块也符合default组(没有test属性，不限任何目录)，为啥不会被打包进default组里呢？ 
+
+答案是：因为vendors组和default组，默认都有一个属性priority(优先级)，vendors组的默认priority值为-10、default组的默认priority值为-20。当priority(优先级)的值越大，代码模块就优先归属到哪个组里，-10大于-20，所以优先归属到vendors组里。  
+
+此外default组还有一个vendors组没有的属性 reuseExistingChunk:true，指复用已经存在的代码模块。例如a模块引入c，b模块也引入c，那么只会打包一份c到default组里。vendors组虽然没有该属性，但是node_modules中同一个代码类库webpack默认也是只会导出一份。  
+
+#### vendors组与default组的共同点：  
+1、自定义输出文件名filename:"xxxxx"设置完全相同。  
+2、优先级priority设置完全相同，只是vendors的priority默认值为-10，default的priority默认值为-20。强烈建议不要修改他们的priority默认值。  
 
 #### 第3种：动态加载(动态导入)  
 
