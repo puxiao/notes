@@ -112,7 +112,81 @@ npm install --save @babel/polyfill
 特别说明：  
 1、依然需要使用css-loader。  
 2、目前最新版本的mini-css-extract-plugin已经默认支持热更新。  
-3、和输出js文件命名规则类似，如果一个css文件被网页直接引用，那么他将会被命名为filename对应的值，如果是被间接引用(被网页直接引用的css引入)则被命名为chunkFilename对应的值。  
+3、和输出js文件命名规则类似，如果一个css文件被网页直接引用，那么他将会被命名为filename对应的值，如果是被间接引用(被网页直接引用的css引入)则被命名为chunkFilename对应的值。
+
+假如有以下情况：  
+1、入口文件直接引用有css，也间接引用有其他css，那么默认会打包出多个css文件(filename和chunkFilename)。  
+2、入口文件有多个，并且每个入口文件都引用有各自的css，那么默认会打包出多个css文件。  
+
+如果我们希望将整个项目所有css文件都打包成一个css文件，可以在webpack配置文件中的optimization.splitChunks.cacheGroups增加一个style组，代码如下：  
+
+    optimization:{
+      splitChunks:{
+        chunks:'all',
+        cacheGroups:{
+          styles: {
+            name: 'styles',
+            test: /\.css$/,
+            chunks: 'all',
+            enforce: true,
+          }
+        }
+      }
+    } 
+
+
+
+假如有以下情况：  
+1、入口文件有多个，每个入口文件都直接引用或间接引用各自的css。  
+
+如果我们希望将各个入口文件的css单独进行打包，那么可以在webpack配置文件中做以下修改：
+
+    const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+    
+    //定义一个函数
+    function recursiveIssuer(m) {
+      if (m.issuer) {
+    return recursiveIssuer(m.issuer);
+      } else if (m.name) {
+    return m.name;
+      } else {
+    return false;
+      }
+    }
+
+    //假设其中一个入口文件为foo，在配置文件中的cacheGroups属性进行新增一个fooStyles组，其他入口文件也如此增加
+    optimization:{
+      splitChunks:{
+        chunks:'all',
+        cacheGroups:{
+          fooStyles: {
+            name: 'foo',
+            test: (m, c, entry = 'foo') => {
+              m.constructor.name === 'CssModule' && recursiveIssuer(m) === entry
+            },
+            chunks: 'all',
+            enforce: true
+          }
+        }
+      }
+    }
+
+特别说明：以上代码示例来源于webpack官方文档，但我在实际运行中遇到了一些问题(webpack版本4.42.1)，打包结果并不是预期的，暂时保留这些问题，此处代码仅做记录。  
+
+
+## CSS文件代码压缩：optimize-css-assets-webpack-plugin
+
+将css中多处样式进行简化合并(例如删除注释、多个css属性合并为一个css属性等)。无论是使用style-loader还是mini-css-extract-plugin，都推荐使用css代码压缩。  
+
+使用方法：  
+
+    const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+    
+    //配置文件中的plugin属性
+    plugins:[
+      new OptimizeCssAssetsPlugin()
+    ]
+
 
 # devtool配置
 
