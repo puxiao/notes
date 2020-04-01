@@ -116,7 +116,7 @@ npm install --save @babel/polyfill
 
 假如有以下情况：  
 1、入口文件直接引用有css，也间接引用有其他css，那么默认会打包出多个css文件(filename和chunkFilename)。  
-2、入口文件有多个，并且每个入口文件都引用有各自的css，那么默认会打包出多个css文件。  
+2、入口文件有多个，并且每个入口文件都引用有各自的css，那么默认也会打包出多个css文件。  
 
 如果我们希望将整个项目所有css文件都打包成一个css文件，可以在webpack配置文件中的optimization.splitChunks.cacheGroups增加一个style组，代码如下：  
 
