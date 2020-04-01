@@ -317,7 +317,10 @@ optimization:{splitChunks:{chunks:"all"}}
 大致实现模式是：  
 
     async function getComponent(){
-      const { default: xxx } = await import('xxxxx');
+      //请注意，在引入函数import的括号里有 /* webpackChunkName='xxxxx' */ 
+      //这个被称为"魔法注释"：将来打包输出的该动态类名字就是注释里的xxxxx
+      //如果省略则生成的文件名是以数字0为启始索引，例如0.js、1.js....
+      const { default: xxx } = await import(/* webpackChunkName='xxxxx' */ 'xxxxx');
       //此时xxx为引入的类模块(公共类库或者自己拆分出的业务模块js)
       //编写业务代码，例如生成自己的组件mycomp
       let mycomp = xxxxxx....
