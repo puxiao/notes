@@ -154,7 +154,7 @@ npm install --save @babel/polyfill
       }
     }
 
-    //假设其中一个入口文件为foo，在配置文件中的cacheGroups属性进行新增一个fooStyles组，其他入口文件也如此增加
+    //假设其中一个入口文件为foo，在配置文件中的cacheGroups属性进行新增一个fooStyles组，其他入口文件也采用这种方式增加
     optimization:{
       splitChunks:{
         chunks:'all',
