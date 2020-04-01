@@ -377,7 +377,7 @@ optimization:{splitChunks:{chunks:'all',cacheGroups:{verdors:false,default:false
 3、当预加载完成后，当前模块可以立即使用、当预取完成后，可能将来某个时刻才会使用到。  
 
 # 魔法注释
-#### webpack在使用动态加载或懒加载(预取和预加载)中，目前有3个魔法注释：  
+#### webpack在使用动态加载(导入)或懒加载(预取和预加载)中，目前有3个魔法注释：  
 1、设定加载模块打包输出文件名(如果不设定，则采用默认的以数字为文件名的规则)：/* webpackChunkName:'xxxxx' */  
 2、设定懒加载的方式为预取：/\* webpackPrefetch: true */  
 3、设定懒加载的方式为预加载：/\* webpackPreload: true */  
