@@ -305,7 +305,9 @@ entry:{main:'../src/index.js',xxx:'../src/xxx.js'}，这样在输出打包时会
 
 实现方法：在webpack.config.js中，添加optimization(优化)项，并配置splitChunks中的chunks值为"all"，配置如下：  
 optimization:{splitChunks:{chunks:"all"}}  
-此时打包输出，除业务逻辑代码js外，会额外创建一个以"vendors"开头的js文件(例如vendors~main.bundle.js)，里面是拆分出来的公共类库代码。  
+此时打包输出，除业务逻辑代码js外，会额外创建一个以"vendors"开头的js文件(例如vendors~main.bundle.js)，里面是拆分出来的公共类库代码。 
+
+这里说的"公共类库代码"默认仅仅指从node_modules目录里引入的代码，当然你可以通过修改splitChunks.cacheGroups.vendors.test的值来确定哪些算是“公共类库”。  
 
 注意：splitChunks有很多属性配置，其中有一个默认属性miniSize:30000，意思是只有当你引入的模块代码超过30K以后，才会进行拆分。如果引入的模块代码总共不超过30K，即使做了拆分配置，也不会进行拆分。  
 
