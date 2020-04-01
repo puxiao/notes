@@ -106,12 +106,13 @@ npm install --save @babel/polyfill
 
     //配置文件中的plugin属性
     plugins:[
-      new MiniCssExtractPlugin({filename:'css/[name].css',chunkFilename:'css/[id].css'})
+      new MiniCssExtractPlugin({filename:'css/[name].css',chunkFilename:'css/[name].chunk.css'})
     ]
 
 特别说明：  
 1、依然需要使用css-loader。  
 2、目前最新版本的mini-css-extract-plugin已经默认支持热更新。  
+3、和输出js文件命名规则类似，如果一个css文件被网页直接引用，那么他将会被命名为filename对应的值，如果是被间接引用(动态导入或懒加载)则被命名为chunkFilename对应的值。  
 
 # devtool配置
 
