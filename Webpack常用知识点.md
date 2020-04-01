@@ -307,8 +307,7 @@ entry:{main:'../src/index.js',xxx:'../src/xxx.js'}，这样在输出打包时会
 optimization:{splitChunks:{chunks:"all"}}  
 此时打包输出，除业务逻辑代码js外，会额外创建一个以"vendors"开头的js文件(例如vendors~main.bundle.js)，里面是拆分出来的公共类库代码。  
 
-注意：splitChunks有很多属性配置，其中有一个默认属性miniSize:30000，意思是只有当你引入的模块代码超过30K以后，才会进行拆分。  
-如果引入的模块代码总共不超过30K，即使做了拆分配置，也不会进行拆分。  
+注意：splitChunks有很多属性配置，其中有一个默认属性miniSize:30000，意思是只有当你引入的模块代码超过30K以后，才会进行拆分。如果引入的模块代码总共不超过30K，即使做了拆分配置，也不会进行拆分。  
 
 当然也可以自定义输出文件名字(例如名字叫vendors.js)，以及文件存放位置(例如存放到dist的js目录里)，只需做一下配置修改：  
 optimization:{splitChunks:{chunks:"all",cacheGroups:{vendors:{filename:'js/vendors.js'}}}}  
