@@ -311,8 +311,10 @@ optimization:{splitChunks:{chunks:"all"}}
 
 注意：splitChunks有很多属性配置，其中有一个默认属性miniSize:30000，意思是只有当你引入的模块代码超过30K以后，才会进行拆分。如果引入的模块代码总共不超过30K，即使做了拆分配置，也不会进行拆分。  
 
-当然也可以自定义输出文件名字(例如名字叫vendors.js)，以及文件存放位置(例如存放到dist的js目录里)，只需做一下配置修改：  
-optimization:{splitChunks:{chunks:"all",cacheGroups:{vendors:{filename:'js/vendors.js'}}}}  
+如果设置miniSize:0，那么只要是import的类库(公共类库和自己写的业务模块)，都会进行拆分。这里有一个特殊情况是如果是自己写的业务模块或者是引用别人的框架js，这些代码并不在默认的"node_modules"目录里，这时需要在splitChunks.cacheGroups配置中新增一个和vendors同级的default对象，default配置属性和vendors有些区别但又类似。
+
+当然也可以自定义输出文件名字(例如引用node_modules目录里的代码模块打包文件名字叫vendors.js，引用其他地方的代码模块打包文件名字叫common.js)，以及文件存放位置(例如存放到dist的js目录里)，只需做一下配置修改：  
+optimization:{splitChunks:{chunks:"all",cacheGroups:{vendors:{filename:'js/vendors.js'}},default:{filename:'js/common.js'}}}  
 
 优点：自动，简单  
 缺点：只是简单讲公共类库和业务代码进行拆分，并未做到不同业务模块拆分，实现按需加载  
