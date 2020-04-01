@@ -367,7 +367,7 @@ optimization:{splitChunks:{chunks:'all',cacheGroups:{verdors:false,default:false
 
 实现方式：在import时，使用2个魔法注释：  
 1、/* webpackPrefetch: true */   预取  
-2、/* webpackPreload: true */   预加载  
+2、/\* webpackPreload: true */   预加载  
 
 这2个魔法注释的用法和 /* webpackChunkName:'xxxxx' */ 相同。
 
@@ -379,6 +379,5 @@ optimization:{splitChunks:{chunks:'all',cacheGroups:{verdors:false,default:false
 # 魔法注释
 #### webpack在使用动态加载或懒加载(预取和预加载)中，目前有3个魔法注释：  
 1、设定加载模块打包输出文件名(如果不设定，则采用默认的以数字为文件名的规则)：/* webpackChunkName:'xxxxx' */  
-2、设定懒加载的方式为预取：/* webpackPrefetch: true */  
-3、设定懒加载的方式为预加载：/* webpackPreload: true */  
-
+2、设定懒加载的方式为预取：/\* webpackPrefetch: true */  
+3、设定懒加载的方式为预加载：/\* webpackPreload: true */  
