@@ -355,7 +355,7 @@ vendors组有属性test:/[\\/]node_modules[\\/]/，打包时会判断引入的�
     })
 
 与此同时，要修改webpack.config.js中的ouput配置参数，新增chunkFilename属性：  
-ouput:{main:'xxx',chunkFilename: '[name].bundle.js',path:xxxxxxxx}  
+ouput:{main:'xxx',chunkFilename: '[name].chunk.js',path:xxxxxxxx}  
 optimization:{splitChunks:{chunks:'all',cacheGroups:{verdors:false,default:false}}}  
 
 无论静态分割还是动态导入，都需要用到webpack默认自带插件splitChunksPlugin，以及对它的配置。  
