@@ -598,3 +598,17 @@ webpack.analysis.js是我们专门为了打包分析设定的webpack配置文件
 
 终端执行命令：npm run analysis  
 打包完成后，浏览器会自动打开 http://127.0.0.1:8888 里面就是可视化打包分析结果。  
+
+
+# 垫片(Shimming) | shim预置依赖
+
+垫片(Shimming) 和 shim预置依赖 是同一个事情的两种不同叫法而已。  
+
+假设有这个场景：某个子模块c需要使用了另外一个公共类库B，那么c需要先import或require B。  
+但是，如果你想省力气，不写c引入B，而是直接使用B，此时理论上c模块代码是不完整，无法运行的。  
+
+这时候，就用到了 webpack 垫片 或 预置依赖 这个概念。需要你做一些特别的配置，webpack在打包输出时，帮你把缺失的引入B代码给自动添加到c模块中。  
+
+声明：非常不赞成这种行为，但是webpack确实可以帮你完成这个工作。  
+
+具体实现方式是通过使用ProvidePlugin插件来完成的，具体用法可参见：[https://webpack.js.org/plugins/provide-plugin/](https://webpack.js.org/plugins/provide-plugin/)  
