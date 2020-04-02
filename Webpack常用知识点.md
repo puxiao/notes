@@ -380,6 +380,23 @@ server.js代码类似如下：
 
 这样配置以后，想执行开发环境(创建调试网页、热更新等)：npm run start、想执行生产环境(打包输出文件)：npm run build  
 
+另外一种常见做法是通过添加环境变量，再根据环境变量返回(判断并合并)对应的配置文件。  
+
+实现方法是：  
+1、webpack.dev.js和webpack.prod.js本身只储存配置，并不使用webpack-merge与webpack.common.js合并。  
+2、在package.json中的scripts里，给打包命令添加环境变量，并且修改参数对应的配置文件路径：   
+{"dev": "webpack  --env.NODE_ENV='development' --config ./build/webpack.common.js"}  
+3、webpack.common.js中同时引入webpack.dev.js和webpack.prod.js，并且修改webpack.common.js的导出代码，将原来的直接导出对象改为一个包含return最终配置文件的函数(使用webpack-merge进行合并)。  
+
+    //导出模块为一个函数，伪代码如下：
+    module.export = (env) =>{
+    //根据环境变量来判断到底和哪个配置文件合并
+      return merge(config,(env && env.NODE_ENV === 'development')?dev:prod);
+    }
+
+注意：不同操作系统对于环境变量的设置不同，为了兼容各个操作系统，还需要安装使用cross-env这个类模块。  
+
+虽然这种方式也可以实现合并多个配置文件，但是不推荐使用此方法。  
 
 
 # 代码拆分(code splitting) —— 代码优化(optimization)
