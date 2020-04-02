@@ -1,5 +1,48 @@
 # Webpack常用知识点
 
+webpack4以上版本配置文件可以为空(不创建、不存在)，那么webpack会使用默认的配置设置。  
+
+但是实际项目中的打包输出肯定需要自己去配置定义，才能满足项目个性化需求。  
+
+# 入口文件(entry)和输出配置(output)  
+
+### 入口文件(entry)  
+
+这里说的"入口文件"是指webpack在开始准备打包时，先从哪个文件开始分析。  
+
+常见入口设置：  
+
+    entry:{main:'./src/index.js'}
+
+上面的配置里只是设定只有一个入口文件main，以及main对应的源代码位置。  
+ 
+如果有多个入口文件，可以继续向entry里添加：  
+
+    entry:{main:'./src/index.js',admin:'./src/admin.js',....}
+
+注意：设定的入口文件main，admin这些对应输出配置里fliename中的[name]占位符。  
+
+### 输出配置(output)  
+
+这里的"输出设置"是指webpack打包输出时，对js文件的储存目录和文件命名设置。  
+
+常见的输出配置：  
+
+    output:{
+        filename:'js/[name].[hash].js',
+        chunkFilename:'[name].chunk.[hash].js',
+        path:path.join(__dirname,'../','dist'),
+        hashDigestLength:10
+    }
+
+filename：表示被网页直接引用的js对应储存目录和文件名。其中添加[hash]是为了确保有内容修改时文件名也发生变化，避免浏览器缓存更新不及时。  
+
+chunFilename:表示被网页简介引用的js对应储存目录和文件名。  
+
+path：以配置文件所在目录为基础，设置最终打包生成的文件目录。 上面的代码示例里，将webpack配置文件放在了项目根目录下的build目录里，所以'../'跳出本目录，才能找到项目根目录下的dist目录。  
+
+hashDigestLength:文件名中[hash]的字符长度，默认为20，长度越长可能重复的几率越小。实际中设定为10足够了，当然也可以不修改或配置此属性。
+
 
 # 各种loader
 
