@@ -43,6 +43,78 @@ path：以配置文件所在目录为基础，设置最终打包生成的文件�
 
 hashDigestLength:文件名中[hash]的字符长度，默认为20，长度越长可能重复的几率越小。实际中设定为10足够了，当然也可以不修改或配置此属性。
 
+注意：以上是普通项目代码输出output配置，如果是写给其他人用的类库项目，还需做一些别的配置。  
+
+对应场景：别人使用你的类库，可能采用import或require，甚至可能是html中的<script>标签引用。  
+output属性需要新增：libaray(供html中的<script>标签使用)、libarayTarget(供import|require使用)  
+
+若项目只有1个入口文件，可以做如下配置：  
+
+    entry:{
+      mylibaray:'./src/index.js'
+    },
+    output:{
+      filename:'mylibaray.js',
+      path:path.resolve(__dirname,'dist'),
+      libaray:'mylibaray',
+      libarayTarget:'umd'
+    }
+
+libaray:'mylibaray'中的mylibaray对应<script>标签中可使用的库类名字mylibaray。  
+libarayTarget:'umd'中的umd表示“通用引用方式，包含nodejs环境和浏览器环境”。  
+若libarayTarget的值为'this'、'windows'、'global'，则表示挂载到对应对象上，而不是全局变量中。  
+
+类库名字相当于在全局变量中，添加了一个变量mylibaray。所谓全局变量即表示可直接使用xxx，不需要this.xxx、windows.xxx、global.xxx等前缀对象。  
+
+若项目有多个入口文件，libaray:'mylibaray'只会匹配上最后一个入口文件。对于多个入口文件应该将libaray的值修改为数组(请注意该数组并的值并不是多条库类名字，而是一种占位符组合方式)。  
+
+    entry:{
+      alpha:'./src/alpha.js',
+      beta:'./src/beta.js'
+    },
+    output:{
+      filename:'mylibaray.[name].js',
+      path:path.resolve(__dirname,'dist'),
+      libaray:['mylibaray','[name]'],
+      libarayTarget:'umd'
+    }
+
+请注意上面代码中的 libaray:['mylibaray','[name]']  
+
+按照上面配置，打包输出后将会创建2个文件：mylibaray.alpha.js、mylibaray.beta.js，对应使用时类库名字为：mylibaray.alpha、mylibaray.beta。  
+
+再次注意，在打包类库时还存在以下实际场景：  
+1、你自己编写的类库A中引用了别人的类库C，webpack打包输出时会将C捆包打包到你的类库A中    
+2、别人的项目B中引用了你的类库A，但是他由于别的需求也引用了类库C  
+此时对于项目B来说同时存在了2份类库C，这是不合理的。  
+
+对于上述场景，解决方案是通过webpack.config.js中的externals配置，将类库C排除在外(不进行打包)，externals中还会约别人(定项目B)在引用类库C时的约定名字，好让这个约定的名字也能让类库A使用。  
+
+具体如何配置参见externals。  
+
+
+# 外部扩展(externals) 不打包依赖
+
+对于普通项目，webpack会在打包输出时把各种代码依赖都打包捆绑出去，以确保项目能够独立正常运行。但是对于类库项目(libaray)，实际应用中反而希望webpack不打包依赖，只需要把自己那部分类库业务代码打包出去即可。  
+
+若有使用者引用我们编写的类库，我们希望使用者自己引入第三方类库。当然还要和使用者约定引入第三方类库的变量名(相当于告诉使用者我们编写项目时，代码中第三方类库的引用变量名)，确保我们编写的类库可以使用上。  
+
+webpack.config.js中的externals配置项，就是用来解决这件事情的。  
+
+externals配置项有3种形式：数组、对象、正则表达式。他们可以相互组合，对应的含义各自不同。  
+
+假设我们编写的类库代码中，引用了第三方类库C(是类库名为C，而不是类库地址)，并且给类库C对应的内部引入变量名为myc，且用到了类库C中的.dosomting，那么externals不同配置项含义如下：  
+
+externals:['C'] 告知webpack打包时不需要打包C  
+
+externals:{myc:'C'} 告知webpack打包时不需要打包C，同时告诉使用者在引入C时应该将类库C的引入变量名设置为myc(这里所谓的告知应该是通过报错文字信息来提示，比如找不到myc)  
+
+externals:{myc:['./C','dosomthing']}  告知webpack打包时不需要打包C，同时告诉使用者只需要引入C类库下的dosomting即可，且对应dosomthing引入变量名为myc  
+
+externals:{C:{commonjs:'myc',amd:'myc',root:'_'}} 告知webpack打包时不需要打包C，同时告诉使用者需要引入C类库，并且如果是使用commonjs语法引入则应将C类库对应的引入变量名设置为myc，如果是使用root(全局变量)引入，则应该将C类库对应的引入变量名设置为_，以此类推。  
+
+externals:/^(C|myc|\_|\$)$/i 告知webpack遇到类库C，或myc、_、$这些变量时，不把对应的依赖打包出去。  
+
 
 # 各种loader
 
