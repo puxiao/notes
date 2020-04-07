@@ -199,6 +199,13 @@ npm install --save @babel/polyfill
       )  
     ]  
 
+还可以给HtmlWebpackPlugin增加一个config的属性，这个属性的值是开发者自定义的对象。  
+
+假设我们定义config:{title:'index',mode:true}，那么html模板里可以使用<% %>标签来添加渲染代码，类似以下：  
+1、<title><%= htmlWebpackPlugin.options.config.title %></title>  
+注意：注意此处的"<%="，%=必须是紧挨着的(中间不可以有空格，<% } %>没有这个限制)、引用自定义属性时需要加".options"  
+2、<% if(htmlWebpackPlugin.options.config.mode) { %> <!-- 此处放置你的html代码 --> <% } %>  
+
 ## CSS文件拆分(将CSS独立打包成一个文件)：mini-css-extract-plugin
 
 如果不希望将css样式内嵌在打包输出的js中(该js会通过style-loader将css样式内嵌到网页<style>标签中)。  
