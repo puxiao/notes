@@ -181,6 +181,15 @@ npm install --save @babel/polyfill
       new CleanWebpackPlugin()  
     ]  
 
+若不想删除某个目录以及该目录下的文件，可以通过在构造函数中添加{cleanOnceBeforeBuildPatterns}来实现。  
+
+    plugins:[  
+      new CleanWebpackPlugin({
+          //xxx目录以及该目录下的文件将不会被删除
+          cleanOnceBeforeBuildPatterns:['**/*','!xxx','!xxx/**']
+        })  
+    ]
+
 
 ## 创建(生成)html页面：html-webpack-plugin
 
