@@ -21,7 +21,7 @@
 2、自定义组件必须以大写字母开头、默认网页原生标签还以小写开头；  
 3、自定义组件render(){return <Xxx></Xxx>}，必须且只能有一个最外层标签；  
 4、如果不希望设定最外层的标签，那么可以使用react(16+版本)提供的占位符Fragment来充当最外层标签；  
-    import React,{Component,Fragment} from 'react';  
-    render(){return <Fragment>xxxxxxx</Fragment>}  
+    `import React,{Component,Fragment} from 'react';
+    render(){return <Fragment>xxxxxxx</Fragment>}`
 5、如果你写了constructor(props){super(props);}但是还没有写this.state={}，默认会报错误警告：Useless constructor. eslint(no-useless-constructor)，constructor中加上this.state={}即可消除警告。  
 
