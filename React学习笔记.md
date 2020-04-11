@@ -39,6 +39,12 @@
 
 10、在最新的react版本中，为了提高更新性能，推荐采用异步的方式更新数据。具体使用方式为：setState((prevState) => {return {xxx}})。其中参数prevState指之前的数据值(即this.state)，return的对象指修改之后的数据值。pervState参数还可以省略，即 setState(() => {return {xxx}});  
 
+setState()还可以增加第2个参数(回调函数)，即当异步的setState更新完成后执行的函数。  
+
+setState(()=>{return {xxx}},()=>{xxxxx})  
+
+上述代码中的第2个参数()=>{xxxxx}就是异步执行(更新)完毕后的回调函数。  
+
 异步的目的是为了优化更新性能，react短期内发现多条state发生修改，那么他会将所有修改合并成一次修改再最终执行。  
 
 11、在render(){return <xx></xx>}中写注释，格式为：{/* xxxxx */}或{//xxxx}，注意如果使用单行注释，最外的大括号必须单独占一行。注释尽在开发源代码中显示，在导出的网页中不会有该注释。 
