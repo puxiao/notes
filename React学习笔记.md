@@ -151,3 +151,49 @@ Diff算法为了提高性能，优化算法，通常原则为：
 如果key值是稳定的，那么在比对的时候，比较容易比对出是否发生变化，以及具体的变化是什么。  
 
 Diff算法还有非常多的其他性能优化算法，以上列出的"同层比对、key值比对"仅仅为算法举例。  
+
+## "生命周期函数" 概念解释
+
+声明周期函数指在某一时刻组件会自动调用执行的函数。  
+
+这里的"某一时刻"可以是指组件初始化、挂载到虚拟DOM、数据更改引发的更新(重新渲染)、从虚拟DOM卸载这4个阶段。
+
+#### 生命周期4个阶段和该阶段内的生命周期函数：  
+
+##### 初始化(Initialization)  
+constructor()是JS中原生类的构造函数，理论上他不专属于组件的初始化，但是如果把它归类成组件组初始化也是可以接受的。
+
+##### 挂载(Mounting)
+componentWillMount(即将被挂载)、render(挂载)、componentDidMount(挂载完成)  
+
+##### 更新(Updation)：
+props发生变化后对应的更新过程：componentWillReceiveProps(父组件发生数据更改，父组件的render重新被执行，子组件预测到可能会发生替换新数据)、shouldComponentUpdate(询问是否应该更新？返回true则更新、返回flash则不更新)、componentWillUpate(准备要开始更新)、render(更新)、componentDidUpdate(更新完成)  
+
+states发生变化后对应的更新过程：shouldComponentUpdate(询问是否应该更新？返回true则更新、返回flash则不更新)、conponentWillUpdate(准备要开始更新)、、render(更新)、componentDidUpdate(更新完成)   
+
+props和states发生变化后的更新过程，唯一差异是props多了一个 componentWillReceiveProps生命周期函数。  
+
+componentWillReceiveProps触发的条件是：  
+1、一个组件要从父组件接收参数，并且已存在父组件中(子组件第一次被创建时是不会执行componentWillReceiveProps的)  
+2、只要父组件的render函数重新被执行(父组件发生数据更改，子组件预测到可能会发生替换新数据)，componentWillReceiveProps就会被触发  
+  
+##### 卸载(Unmounting)：  
+componentWillUnmount(即将被卸载)  
+
+备注：自定义组件继承自Component组件，Component组件内置了除render()以外的所有生命周期函数。因此自定义组件render()这个生命周期函数必须存在，其他的生命周期函数都可以忽略不写。 
+
+##### 生命周期函数的几个应用场景：
+
+1、只需要第一次获取数据的Ajax请求  
+如果组件有ajax请求(只需请求一次)，那么最好把ajax请求写在componentDidMount中(只执行一次)。因为"初始化、挂载、卸载"在一个组件的整个生命周期中只会发生一次，而"更新"可以在生命周期中多次执行。  
+
+2、防止子组件不必要的重新渲染  
+若父组件发生state改变，那么会调用render()，会重新渲染所有子组件。但是如果state改变的某个值与某子组件并不相关，如果此时也重新渲染该子组件会造成性能上的浪费。为了解决这个情况，可以在子组件中的shouldComponentUpdate生命周期函数中，做以下操作:  
+
+    shouldComponentUpdate(nextProps,nextStates){
+      //判断xxx值是否相同，如果相同则不进行重新渲染
+      return (nextProps.xxx !== this.props.xxx); //注意是 !== 而不是 !=
+    }
+
+
+
