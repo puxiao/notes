@@ -198,9 +198,17 @@ Diff算法为了提高性能，优化算法，通常原则为：
 
 Diff算法还有非常多的其他性能优化算法，以上列出的"同层比对、key值比对"仅仅为算法举例。  
 
+
+## "高阶组件" 概念解释
+
+高阶组件是一种组件设计方式(设计模式)，就是将一个组件作为参数传递给一个函数，该函数接收参数(组件)后进行处理和装饰，并返回出一个新的组件。  
+
+简单来说就是，普通组件是根据参数(props)生成一个UI(JSX语法支持的标签)。而高阶组件是根据参数(组件)生成一个新的组件。  
+
+
 ## "生命周期函数" 概念解释
 
-声明周期函数指在某一时刻组件会自动调用执行的函数。  
+生命周期函数指在某一时刻组件会自动调用执行的函数。  
 
 这里的"某一时刻"可以是指组件初始化、挂载到虚拟DOM、数据更改引发的更新(重新渲染)、从虚拟DOM卸载这4个阶段。
 
@@ -244,6 +252,11 @@ componentWillUnmount(即将被卸载)
       return (nextProps.xxx !== this.props.xxx); //注意是 !== 而不是 !=
     }
 
+对于类组件(由class创建的)和函数组件(由function创建的)，他们对于生命周期的调用方法不同。  
+
+类组件：直接在类中定义函数；  
+函数组件：需要用到hook(钩子)，具体用法参见Hook用法；  
+
 
 # React中数据传递的几种方式  
 
@@ -251,7 +264,7 @@ componentWillUnmount(即将被卸载)
 
 注：这里说的"数据传递"包含以下几层意思：  
 1、数据的获取  
-2、数据的修改(通过父级暴露给子组件函数来实现修改)  
+2、数据的修改(通过父级暴露给子组件函数来实现修改，这种方式也称为 "render props")  
 3、根据数据变化重新渲染  
 
 
@@ -380,3 +393,213 @@ componentWillUnmount(即将被卸载)
     </Me> 
 
 再次提醒：父组件使用<GlobalContext.Provider></GlobalContext.Provider>、子组件或孙组件使用<GlobalContext.Consumer></GlobalContext.Consumer>，且格式为<GlobalContext.Consumer>{context => { return xxxxx;}}</GlobalContext.Consumer>  
+
+
+## 第4种：使用第三方数据管理 Redux
+
+实现方式：引入第三方该数据管理模块 redux。  
+
+
+# Hook用法
+
+Hook是react16.8以上版本才出现的新特性，可以在函数组件中使用组件生命周期函数，且颗粒度更加细致。  
+
+可以把Hook逻辑从组件中抽离出来，多个组件可以共享该hook逻辑。  
+
+**请注意hook本质上是为了解决组件之间共享逻辑，并不是为了解决组件之间共享数据。**  
+
+hook表现出来特别像一个普通的JS函数(仅仅是表现出来但绝不是真的普通JS函数)，如果加以扩展，是可以做到一定程度上组件之间共享数据的。  
+
+
+## 诞生Hook特性的背景原因：  
+
+第一个原因：在以前版本中，函数组件不支持组件生命周期函数，若想使用生命周期函数必须使用类组件，即由class Xxx extends Component 这种形式来定义的组件。  
+
+第二个原因：类组件在使用过程中，常见有以下几个"痛点"：  
+1、函数中的this用法稍显复杂(js中的this都很复杂)，函数必须bind(this)或者使用箭头函数。  
+
+2、类组件中生命周期函数固定，无法提供更细致的颗粒度。  
+举个例子：  
+假设你在componentDidUpdate函数中需要自定义a,b,c 3个变量，那么你必须把 a,b,c 3件事情都写在this.state = { a,b,c}中。
+
+若你需要维护一个已经写好的组件，而该生命周期函数中存在a,b两个变量，那么你新增加c时，你还必须完整维护好a,b两个变量(添加c时千万别手滑修改了a或b)。
+
+我们更希望能够将c变量从this.state中分离出去，只去关心c就好，无需维护保持a,b。因此就需要对生命周期函数有更加细致的颗粒度控制能力。
+
+把上面这段话中的"变量"替换为"执行代码"也是合理的。  
+
+使用Hook以后，你可以单独把c从state中抽离出去、或者可以表达为：单独把c执行代码从某个生命周期函数中抽离出去。
+
+3、类组件在个别情况下容易引发无意义的重新渲染。 
+ 
+4、类组件使用内部自定义数据稍显复杂(需要使用this.state.xxx这种形式)。使用Hook以后直接使用{xxxx}即可获取。   
+
+5、类组件中内部定义state数据会随着变化而变化，最初的state数据不会做备份保留。 
+
+6、若希望在类组件挂载后或数据更新后执行一些操作，那么你需要分别在componentDidMount和componentDidUpdate函数中分别写入相同的执行代码。使用Hook以后则2者合并为一个函数useEffect中。  
+
+7、类组件操作原生DOM不方便。使用Hook以后，就像普通JS函数操作原生DOM一样，非常简单。
+
+
+基于以上原因，在react 16.8中引入了Hook这个概念。React官方声明不会因为Hook的出现而取消或削弱类组件。  
+
+备注：像其他前端库，例如Vue也都有Hook用法。
+
+
+## Hook的用法：  
+
+##### useState：用来在函数组件中自定义变量
+
+使用方法：数组结构的语法 + useState(value)来实现组件内部自定义数据。  
+
+代码示例：
+
+    import React,{useState} from 'react';
+    function Example(){
+       //通过以下语法来内部自定义数据
+      //xxxx：定义的变量名
+      //setXxxx：定义更改xxxx对应的函数名
+      //xx：定义的默认值
+      const [xxxx,setXxxx] = useState(xx);
+    
+      //以上定义好之后，函数组件想获取xxxx变量值，即：{xxxx}
+      //想修改xxxx变量值，即：setXxxx(newValue)
+
+      return (//...)
+    }
+
+数组结构赋值的用法，在上面代码中 const [xxxx,setXxxx] = useState(xx)  
+等价于以下代码：  
+const resArr = useState(xx);  
+const xxxx = resArr[0];  
+const setXxxx = resArr[1];  
+
+由此可见数组结构赋值可以使代码更加简洁。  
+
+
+##### useEffect：组件某些生命周期函数后执行额外的代码，也称为"副作用(额外的操作)"
+
+"某些生命周期函数"是指这3个：componentDidMount、componentDidUpdate、componentWillUncount  
+
+使用方法：直接在函数组件中使用 useEffect(() => {//...});，若该方法中有 return 返回函数，那么表示当组件生命周期函数执行完毕后，调用此retrun 的返回函数。  
+
+代码示例：
+
+    import React,{useState,useEffect} from 'react';
+    function Example(){
+      useEffect(()=>{
+        //组件生命周期函数执行前 对应的自定义处理代码
+        return () => {
+        //组件生命周期函数执行完毕后 对应的自定义处理代码
+        }
+      });
+
+      return (//...)
+    }
+
+请注意，在useEffect中第1个参数()=>{}，你可能会有疑惑，为什么不在其他地方单独定义一个函数，而是选择每次都返回一个不同的函数？  
+这是为了确保effect每次获取到的都是最新的值，而不用担心过期。 可以将每次新生成的()=>{}当成专门为此次渲染之后打造的执行函数。  
+
+若函数组件或自定义Hook中出现多个useEffect，则会按照他们定义的先后顺序，依次执行。  
+
+使用useEffect，会在组件渲染之后就执行一次。这里的"渲染之后"包括3个生命周期函数(componentDidMount、componentDidUpdate、componentWillUnmount)。  
+
+对于同一处的useEffect，每次执行useEffect之前，会清理掉上一次执行的效果。
+
+为什么要这样做？  
+为了确保代码的执行正确、一致性，为了避免可能因为忘记添加更新逻辑而出现的bug。
+
+该如何优化性能？  
+如果是类组件，可以在componentDidUpdate中添加prevProps或prevState值的对比，如果值未发生变化则通过return false 来阻止重新渲染，以提高性能。  
+那么函数组件则可以通过给useEffect()添加第2个参数(只有第2个参数发生变化时再会执行useEffect里的内容)，以达到优化性能的目的。第2个参数通常被称为"依赖列表"。  
+
+代码示例：useEffect(()=>{//...},[xxxx]);  
+只有在xxxx发生真的变化后才会执行useEffect中第1个参数 ()=>{//...} 中的代码
+
+如果你传入第2个参数是一个空数组[]，那么表示该useEffect只会在第一次被挂载时执行一次。以后发生的componentDidUpate、componentWillUnmount生命周期函数时，均不会再次执行该useEffect。   
+
+函数组件中定义(出现)多个useState和多个useEffect，他们是如何对应(关联)的？  
+是按照他们定义(出现)的先后顺序进行 useState和useEffect一一对应的。   
+
+代码示例：
+useState('Aa');  
+useEffect(()=>{});  
+useState('Bb');  
+useEffect(()=>{});  
+
+通过定义的先后顺序(成对出现)，useEffect会找到上一个最近定义的useState，认为该useState是自己所需要关注的。当这个useState发生变化时则会执行自身(useEffect)。  
+
+这也是为什么不允许在if/for/嵌套函数中使用hook的原因，因为那些语句本身包含有条件判断或逻辑，不能保证每一次执行的结果都是按照"固定顺序定义hook"的，这样做很容易造成bug。如果你这样做了，react自带的lint插件会有错误警告提示。   
+
+如果就是需要用到if做一些判断来决定是否执行某些代码，可以将if放到useEffect中。这样是比较安全稳妥的做法。  
+
+
+##### useContext：获取react中自定义的共享数据对象 Context
+
+若使用 函数组件 + Hook，不建议再使用Context来共享数据。Hook已经可以让我们非常自由的去定义自己的数据(Hook本身就像一个普通的JS函数)。  
+
+使用方法：const xxx = useContext(XxxContext)
+
+代码示例：
+
+    //假设我们有一个自定义GlobalContext，文件名为global-context.js
+    //先引入GlobalContext
+    import GlobalContext from './global-context.js';
+    
+    //函数组件或自定义Hook函数
+    function Example(){
+      //订阅GlobalContext
+      const globalContext = useContext(GlobalContext);
+      //备注：若在类组件中订阅，则使用代码 static globalContext = GlobalContext; 
+    }
+
+
+以上为基础的Hook函数，以下为其他Hook函数
+
+##### useReducer
+##### useCallback
+##### useMemo
+##### useRef
+##### useImperativeHandle
+##### useLayoutEffect
+##### useDebuValue
+
+
+##### Hook使用规则
+  
+1、Hook只能在函数组件或自定义Hook中使用(类组件或者普通JS函数中均不可使用Hook)；  
+2、必须在函数内的最外层(不允许在if/for/嵌套函数中使用)  
+3、使用次数不限(可多次使用)，但是他们的定义先后顺序很重要。应该让useEffect紧随着需要关注的useState；  
+4、可以从函数组件中抽离出来到一个单独的函数中，该函数通常称为"自定义Hook"；  
+
+
+##### 自定义Hook
+
+函数命名：约定自定义Hook函数名采用驼峰命名法，且必须以use开头，即 useXxxx；  
+补充说明：  
+1、react自带linter插件来检测是否按照要求来命名，若不以use开头则会有错误警告。  
+2、实际中为了更加语义化，还可以命名为useXxxStatus，表明该函数是用于处理XxxStatus状态的函数。  
+
+使用方法：将函数组件中Hook相关函数抽离出来，单独放在一个函数内，该函数即自定义Hook。
+
+代码示例：  
+
+    import React,{useState,useEffect} from 'react';
+    import GlobalContext from './global-context.js';
+    
+    function useXxxx([param]){
+      const [xxx,setXxx] = useState(defaultValue);
+      const globalContext = useContext(GlobalContext);
+      useEffect(() => {
+        //...
+        return () => {
+          //...
+        }
+      });
+    }
+
+    // 当然你也可以使用箭头函数来自定义hook
+    useXxxx = ([param]) => {
+    }
+
+将Hook抽离出函数组件的一个好处是可以实现多个组件共用该hook。  
