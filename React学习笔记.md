@@ -258,6 +258,29 @@ componentWillUnmount(即将被卸载)
 函数组件：需要用到hook(钩子)，具体用法参见Hook用法；  
 
 
+# React中设置样式的几种形式
+
+##### 第一种：引用外部css样式  
+
+伪代码示例：  
+import from './xxx.css';  
+return <div className='xxx' /\>
+
+注意：在jsx语法中，使用驼峰命名。例如原生html中的classname需要改成className、background-color要改成backgroundColor。  
+
+
+##### 第二种：内部样式  
+
+伪代码示例：  
+return <div style={{backgroundColor:'green',width:'100px'}} /\>  
+
+注意：内联样式值为一个对象，对象属性之间用","分割而不是原生html中的";"。  
+因为是一个对象，因此下面代码也是可行的：  
+const mystyle = {backgroundColor:'green',width:'100px'};
+return <div style={mystyle} /\>
+
+
+
 # React中数据传递的几种方式  
 
 在实际场景中，组件往往是由多级组件组合而成。组件之间数据传递(数据绑定)有多重形式，需要根据具体也许需求来选择使用哪种传递方式。
@@ -462,8 +485,12 @@ hook表现出来特别像一个普通的JS函数(仅仅是表现出来但绝不�
       //xx：定义的默认值
       const [xxxx,setXxxx] = useState(xx);
     
-      //以上定义好之后，函数组件想获取xxxx变量值，即：{xxxx}
-      //想修改xxxx变量值，即：setXxxx(newValue)
+      //函数组件想获取xxxx变量值，即：{xxxx}
+
+      //想修改xxxx变量值需要做以下判断
+      //若xxxx为简单值(string、number)，可以直接采用setXxxx(newValue)进行修改
+      //若xxxx为包含引用类型的值(例如为object {a:xx,b:xx})，若仅想修改属性b(其他属性不变)
+      //修改方式为setXxxx({...xxxx,b:newBValue})
 
       return (//...)
     }
