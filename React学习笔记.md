@@ -506,7 +506,7 @@ const setXxxx = resArr[1];
 
 ##### useEffect：组件某些生命周期函数后执行额外的代码，也称为"副作用(额外的操作)"
 
-"某些生命周期函数"是指这3个：componentDidMount、componentDidUpdate、componentWillUncount  
+"某些生命周期函数"是指这3个：componentDidMount、componentDidUpdate、componentWillUnmount  
 
 使用方法：直接在函数组件中使用 useEffect(() => {//...});，若该方法中有 return 返回函数，那么表示当组件生命周期函数执行完毕后，调用此retrun 的返回函数。  
 
