@@ -6,6 +6,11 @@ npm i less -g
 查看帮助：less -h  
 查看文件依赖：less -m 或 less -depends  
 
+## 编译
+进入存放.less的文件目录，在终端运行 less xxx.less xxx.css。  
+例如我们要编译 base.less文件，编译后的css文件名为 base.css，对应执行命令为：   
+less base.less base.css  
+
 ## 变量
 使用 @ 作为变量前缀，例如@width:10px、@height:@width+10px
 
