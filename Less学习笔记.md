@@ -1,10 +1,10 @@
 # less学习笔记
 
 ## 安装
-npm i less -g
-查看版本：less -v
-查看帮助：less -h
-查看文件依赖：less -m 或 less -depends
+npm i less -g  
+查看版本：less -v  
+查看帮助：less -h  
+查看文件依赖：less -m 或 less -depends  
 
 ## 变量
 使用 @ 作为变量前缀，例如@width:10px、@height:@width+10px
