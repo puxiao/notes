@@ -1,6 +1,6 @@
 ## 我的学习笔记
 后端技术栈：Nodejs/Koa/Middleware/Mysql/Redis/Nginx/Npm/CentOS  
-前端技术栈：React/Webpack  
+前端技术栈：React/Webpack/Less  
 
 持续添加更新中...
 
