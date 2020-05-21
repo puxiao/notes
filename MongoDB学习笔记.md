@@ -17,3 +17,10 @@ MongoDB Compass 是图形可视化管理MongoDB数据库的工具。
 下载软件：https://downloads.mongodb.com/compass/mongodb-compass-1.21.2-win32-x64.msi  
 安装软件：下一步 下一步  
 运行软件：运行MongoDBCompass.exe，进入软件后，先看完软件介绍后，点击继续按钮，即可看到当前本机MongoDB数据状态。  
+
+# MongoDB优势
+#### 简单直接
+
+#### 
+
+#### 执行快速
