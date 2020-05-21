@@ -6,5 +6,5 @@
 安装软件：下一步 下一步  
 运行软件：安装完成后，找到 安装目录\MongoDB\Server\4.2\bin\mongo.exe，运行mongo.exe  
 编写测试：  
-var message = 'hello mongodb'  
-pritejson(message);
+````var message = 'hello mongodb'  
+pritejson(message);````
