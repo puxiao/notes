@@ -8,6 +8,5 @@
 编写测试：  
 ````
 var message = 'hello mongodb'
-pritejson(message);
-
+pritejson(message)
 ````
