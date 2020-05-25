@@ -11,6 +11,8 @@ var message = 'hello mongodb'
 pritejson(message)
 ````
 
+注意：当MongoDB安装成功后，会默认自动创建3个数据库 admin、config、local 无需删除这3个，自己可以再新建别的数据库使用。  
+
 #### 安装MongoDB Compass：  
 MongoDB Compass 是图形可视化管理MongoDB数据库的工具。  
 若在安装 MongoDB 过程中，没有同步安装 MongoDB Compass，需要手工下载并安装。  
@@ -64,37 +66,133 @@ MongoDB技术优势总结：
 3、复制集提供高可用  
 4、分片架构支持海量数据和无缝扩容  
 
-## MongoDB基础用法
+## MongoDB 数据库和集合 相关知识
 
-#### 创建数据库
+#### 数据结构
+MongoDB数据结构为：  
+1、MongoDB下面有若干个数据库(db)  
+2、每个数据库下有若干个集合(collection)  
+3、每个集合里储存若干个文档(JSON格式的数据)  
+即：dbs -> db -> collection -> JSON document  
+
+因此，如果想操作某条数据(增删改查)，正确的流程是：  
+1、先使用 use xxx 切换到该数据库  
+2、明确要修改的集合名字 db.xx  
+3、再使用具体的增删改查函数进行操作  
+
+举例：假设moodmap数据库中的user集合要新增一条数据，对应的执行命令为：  
+1、use moodmap 切换到moodmap数据库  
+2、db.user.insert({'name':'puxiao'})  db.user表示要修改的集合名字为user，insert()为添加数据的函数  
+
+请注意：不可以直接给某数据库添加数据，只能给该数据库下某集合添加数据。  
+
+
+#### 基础知识
+1、当MongoDB安装成功后，会自动创建3个数据库 admin、config、local  
+2、与此同时MongoDB还会隐形存在一个数据库 test。若未切换到某具体的数据库，此时若执行向某集合中添加数据命令，那么MongoDB会启用一个名为 test 的数据库，并把数据添加到 test 中。基于这个原因，你自己创建数据库时切忌不要使用 test 来当数据库名字。  
+3、如果只创建但是从未添加过数据，则该数据库不会在 MongoDB Compass中出现，使用 use dbs 查看全部数据库也看不到。就好像默认的 test数据库最开始是不显示的，只有在未指定数据库前提下进行某集合数据添加后，MongoDB把这条添加的数据归类到test中，此时 test 数据库才可以被查看到。  
+4、在MongoDB的shell命令中，属性名是可以不加引号的，属性值需要加引号，既可以是单引号也可以是双引号。如果属性值是数字，则可不加引号。  
+
+
+#### 开启、查看、关闭数据库
+开启某数据库：use xxx  
+查看当前所在数据库：db  
+查看全部数据库：show dbs  
+关闭当前数据库：db.shutdownServer() 此为优雅关闭数据库的方式，即数据库先把当前全部认为执行完毕后才真正关闭数据库  
+
+
+#### 配置数据库
+配置端口：--port xxxx  
+以进程守护方式启动：--fork  
+日志输出路径：--loppath xxxx  
+数据库路径：--dbpath xxxx  
+启动代码示例：mongodb --port 22334 --fork --logpath data/log/mongodb.log --dbpath data/db
+
+
+#### 创建或切换数据库
 命令代码：use xxx  
 详细说明：  
-1、创建数据库语法关键词：use  
-2、xxx 即要创建的数据库名字  
-3、若数据库不存在，MongoDB则会创建名为xxx的数据库  
-4、若数据库已存在，MongoDB也不会报错  
-4、无论新创建或是本身已存在，执行use xxx 后都会自动切换到该数据库  
+1、创建或切换数据库语法关键词：use  
+2、xxx 即要创建或切换的数据库名字  
+3、若数据库不存在，MongoDB则会创建名为xxx的数据库并切换到该数据库  
+4、若数据库已存在，则切换到该数据库  
+5、也就是说：无论新创建或是本身已存在，执行use xxx 后都会自动切换到该数据库  
 
 例如，创建数据库moodmap：use moodmap  
-若没有moodmap数据库则创建，若有则忽略，无论怎样都会切换到该数据库，命令面板会提示：switched to db moodmap  
+若没有moodmap数据库则会创建，若moodmap已存在则切换到该数据库，命令面板会提示：switched to db moodmap  
 
-注意：本文后面的代码示例中，均以 db.moodmap 这个数据库为例。  
+再次提醒：若数据库没有任何内容，则使用 use dbs 是不会出现的。 就好像上面代码中 执行 use moodmap 创建新的数据库，此时执行 use dbs，moodmap是不会出现在结果列表中的。  
+
+
+#### 删除数据库或集合
+删除数据库  
+命令代码：db.dropDatabase()  
+详细说明：
+1、删除数据库是危险操作，需要谨慎  
+2、首先需要确认删除哪个数据库，可以切换到该数据库，例如 use moodmap 或者 查看当前所在数据库 db  
+3、执行db.dropDatabase()  即可删除该数据库
+
+删除集合  
+命令代码：db.collection.drop() 
+
+
+#### 重命名 数据库或集合
+MongoDB并未提供直接函数可以重命名数据库，但是有针对集合的重命名函数renameCollection()  
+
+针对集合的重命名  
+命令代码：db.adminCommand({renameCollection:"dbname.oldname",to:"dbname.newname"})  
+详细说明：  
+1、"dbname"为当前数据库的名字  
+2、"dbname.oldname"为某集合的当前名字，"dbname.newname"为某集合新的名字  
+例如 db.adminCommand({renameCollection:"moodmap.user",to:"moodmap.users"})，将数据库moodmap中集合user名字改为users  
+
+2、不光可以修改集合名，还可以修改集合对应的数据库名 dbname   
+例如 db.adminCommand({renameCollection:"moodmap.user",to:"mymap.user"})，将数据库moodmap中的集合user 转移到 数据库mymap中的集合user。  
+
+注意：这种“转移”属于“修改元数据”，是对索引的修改，并不会真正重新复制出一份，因此这种修改消耗很小。  
+
+修改集合对应的数据库，存在以下几种结果：  
+1、若mymap.user本身就存在，则会转移失败，反之则会成功。  
+2、若mymap本身不存在，则会自动创建mymap。  
+3、若moodmap里面只有user 一个集合，那么转移成功后 moodmap 即为空数据库，那么此时 show dbs 或在 MongoDB Compass中将无法再看到 moodmap。  
+
+基于上面对于某数据库中的集合重命名操作，我们可以变相实现对数据库的重命名。  
+假设当前数据库为moodmap，我们希望将数据库重命名为mymap。  
+实施思路：将moodmap中所有的集合都通过重命名形式，转移到mymap中，这样moodmap为空数据库则会消失(use dbs 或在 MongoDB Compass中消失)，而新的数据库mymap总拥有原moodmap所有集合，变相实现将moodmap重命名为mymap。  
+
+示例代码：
+
+    let source = "source";
+    let dest = "dest";
+    let colls = db.getSiblingDB(source).getCollectionNames();
+    for (let i = 0; i<colls.length; i++) {
+      let from = `${source}.${colls[i]}`;
+      let to = `${dest}.${colls[i]}`;
+      db.adminCommand({renameCollection: from, to: to});
+    }
+
+备注：MongoDB 4.2 支持ES6中的新语法，例如 let 和 模板字符串  
+
+
+## 增删改查 相关知识
 
 #### 添加数据
-命令代码：xxx.insert(json)  
+对数据库进行 增删改查，例如“添加数据”准确含义为“向某数据库中的某个集合中添加JSON文档类型的数据”。  
+
+命令代码：db.xxx.insert(json)  
 详细说明：  
 1、添加数据语法关键词：inset  
 2、json即要添加的数据，格式为JSON  
 3、若要添加多条数据，则可使用数据，例如：[json1,json2]  
-4、添加完成后，会返回该数据，其中MongoDB会自动为该条数据添加 _id 的属性值。  
+4、添加时MongoDB会自动为该条数据添加 _id 的属性值。  
 5、若不想使用MongoDB默认的_id值，需要提前在json数据中心设定 _id属性。  
 
 特别强调：  
-1、若我们向db.xxx添加数据时，db.xxx根本不存在(未使用use xxx创建该数据库)，MongoDB会自动为我们创建 xxx 这个数据库。  
+1、若我们向db.xxx添加数据时，db.xxx根本不存在，MongoDB会自动为我们创建 xxx 这个集合。  
 
 
 #### 查找数据
-命令代码：xxx.find({})  
+命令代码：db.xxx.find({})  
 详细说明：  
 1、查找数据语法关键词：find  
 2、{}为查找条件  
@@ -135,13 +233,12 @@ sort({xxx:-1}) 用来设定按降序排序，如果是sort({xxx:1})则表示按�
 
 
 #### 查询结果统计
-命令代码：xxx.count()  
+命令代码：db.xxx.find({}).count()  
 详细说明：使用count()函数可对结果数量进行统计  
-举例：db.xxx.find({}).count() 返回查询返回结果的数量  
 
 
 #### 删除数据
-命令代码：xxx.remove(json)  
+命令代码：db.xxx.remove(json)  
 详细说明：  
 1、删除数据语法关键词：remove  
 2、json为我们要删除对象的条件
@@ -155,7 +252,7 @@ sort({xxx:-1}) 用来设定按降序排序，如果是sort({xxx:1})则表示按�
 
 
 #### 更新数据
-命令代码：xxx.update(json,{$set:json2},{xx})  
+命令代码：db.xxx.update(json,{$set:json2},{xx})  
 详细说明：  
 1、update()函数有2个必填参数和1个可选参数  
 2、第1、第2个参数为必填，第3个参数为可选参数  
@@ -172,4 +269,30 @@ sort({xxx:-1}) 用来设定按降序排序，如果是sort({xxx:1})则表示按�
 - writeConcern 抛出异常的等级
 
 举例：db.xxx.update({age:18},{$set:{'age':34}},{multi:true}) 查找属性age值为18的数据，并将他们的属性age值全部修改为34  
+
+替换数据  
+命令代码：db.xxx.save(json,newData,{xx})  
+
+#### 添加或更新数据
+命令代码：db.xxx.save(json)  
+详细说明：  
+1、json表示一个JSON格式的文档数据  
+2、若json中没有_id属性，则插入该条数据  
+3、若json中有_id属性，则会通过_id查找是否存在该_id的数据  
+4、若_id对应的数据原本存在，则将json完全替换原来数据  
+5、若_id对应的数据原本不存在，则插入该条数据，但是该数据的_id不再使用MongoDB默认的，而是使用json本身中的_id属性值
+
+注意：save()中若出现更新数据，是将json整个替换为原来的数据对象，不像update()那样仅仅是替换某属性。  
+
+
+
+
+
+
+
+
+
+
+
+
 
