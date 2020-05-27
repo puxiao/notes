@@ -398,10 +398,10 @@ MongoDB聚合框架(Aggregation Framework)是一个计算框架，可以作用�
 数据结果就好像是水，流经一个又一个管道，经过每个管道的过滤，最终剩下的水到达目标出口。  
 
 #### 聚合查询基础格式
-命令代码：db.xxx.aggregation([stage1,stage2,...],{options})  
+命令代码：db.xxx.aggregate([stage1,stage2,...],{options})  
 详细说明：
-1、聚合查询使用关键词 aggregation  
-2、aggregation函数共2个参数  
+1、聚合查询使用关键词 aggregate  
+2、aggregate函数共2个参数  
 3、第1个参数为一个数组，数组中每一项均代表一个查询运算步骤  
 4、第2个参数为一个对象，是查询运算的配置选项  
 
@@ -428,8 +428,5 @@ $facet这个步骤是将多组$bucket进行查询，从而实现多维度查询�
 ## 更多API详情
 MongoDB全部API请访问：https://docs.mongodb.com/manual/reference/  
 
-补充：无论是MongoDB中文网(https://www.mongodb.org.cn/) 还是MongoDB中文社区(https://mongoing.com/) ，他们上面关于MongoDB的中文API文档都存在版本比较滞后、不是最新、不够全面的问题。  
+补充：无论是MongoDB中文网(https://www.mongodb.org.cn/) 还是 MongoDB中文社区(https://mongoing.com/)，他们上面关于MongoDB的中文API文档都存在版本比较滞后、不是最新、不够全面的问题。  
 因此学习时，还是以英文官方API文档为好。  
-
-
-
