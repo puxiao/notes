@@ -299,7 +299,14 @@ sort({xxx:-1}) 用来设定按降序排序，如果是sort({xxx:1})则表示按�
 4、由于默认一定会返回_id，所以若不需要返回_id则需要显式声明 _id:0  
 5、没有提及的属性名，均不会返回  
 
-限定返回字段这个在MongoDB里被称为 投影(projection)。  
+限定返回字段这个在MongoDB里被称为 投影(projection)。
+
+#### 格式化输出打印结果
+命令代码：pretty()  
+详细说明：  
+1、在查找命令结尾处，添加.pretty()即可格式化输出打印结果  
+
+例如：db.xxx.find().pretty()    
 
 
 #### 删除数据
@@ -330,12 +337,12 @@ sort({xxx:-1}) 用来设定按降序排序，如果是sort({xxx:1})则表示按�
 
 第3个更新选项配置，一共有3个属性，分别是：
 
-- upsert 当原本不存在要修改的属性时是否添加该属性，默认为false，即不添加
+- upsert 当原本不存在要修改对象时是否添加该对象，默认为false，即不添加。请注意这里说的是 对象不存在，而不是对象属性不存在  
 - multi 是否为更新多条数据，默认为false，即只更新1条
-- writeConcern 抛出异常的等级
 
 举例：db.xxx.update({age:18},{$set:{'age':34}},{multi:true}) 查找属性age值为18的数据，并将他们的属性age值全部修改为34  
 
+如果要同时修改多条数据，除了设置第3个参数multi为true之外，还可通过使用db.xxx.updateMany()。
 
 对于insertOne()和insertMany()来说，函数中必须使用到以下关键词之一，若不使用则会报错：  
 $set 如果匹配到，则 设置该值  
@@ -416,4 +423,13 @@ $match、$project、$group 这3个是常见的、核心的、包裹其他查询�
 $bucket这个步骤可用于将数据按照某一种维度自动分组查询。常见的应用场景是搜索商品时，按不同价格区间进行查询。  
 
 $facet这个步骤是将多组$bucket进行查询，从而实现多维度查询。例如搜索商品时，按不同价格区间、不同品牌、不同类型等多维度分组查询。  
+
+
+## 更多API详情
+MongoDB全部API请访问：https://docs.mongodb.com/manual/reference/  
+
+补充：无论是MongoDB中文网(https://www.mongodb.org.cn/)还是MongoDB中文社区(https://mongoing.com/)，他们上面关于MongoDB的中文API文档都存在版本比较滞后、不是最新、不够全面的问题。  
+因此学习时，还是以英文官方API文档为好。  
+
+
 
