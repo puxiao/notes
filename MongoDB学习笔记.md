@@ -428,7 +428,7 @@ $facet这个步骤是将多组$bucket进行查询，从而实现多维度查询�
 ## 更多API详情
 MongoDB全部API请访问：https://docs.mongodb.com/manual/reference/  
 
-补充：无论是MongoDB中文网(https://www.mongodb.org.cn/)还是MongoDB中文社区(https://mongoing.com/)，他们上面关于MongoDB的中文API文档都存在版本比较滞后、不是最新、不够全面的问题。  
+补充：无论是MongoDB中文网(https://www.mongodb.org.cn/) 还是MongoDB中文社区(https://mongoing.com/) ，他们上面关于MongoDB的中文API文档都存在版本比较滞后、不是最新、不够全面的问题。  
 因此学习时，还是以英文官方API文档为好。  
 
 
