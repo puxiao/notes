@@ -52,8 +52,8 @@
 | ---- | ---- | ---- | ---- |  
 | Double | 1 | 'double' |  |  
 | String | 2 | 'string' |  |  
-| Object | 3 |  | 'object' |  
-| Array | 4 |  | 'array' |  
+| Object | 3 | 'object' |  |  
+| Array | 4 | 'array' |  |  
 | Binary data | 5 | binData |  |  
 | Undefined | 6 | 'undefined' | 已废弃 |  
 | Objectid | 7 | 'objectid' |  |  
@@ -72,7 +72,7 @@
 | Min key | -1 | 'minKey' |  |  
 | Max key | 127 | 'maxKey' |  |  
 
-> 例如 String 对应的编号为2，别名为'string' 因此：  
+> 例如 String 对应的编号数字为2，别名为'string' 因此：  
 > db.address.find({zipcode:{$type:2}})  
 > 等同于  
 > db.address.find({zipcode:{$type:'string'}})  
