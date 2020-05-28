@@ -53,7 +53,7 @@
 
 | 类型 | 含义 | 数字编号 | 别名(字符串) | 备注 |  
 | ---- | ---- | ---- | ---- | ---- |  
-| Double | 双精度浮点数(相当于JS中的Number 整数或小数) | 1 | 'double' |  |  
+| Double | 双精度浮点数(整数或小数) | 1 | 'double' |  |  
 | String | 字符串 | 2 | 'string' |  |  
 | Object | 对象 | 3 | 'object' |  |  
 | Array | 数组 | 4 | 'array' |  |  
