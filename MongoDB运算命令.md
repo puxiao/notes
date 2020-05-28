@@ -58,8 +58,8 @@
 | Undefined | 6 | 'undefined' | 已废弃 |  
 | Objectid | 7 | 'objectid' |  |  
 | Boolean | 8 | 'bool' |  |  
-| Date |  | 9 | 'date' |  
-| Null |  | 10 | 'null' |  
+| Date | 9 | 'date' |  |  
+| Null | 10 | 'null' |  |  
 | Regullar Expression | 11 | 'regex' |  |  
 | DBPointer | 12 | 'dbPointer' | 已废弃 |  
 | JavaScript | 13 | 'javascript' |  |  
