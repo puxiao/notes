@@ -80,7 +80,7 @@
 > 等同于  
 > db.address.find({zipcode:{$type:'string'}})  
 
-
+<br/>
 
 关于数字精度的知识补充：  
 
