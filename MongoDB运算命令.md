@@ -125,8 +125,15 @@ MongoDB默认自动生成的_id格式遵循以下规则：
 
 > 注意：  
 > $expr 所谓允许使用聚合表达式，意思就是让原本不支持聚合查询的函数可以使用聚合查询，例如find()。举例： db.users.find({$expr:{$gt:['$yingyu','$shuxue']}})  
+
 > $jsonSchema中验证的JSON文档结构需要使用特定的书写规范，而具体规范此处暂时不做深究。  
+
 > $mod 的两个参数，第1个为除数，第2个为余数。例如{$mod:[4,1]}即表示 除以4余数为1个 评估查询。  
+
 > $regex 通常使用格式为 {$regex:/xxx/x} 其中xxx为正则表达式的内容，而x为匹配参数选项(i表示不区分大小写、m是否换行匹配、s允许.字符匹配所有字符包括换行符、x忽略空格)  $regex还有另外2中写法，例如：{$regex:/^yang/i} 还可以写成 {$regex:/^yang/,$options:'i'} 或 {$regex:'^yang',$options:'i'}  
+
 > $text对应的搜索规则，与4个选项：$search(关键词)、$language、$caseSensitive(大小写是否敏感，默认为false即不区分大小写)、$diacriticSensitive(声调是否敏感，默认为false即不敏感，例如：e 和 é)  
+
 > $where 中对应的JavaScript表达式(或函数)中 this 指当前这条数据。 $where 和 $expr 的区别：$where可以匹配以JavaScript表达式(或函数)为规则的数据，$expr不可以，$expr对应的是以聚合查询为规则，$expr执行效率更快。因此，应优先使用$expr和对应的聚合表达式，而不是使用$where和对应的JS表达式。  
+
+
