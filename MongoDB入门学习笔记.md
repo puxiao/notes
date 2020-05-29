@@ -266,6 +266,13 @@ db.xxx.find({'why':{$elemMatch:{wealth:'500w',wife:'beautiful'}}})
 1、$elemMatch 为关键词，表示必须全部满足  
 
 
+#### 获取属性值
+命令代码：'$xxx"  
+详细说明：  
+1、假设有一条数据为 {"name":"puxiao","age":34}，那么 'age' 表示属性名，属性名前面加上 $ 即表示属性值，例如 '$age' 表示age的属性值。  
+
+
+
 #### 遍历游标
 命令代码：xxx.hasNext()、xxx.next()  
 详细说明：  
