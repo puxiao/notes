@@ -189,7 +189,7 @@ MongoDB默认自动生成的_id格式遵循以下规则：
 
 | 语法 | 解释 |  
 | ---- | ---- |  
-| $ | 与查询值匹配的数组中第一个元素的投影，表现为 <array>.$ |   
+| $ | 与查询值匹配的数组中第一个元素的投影，表现为 <array\>.$ |   
 | $elemMatch | 与查询条件匹配的数组中第一个元素的投影，表现为 $elemMath:{<query>} |   
 | $meta | 使用$text查询获得的文档匹配分数的投影，表现为 $meta: "textScore" |   
 | $slice | 控制数组返回数量(类似JS中array的slice方法)，表现为 $slice:[num] 或 $slice:[num1,num2] |   
