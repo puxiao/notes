@@ -164,10 +164,10 @@
 
 ````
 {
-releases:[
-{country:"USA",date:"2020/06/02"},
-{country:"CN",date:"2020/06/01"}
-]
+  releases:[
+    {country:"USA",date:"2020/06/02"},
+    {country:"CN",date:"2020/06/01"}
+  ]
 }
 ````
 
