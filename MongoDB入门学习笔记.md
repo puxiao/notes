@@ -66,7 +66,9 @@
 - 下载方法1：先下载该文件，然后通过 xftp 软件上传到服务器指定的目录中(例如根目录下的 software)
 - 下载方法2：直接在服务器中，执行下面命令：  
 
+````
      wget -P /software/ https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-rhel70-4.2.7.tgz
+````
 
 
 > 注意：  
