@@ -67,7 +67,7 @@
 - 下载方法2：直接在服务器中，执行下面命令：  
 
 ````
-     wget -P /software/ https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-rhel70-4.2.7.tgz
+wget -P /software/ https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-rhel70-4.2.7.tgz
 ````
 
 
