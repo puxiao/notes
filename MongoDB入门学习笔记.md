@@ -137,7 +137,7 @@ pritejson(message)
 注意：当MongoDB安装成功后，会默认自动创建3个数据库 admin、config、local 无需删除这3个，自己可以再新建别的数据库使用。  
 
 #### 安装MongoDB Compass：  
-MongoDB Compass 是图形可视化管理MongoDB数据库的工具。  
+MongoDB Compass 是图形可视化管理MongoDB数据库的工具。若服务器系统为 CentOS 肯定就不用考虑安装这个了，因为服务器根本就没有图形化窗口，但是在 Windows 系统下，非常有必要安装这个软件。  
 若在安装 MongoDB 过程中，没有同步安装 MongoDB Compass，需要手工下载并安装。  
 下载软件：https://downloads.mongodb.com/compass/mongodb-compass-1.21.2-win32-x64.msi  
 安装软件：下一步 下一步  
