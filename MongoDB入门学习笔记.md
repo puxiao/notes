@@ -1,7 +1,128 @@
 # MongoDB学习笔记
 
 ## 安装MongoDB
-#### windows安装(仅限64位系统)
+
+#### 软件下载地址
+
+官网提供的软件下载地址：https://www.mongodb.com/try/download/community  
+
+在网页 “On-premises” 中，分别提供企业版和社区版。
+
+- MongoDB-Enterprise-Server：收费的企业版
+- MongoDB-Community-Server：免费的社区版
+
+> MongoDB 近期强行修改了免费开源政策(主要针对云厂商)，企业版目前为收费版(所有云服务商提供的MongoDB产品都需要给他们交钱)，社区版为免费版。MongoDB企业版收费之后，会对MongoDB流行度会有一定的影响。
+
+根据操作系统，选择适合的版本和文件格式，并开始下载。
+
+> 点击下载之后网页会跳转到输入个人信息的页面，无需理会。  
+> 大约3秒后，会自动开始下载刚才选择的软件安装包。  
+> 目前最新稳定版本为 MongoDB 4.2.7  
+
+
+#### Linux下安装MongoDB
+
+本人的服务器为腾讯云 CentOS 7.6，所以下载时，Platform 这一项选择：RedHat/CentOS 7.0  
+
+
+#### 第一种安装方式：yum 安装
+
+咨询过腾讯技术人员，腾讯云 yum 默认安装的 MongDB 版本为2.6.12，由于版本过低，所以需要我们手工创建 yum源文件，以便自定义安装MongoDB的版本。
+
+**第1步：使用 vim 命令创建 yum源文件**
+
+文件保存路径为 /etc/yum.repos.d/mongodb-org-4.2.repo，文件内容为：  
+ 
+    [mongodb-org-4.2]
+    name=MongoDB Repository
+    baseurl=https://repo.mongodb.org/yum/redhat/7Server/mongodb-org/4.2/x86_64/
+    gpgcheck=1
+    enabled=1
+    gpgkey=https://www.mongodb.org/static/pgp/server-4.2.asc
+
+> 注意：  
+> 上面代码baseurl中 “redhat/7Server/”，“7Server”对应本人的系统版本，你需要根据你的系统版本来修该值。  
+
+> 建议：  
+> 1. 不建议将 mongodb-org-4.2.repo 放到别的目录中，虽然没问题但也没什么意义。  
+> 2. 本人根本不建议使用 yum安装，因为 yum 安装虽然简单，但也伴随着其他一些问题，例如我不希望yum自动升级该软件，或者我希望自定义 MongoDB 的安装目录等。
+
+
+**第2步：执行安装命令**
+
+    yum install -y mongodb-org
+
+耐心等待，执行完成后即安装成功。
+
+
+#### 第二种安装方式：.tgz 安装
+
+**第1步：在指定的目录中，下载 MongoDB对应的 .tgz 安装包**  
+
+目前最新版本文件安装包地址：https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-rhel70-4.2.7.tgz  
+
+假设我希望将来 MongoDB 安装目录为系统根目录下的 /software/mongodb/，那么我可以先将 .tgz 文件下载到 software目录中。  
+
+- 下载方法1：先下载该文件，然后通过 xftp 软件上传到服务器指定的目录中(例如根目录下的 software)
+- 下载方法2：直接在服务器中，执行下面命令：  
+
+     wget -P /software/ https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-rhel70-4.2.7.tgz
+
+
+> 注意：  
+> 如果你不确定服务器上是否安装 wget，可执行 rpm -qa|grep wget，若已安装会显示wget版本号。若未安装则执行 yum install -y wget 即可安装。  
+
+
+**第2步：解压 .tgz 安装包**  
+
+cd 到 .tgz 下载目录(例如 /software/)，然后执行：  
+
+    tar -zxvf mongodb-linux-x86_64-rhel70-4.2.7.tgz  
+
+解压即安装成功，MongoDB主程序就在 /software/mongodb-linux-x86_64-rhel70-4.2.7/bin/ 中。
+
+
+**第3步：重命名**
+
+默认MongoDB目录名字有点长，我们可以将其重命名，改为"mongodb"，进入 software 目录中，执行：  
+
+    mv mongodb-linux-x86_64-rhel70-4.2.7 mongodb
+
+这样修改以后，目录名看着清爽简洁多了。  
+
+> 当然你也可以完全忽略这一步，不进行重命名，这样目录名虽然有点长，但是版本标注的很清晰。  
+
+
+**第4步：创建软连接**
+
+执行：  
+
+    ln -s /software/mongodb/bin/* /usr/local/bin/
+
+软连接创建好后，这样以后在任意目录，都可以执行 mongo 命令。  
+
+> 注意：  
+> 若你没有修改默认的 .tgz 解压后的目录名，则执行：  
+
+    ln -s /software/mongodb-linux-x86_64-rhel70-4.2.7/bin/* /usr/local/bin/
+
+
+**第5步：检测并开启 MongoDB**
+
+任意目录执行：  
+
+    mongo
+
+当看到：  
+
+    MongoDB shell version v4.2.7
+    connecting to: mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb
+    ...
+
+即表示 MongoDB 安装成功。  
+
+
+#### Windows下安装(仅限64位系统)
 下载软件：https://fastdl.mongodb.org/win32/mongodb-win32-x86_64-2012plus-4.2.6-signed.msi  
 安装软件：下一步 下一步，在倒数第2步界面左下角有一个选项“Install MongoDB Compass”，可以取消勾选，稍后单独安装 MongoDB Compass  
 运行软件：安装完成后，找到 安装目录\MongoDB\Server\4.2\bin\mongo.exe，运行mongo.exe  
