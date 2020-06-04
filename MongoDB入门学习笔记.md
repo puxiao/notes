@@ -109,7 +109,7 @@ cd 到 .tgz 下载目录(例如 /software/)，然后执行：
     ln -s /software/mongodb-linux-x86_64-rhel70-4.2.7/bin/* /usr/local/bin/
 
 
-**第5步：检测并开启 MongoDB**
+**第5步：检测并连接 MongoDB**
 
 任意目录执行：  
 
