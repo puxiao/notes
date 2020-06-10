@@ -250,3 +250,72 @@ MongoDB默认没有总管理员账户，需要手工创建。
 > 注意：再给用户设定角色时，尽可能只给最小权限的角色。  
 
 
+## 在CentOS系统中，登录后提示的错误警告
+
+使用 mongo root 角色账户登录连接到 mongod 之后，默认会收到一些自动检测警告。
+
+在本人的腾讯云 CentOS 7.6 中，收到的警告有：
+
+1. WARNING: Using the XFS filesystem is strongly recommended with the WiredTiger storage engine
+
+2. WARNING: You are running this process as the root user, which is not recommended.
+
+3. WARNING: /sys/kernel/mm/transparent_hugepage/enabled is 'always'.
+We suggest setting it to 'never'
+
+4. WARNING: /sys/kernel/mm/transparent_hugepage/defrag is 'always'.
+We suggest setting it to 'never'
+
+5. WARNING: soft rlimits too low. rlimits set to 15072 processes, 100001 files. Number of processes should be at least 
+
+
+第1条警告：建议系统文件使用 XFS 储存。  
+第2条警告：不建议使用CentOS的root用户来启动MongoDB。因为root的权限太大，不安全。  
+第3条和第4条警告：当前Transparent Huge Pages(THP)为开启状态，建议关闭Transparent Huge Pages(THP)。
+第5条警告：系统设定软件最大连接数太低，建议调高一些。  
+
+
+#### 修复这些问题
+
+##### 第1条和第2条
+很明确，暂时不作修改。
+
+
+##### 第3条和第4条，修复方式：  
+
+1. 找到 /etc/rc.d/rc.local 文件
+2. 编辑该文件，新增以下内容：
+
+````
+ if test -f /sys/kernel/mm/transparent_hugepage/enabled; then
+ echo never > /sys/kernel/mm/transparent_hugepage/enabled
+ fi
+ if test -f /sys/kernel/mm/transparent_hugepage/defrag; then
+ echo never > /sys/kernel/mm/transparent_hugepage/defrag
+ fi
+````
+
+3. 保存 rc.local
+4. 给该文件赋予可执行权力，执行代码：chmod +x /etc/rc.d/rc.local
+5. 立即重启系统：shutdown -r now
+
+系统重启之后，再次启动 mongod，再次使用 mongo 登录连接，第3和第4条警告就会消失。  
+
+
+##### 第5条，修复方式：
+
+1. 找到 /etc/security/limits.conf 文件
+2. 编辑改文件，新增以下内容：
+
+````
+mongod soft nofile 64000
+mongod hard nofile 64000
+mongod soft nproc 32000
+mongod hard nproc 32000
+````
+
+3. 保存 limits.conf
+4. 重启 mongod (不需要重启操作系统)
+
+> 理论上还要看自身服务器的配置，如果配置并不高，那么即使把可用数量调得很高实际意义也不大。
+
