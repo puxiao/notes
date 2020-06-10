@@ -271,7 +271,7 @@ We suggest setting it to 'never'
 
 第1条警告：建议系统文件使用 XFS 储存。  
 第2条警告：不建议使用CentOS的root用户来启动MongoDB。因为root的权限太大，不安全。  
-第3条和第4条警告：当前Transparent Huge Pages(THP)为开启状态，建议关闭Transparent Huge Pages(THP)。
+第3条和第4条警告：当前Transparent Huge Pages(THP)为开启状态，建议关闭Transparent Huge Pages(THP)。  
 第5条警告：系统设定软件最大连接数太低，建议调高一些。  
 
 
