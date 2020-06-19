@@ -48,3 +48,21 @@ taro init helloTaro
 2. 关闭 上传代码时样式自动补全 功能
 3. 关闭 代码压缩上传 功能
 
+## Taro-ui 安装和注意事项
+
+#### 安装Taro-ui
+````
+npm i --save-dev taro-ui
+````
+
+#### 引入组件
+````
+import { AtButton } from 'taro-ui'
+````
+所有Taro-ui组件均以 'At' 开头，At 是 Taro开发团队 京东凹凸实验室(https://auto.io) 的缩写。
+
+#### 引入taro-ui样式
+1. 通过js全局引入：在项目入口文件中，引入 import 'taro-ui/dist/style/index.scss'
+2. 通过scss全局引入：在项目app.scss中，引入 @import "~taro-ui/dist/style/index.scss";
+3. 按需引入：例如 @import "~taro-ui/dist/style/components/button.scss";
+
