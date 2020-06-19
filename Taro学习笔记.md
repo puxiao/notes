@@ -68,7 +68,7 @@ import { AtButton } from 'taro-ui'
 
 #### H5项目注意事项
 
-由于H5项目并不会编译 node_modules 模块，所以需要额外给H5项目做配置 `esnextModules`，在 taro 项目的 `config/index.js` 中新增如下配置项：  
+由于H5项目默认并不会编译 node_modules 模块，所以需要额外给H5项目做配置 `esnextModules`，在 taro 项目的 `config/index.js` 中新增如下配置项：  
 
 ````
 h5: {
