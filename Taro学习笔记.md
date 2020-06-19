@@ -25,10 +25,10 @@ npm i -g @tarojs/cli@next
 进入准备存放 taro 项目的上级目录，例如 f:\taro\，然后执行
 
 ````
-taro init helloTaro
+taro init hello-taro //不要使用helloTaro，因为react项目目录不支持驼峰命名
 ````
 
-就会在 f:\taro\下创建 helloTaro 目录，存放本次初始化的项目代码。
+就会在 f:\taro\下创建 hello-taro 目录，存放本次初始化的项目代码。
 
 在终端安装过程中，会有若干询问配置项目步骤。通过摁键盘上下箭头或回车键进行选择和确认。
 
