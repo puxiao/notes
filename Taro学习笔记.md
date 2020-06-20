@@ -74,8 +74,8 @@ alias: {
 经过以上配置后，在页面中引用组件的路径，可写成： `import Xxx from "@/components/Xxx"`
 
 注意事项：  
-1. 若 src/components/index.js 作为组件统一导出文件，不要使用 exprot default { ... }，而是 使用 export { ... }  
-2. 页面若想引入 src/components/index.js，路径应该写成 import {Xxx} from '@/components/index'  
+1. 若 src/components/index.js 作为组件统一导出文件，不要使用 exprot default { Xxx }，而是 使用 export { Xxx }  
+2. 页面若想引入 src/components/index.js 中某组件，路径应该写成 import {Xxx} from '@/components/index'  
 
 ## Taro-ui 安装和注意事项
 
