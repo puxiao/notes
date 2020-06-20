@@ -48,6 +48,31 @@ taro init hello-taro //不要使用helloTaro，因为react项目目录不支持�
 2. 关闭 上传代码时样式自动补全 功能
 3. 关闭 代码压缩上传 功能
 
+#### 目录别名：alias配置方法
+
+假设所有组件目录为 src/components/，而所有页面目录为 src/pages/，为了简化页面中引入组件时路径需要写 '../../components/' ，可通过修改项目配置项，添加 alias 属性来实现。
+
+第1步：打开 config/index.js 向 config 中添加 alias 属性  
+
+````
+import path from 'path'
+const config = {
+alias: {
+    '@/components': path.resolve(__dirname,'..','src/components')
+  },
+}
+````
+
+第2步：打开 tsconfig.json 添加 paths 属性  
+
+````
+"paths": {
+      "@/components/*": ["./src/components/*"]
+    }
+````
+
+经过以上配置后，在页面中引用组件的路径，可写成： `import Xxx from "@/components/Xxx"`
+
 ## Taro-ui 安装和注意事项
 
 #### 安装Taro-ui
