@@ -90,15 +90,15 @@ Nginx默认配置文件位置：/etc/nginx/nginx.conf
 
 使用系统命令控制nginx：  
 
-开启nginx：systemctl start nginx
-关闭nginx：systemctl stop nginx
-重启nginx：sysemctl restart nginx
-查看状态：systemtcl status nginx
+开启nginx：systemctl start nginx  
+关闭nginx：systemctl stop nginx  
+重启nginx：sysemctl restart nginx  
+查看状态：systemtcl status nginx  
 
-查看系统当前各软件占用端口情况：netstat -ntlp
-查看当前系统中Nginx的进程信息：ps -ef|grep nginx
-终止nginx某个进程：kill -9 pid   pid为该进程在运行ps -ef 中对应的pid
-终止nginx全部进程：killall -9 nginx
+查看系统当前各软件占用端口情况：netstat -ntlp  
+查看当前系统中Nginx的进程信息：ps -ef|grep nginx  
+终止nginx某个进程：kill -9 pid   pid为该进程在运行ps -ef 中对应的pid  
+终止nginx全部进程：killall -9 nginx  
 
 
 ## Nginx命令
@@ -123,9 +123,7 @@ Nginx默认配置文件位置：/etc/nginx/nginx.conf
 
 ## 配置
 
-特别提醒：在设置属性值时，结尾处一定要添加英文分号 “;”。
-
-如果某处结尾没有添加 ; 在 nginx -t 时会报错误：nginx: [emerg] unexpected "}" in /software/nginx/conf/nginx.conf
+特别提醒：在设置属性值时，结尾处一定要添加英文分号 “;”。 如果某处结尾没有添加 ; 在 nginx -t 时会报错误：nginx: [emerg] unexpected "}" in /software/nginx/conf/nginx.conf  
 
 ### 全局配置
 
@@ -140,7 +138,7 @@ worker_processes  1;
 #error_log  logs/error.log  notice;
 #error_log  logs/error.log  info;
 
-pid        logs/nginx.pid;
+pid  logs/nginx.pid;
 
 #include /usr/share/nginx/modules/*.conf;
 
@@ -216,15 +214,12 @@ http {
 
 
 
-> “一个站点”即一个完整域名(二级域名+主域名)，例如 `www.xxx.com` 和 `api.xxx.com` 相当于2个站点。
->
-> 由于服务器上可能存在多个站点，为了避免配置文件存放混乱，给以下几条建议：
->
-> 1. 每一个站点对应一个自定义配置文件，建议将配置文件命名为：“二级域名 + 主域名 + nginx.conf”，例如`www.xxx.com.nginx.conf` ，方便直观区分。
->
+“一个站点”即一个完整域名(二级域名+主域名)，例如 `www.xxx.com` 和 `api.xxx.com` 相当于2个站点。  
+由于服务器上可能存在多个站点，为了避免配置文件存放混乱，给以下几条建议：  
+1. 每一个站点对应一个自定义配置文件，建议将配置文件命名为：“二级域名 + 主域名 + nginx.conf”，例如`www.xxx.com.nginx.conf` ，方便直观区分。
 >    补充：如果某主域名下对应的二级域名不多，也可以把该主域名下所有需要解析的二级域名都放在同一个配置文件中，nginx并没有要求限定一个配置文件中server的数量，具体如何创建全看个人习惯。
->
-> 2. 在 nginx/conf/ 中创建一个目录，专门用来存放所有自定义配置文件，例如 `nginx/conf/myconf/`，那么此时 nginx.conf 中导入该配置文件的代码对应为 `include ./myconf/www.xxx.com.nginx.conf;`
+
+2. 在 nginx/conf/ 中创建一个目录，专门用来存放所有自定义配置文件，例如 `nginx/conf/myconf/`，那么此时 nginx.conf 中导入该配置文件的代码对应为 `include ./myconf/www.xxx.com.nginx.conf;`
 
 
 
@@ -692,7 +687,6 @@ http {
 ## 感谢
 
 极客时间：Nginx核心知识100讲：[https://time.geekbang.org/course/intro/138](https://time.geekbang.org/course/intro/138)  
-动力节点：2020最新Nginx详细教程(nginx快速上手)：[https://www.bilibili.com/video/BV1zE411N7m9](https://www.bilibili.com/video/BV1zE411N7m9)  
-
+动力节点：2020最新Nginx详细教程(nginx快速上手)：[https://www.bilibili.com/video/BV1zE411N7m9](https://www.bilibili.com/video/BV1zE411N7m9) 
 腾讯云：Nginx 服务器证书安装：https://cloud.tencent.com/document/product/400/35244
 
