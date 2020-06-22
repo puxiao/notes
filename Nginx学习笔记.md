@@ -39,7 +39,7 @@ Nginx默认配置文件位置：/etc/nginx/nginx.conf
     
     执行make编译：make  
     
-    如果不报错，执行结束，会把编译成功的文件存放在 /nginx-1.16.1/objs  
+    如果不报错，执行结束，会把编译成功的文件存放在 /nginx-1.18.0/objs  
     
     执行安装：make install  
 
