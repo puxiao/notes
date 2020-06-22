@@ -11,7 +11,7 @@ Nginx默认配置文件位置：/etc/nginx/nginx.conf
 
 #### 安装方式 二：手工下载，编译，配置，安装
 
-访问Nginx官网：http://nginx.org/en/download.html，在 “Stable version” 中找到最新稳定版下载地址。
+访问Nginx官网：http://nginx.org/en/download.html ，在 “Stable version” 中找到最新稳定版下载地址。
 
 以下操作，均通过shell命令进行。
 
