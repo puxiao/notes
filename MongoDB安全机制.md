@@ -152,6 +152,12 @@ MongoDB 支持 TLS/SSL 来加密 MongoDB 的所有网络传输(客户端应用�
 
 #### 第2种启用方式：配置文件中，在 security 下添加 authorization:enabled
 
+重启 mongod ，并添加配置文件的参数
+
+````
+mongod -f mongod.conf
+````
+
 启用鉴权后，无密码可以登录，但是只能执行创建用户操作。
 
     mongo
