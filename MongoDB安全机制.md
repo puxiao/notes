@@ -208,7 +208,7 @@ MongoDB默认没有总管理员账户，需要手工创建。
 
 首先以超级管理员账户连接并登录 mongod 数据库中。
 
-    mongo --username superuser --password Xxxxxx --authenticationDatabase admin -- host 127.0.0.1:xxxx
+    mongo --username superuser --password Xxxxxx --authenticationDatabase admin --host 127.0.0.1:xxxx
 
 连接成功之后，可以开始创建项目管理员账户。
 
@@ -232,7 +232,7 @@ MongoDB默认没有总管理员账户，需要手工创建。
 
 此时若退出超级用户，使用新创建的 admin 登录连接数据库。
 
-    mongo --username admin --password Xxxx --authenticationDatabase students -- host 127.0.0.1:xxxx
+    mongo --username admin --password Xxxx --authenticationDatabase students --host 127.0.0.1:xxxx
 
 进去之后，执行 show dbs，只会列出 students 这个集合，也就意味着该用户只能操作 students 这个集合，整个 MongoDB 的其他集合该用户都不可见。
 
