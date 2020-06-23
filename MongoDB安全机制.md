@@ -294,7 +294,7 @@ MongoDB默认没有总管理员账户，需要手工创建。
     db.createUser(
       {
         user:"admin",
-        psw:"Xxxx",
+        pwd:"Xxxx",
         roles:[
           {
             role:"dbOwner",
