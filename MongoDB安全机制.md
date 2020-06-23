@@ -1,4 +1,59 @@
 # MongoDB安全机制
+## 启动mongod
+
+推荐使用 配置文件(mongod.conf) 的方式启动 mongod：
+
+````
+mongod -f mongod.conf
+````
+
+> 若不使用配置文件启动 mongod，采用直接 mongod + 参数 的形式，则需要输入多项对应的参数，略显麻烦。
+
+mongod.conf 配置参考：
+
+````
+#数据库目录设置
+storage:
+  dbPath: ../data
+  journal:
+    enabled: true
+    
+#日志相关设置
+systemLog:
+  destination: file
+  logAppend: true
+  path:  ../log/mongod.log
+
+#网络端口设置
+net:
+  port: 27027
+  bindIp: 127.0.0.1
+
+#是否后台运行设置。 特别说明：windows系统不支持该项，不可以有此项设置
+processManagement:
+  fork: true
+
+#用户认证设置
+security:
+  authorization: enabled
+````
+
+
+#### Windows系统启动 mongod 的注意事项
+
+1. 可以使用 mongo.exe 直接连接 mongod所创建的数据库，但是直接运行 mongo.exe 连接时无法设置连接参数，例如端口为27017，无法设置账户密码等。如果 mongod 创建的数据库端口不是 27017，则 mongo.exe 连接失败，窗口会自动关闭，此时只能通过 cmd 命令窗口来连接。
+2. windows系统命令窗口下执行 mongod -f mongod.conf 之后，即使成功启动，也不会有任何文字提示。
+3. windows系统命令窗口不支持后台运行(fork:true)，因此 启动 mongod 之后，千万不要关闭当前 cmd 命令窗口，因为一旦关闭就相当于把 mongod 也关闭了。 想进行 mongo 命令连接 mongod，只能再新建一个 cmd 命令窗口进行操作。
+
+
+#### 结束mongod进程
+
+执行以下代码：
+
+````
+killall -9 nginx
+````
+
 
 ## 安全架构
 
