@@ -160,7 +160,7 @@ mongod -f mongod.conf
 
 重新通过 mongo 连接数据库。启用鉴权后，无密码可以登录，但是只能执行创建用户操作。
 
-    mongo --host:127.0.0.1:27017
+    mongo --host 127.0.0.1:27017
     use admin
     db.createUser({
       user:"superuser",pwd:"password",roles:[{role:"root",db:"admin"}]
