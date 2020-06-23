@@ -151,11 +151,20 @@ mongo 是连接和操作 mongod 创建的数据库的工具；
 
 ## 启动mongod
 
-推荐使用 配置文件(mongod.conf) 的方式启动 mongod：
+推荐使用 配置文件(mongod.conf) 的方式启动 mongod。
+
+Linux系统下启动：
 
 ````
 mongod -f mongod.conf
 ````
+
+Windows系统下启动 (cmd命令窗口，右键，以管理员身份运行)：
+
+````
+mongod.exe -f mongod.conf
+````
+
 
 > 若不使用配置文件启动 mongod，采用直接 mongod + 参数 的形式，则需要输入多项对应的参数，略显麻烦。
 
@@ -195,6 +204,9 @@ security:
 2. windows系统命令窗口下执行 mongod -f mongod.conf 之后，即使成功启动，也不会有任何文字提示。
 3. windows系统命令窗口不支持后台运行(fork:true)，因此 启动 mongod 之后，千万不要关闭当前 cmd 命令窗口，因为一旦关闭就相当于把 mongod 也关闭了。 想进行 mongo 命令连接 mongod，只能再新建一个 cmd 命令窗口进行操作。
 
+> 特别注意：
+> 1. 需要用 管理员账户 运行 cmd命令窗口
+> 2. 启动时，执行的代码是 `mongod.exe -f mongod.conf`  ，一定要注意是 `mongod.exe`
 
 #### 结束mongod进程
 
