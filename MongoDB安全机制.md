@@ -250,6 +250,49 @@ MongoDB默认没有总管理员账户，需要手工创建。
 > 注意：再给用户设定角色时，尽可能只给最小权限的角色。  
 
 
+
+## 忘记密码
+
+#### 忘记普通管理账户密码
+
+可以通过最高权限管理账户，删除原有普通管理账户，重新添加。
+
+
+
+#### 忘记最高管理者账户密码
+
+没有办法找回密码，只能重置账户和密码。
+
+第1步：停止 mongod 服务：killall -9 mongod
+
+第2步：取消密码登录 (删除或注释 mongod.conf 中的 security:authorization: enabled)
+
+第3步：启动 mongod 服务：mongod -f mongod.conf
+
+第4步：进入 admin 文档中，查看、删除 root 权限的账户
+
+````
+use admin
+db.system.users.find()
+db.system.users.remove({})
+````
+
+> 上面代码中 remove({}) 并没有设定查询条件，导致会将所有用户都删除。
+>
+> 正确的做法应该是 db.system.users.find() 查看所有账户信息，找到确认要删除的root权限账户的 "user":"xxxx"，然后再执行精准删除：db.system.users.remove({"user":"xxxx"})
+
+第5步：重新添加总管理员账户，db.createUser(...)
+
+第6步：重新启用 mongod 账户认证 (添加或取消注释 mongod.conf 中的 security:authorization: enabled)
+
+第7步：停止 mongod 服务：killall -9 mongod
+
+第8步：启动 mongod 服务：mongod -f mongod.conf
+
+> 第7、8步骤 和 第1、3步骤是相同的。
+
+
+
 ## 在CentOS系统中，登录后提示的错误警告
 
 使用 mongo root 角色账户登录连接到 mongod 之后，默认会收到一些自动检测警告。
