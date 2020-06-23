@@ -145,7 +145,7 @@ MongoDB Compass 是图形可视化管理MongoDB数据库的工具。若服务器
 
 #### mongod和mongo概念解释
 
-mongod 是 MongoDB 的服务程序，用来创建启动数据库；
+mongod 是 MongoDB 的服务程序，用来创建启动数据库；  
 mongo 是连接和操作 mongod 创建的数据库的工具；
 
 
