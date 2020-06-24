@@ -685,6 +685,21 @@ http {
 
 
 
+## 权限设置
+
+如果 nginx正常启动，配置文件也没问题 ，但是访问网站出现 403 错误，那就是 服务器上网站目录的权限有问题。
+
+网站目录需要 755 权限，目录下的文件需要 644 权限，设置方式如下。
+
+通过命令 cd 到该目录下，然后执行：
+
+````
+chmod 644 -R ./
+find ./ -type d -print|xargs chmod 755;
+````
+
+
+
 ## 感谢
 
 极客时间：Nginx核心知识100讲：[https://time.geekbang.org/course/intro/138](https://time.geekbang.org/course/intro/138)  
