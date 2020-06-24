@@ -16,6 +16,14 @@ root用户操作重启：shutdown -r [time]  [time]如果为now立即重启、10
 立即关机：poweroff  
 root用户操作关机：shutdown -h [time]  [time]如果为now立即关机、10表示10分钟后关机、20:35表示20:35关机  
 
+## 权限设置
+常见的 Nginx 网站目录需要 755 权限，目录下的文件需要 644 权限，设置方式如下。
+通过命令 cd 到该目录下，然后执行：
+
+````
+chmod 644 -R ./
+find ./ -type d -print|xargs chmod 755;
+````
 
 ## 网络相关
 列出网络配置：netstat  
