@@ -18,13 +18,36 @@
 
 ## 简化安装代码
 
-npm i --save koa-router
-npm i --save koa-bodyparser
-可以合并成：npm i --save koa-router koa-bodyparser
-还可以继续精简为：npm i --save koa-{router,bodyparser)
+npm i --save koa-router  
+npm i --save koa-bodyparser  
+可以合并成：npm i --save koa-router koa-bodyparser  
+还可以继续精简为：npm i --save koa-{router,bodyparser)  
 
-npm i --save-dev @types/koa @types/koa-router @types/koa-bodyparser
-可以精简为：npm i --save-dev @types/{koa,koa-ruter,koa-bodyparser}
+npm i --save-dev @types/koa @types/koa-router @types/koa-bodyparser  
+可以精简为：npm i --save-dev @types/{koa,koa-ruter,koa-bodyparser}  
+
+## NPM 安装源配置
+
+如果使用 npm 安装比较慢，依然不建议直接通过 cnpm 安装（据网上传闻 cnpm 安装会莫名缺失一些包）。
+
+建议使用 npm 安装，然后 修改 npm 的安装源 registry。
+
+推荐的方法是，在项目根目录下，新建一个  .npmrc 文件，文件内容如下：
+
+````
+registry=https://registry.npm.taobao.org
+disturl=https://npm.taobao.org/dist
+sass_binary_site=https://npm.taobao.org/mirrors/node-sass/
+phantomjs_cdnurl=https://npm.taobao.org/mirrors/phantomjs/
+electron_mirror=https://npm.taobao.org/mirrors/electron/
+chromedriver_cdnurl=https://npm.taobao.org/mirrors/chromedriver
+operadriver_cdnurl=https://npm.taobao.org/mirrors/operadriver
+selenium_cdnurl=https://npm.taobao.org/mirrors/selenium
+node_inspector_cdnurl=https://npm.taobao.org/mirrors/node-inspector
+fsevents_binary_host_mirror=http://npm.taobao.org/mirrors/fsevents/
+````
+
+这样当使用 npm 安装各种包时，默认都会使用 淘宝的NPM镜像源。
 
 
 ## 卸载模块
