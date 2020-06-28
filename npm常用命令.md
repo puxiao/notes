@@ -16,15 +16,6 @@
 
 安装模块对应的 TypeScript 规则，例如 node 的TS规则： npm install @types/node
 
-## 简化安装代码
-
-npm i --save koa-router  
-npm i --save koa-bodyparser  
-可以合并成：npm i --save koa-router koa-bodyparser  
-还可以继续精简为：npm i --save koa-{router,bodyparser)  
-
-npm i --save-dev @types/koa @types/koa-router @types/koa-bodyparser  
-可以精简为：npm i --save-dev @types/{koa,koa-ruter,koa-bodyparser}  
 
 ## NPM 安装源配置
 
