@@ -4,21 +4,13 @@
 
 #### 安装
 
-taro当前稳定版本为2.2.1，内测版为3.0。
-
-安装稳定版：
+Tro 3.0 已经于2020.07.01正式发布，所以现在安装最新版，可直接执行：
 
 ````
 npm i -g @tarojs/cli
 ````
 
-安装内测开发版：
-
-````
-npm i -g @tarojs/cli@next
-````
-
-> 以下内容均以安装内测开发版为讲解基础，并使用 React 和 TypeScrip。
+> 以下内容均以安装 Taro 3.0 为基础，并使用 React 和 TypeScrip。
 
 #### 初始化项目
 
@@ -78,6 +70,8 @@ alias: {
 2. 页面若想引入 src/components/index.js 中某组件，路径应该写成 import {Xxx} from '@/components/index'  
 
 ## Taro-ui 安装和注意事项
+
+#### 特别提醒：目前的 Taro-ui 并不支持 Taro 3.0版本
 
 #### 安装Taro-ui
 ````
