@@ -170,6 +170,10 @@ const OpendataAvatar: <IOpendataAvatarProps> = (props) => {
 }
 ````
 
+#### 请注意上述代码的潜在隐患
+无论 assign还是结构赋值，都只能进行第1层的替换，无法对比第2层属性值。 像上面代码中，假设还存在一个属性data，而data默认值 defaultProps.data = {a:1,b:2}，但是传递过来的参数中，props.data = {a:3}，那么2者合并之后的值是不存在 xxx.data.b 这个属性的。
+
+
 ## 类(calss)
 1、实现接口：interface Person:{name:string,age:number};  class Teacher implements Person{}  
 2、继承类：class Teacher extends Person{}  
