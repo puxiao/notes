@@ -148,7 +148,27 @@ never概念解释：表示永远不存在的类型，通常用在
 8、属性修饰符：public、protected、private和类中的修饰符用法完全一致，如果是给变量、方法、属性使用时public可省略不写，但是请注意，如果是 类的构造函数中的参数，例如 constructor(public xx:xxx) ，这里的public表示将xx看作参数的同事，也将xx作为本类的属性。  
 9、合并接口：对于同一个变量进行多次接口声明，则意味着TS会自动合并这些接口。例如，interface Box {width:number}; interface Box(scale:nuber)，那么此时的Box 对应的接口是两次接口的合并。注意，越靠后定义的接口优先级越高。  
 
+#### 接口默认值
+默认 interface 只能定义类型，无法设定默认值。如果想实现“给接口参数定义默认值”，可以通过先内部定义一个默认值，然后通过Object.assign(default,props)或{...default,props}的方式将默认值和参数值进行合并，从而实现希望的效果。
 
+````
+interface IOpendataAvatarProps {
+    headWidth?:number,
+    nameSize?:number,
+}
+
+const defaultProps:IOpendataAvatarProps = {
+    headWidth:250,
+    nameSize:32
+}
+
+const OpendataAvatar: <IOpendataAvatarProps> = (props) => {
+    props = Object.assign(defaultProps,props)
+    //或者使用
+    //props = {...defaultProps,...props}
+    console.log(props.headWidth,props.nameSize)
+}
+````
 
 ## 类(calss)
 1、实现接口：interface Person:{name:string,age:number};  class Teacher implements Person{}  
