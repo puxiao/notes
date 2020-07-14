@@ -30,9 +30,9 @@ find ./ -type d -print|xargs chmod 755;
 列出简要的网络配置：netstat -netlp  
 
 ## 进程相关
-查看当前系统全部进程：ps -ef
-查看某xxxx进程：ps -ef|grep xxxx
-终止某进程：kill -9 pid  pid为该进程在 ps -ef中对应的pid
+查看当前系统全部进程：ps -ef  
+查看某xxxx进程：ps -ef|grep xxxx  
+终止某进程：kill -9 pid  pid为该进程在 ps -ef中对应的pid  
 终止某xxxx相关全部进程：killall -9 xxxx  
 
 
