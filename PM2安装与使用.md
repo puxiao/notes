@@ -1,6 +1,6 @@
 # PM2 安装与使用
 
-### 安装代码
+## 安装代码
 
 #### 全局安装代码
 
@@ -54,7 +54,7 @@ ln -s /software/nodejs/lib/node_modules/pm2/bin/pm2 /usr/local/bin/pm2
 
 
 
-### pm2 命令参数
+## pm2 命令参数
 
 #### 更新版本
 
