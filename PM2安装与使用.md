@@ -1,6 +1,6 @@
 # PM2 安装与使用
 
-## 安装代码
+### 安装代码
 
 #### 全局安装代码
 
@@ -54,7 +54,7 @@ ln -s /software/nodejs/lib/node_modules/pm2/bin/pm2 /usr/local/bin/pm2
 
 
 
-## pm2 命令参数
+### pm2 命令参数
 
 #### 更新版本
 
@@ -75,13 +75,18 @@ ln -s /software/nodejs/lib/node_modules/pm2/bin/pm2 /usr/local/bin/pm2
 | --name xxx                            | 设置进程名字为 xxx                                           |
 | --watch                               | 对文件进行监控，若发现修改则立即重启服务                     |
 | --watch --ignore-watch="node_modules" | 对文件进行监控，但是忽略 node_modules 目录中文件的改变       |
-| --max-memory-restart 200MB            | 若程序内存占用超过 200MB 则重启该程序                        |
+| --max-memory-restart 200MB            | 若程序内存占用超过 200MB 则重启该程序<br />(系统每隔30秒检查一次，因此若中间达到 200MB 时可能需要等一段时间后才会重启) |
 | --log xxxx                            | 存放日志的路径                                               |
 | --error xxxx                          | 存放错误日志的路径                                           |
 | -- arg1 arg2 arg3                     | 添加其他参数                                                 |
-| --restart-delay 2000                  | 启动延迟多少毫秒                                             |
+| --restart-delay 2000                  | 延迟重启的毫秒数，效果等同于--exp-backoff-restart-delay=2000 |
+| --exp-backoff-restart-delay=100       | 延迟重启的毫秒数<br />(确保不会马上立即重启，给系统一些缓冲时间) |
 | --time                                | 写日志时加上日期                                             |
 | --cron <cron_pattern>                 | 强制重启时指定 cron <br />(cron 是一种时间表达语法规则，例如`0 0 23 * * ?`表示每天 23点 执行一次) |
+| --kill-timeout 3000                   | 超时延长至 3000 毫秒                                         |
+| --wait-ready                          | 等待要启动的程序向系统进程发送 ready 信号<br />(例如 nodejs 创建http服务完成后，执行 process.send('ready')) |
+| --listen-timeout 3000                 | 设置 wait-ready 监听超时时间为 3000毫秒                      |
+| --shutdown-with-message               | 是否允许pm2向系统进程发送关闭信号<br />(Nodejs可以通过 process.on('message',function (msg) { if(msg==='shutdown') }) 来做出响应处理 |
 | --no-autorestart                      | 不自动重启服务                                               |
 | --no-vizion                           | 不使用视图模式                                               |
 | --no-daemon                           | 附加到应用程序日志<br />(daemon 为守护进程)                  |
@@ -136,12 +141,14 @@ ln -s /software/nodejs/lib/node_modules/pm2/bin/pm2 /usr/local/bin/pm2
 
 #### 查看日志
 
-| 命令                 | 说明                   |
-| -------------------- | ---------------------- |
-| pm2 logs             | 显示全部日志           |
-| pm2 logs --lines 200 | 只显示最近 200 行日志  |
-| pm2 reloadLogs       | 重新加载，显示全部日志 |
-| pm2 flush            | 清空全部日志           |
+| 命令                 | 说明                                                   |
+| -------------------- | ------------------------------------------------------ |
+| pm2 logs             | 显示全部日志                                           |
+| pm2 logs xxx         | 仅仅显示 进程名为xxx 的日志<br />(例如 pm2 logs myapp) |
+| pm2 logs --format    | 格式化显示日志                                         |
+| pm2 logs --lines 200 | 只显示最近 200 行日志                                  |
+| pm2 reloadLogs       | 重新加载，显示全部日志                                 |
+| pm2 flush            | 清空全部日志                                           |
 
 ## 以配置文件方式启动
 
@@ -196,6 +203,181 @@ module.exports = {
 
 ```
 pm2 [start|restart|stop|delete] ecosystem.config.js
+```
+
+
+
+### 配置开发或测试环境变量
+
+#### 配置文件设置环境变量
+
+只能在配置文件中才可以设置 开发(development) 或 测试(production) 环境变量。
+例如，在 ecosystem.config.js 中设置：
+
+```
+module.exports = {
+  apps : [
+      {
+        name: "myapp",
+        script: "./app.js",
+        watch: true,
+        env: {
+            "PORT": 3000,
+            "NODE_ENV": "development"
+        },
+        env_production: {
+            "PORT": 80,
+            "NODE_ENV": "production",
+        }
+      }
+  ]
+}
+```
+
+#### 添加以哪种环境启动
+
+以配置文件形式启动 pm2，同时添加 --env xxx 来明确以哪种环境启动：
+
+```
+pm2 start ecosystem.config.js --env production
+```
+
+#### Nodejs获取环境变量
+
+例如获取环境变量中 POST 的值：
+
+```
+process.env.PORT
+```
+
+
+
+## PM2与Nodejs通信
+
+#### PM2 监听 Nodejs 创建http服务成功
+
+**pm2 启动时参数代码：**
+
+```
+pm2 start app.js --wait-ready
+```
+
+**当然也可以设置 监听 wait-ready 超时时间：**
+
+```
+pm2 start app.js --wait-ready --listen-timeout 3000
+```
+
+**Nodejs 创建http服务完成后，通过 process 向系统发送 ready 信号：**
+
+```
+var http = require('http');
+
+var app = http.createServer(function(req, res) {
+  res.writeHead(200);
+  res.end('hey');
+})
+
+var listener = app.listen(0, function() {
+  console.log('Listening on port ' + listener.address().port);
+  // Here we send the ready signal to PM2
+  process.send('ready');
+});
+```
+
+
+
+#### Nodejs 监听 PM2 发送关闭信号
+
+**pm2 启动时添加参数，允许 pm2 向系统进程发送关闭信号：**
+
+```
+pm2 start app.js --shutdown-with-message
+```
+
+**Nodejs 监听 系统进度 中的信号：**
+
+```
+process.on('message', function(msg) {
+  if (msg == 'shutdown') {
+    console.log('Closing all connections...');
+    setTimeout(function() {
+      console.log('Finished closing connections');
+      process.exit(0);
+    }, 1500);
+  }
+});
+```
+
+
+
+## 开机自动启动 pm2 服务
+
+#### 第1步：保存当前状态
+
+```
+pm2 save
+```
+
+执行后会得到以下信息：
+
+```
+[PM2] Saving current process list...
+[PM2] Successfully saved in /root/.pm2/dump.pm2
+```
+
+#### 第2步：创建启动文件
+
+```
+pm2 startup
+```
+
+执行后会得到以下信息：
+
+```
+[PM2] Init System found: systemd
+Platform systemd
+Template
+[Unit]
+Description=PM2 process manager
+Documentation=https://pm2.keymetrics.io/
+After=network.target
+
+...
+
+Target path
+/etc/systemd/system/pm2-root.service
+Command list
+[ 'systemctl enable pm2-root' ]
+[PM2] Writing init configuration in /etc/systemd/system/pm2-root.service
+[PM2] Making script booting at startup...
+[PM2] [-] Executing: systemctl enable pm2-root...
+Created symlink from /etc/systemd/system/multi-user.target.wants/pm2-root.service to /etc/systemd/system/pm2-root.service.
+[PM2] [v] Command successfully executed.
++---------------------------------------+
+[PM2] Freeze a process list on reboot via:
+$ pm2 save
+
+[PM2] Remove init script via:
+$ pm2 unstartup systemd
+```
+
+#### 停止开启自动重启
+
+```
+pm2 unstartup
+```
+
+执行后会得到以下信息：
+
+```
+[root@VM_0_8_centos ~]# pm2 unstartup
+[PM2] Init System found: systemd
+Removed symlink /etc/systemd/system/multi-user.target.wants/pm2-root.service.
+
+Removed symlink /etc/systemd/system/multi-user.target.wants/pm2-root.service.
+
+[PM2] Init file disabled.
 ```
 
 
