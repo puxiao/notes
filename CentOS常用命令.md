@@ -47,17 +47,22 @@ find ./ -type d -print|xargs chmod 755;
 创建文件夹：mkdir xxx  
 查看当前所在目录的绝对路径：pwd  
 
-
-## 解压文件
-
-解压文件：tar xvf xxx
-
 ## yum安装软件
 
 安装本地 .rpm 文件包：yum install /xxx/xxx.rpm  
 安装网络 .rpm 文件包：yum install https://xxx.com/xxx.rpm  
 将程序安装到指定目录中：yum install xxx --installroot=/xx/xx  
-卸载 xxx 程序：yum remove xxx
+卸载 xxx 程序：yum remove xxx  
+
+## 下载文件
+
+安装wget下载程序：yum install wget  
+使用wget下载某文件：wget http://xxx.xxxx.xxx/xxx.xx  
+使用curl下载某文件：curl http://xxx.xxxx.xxx/xxx.xx  
+
+## 解压文件
+
+解压文件：tar xvf xxx
 
 
 ## 软连接
@@ -73,13 +78,6 @@ find ./ -type d -print|xargs chmod 755;
 切换到输入编辑文件模式：i  
 保存：w  
 退出：Exc 或 q 或 ctrl+z(不会保存)  
-
-
-## 下载文件
-
-安装wget下载程序：yum install wget  
-使用wget下载某文件：wget http://xxx.xxxx.xxx/xxx.xx  
-使用curl下载某文件：curl http://xxx.xxxx.xxx/xxx.xx  
 
 
 ## 查看/编辑某文档
