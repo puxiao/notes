@@ -6,7 +6,7 @@
 
 发布程序：
 
-1. 购物物理服务器
+1. 购买物理服务器
 2. 将程序文件拷贝到物理服务器中
 
 存在的缺点：
@@ -146,3 +146,222 @@ Docker Desktop requires Windows 10 Pro/Enterprise (15063+) or Windows 10 Home (1
 
 ### CentOS安装Docker
 
+#### Docker 对 CentOS 系统要求
+
+1. 服务器必须64位，且最低版本为 CentOS 7
+2. Linux内核最低版本 3.10，可通过执行 `uname -r` 来查看
+3. 处理器支持 x86_64/amd64 或 ARM64/aarch64、不支持 ARM 处理器
+
+#### 若之前安装有Docker，则先卸载旧版本
+
+卸载旧版本代码：
+
+```
+yum remove docker \
+                  docker-client \
+                  docker-client-latest \
+                  docker-common \
+                  docker-latest \
+                  docker-latest-logrotate \
+                  docker-logrotate \
+                  docker-engine
+```
+
+#### 安装方式1：下载脚本安装
+
+> curl 是 Linux 的一个命令，用来下载文件
+> .sh 是一种编写好的脚本文件
+
+下载脚本文件(get-docker.sh)，并执行该文件：
+
+```
+curl -fsSL https://get.docker.com -o get-docker.sh
+sh get-docker.sh
+```
+
+上述代码还可以合并成一行：
+
+```
+curl -fsSL https://get.docker.com -o get-docker.sh | sh
+```
+
+> `https://get.docker.com` 会安装最新版，若要安装测试版，则将域名更换为 `https://test.docker.com`
+
+**注意事项：**
+虽然这种方式最为简便，但是需要注意以下几点：
+
+1. 需要 root 用户 或 sudo 权限
+2. 安装过程中各种配置参数均无法自定义，只能按照脚本中的来进行安装。
+3. 会自动安装软件管理器所有依赖或建议项，因此可能会安装大量软件包。
+4. Docker官方不建议使用此方法用于生产环境中。
+
+#### 安装方式2：使用存储库安装
+
+##### 第1步：设置存储库
+
+安装 yum-utils 软件包，使用 yum-utils 提供的 yum-config-manager 工具，设置固定的 Docker 存储库，方便此时安装或以后更新。
+
+```
+yum install -y yum-utils
+yum-config-manager \
+    --add-repo \
+    https://download.docker.com/linux/centos/docker-ce.repo
+```
+
+也可以选择国内的一些镜像地址：
+
+```
+yum-config-manager \
+    --add-repo \
+    https://mirrors.tencent.com/docker-ce/linux/centos/docker-ce.repo
+```
+
+```
+yum-config-manager \
+    --add-repo \
+    http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+```
+
+##### 第2步：安装 Docker Engine 社区版
+
+默认安装最新版本的 Docker Engine 社区版：
+
+```
+yum install docker-ce docker-ce-cli containerd.io
+```
+
+> 如果提示是否接受 GPG 秘钥，选择：是
+
+##### 第3步：启动 Docker
+
+```
+systemctl start docker
+```
+
+##### 第4步：验证是否启动成功
+
+```
+docker run hello-world
+```
+
+> hello-world 是一个自带的小测试项目，会打印 “Hello from Docker!” 并自动退出
+
+#### 第3中方式：使用安装包安装
+
+##### 第1步：找到对应的安装包 .rpm 文件
+
+访问网址：https://download.docker.com/linux/centos/ ，找到对应的 CentOS 版本并点击进入，进入 `x86_64/stable/Packages/` 目录，找到需要安装的版本文件
+
+> 例如我选择的 完整文件路径为：`https://download.docker.com/linux/centos/7/x86_64/stable/Packages/` 中 docker-ce (社区版)的某个版本
+
+##### 第2步：下载该文件(可选)
+
+需要安装下载的3个文件，依次是：containerd.io、docker-ce-cli、docker-ce
+
+> package中的docker-ce-selinux 这个文件不需要下载安装，已经被废弃。
+
+> 如果服务器不能联网，则可通过离线拷贝形式将文件存放到服务器中。
+> 如果服务器可以联网，也可以忽略第2步。
+
+我选择的版本文件是：
+
+```
+https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.2.6-3.3.el7.x86_64.rpm
+https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-cli-19.03.8-3.el7.x86_64.rpm
+https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-19.03.8-3.el7.x86_64.rpm
+```
+
+下载文件时我选择使用 wget 而不是 curl 命令，对应的下载命令：
+
+```
+wget https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.2.6-3.3.el7.x86_64.rpm
+wget https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-cli-19.03.8-3.el7.x86_64.rpm
+wget https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-19.03.8-3.el7.x86_64.rpm
+```
+
+> 如果在云服务器上下载很慢，可以通过本机网页下载这些文件，然后通过 xftp 工具将文件上传到服务器对应目录中。
+
+##### 第3步：使用 yum 安装该文件
+
+需要依次安装：containerd.io、docker-ce-cli、docker-ce
+安装代码构成为：yum + install + 本地绝对路径或网上对应的文件地址
+
+特别强调：如果是本地rpm文件，**一定要写绝对路径**，不要写相对路径。例如：
+
+```
+一定要写绝对路径
+yum install /software/docker/containerd.io-1.2.6-3.3.el7.x86_64.rpm
+
+即使 cd 到 /software/docker/，也不能写相对路径
+yum install containerd.io-1.2.6-3.3.el7.x86_64.rpm
+```
+
+若 安装包文件 已经下载到某目录中，依次按照顺序，执行安装命令：
+
+```
+yum install /path/to/containerd.io-1.2.6-3.3.el7.x86_64.rpm
+yum install /path/to/docker-ce-cli-19.03.8-3.el7.x86_64.rpm
+yum install /path/to/docker-ce-19.03.8-3.el7.x86_64.rpm
+```
+
+若没有下载 rpm文件，也可直接使用网上文件地址：
+
+```
+yum install https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.2.6-3.3.el7.x86_64.rpm
+yum install https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-cli-19.03.8-3.el7.x86_64.rpm
+yum install https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-19.03.8-3.el7.x86_64.rpm
+```
+
+> 安装过程中会有几步需要确认，都输入 y 表示同意即可。
+> 若嫌麻烦，可在 yum 安装命令中，增加 -y 的参数(即告诉 yum 所有询问都执行 y)
+
+##### 第4步：启动 Docker
+
+```
+systemctl start docker
+```
+
+##### 第5步：验证是否启动成功
+
+```
+docker run hello-world
+```
+
+> hello-world 是一个自带的小测试项目，会打印 “Hello from Docker!” 并自动退出
+
+### 更新 Docker Engine 版本
+
+卸载旧版本，按照上述中的安装方式，重新安装一遍新版本。
+
+### 卸载 Docker Engine
+
+```
+yum remove docker-ce docker-ce-cli containerd.io
+```
+
+### 补充说明
+
+##### 查看 Docker安装目录
+
+```
+which docker
+
+会显示默认安装位置
+/usr/bin/docker
+```
+
+##### 关于腾讯云镜像存储库说明
+
+1. https://mirrors.cloud.tencent.com/ 是对外，可通过公网访问，若云服务器访问则会产生流量
+2. https://mirrors.tencent.com/ 是对内，仅腾讯云服务器内网可访问，不产生任何流量
+3. 默认腾讯云服务器 CentOS /etc/yum.repos.d/CentOS-Epel.repo 中，镜像存储库都使用的是 `https://mirrors.tencent.com/ `
+
+##### Docker Engine 更新版本库的说明
+
+通常有4个共存的版本目录，对应更新频率分别是：
+
+1. /edge 或 /test：每月发布一次
+2. /nightly：每天夜里更新一次
+3. /stable：每3个月更新一次
+
+相对而言 stable 版本更加稳定，这也是为什么 安装方法3中，文件网址路径中，会出现 `/stable/`。
