@@ -1,7 +1,7 @@
 ## 我的学习笔记
 前端技术栈：React/Taro/Webpack/Less/TypeScript  
 数据库：Mysql/MongoDB  
-后端技术栈：Nodejs/Koa/Middleware/Redis/Nginx/Npm
+后端技术栈：Nodejs/Koa/Middleware/Redis/Nginx/Npm  
 运维部署：PM2/Docker/CentOS  
 
 
