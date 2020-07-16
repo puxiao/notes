@@ -39,6 +39,7 @@ find ./ -type d -print|xargs chmod 755;
 ## 文件夹相关
 查看文件夹下内容：ls 或 ll  
 创建文件夹：mkdir xxx  
+查看当前所在目录的绝对路径：pwd  
 
 
 ## 解压文件
