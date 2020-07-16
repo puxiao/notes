@@ -46,6 +46,7 @@ find ./ -type d -print|xargs chmod 755;
 查看文件夹下内容：ls 或 ll  
 创建文件夹：mkdir xxx  
 查看当前所在目录的绝对路径：pwd  
+查看某程序 xxx 所在安装目录：which xxx  
 
 ## yum安装软件
 
