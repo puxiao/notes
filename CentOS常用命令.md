@@ -237,7 +237,15 @@ find ./ -type d -print|xargs chmod 755;
 终止某个(无论是不是在后台)命令：kill -9 pid  pid是通过ps -ef 命令查找到的该命令对应的pid数字
 
 终止某个服务所有相关的进行：killall -9 name  name是通过ps -ef 命令查找到的该命令名称  
+## 防火墙相关
 
+查看防火墙：firewall-cmd --state  若输出 running 即表示已启动
+
+启动防火墙：service firewall start
+
+关闭防火墙：service firewall stop
+
+重启防火墙：service firewall restart
 ## 其他命令
 
 调出之前的命令：摁上下键
