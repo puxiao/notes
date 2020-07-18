@@ -7,6 +7,34 @@
 
 查看当前系统版本：uname -r  
 
+## 服务相关
+
+管理服务使用：systemctl (推荐) 或 service
+
+> systemctl 更加利于提高启动速度，且 systemctl 兼容 service，因此推荐使用 systemctl 命令
+
+查看 systemctl 版本：systemctl --version
+
+管理服务命令格式为：systemctl + 执行命令(command) + 服务名(unit)
+
+执行命令(command)分别为：
+
+| 命令      | 对应含义                         |
+| --------- | -------------------------------- |
+| start     | 立即启动                         |
+| stop      | 立即关闭                         |
+| restart   | 立即重启                         |
+| reload    | 不关闭情况下 ，重新载入配置文件  |
+| enable    | 设置下次开机时，自动启动         |
+| disable   | 设置下次开机时，不自动启动       |
+| status    | 打印当前状态                     |
+| is-active | 目前是否正在运行中               |
+| is-enable | 打印开机时是否默认启动           |
+| kill      | 向服务进程发送信号(并非关闭服务) |
+| show      | 打印出服务配置                   |
+| mask      | 注销服务，且无法再启动           |
+| unmask    | 取消注销服务                     |
+
 
 ## 开关机相关
 
