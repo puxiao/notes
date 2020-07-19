@@ -14,6 +14,20 @@ docker 启动项目：docker run xxx
 
 
 
+## 帮助相关
+
+查看帮助：docker --help
+
+查看 某操作 的帮助：docker xxx -help  例如查看 run 相关帮助 docker run --help、docker logs --help、docker ps --help
+
+
+
+## 输出logs相关
+
+查看 logs 帮助：docker logs --help
+
+
+
 ## 安装镜像相关
 
 搜索镜像：docker search xxx
@@ -22,7 +36,7 @@ docker 启动项目：docker run xxx
 
 下载镜像：docker pull xxx ，其中 xxx 为 docker search xxx 中选定的结果名称
 
-查看已安装的镜像：docker images
+查看已安装的镜像：docker images  或  docker image ls
 
 导出镜像文件：docker save xxx > /xx/xxx.tar.gz
 
@@ -59,6 +73,7 @@ docker 启动项目：docker run xxx
 
 | -x的值       | 对应含义                             |
 | ------------ | ------------------------------------ |
+| 不使用参数   | docker ps 显示当前活动中的容器       |
 | -a           | 显示所有容器，包括未运行的(已停止的) |
 | -f           | 根据条件过滤显示的内容               |
 | --format     | 指定返回值的模板文件                 |
