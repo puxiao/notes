@@ -26,6 +26,146 @@ docker 启动项目：docker run xxx
 
 查看 logs 帮助：docker logs --help
 
+格式化输出：docker logs -f
+
+
+
+## Docker配置文件(daemon.json)
+
+Linux系统，docker 配置文件路径为：/etc/docker/daemon.json
+
+Windows10，docker 桌面版配置文件路径为：c:\users\your-username\\.docker\daemon.json
+
+也可以通过点击系统右下角 docker 图标，右键 > settings > docker engine > 右侧内容里修改
+
+> 每次修改配置文件，一定要重启 docker 才会生效
+
+
+
+## 使用DockerHub加速器
+
+使用腾讯云或阿里云的 DockerHub 加速器，可以快速拉取 DockerHub 平台上的容器镜像。
+
+Linux系统内，配置步骤如下：
+
+第1步：创建或修改 /etc/docker/daemon.json 文件，并写入以下内容：
+
+```
+# 腾讯云的 DockerHub加速 只针对在腾讯云服务器上使用，外网无法使用
+{
+   "registry-mirrors": ["https://mirror.ccs.tencentyun.com"]
+}
+
+# 阿里云的 DockerHub加速 可以针对外网使用
+{
+  "registry-mirrors": ["https://e3je0x5v.mirror.aliyuncs.com"]
+}
+```
+
+> 默认安装 docker 之后，/etc/docker/daemon.json 文件并不存在，需要自己创建
+
+第2步：重新加载 守护进程 配置文件
+
+```
+systemctl daemon-reload
+```
+
+第3步：重启 docker 服务
+
+```
+systemctl restart docker
+```
+
+第4步：验证是否配置生效
+
+```
+docker info
+```
+
+若在打印输出的信息中，找到以下信息即表明配置已生效。
+
+```
+Registry Mirrors:
+ https://mirror.ccs.tencentyun.com
+```
+
+
+
+Windows10 Docker 桌面版配置方式：
+
+第1步：windows 系统右下角 docker 图标，点击右键，在出现的菜单中点击 Settings。
+
+第2步：在设置面板左侧中，点击 Docker Engine，在右侧文本内容中，将加速地址 "https://e3je0x5v.mirror.aliyuncs.com" 填入到 registry-mirrors 中。
+
+> 由于腾讯云 DockerHub 不支持外网，所以只能使用 阿里云 DockerHub 加速器
+
+第3步：点击 Apply & Restart，应用并重启 Docker 服务。
+
+第4步：验证是否配置生效
+
+```
+docker info
+```
+
+若在打印输出的信息中，找到以下信息即表明配置已生效。
+
+```
+Registry Mirrors:
+ https://mirror.ccs.tencentyun.com
+```
+
+
+
+## 全局DNS配置
+
+创建或修改 /etc/docker/daemon.json 文件，并写入以下内容：
+
+```
+{
+  "dns" : ["118.118.118.118","8.8.8.8"]
+}
+```
+
+> dns 的值为一个数组，可以设置多条 IP地址
+> 修改 daemon.json 文件后，需要重启 dokcer 才可生效。
+
+> 某个容器若想不使用全局DNS，而是指定DNS，可在启动容器时，增加 --dns=118.118.118.118 来实现。
+
+
+
+## 修改镜像文件存放位置
+
+Linux系统内，配置步骤如下：
+
+创建或修改 /etc/docker/daemon.json 文件，并写入以下内容：
+
+```
+{
+  "data-root": "/docker"
+}
+```
+
+> 修改 daemon.json 文件后，需要重启 dokcer 才可生效。
+
+
+
+Windows10 Docker 桌面版配置方式：
+
+第1步：windows 系统右下角 docker 图标，点击右键，在出现的菜单中点击 Settings。
+
+第2步：在设置面板左侧中，点击 Docker Engine，在右侧文本内容中，添加参数：
+
+```
+# 假设要修改的本地镜像文件，在windows系统路径为 d:\docker
+# 由于 docker 不支持 \ 这种形式的路径，即使 \\ 也不行
+# windows 中，docker 配置文件 daemon.json 中支持的路径应该是 /d/docker 对应(d:\docker)
+{
+  "data-root": "/d/docker"
+}
+```
+
+第3步：点击 Apply & Restart，应用并重启 Docker 服务。
+
 
 
 ## Dockerfile文件相关
@@ -185,7 +325,7 @@ ENTRYPOINT 形式为：
 3. 允许有多条 LABEL 设置
 4. 若一条 LBEL 结尾处 出现 \ ，则会将下一行代码 合并到本行中，相当于 跨行符
 
-> 若要查看镜像文件的 label 标签，可是使用命令：docker inspect imagenamexxx
+> 若要查看镜像文件的 label 标签(同时也是容器的 label 标签)，使用命令：docker inspect imagenamexxx
 
 #### EXPOSE(端口和协议)设置
 
@@ -374,6 +514,8 @@ Docker build .  构建镜像文件是通过 Docker daemon (守护进程) 运行�
 
 查看已安装的镜像：docker images  或  docker image ls
 
+标记本地镜像，将其归入某一仓库：docker tat xxx xxx
+
 导出镜像文件：docker save xxx > /xx/xxx.tar.gz
 
 > 将镜像导出成压缩文件(相当于本地备份镜像)，`/xx/xxx.tar.gz` 为导出镜像文件的保存位置和文件名。
@@ -397,7 +539,20 @@ Docker build .  构建镜像文件是通过 Docker daemon (守护进程) 运行�
 
 登录镜像仓库：docker login
 
-发布镜像：docker push xxx
+登出镜像仓库：docker logout
+
+发布镜像：docker push username/xxx:xx.x
+
+更新镜像：docker commit xxx-id  xxx-name:vx.x
+
+> 上述更新镜像中代码中，xxx-id 为镜像ID，xxx-name 为镜像名，vx.x 为镜像版本(TAG)，若不填写vx.x则默认值为 latest
+
+更新镜像中可以添加的参数：
+
+| 参数 | 对应含义     |
+| ---- | ------------ |
+| -m   | 更新描述信息 |
+| -a   | 更新作者     |
 
 
 
@@ -429,7 +584,39 @@ Docker build .  构建镜像文件是通过 Docker daemon (守护进程) 运行�
 
 删除容器：docker rm xxx  需要先 stop 容器，否则会删除失败
 
-强制删除容器：docker rm xxx --force  即使容器正在运行，也会先 stop 然后再删除掉
+强制删除容器：docker rm  -f  xxx 即使容器正在运行，也会先 stop 然后再删除掉
+
+查看容器底层信息(配置和运行状态)：docker inspect  xxx
+
+进入某容器：docker exec xxx
+
+导出容器快照：docker export xxx >  /xx/xxx.tar.gz
+
+导入容器快照：docker import /xx/xxx.tar.gz (本地文件资源)  或  docker import https://xxx.com/xxx (网络资源)
+
+查看容器端口：docker port xxx
+
+查看容器内部运行程序：docker top xxx
+
+查看镜像的创建历史信息：docker history xxx
+
+查看容器内部文件结构更改：docker diff xxx
+
+容器与宿主机之间拷贝文件：docker cp from-path-xxx  to-path-xxx
+
+> from-path-xxx 是需要拷贝的文件或目录路径、to-path-xxx 是复制到的路径
+> 宿主机文件系统直接使用常规路径，但是容器路径需要添加容器ID，
+> 举例：docker cp /root/xxx  containidxxx:/root/xxx，将 宿主机中的 /root/xxx 拷贝到 容器ID 为 containidxxx 的/root/xxx中。
+
+> 注意：源文件(或目录)路径 和 目标文件(或目录)路径 结尾处，是否包含 / 会直接影响拷贝结果
+> 如果双方结尾处 都不包含 / ，则对应的含义是：直接对等拷贝
+> 如果 一方结尾处有 /，而另外一方结尾处没有 /，则对应的含义是：拷贝到 xx/目录下面
+
+阻塞运行直到容器停止：docker wait xxx
+
+创建容器但不启动它：docker create imagexxx
+
+> 语法同 docker run 相同，区别就在于只创建不启动
 
 创建容器：docker run imagexxx  
 
@@ -438,20 +625,56 @@ Docker build .  构建镜像文件是通过 Docker daemon (守护进程) 运行�
 
 启动镜像时，可添加的参数：
 
-| 参数          | 对应含义                                                     |
-| ------------- | ------------------------------------------------------------ |
-| -it           | 启动成功后，显示容器命令界面<br />若不添加该参数，容器启动成功后则停留在主机操作界面、若添加则进入容器命令界面 |
-| --name  xxx   | 给该容器起一个名字(ID)，若不添加该参数，则 docker 会随机产生一个字符串作为该容器名字(ID) |
-| -p 9000:8080  | 映射端口，9000为宿主机端口，8080为容器内部端口<br />可以有多组 -p xxxx:xxxx，设置多组端口映射关系 |
-| -v /aa/bb:/cc | 映射目录，/aa/bb为宿主机目录，/cc为容器内部目录<br />通常情况下数据库文件一定是存放在宿主机目录里的，同 -p 一样，也可以设置多组目录映射关系 |
-| --privileged  | 允许容器拥有操作宿主机中映射的目录最高权限(读/写执行)        |
-| --net=xxx     | 其中 xxx 为网络模式<br />1、none：无网络<br />2、host：直接使用宿主机的网络配置<br />3、bridge：默认设置，会为每一个容器分配IP，通过虚拟网桥与宿主机通信<br />4、container:Name_or_ID，容器自己不配置网络，而是和指定容器共享同一个网络配置 |
-| --detach      | 在容器中，以后台模式运行                                     |
+| 参数             | 对应含义                                                     |
+| ---------------- | ------------------------------------------------------------ |
+| -it              | 启动成功后，显示容器命令操作界面<br />若不添加该参数，容器启动成功后则停留在主机操作界面、若添加则进入容器命令界面<br />退出容器命令操作界面，执行：exit ，由于未使用参数 -d，因此退出命令操作界面会让容器停止 |
+| -itd             | 启动成功后，不显示容器命令操作界面，以后台形式运行<br />若想进入容器操作界面，执行：docker exec -itd xxx(容器名)<br />退出容器命令操作界面，执行：exit ，由于使用参数 -d，因此退出命令操作界面并不会让容器停止 |
+| --name  xxx      | 给该容器起一个名字(ID)，若不添加该参数，则 docker 会随机产生一个字符串作为该容器名字(ID) |
+| -p 9000:8080/tcp | 指定映射端口，9000为宿主机端口，8080为容器内部端口，<br />默认(不填时)使用协议为tcp，可修改为udp<br />可以有多组 -p xxxx:xxxx，设置多组端口映射关系<br />也可以添加上宿主机IP，-p 127.0.0.1:9000:8080 |
+| -P               | 随机映射到宿主机某个端口(不推荐)                             |
+| -v /aa/bb:/cc    | 映射目录，/aa/bb为宿主机目录，/cc为容器内部目录<br />通常情况下数据库文件一定是存放在宿主机目录里的，同 -p 一样，也可以设置多组目录映射关系 |
+| --privileged     | 允许容器拥有操作宿主机中映射的目录最高权限(读/写执行)        |
+| --net=xxx        | 其中 xxx 为网络模式<br />1、none：无网络<br />2、host：直接使用宿主机的网络配置<br />3、bridge：默认设置，会为每一个容器分配IP，通过虚拟网桥与宿主机通信<br />4、container:Name_or_ID，容器自己不配置网络，而是和指定容器共享同一个网络配置 |
+| -d 或 --detach   | 在容器中，以后台模式运行                                     |
 
-退出容器命令界面：exit 仅退出容器命令界面，还会停止容器(stop)
+> 默认会先查找并启动本地资源中的镜像文件，如果本地找不到，则会尝试 从 DockerHub 下载该名称的镜像
+> 若想直接从 仓库中下载，则使用 docker pull xxx:xx
 
-> 注意：
->
-> 1. exit 会停止容器(docker stop xxx)，并不是暂停容器(docker pauser xxx)，
-> 2. 因此若想重启容器，恢复容器(docker unpauser xxx)是不行的，只能执行重新开启容器(docker start -i xxx)
+
+
+## 容器互连
+
+docker 有一个连接系统，可以将多个容器进项相互连接。
+
+具体操作步骤如下：
+
+第1步：新建一个 docker 网络
+
+```
+docker network create -d bridge test-net
+```
+
+> 上面代码中将新建的网络命名为 test-net
+
+> 网络类型 -d 参数，可以设置值有：bridge、overlay
+
+第2步：新建一个容器，并连接到 创建的网络中
+
+```
+docker run -itd --name test1 --network test-net image-name-xxx1
+```
+
+> 上面代码中，将容器名字命名为 test1，连接到 test-net 网络中，image-name-xxx1 为镜像文件名
+
+> 第一个连接到该网络的容器，称为 父容器
+
+第3步：再新建其他容器，并连接到 创建的网络中
+
+```
+docker run -itd --name test2 --network test-net image-name-xxx2
+```
+
+容器之间测试连接：可以在容器中使用 ping 命令 去连接另外一个容器，例如在 test1 中执行 ping test2。
+
+> 如果容器过多，还是推荐使用 Docker Compose 来管理这些容器。
 
