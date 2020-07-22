@@ -165,7 +165,9 @@ Registry Mirrors:
 
 第3步：点击 Apply & Restart，应用并重启 Docker 服务。
 
-**强调说明：Win10 中虚拟机采用 WSL 2版本，虚拟机文件系统由 WSL 2 管理，因此想更换 docker 的默认镜像文件存放目录，应该通过 WSL 命令来操作。**
+**以下才是真正 配置迁移虚拟目录的方法**
+
+**补充说明：Win10 中虚拟机采用 WSL 2版本，虚拟机文件系统由 WSL 2 管理，因此想更换 docker 的默认镜像文件存放目录，应该通过 WSL 命令来操作。**
 
 > 默认 docker 虚拟机文件存放位置为：C:\Users\your-user-name\AppData\Local\Docker\wsl\data\ext4.vhdx
 
