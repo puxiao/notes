@@ -57,6 +57,8 @@ Linux系统内，配置步骤如下：
 }
 
 # 阿里云的 DockerHub加速 可以针对外网使用
+# 阿里云的 DockerHub 需要使用自己的阿里云账户登录，待系统给你分配专属的加速地址
+# 本示例中使用到的 https://e3je0x5v.mirror.aliyuncs.com 是阿里云分配给我的
 {
   "registry-mirrors": ["https://e3je0x5v.mirror.aliyuncs.com"]
 }
@@ -111,7 +113,7 @@ docker info
 
 ```
 Registry Mirrors:
- https://mirror.ccs.tencentyun.com
+ https://e3je0x5v.mirror.aliyuncs.com
 ```
 
 
@@ -165,7 +167,7 @@ Registry Mirrors:
 
 第3步：点击 Apply & Restart，应用并重启 Docker 服务。
 
-**以下才是真正 配置迁移虚拟目录的方法**
+**以下才是真正 win10下 配置迁移虚拟目录的方法**
 
 **补充说明：Win10 中虚拟机采用 WSL 2版本，虚拟机文件系统由 WSL 2 管理，因此想更换 docker 的默认镜像文件存放目录，应该通过 WSL 命令来操作。**
 
