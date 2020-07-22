@@ -135,7 +135,7 @@ Registry Mirrors:
 
 ## 修改镜像文件存放位置
 
-Linux系统内，配置步骤如下：
+#### Linux系统内，配置方法
 
 创建或修改 /etc/docker/daemon.json 文件，并写入以下内容：
 
@@ -149,22 +149,92 @@ Linux系统内，配置步骤如下：
 
 
 
-Windows10 Docker 桌面版配置方式：
+#### Windows10 Docker 桌面版配置方式
+
+**特别提醒：以下操作仅仅是修改了 Window10 Docker 虚拟机(WSL 2 ) 里静态文件的存放位置，并不是真正 Win10 本地文件系统中的位置。**
 
 第1步：windows 系统右下角 docker 图标，点击右键，在出现的菜单中点击 Settings。
 
 第2步：在设置面板左侧中，点击 Docker Engine，在右侧文本内容中，添加参数：
 
 ```
-# 假设要修改的本地镜像文件，在windows系统路径为 d:\docker
-# 由于 docker 不支持 \ 这种形式的路径，即使 \\ 也不行
-# windows 中，docker 配置文件 daemon.json 中支持的路径应该是 /d/docker 对应(d:\docker)
 {
-  "data-root": "/d/docker"
+  "data-root": "/docker"
 }
 ```
 
 第3步：点击 Apply & Restart，应用并重启 Docker 服务。
+
+**强调说明：Win10 中虚拟机采用 WSL 2版本，虚拟机文件系统由 WSL 2 管理，因此想更换 docker 的默认镜像文件存放目录，应该通过 WSL 命令来操作。**
+
+> 默认 docker 虚拟机文件存放位置为：C:\Users\your-user-name\AppData\Local\Docker\wsl\data\ext4.vhdx
+
+假设现在我们希望将 docker 默认在 c盘 的虚拟文件存放目录修改到 `d:\docker-data\`，操作步骤如下：
+
+第1步：在终端执行以下命令，查看并确认 本机 docker 使用的是 WSL 2
+
+```
+wsl -l -v
+```
+
+在终端会打印出：
+
+```
+C:\WINDOWS\system32>wsl -l -v
+  NAME                   STATE           VERSION
+* docker-desktop         Running         2
+  docker-desktop-data    Running         2
+```
+
+> 在输出信息中，STATE显示 docker 当前运行状态、LVERSION 为 2 (即 WSL 2)。
+
+> docker-desktop 为我们安装的 docker 桌面版软件，由于软件文件体积并不大，因此无需移动 docker-desktop。
+> 我们此次重点，只需要移动 docker-desktop-data，这个才是 win10 下 docker 的虚拟文件目录，docker pull 下载的镜像文件都存放在这个虚拟目录里，为了避免以后 C盘空间被占满，所以才需要将该虚拟目录移动到其他盘。
+
+第2步：关闭 docker 桌面版，或者通过 wsl 关闭
+
+```
+wsl --shutdown
+```
+
+第3步：通过 wsl --export 将原有虚拟目录中的数据，压缩并导出到目标目录中
+
+```
+wsl --export docker-desktop-data d:\docker-data\docker-data.tar
+```
+
+> d:\docker-data：本次迁移到的目录，实际操作中，你可以将该目录命名成你喜欢的名字，但是切记目录名不要出现中文
+> docker-data.tar：该压缩文件名字你也可以使用其他名字，该文件在后面导入过程中会使用到
+
+第4步：注销原有虚拟文件目录
+
+```
+wsl --unregister docker-desktop-data
+```
+
+> 终端会打印出：正在注销...，并执行完成
+
+第5步：创建新的虚拟文件目录，并导入原有虚拟目录中的数据(第3步中创建的那个压缩文件)，并设定 WSL 的版本
+
+```
+wsl --import docker-desktop-data d:\docker-data d:\docker-data\docker-data.tar ---version 2
+```
+
+> docker-desktop-data：虚拟目录名字
+> d:\docker-data：虚拟目录在 Windows 文件中真实路径
+> d:\docker-data\docker-data.tar：原有虚拟目录中的数据
+> --version 2：使用 WSL 2版本
+
+> 上述命令执行完毕后，本机打开 d:\doker-data，查看是否存在 ext4.vhdx，若存在即证明迁移成功 。
+
+至此，虚拟目录迁移完成，以后 docker 下载的镜像文件都将存放在这个目录中的 ext4.vhdx 中。
+默认的虚拟目录对应的文件  `C:\Users\your-user-name\AppData\Local\Docker\wsl\data\ext4.vhdx` 将不存在。
+
+第6步：将之前创建的 d:\docker-data\docker-data.tar 文件删除 (直接用文件夹形式打开目录，找到 .tar 删除即可)
+
+> 事实上，如果觉得有必要，以后也可以通过 wsl --export docker-desktop-data 来导出并备份 docker 虚拟文件系统
+
+第7步：重启 docker 
 
 
 
@@ -558,7 +628,7 @@ Docker build .  构建镜像文件是通过 Docker daemon (守护进程) 运行�
 
 ## 容器相关
 
-查看容器：docker ps -x
+查看容器：docker ps -x  “-x” 仅仅是示意，具体对应的参数请参加下表
 
 上述命令中 -x 为参数：
 
