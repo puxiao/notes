@@ -1,5 +1,29 @@
 # Docker常用命令
 
+## 名词解释
+
+镜像(image)：包含项目运行程序和所需环境的全部文件，为只读文件。
+
+容器(container)：在只读的镜像文件之外添加一个写入层，让原本只读的镜像可以与宿主机之间进行数据交互，实现可读可写。
+
+仓库(depository)：储存镜像文件的仓库，有官方镜像仓库、腾讯云或阿里云镜像仓库、或自己搭建的仓库。
+
+
+
+标签(tag)：在 docker 语境下，tag 用来标记镜像文件的版本号或发行标记，tag 的值可以是纯版本号，也可以是其他字符串。
+
+标签(label)：在 docker 语境下，label 用来给镜像文件添加一些描述性信息，在构建 镜像文件时 通过 LABEL 来定义。
+
+镜像ID：安装某镜像时，给该镜像添加的唯一标识符 ID，是一个 12 位的哈希码。
+
+镜像名：镜像默认的名字
+
+镜像别名：为某镜像文件添加一个新的引用名称，所以称为镜像别名。注意只是新增一个引用名，并不是真实复制拷贝一份。
+
+> 一个已安装的镜像 只有一个镜像ID，但是可以有多个镜像别名
+
+
+
 ## 基础命令
 
 查看 docker 支持的命令：docker
@@ -333,9 +357,9 @@ ENV 定义环境变量遵循以下原则：
 1. 指令变量必须出现在 FROM 指令之前
 2. 指令变量只能用于 FROM 指令中、而环境变量则可以用在绝大多数指令和容器中
 
-#### FROM(镜像文件引用)设置
+#### FROM(基础镜像)设置
 
-通过 FROM 来定义镜像文件源，有以下几种形式：
+通过 FROM 来定义基础镜像，也就是运行程序所需要的基础环境，有以下几种形式：
 
 | 形式                                   | 示例                         |
 | -------------------------------------- | ---------------------------- |
@@ -425,6 +449,7 @@ ADD 形式有以下2种：
 1. src 的路径可以包含通配符  * ？！
 2. [--chown=<user\>:<group\>] 为可选参数，且只在 Linux 系统下起作用，目的是改变文件属主(拥有者)
 3. 如果远程文件有身份验证保护，那么 ADD 将无法顺序执行，只能使用 RUN wget 或 RUN curl
+4. 如果路径中包含空格，那么需要加上 引号 ""
 
 ADD 添加文件遵循以下原则：
 
@@ -472,18 +497,21 @@ VOLUME 形式为：
 
 > 容器启动时，可通过 -v 参数来修改挂载数据点
 
-#### WORKDIR(工作目录)设置
+#### WORKDIR(项目虚拟主目录)设置
 
-通过 WORKDIR 来指定工作目录。
+通过 WORKDIR 来指定本镜像虚拟环境下的项目主目录。将来启动该镜像的容器，默认会从该目录下找执行文件。
+
+注意：为避免冲突，请勿将 WORKDIR 的路径 设置为 常见 Linux 系统默认的目录
 
 WORKDIR 形式：
 
-| 形式           | 示例 |
-| -------------- | ---- |
-| WORKDIR <path> |      |
+| 形式            | 示例 |
+| --------------- | ---- |
+| WORKDIR <path\> |      |
 
-> 1. 指定的工作目录必须存在，若不存在并不会自动创建该目录
+> 1. 指定的项目主目录无论是否最终使用，都会自动被创建
 > 2. 每一个 RUN 命令都新建一层，只有 WORKDIR 创建的目录会一直存在
+> 3. 一个 dockerfile 中允许出现多个 WORKDIR，若为相对路径，则每一个 WORKDIR 对应的路径 都将是上一个 WORKDIR 路径累加之后的绝对路径
 
 #### USER(用户)设置
 
@@ -578,7 +606,7 @@ Docker build .  构建镜像文件是通过 Docker daemon (守护进程) 运行�
 
 
 
-## 安装镜像相关
+## 安装和管理镜像相关
 
 搜索镜像：docker search xxx
 
@@ -588,7 +616,9 @@ Docker build .  构建镜像文件是通过 Docker daemon (守护进程) 运行�
 
 查看已安装的镜像：docker images  或  docker image ls
 
-标记本地镜像，将其归入某一仓库：docker tat xxx xxx
+为本地某镜像添加一个新的别名，并使用新的 tag：docker tat xxx:newtag xxx:oldtag
+
+> 注意并不是将原来镜像的 tag 进行修改，而是创建一个副本(镜像别名)，副本(镜像别名)使用新的 tag，但是这两个镜像 Image ID 是一样的，也就意味着实际上本地只储存了一份镜像，所谓新创建的副本(镜像别名)只是新增的一个镜像引用而已。
 
 导出镜像文件：docker save xxx > /xx/xxx.tar.gz
 
@@ -599,13 +629,19 @@ Docker build .  构建镜像文件是通过 Docker daemon (守护进程) 运行�
 
 > 注意：导出镜像文件使用 > ，导入镜像文件使用 <
 
-删除镜像：docker rmi xxx
+删除镜像：docker image rm xxx  或者 docker rmi xxx
 
-> 这里是指从 docker 已安装的镜像列表中删除 xxx 镜像，并不是从本机删出该镜像对应的导出 .tar.gz 文件
+> 这里的 xxx 既可以是镜像名，也可以是镜像ID
+
+> 若 xxx 是镜像别名，该镜像只有一个镜像名，那么删除 xxx 也就相当于同时删除了该镜像
+> 若 xxx 是镜像别名，该镜像本地创建了多个镜像别名，那么删除 xxx 仅仅删除该镜像别名而已，并不会删除镜像
+> 若 xxx 是镜像ID，那么删除 xxx 就会删除该镜像以及所有的镜像别名
 
 删除镜像时若报错误：unable to remove repository reference... container xxxxxxx is using its referenced image xxxx，这表示该镜像正在被 某容器 占用，即使该容器已经停止。
 
-解决办法：若容器正在运行，则先停止该容器(docker stop containerxxxxxx)，然后删除该容器(docker rm containerxxxxxx)，再进行删除镜像(docker rmi imagexxxxxx)
+解决办法：若容器正在运行，则先停止该容器(docker stop containerxxxxxx)，然后删除该容器(docker rm containerxxxxxx)，再进行删除镜像(docker image rm imagexxxxxx)
+
+强制删除镜像：docker image rm -f xxx  或  docker rmi -f  xxx
 
 
 
