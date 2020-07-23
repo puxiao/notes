@@ -489,7 +489,7 @@ COPY 形式为：
 ```
 # 如果路径中不包含空格，可以不使用双引号 "" 包括路径
 COPY ./dist /app \
-    ./node_modules /app/
+    ./node_modules /app/node_modules
 ```
 
 
