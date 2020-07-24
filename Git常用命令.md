@@ -2,7 +2,7 @@
 
 ## 安装Git
 
-### Windows下安装Git
+### Windows下安装 Git
 
 访问 Git Windows安装程序下载页：https://git-scm.com/download/win，网页根据当前系统默认自动下载合适的安装程序。
 
