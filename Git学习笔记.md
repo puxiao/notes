@@ -1,4 +1,4 @@
-# Git常用命令
+# Git学习笔记
 
 ## 安装 Git
 
@@ -163,4 +163,141 @@ ln -s /software/git/bin/git /usr/local/bin/git
 至此，可以在任意目录下，都可以使用 git 命令了。
 
 > 若有一天想卸载 git，则先删除软连接：rm -rf /usr/local/bin/git，再删除 git 所在目录：rm -rf /software/git
+
+
+
+## 概念解释
+
+Git 中有3种文件状态：
+
+已修改(modified)：文件已修改，但还未存入本地数据库中
+
+已暂存(staged)：对一个已修改的文件做了标记，使之包含在下次提交的快照中
+
+已提交(committed)：文件已保存至本地数据库中
+
+
+
+## Git配置
+
+### Git 配置文件级别
+
+Git 通常有3个级别的配置：
+
+1. 当前项目中的 config 配置：.git/config，优先级别最高
+2. 当前用户中的 config 配置：~/.config/git/config，优先级次之
+3. 系统中 git 的全局配置：../etc/gitconfig，优先级较低
+
+Git 会依次读取 3 个级别中的相关配置，并最终选用级别高的配置值。
+
+> 无论哪个级别的配置文件，如果设置参数时 添加 --global 参数，都会将该配置提升至`全局配置`中。
+> 事实上 --global 主要使用在 当前用户中的 config 配置，因为对于 全局配置来说本身就是全局配置无需再次设定、对于当前项目中的 git 配置，即使不设置 --global 也是优先级别最高的。
+
+查看所有会影响 Git 配置的文件路径：
+
+```
+git config --list --show-origin
+```
+
+查看 Git 全局配置信息：
+
+```
+git config --global --list
+```
+
+> 仅显示具有 --global 参数属性的配置信息，不包含 项目配置信息 和 当前用户配置信息
+
+
+
+### 设置全局用户信息
+
+每次 Git 提交都需要提交者的信息，可以通过以下命令设置全局用户信息。
+
+```
+git config --global user.name "xxx"
+git config --global user.email xxxx@xxx.com
+```
+
+> user.name 后的值加 双引号的目的是为了让你可以在用户名中使用 空格或其他特殊字符。
+
+查看全局配置中，用户信息：
+
+```
+git config --global user.name
+git config --global user.email
+```
+
+若要修改 user.name 的值，重新执行一遍 设置 user.name 的命令即可
+
+> 全局用户信息配置一次即可永久生效，若在某些项目中不希望使用全局用户信息，则可以在该项目的配置文件中，设置自己的用户信息，当然切记设置时不要添加 --global 参数。
+
+
+
+### 设置默认的 Git 文本编辑器
+
+首先需要获取 文本编辑器可执行程序 的绝对路径，例如 Windows 中如果安装 VSCode，那么对应配置命令为：
+
+```
+git config --global core.editor "D:\program files (x86)\Microsoft VS Code\Microsoft VS Code\Code.exe" --wait
+```
+
+> 除了要添加 --wait 参数外，还可以添加另外一个参数 --new-window
+
+查看默认 Git 文本编辑器：
+
+```
+git config --global core.editor
+```
+
+
+
+### 删除全局某配置
+
+使用 --unset 参数可删除某配置，例如要删除全局配置中的 user.name，则执行：
+
+```
+git config --global --unset user.name
+```
+
+
+
+### 查看最终生效的全部配置
+
+```
+git config --list
+```
+
+
+
+## 获取Git帮助
+
+### 获取详细的帮助信息
+
+一共有3种方式可以获取 Git 帮助：
+
+1. git help <verb\>：打开本地 git 帮助网页
+2. git <verb\> --help：打开本地 git 帮助网页
+3. man git-<verb\>：在终端窗口 简要显示帮助信息，摁 q键 退出、摁 h 键 进一步查看，在进一步显示帮助信息界面中，摁回车键查看更多、摁 q键退出
+
+> 注意：第3种 man git-<verb\> 命令只有在 Linux 系统上才可以执行，在 Windows 系统上则无法执行。
+
+例如想查看 config 的相关帮助，对应的命令分别是：
+
+```
+git help config
+git config --help
+man git-config
+```
+
+
+
+### 获取简要的帮助信息
+
+不使用 help，而是使用 -h，即可在终端简要显示对应帮助信息。
+
+命令格式为：git <verb\> --help，例如获取 config  的简要帮助信息：
+
+```
+git config -h
+```
 
