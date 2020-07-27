@@ -170,7 +170,7 @@ find ./ -type d -print|xargs chmod 755;
 
 复制目录：cp -r xxx newxxx 参数 -r 表示递归，即包含该目录下的子目录
 
-删除文件(需要确认)：rm xxx.xx  会收到一个询问：是否确认删除 xxx.xx，需要回复：y，才可删除
+删除文件(需要确认)：rm xxx.xx  直接删除(不会收到是否删除询问)
 
 删除文件(不需要确认)：rm -f xxx.xx 参数 -f 表示不需要询问，强制删除
 
