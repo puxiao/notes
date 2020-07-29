@@ -50,7 +50,10 @@ docker 启动项目：docker run xxx
 
 查看 logs 帮助：docker logs --help
 
-格式化输出：docker logs -f
+查看容器日志：docker logs containerxxx
+
+> 注意：此时能够打印出截至当前的 logs，若执行该命令后又新产生的 logs 是不会打印出来的
+> 为了能够实时打印出 logs，需要添加参数 -f，即：docker logs -f containerxxx
 
 
 
@@ -688,6 +691,8 @@ Docker build .  构建镜像文件是通过 Docker daemon (守护进程) 运行�
 
 查看已安装的镜像：docker images  或  docker image ls
 
+查看某镜像的底层配置：docker inspect xxx
+
 为本地某镜像添加一个新的别名，并使用新的 tag：docker tat xxx:newtag xxx:oldtag
 
 > 注意并不是将原来镜像的 tag 进行修改，而是创建一个副本(镜像别名)，副本(镜像别名)使用新的 tag，但是这两个镜像 Image ID 是一样的，也就意味着实际上本地只储存了一份镜像，所谓新创建的副本(镜像别名)只是新增的一个镜像引用而已。
@@ -715,6 +720,11 @@ Docker build .  构建镜像文件是通过 Docker daemon (守护进程) 运行�
 
 强制删除镜像：docker image rm -f xxx  或  docker rmi -f  xxx
 
+删除所有<none\>的镜像：docker image prune
+
+> 同一个项目，每次构建时，若 -t 值相同，之前构建的镜像文件并不会被删除，而是会被 修改为 <none\>
+> 但是有一个前提：当前并没有任何容器使用该镜像文件，只有满足这个条件下，该镜像才会被删除
+
 
 
 ## 发布镜像相关
@@ -729,9 +739,9 @@ Docker build .  构建镜像文件是通过 Docker daemon (守护进程) 运行�
 
 发布镜像：docker push username/xxx:xx.x
 
-更新镜像：docker commit xxx-id  xxx-name:vx.x
+更新镜像：docker commit imagesxxx-id  xxx-name:vx.x
 
-> 上述更新镜像中代码中，xxx-id 为镜像ID，xxx-name 为镜像名，vx.x 为镜像版本(TAG)，若不填写vx.x则默认值为 latest
+> 上述更新镜像中代码中，imagesxxx-id 为镜像ID，xxx-name 为镜像名，vx.x 为镜像版本(TAG)，若不填写vx.x则默认值为 latest
 
 更新镜像中可以添加的参数：
 
@@ -739,6 +749,10 @@ Docker build .  构建镜像文件是通过 Docker daemon (守护进程) 运行�
 | ---- | ------------ |
 | -m   | 更新描述信息 |
 | -a   | 更新作者     |
+
+从容器中导出镜像：docker commit containerxxx xxx-name:vx.x
+
+> 注意，这里 commit 后面紧跟着的参数是 容器ID
 
 
 
@@ -795,7 +809,9 @@ docker push ccr.ccs.tencentyun.com/puxiao/mynode:0.1
 
 ## 容器相关
 
-查看容器：docker ps -x  “-x” 仅仅是示意，具体对应的参数请参加下表
+查看容器：docker container ls -a
+
+查看容器另外一种写法：docker ps -x  “-x” 仅仅是示意，具体对应的参数请参加下表
 
 上述命令中 -x 为参数：
 
@@ -811,21 +827,35 @@ docker push ccr.ccs.tencentyun.com/puxiao/mynode:0.1
 | -q           | 静默模式，只显示容器编号             |
 | -s           | 显示总的文件大小                     |
 
-暂停容器：docker pauser xxx
+暂停容器：docker pause xxx
 
-恢复容器：docker unpauser xxx
+恢复容器：docker unpause xxx
 
-停止容器：docker stop xxx
+停止容器：docker stop xxx  
 
-重新开启容器：docker start -i xxx
+> 会向进程发送 stop 信号，内容内程序处理后(停止后)，再停止容器
+
+杀死(停止)容器：docker kill xxx 
+
+> 不会像进程发送 stop 信号，直接停止
+
+重新开启容器：docker start xxx
 
 删除容器：docker rm xxx  需要先 stop 容器，否则会删除失败
 
 强制删除容器：docker rm  -f  xxx 即使容器正在运行，也会先 stop 然后再删除掉
 
-查看容器底层信息(配置和运行状态)：docker inspect  xxx
+删除所有已停止的容器：docker container prune
 
-进入某容器：docker exec xxx
+> 在命令操作界面，询问是否删除所有 已停止 的容器时，输入 y ，即可全部删除
+
+查看容器底层信息(配置)：docker inspect  xxx
+
+查看容器运行状态：docker stats xxx
+
+进入某容器：docker exec xxx -it
+
+> 添加参数 -it 后可以通过 命令方式 针对容器内容进行交互操作 
 
 导出容器快照：docker export xxx >  /xx/xxx.tar.gz
 
@@ -833,7 +863,11 @@ docker push ccr.ccs.tencentyun.com/puxiao/mynode:0.1
 
 查看容器端口：docker port xxx
 
-查看容器内部运行程序：docker top xxx
+查看容器内部运行程序(进程)：docker top xxx
+
+修改容器名字：docker container rename xxx newname  
+
+> 注意是容器名称不是容器ID
 
 查看镜像的创建历史信息：docker history xxx
 
@@ -854,6 +888,7 @@ docker push ccr.ccs.tencentyun.com/puxiao/mynode:0.1
 创建容器但不启动它：docker create imagexxx
 
 > 语法同 docker run 相同，区别就在于只创建不启动
+> 启动创建的容器：docker start imagexxx
 
 创建容器：docker run imagexxx  
 
