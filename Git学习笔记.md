@@ -1035,8 +1035,16 @@ git remote show <remote>
 向本地 Git 中添加远程仓库
 
 ```
-git add <shortname> <prpository-url>
+git remote add <shortname> <prpository-url>
 ```
+
+例如，如果想添加 github 上 xxx 仓库，则执行：
+
+```
+git remote add origin https://github.com/puxiao/xxx.git
+```
+
+> 默认本地仓库名使用 origin，不建议更改
 
 
 
@@ -1151,7 +1159,7 @@ git push origin master
 强制推送，执行：
 
 ```
-git push -y origin master
+git push -f origin master
 ```
 
 
