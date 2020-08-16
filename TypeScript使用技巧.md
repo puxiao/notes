@@ -2,7 +2,7 @@
 
 本文是在 王亦斯 的 2 篇文章基础上，整理和补充而来：
 
-巧用 TypeScript：https://zhuanlan.zhihu.com/p/39620591
+巧用 TypeScript：https://zhuanlan.zhihu.com/p/39620591  
 巧用 TypeScript (二)：https://zhuanlan.zhihu.com/p/64423022
 
 我会按照他的原文顺序来逐个重新过一遍，但是在中间会根据自己实际运行结果，补充或添加自己的使用建议。
