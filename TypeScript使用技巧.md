@@ -479,7 +479,7 @@ class Person { constructor() { } }
 同理，所谓实例化 Person，代码是 new Person() 又怎么理解呢？
 **再次划重点：new 这个关键词也是 JavaScript 中的一个语法糖，所谓 new Person()  真正执行的是 new.target** ，其中 target 是 JavaScript 提供给我们方便在原型链上找到构造函数(constructor)的一种内部方式。
 
-但是日常中，我们为了方便描述，依然会选择使用 类 或 实例化类 这样的词语，请务必记住上面知识点，**否则你可能不太容易理解，为什么下面代码中，看上去明明是传入一个类名，实际上却是一个Function实例**。
+但是日常中，我们为了方便描述，依然会选择使用 类 或 实例化类 这样的词语。
 
 
 
@@ -522,6 +522,11 @@ class Gril extends Person { }
 
 const renderPerson1 = (ClassName: Person) => {
     return new ClassName() //报错：此表达式不可构造。类型 "Person" 没有构造签名。
+    
+    /* 例如：let num:number，那么是无法 new num() 的。
+     * 参数 ClassName 只不过是 Person 的一个实例，所以无法 new ClassName()
+     * 并不是说 Person 是个实例
+     */
 }
 
 const renderPerson2 = (ClassName: typeof Person) => {
@@ -621,6 +626,3 @@ Parameters：获取所有参数类型
 ConstructorParameters：获取构造函数所有参数类型
 
 InstanceType：获取类返回对象的类型
-
-
-
