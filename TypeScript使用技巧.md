@@ -475,11 +475,11 @@ const toArray = <T extends {}>(element: T) => [element]; // 不报错
 class Person { constructor() { } }
 ```
 
-你不要觉得你定义了一个名为 Person 的类，你只是借用 class 语法糖(对于原型链方便的操作)) 创建了一个对象实例。
+你不要觉得你定义了一个名为 Person 的类，你只是借用 class 语法糖(对于原型链方便的操作)) 创建了一个Function实例。
 同理，所谓实例化 Person，代码是 new Person() 又怎么理解呢？
-**再次划重点：new 这个关键词也是 JavaScript 中的一个语法糖，所谓 new Person()  真正执行的是 new.target** ，其中 target 是 JavaScript 提供给我们方便在原型链上找到构造函数的一种内部方式。
+**再次划重点：new 这个关键词也是 JavaScript 中的一个语法糖，所谓 new Person()  真正执行的是 new.target** ，其中 target 是 JavaScript 提供给我们方便在原型链上找到构造函数(constructor)的一种内部方式。
 
-但是日常中，我们为了方便描述，依然会选择使用 类 或 实例化类 这样的词语，请务必记住上面知识点，**否则你可能不太容易理解，为什么下面代码中，看上去明明是传入一个类名，实际上却是一个实例**。
+但是日常中，我们为了方便描述，依然会选择使用 类 或 实例化类 这样的词语，请务必记住上面知识点，**否则你可能不太容易理解，为什么下面代码中，看上去明明是传入一个类名，实际上却是一个Function实例**。
 
 
 
