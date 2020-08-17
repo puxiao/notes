@@ -549,6 +549,14 @@ let person =renderPerson3(Person) //不报错
 
 很明显，通过上述代码可以知道，如果是 class 定义的类，最简单的办法就是在 传入该类的时候，采用：ClassName: typeof Person 即可。当然使用 ClassOf 也是可以的。
 
+但是，我思考的是如果是工厂类，那为什么不改成这种写法，更加简单直白：
+
+```
+const renderPerson1 = (ClassName = Person) => {
+    return new ClassName() //不报错
+}
+```
+
 
 
 ## (14)类型查找+类方法——简化子组件中定义函数的方式
