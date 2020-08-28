@@ -634,3 +634,22 @@ Parameters：获取所有参数类型
 ConstructorParameters：获取构造函数所有参数类型
 
 InstanceType：获取类返回对象的类型
+
+
+
+
+## (16)Tuple——设定元祖数组长度
+
+默认元祖数组只能约束元素类型，但是无法约束数组长度，可通过以下定义来实现初次赋值时进行长度限定。
+
+```
+type Tuple<T, N extends number> = [T, ...T[]] & { length: N }
+
+type MyArr = Tuple<number, 7>
+
+const arr:MyArr = [0,1,2,3,4,5,6]
+```
+
+特别提醒：上述中的 Tuple 仅仅只是约束第一次初始化赋值时数组的长度，但是 实例 arr 依然可以执行后续的 push、pop 等操作，来改变数组的长度。
+
+
