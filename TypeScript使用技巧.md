@@ -613,8 +613,6 @@ Record<Keys,Type\>：将选定属性名(或者由枚举而产生的属性名)对
 
 Omit<Type, Keys\>：删除指定属性
 
-ThisParameterType<Type\>：
-
 
 
 ### 条件分发——映射类型：Exclude、Extract、NonNullable
