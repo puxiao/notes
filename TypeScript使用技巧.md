@@ -601,39 +601,47 @@ class Child extends React.PureComponent<ChildProps> {
 
 ### 修改——映射类型：Pick 、Partial、Required、Readonly、Record、Omit
 
-Pick：取一部分
+Pick<T,U\>：取一部分
 
-Partial：全部变为可选属性 ?:
+Partial<T\>：全部变为可选属性 ?:
 
-Required：全部变为必填属性
+Required<Type\>：全部变为必填属性
 
-Readonly：全部变为只读属性
+Readonly<T\>：全部变为只读属性
 
-Record：将选定属性名(或者由枚举而产生的属性名)对应的值类型全部转化为指定类型
+Record<Keys,Type\>：将选定属性名(或者由枚举而产生的属性名)对应的值类型全部转化为指定类型
 
-Omit：删除指定属性
+Omit<Type, Keys\>：删除指定属性
 
-
-
-### 条件——映射类型：Exclude、Extract、NonNullable
-
-Exclude：排除相同的，剩下所有不相同的
-
-Extract：前后两者中共同拥有的
-
-NonNullable：排除所有 null 或 undefined，值保留可用的
+ThisParameterType<Type\>：
 
 
 
-### 其他获取——映射类型：ReturnType、Parameters、ConstructorParameters、InstanceType
+### 条件分发——映射类型：Exclude、Extract、NonNullable
 
-ReturnType：定义函数返回值类型
+Exclude<T,U\>：排除相同的，剩下所有不相同的
 
-Parameters：获取所有参数类型
+Extract<T,K\>：前后两者中共同拥有的
 
-ConstructorParameters：获取构造函数所有参数类型
+NonNullable<T\>：排除所有 null 或 undefined，值保留可用的
 
-InstanceType：获取类返回对象的类型
+
+
+### 其他获取——映射类型：ReturnType、Parameters、ConstructorParameters、InstanceType、ThisParameterType、OmitThisParameter、ThisType
+
+ReturnType<T\>：定义函数返回值类型
+
+Parameters<Type\>：获取所有参数类型
+
+ConstructorParameters<Type\>：获取构造函数所有参数类型
+
+InstanceType<T\>：获取类返回对象的类型
+
+ThisParameterType<Type\>
+
+OmitThisParameter<Type\>：
+
+ThisType<Type\>：
 
 
 
