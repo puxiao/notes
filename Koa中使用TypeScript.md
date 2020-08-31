@@ -168,12 +168,6 @@ npm i --save koa koa-router koa-bodyparser
 npm i --save-dev typescript ts-node nodemon @types/koa @types/koa-router @types/koa-bodyparser 
 ````
 
-代码还可以有更加简洁的形式：
-
-````
-npm i --save koa koa-{router,bodyparser}
-npm i --save-dev typescript ts-node nodemon @types/{koa,koa-router,koa-bodyparser}
-````
 
 #### 第3步：创建 tsconfig.json 文件
 
