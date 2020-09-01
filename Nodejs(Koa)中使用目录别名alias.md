@@ -50,28 +50,28 @@ import xxx from '@xxx/xx'
 
 ## module-alias 使用介绍
 
-**官网：** https://www.npmjs.com/package/module-alias
+**官网：**  https://www.npmjs.com/package/module-alias
 
-**安装：**
+**安装：** 
 
 ```
 npm i --save module-alias
 ```
 
-**配置：**
+**配置：** 
 
 module-alias 一共有 2 种配置方式：
 
 1. 方式一：通过修改 Nodejs(Koa) 项目的 package.json
 2. 方式二：通过调用 module-alias 的 addAliases() 方法添加 alias 配置项
 
-**启用：**配置的方式不同，启动(引入) module-alias 的方式也不一样
+**启用：** 配置的方式不同，启动(引入) module-alias 的方式也不一样
 
 
 
 ## 配置方式一：修改 Nodejs(Koa) 项目的 package.json
 
-**第1步：**编辑项目的 package.json，添加以下内容：
+**第1步：** 编辑项目的 package.json，添加以下内容：
 
 ```
 {
@@ -84,7 +84,7 @@ module-alias 一共有 2 种配置方式：
 }
 ```
 
-**第2步：**编辑项目启动页，例如 app.js，在顶部添加：
+**第2步：** 编辑项目启动页，例如 app.js，在顶部添加：
 
 ```
 require('module-alias/register')
@@ -99,8 +99,8 @@ import ('module-alias/register')
 
 这种配置方式的特点：
 
-1. **优点：**简单，方便
-2. **缺点：**alias目录写死在 package.json 中，不够灵活
+1. **优点：** 简单，方便
+2. **缺点：** alias目录写死在 package.json 中，不够灵活
 
 
 如果是一般的 Nodejs(Koa)项目，也不会有什么问题，但是刚好不巧，本人目前正在开发的一个项目，使用了 Koa + TypeScript + Docker，那么项目经过 TS 编译后目录是 dist 而非 src，dockerfile 拷贝的是 dist 目录而非 src 目录，就会出现本机和服务器上目录不一致导致 node 启动不了。
@@ -111,7 +111,7 @@ import ('module-alias/register')
 
 ## 配置方式二：通过 module-alias 的 addAliases() 方法添加 alias 配置项
 
-**第1步：**在项目中，创建 src/alias/index.js，内容如下：
+**第1步：** 在项目中，创建 src/alias/index.js，内容如下：
 
 ```
 const path = require('path')
@@ -131,7 +131,7 @@ moduleAlias()
 > 1. 由于我的项目中，app.js 位于 src 目录中，所以上述代码中配置的路径为：`'@/config': path.resolve(__dirname, '..', 'config') `
 > 2. 如果你的项目 app.js 不在 src 目录中，而是和 src 平级，那么上述代码应该修改为：`'@/config': path.resolve(__dirname, '..', 'src/config')`
 
-**第2步：**变基项目启动页，例如 app.js，在顶部添加：
+**第2步：** 变基项目启动页，例如 app.js，在顶部添加：
 
 ```
 require('./alias/index')
@@ -143,8 +143,8 @@ require('./alias/index')
 
 这种配置方式的特点：
 
-1. **优点：**不用修改项目 package.json、设置目录别名对应路径时，事实上使用的是 “相对路径” 
-2. **缺点：**没有
+1. **优点：** 不用修改项目 package.json、设置目录别名对应路径时，事实上使用的是 “相对路径” 
+2. **缺点：** 没有
 
 推荐使用这种方式进行 module-alias 配置。
 
