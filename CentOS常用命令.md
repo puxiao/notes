@@ -164,6 +164,14 @@ find ./ -type d -print|xargs chmod 755;
 
 输出文件内容：cat xxx.xx
 
+## 查找文件或目录
+
+查找文件：find / -name 'xxx'
+
+查找目录：find / -name 'xxx' -type d
+
+查找内容：find . | xargs grep -ri 'xxxx'
+
 ## 管理文件或目录
 
 复制文件：cp xxx.xx  newxx.xx
