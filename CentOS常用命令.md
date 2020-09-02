@@ -67,6 +67,10 @@ find ./ -type d -print|xargs chmod 755;
 
 列出简要的网络配置：netstat -netlp  
 
+## 网络请求
+
+请求某网址：curl https://xxx.xx
+
 ## 进程相关
 
 查看当前系统全部进程：ps -ef
