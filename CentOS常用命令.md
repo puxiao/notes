@@ -67,6 +67,10 @@ find ./ -type d -print|xargs chmod 755;
 
 列出简要的网络配置：netstat -netlp  
 
+查看网址响应速度：ping www.xxx.com
+
+查看网址DNS解析记录(可以检测显示网址是否有CND加速)：nslookup www.xxx.com
+
 ## 网络请求
 
 请求某网址：curl https://xxx.xx
