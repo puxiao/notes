@@ -94,7 +94,7 @@ Nginx默认配置文件位置：/etc/nginx/nginx.conf
 开启nginx：systemctl start nginx  
 关闭nginx：systemctl stop nginx  
 重启nginx：systemctl restart nginx  
-查看状态：systemtcl status nginx  
+查看状态：systemctl status nginx  
 
 查看系统当前各软件占用端口情况：netstat -ntlp  
 查看当前系统中Nginx的进程信息：ps -ef|grep nginx  
