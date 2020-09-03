@@ -81,7 +81,7 @@ find ./ -type d -print|xargs chmod 755;
 
 终止某xxxx相关全部进程：killall -9 xxxx    
 
-## 查看系统性能状态
+## 系统性能状态
 
 查看当前系统性能状态以及CPU占用情况：top
 
