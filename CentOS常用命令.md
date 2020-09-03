@@ -91,7 +91,7 @@ find ./ -type d -print|xargs chmod 755;
 | --------------- | ------------------------------------------------------------ |
 | top      | 系统当前时间、当前登录用户个数、系统负载(load average)       |
 | Tasks    | 系统总进程数(total)、运行中进程数(running)、休眠(sleeping)、睡眠(stopped)、僵尸进程数量(zombie) |
-| %Cpu     | CPU 当前使用情况：用户空间占用CPU百分比(us)、内核空间占用CPU百分比(sy)、用户进程空间内改变过优先级的进程占用CPU百分比(ni)、空闲CPU百分比(id)、等待输入输出的CPU时间百分比(wa)、硬件中断(hi)、软件中断(si)、实时(st) |
+| %Cpu     | CPU 当前使用情况：用户空间占用CPU百分比(us)、内核空间占用CPU百分比(sy)、用户进程空间内改变过优先级的进程占用CPU百分比(ni)、<br />空闲CPU百分比(id)、等待输入输出的CPU时间百分比(wa)、硬件中断(hi)、软件中断(si)、实时(st) |
 | KiB Men  | 内存当前使用情况：总内存(total)、空闲可用内存(free)、已用内存(used)、硬盘缓存(buff/cache) |
 | KiB Swap | Swap(硬盘缓存) 空间当前使用情况：可用内存(avail Mem)         |
 
