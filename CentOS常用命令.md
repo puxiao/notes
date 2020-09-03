@@ -69,7 +69,7 @@ find ./ -type d -print|xargs chmod 755;
 
 查看网址响应速度：ping www.xxx.com
 
-查看网址DNS解析记录(可以检测显示网址是否有CND加速)：nslookup www.xxx.com
+查看网址DNS解析记录(可以用来检测网址是否有CND加速)：nslookup www.xxx.com
 
 ## 网络请求
 
