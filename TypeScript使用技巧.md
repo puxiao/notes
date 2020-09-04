@@ -675,6 +675,7 @@ enum LoginFailCode {
 
 //以下要定义错误状态码对应的错误提示信息
 
+//第1种定义方法
 type EnumType<T> = { [key in keyof typeof LoginFailCode]: T };
 const LoginFailMsg1: EnumType<string> = {
     unknowCode: '用户登录时，发生未知错误',
