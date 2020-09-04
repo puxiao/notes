@@ -659,9 +659,7 @@ const arr:MyArr = [0,1,2,3,4,5,6]
 特别提醒：上述中的 Tuple 仅仅只是约束第一次初始化赋值时数组的长度，但是 实例 arr 依然可以执行后续的 push、pop 等操作，来改变数组的长度。
 
 
-
-
-## (17)IEnumType——根据枚举属性名，获得指定类型的属性值
+## (17)EnumType——根据枚举属性名，获得指定类型的属性值
 
 先通过枚举定义若干常亮，然后根据枚举对象的属性名(键名)，重新得到一个指定属性值类型的约束对象。
 
@@ -677,9 +675,8 @@ enum LoginFailCode {
 
 //以下要定义错误状态码对应的错误提示信息
 
-//第1种定义方法
-type IEnumTpProp<R> = { [key in keyof typeof LoginFailCode]: R };
-const LoginFailMsg1: IEnumTpProp<string> = {
+type EnumType<T> = { [key in keyof typeof LoginFailCode]: T };
+const LoginFailMsg1: EnumType<string> = {
     unknowCode: '用户登录时，发生未知错误',
     authorizationCode: '用户登录时，获取openid发生错误',
     loginDbCode: '用户登录时，数据库操作发生错误'
@@ -692,5 +689,4 @@ const LoginFailMsg2: Record<keyof typeof LoginFailCode, string> = {
     loginDbCode: '用户登录时，数据库操作发生错误'
 }
 ```
-
 
