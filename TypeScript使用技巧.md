@@ -691,3 +691,58 @@ const LoginFailMsg2: Record<keyof typeof LoginFailCode, string> = {
 }
 ```
 
+
+
+## (18)const Xxx={} as const——将对象所有键值组成联合类型
+
+在上面小节中，可以通过 keyof typeof 获取 枚举对象的所有键名，并将键名组成联合类型，但是目前来说是没有办法将枚举对象键值组成联合类型。
+
+目前来说，可以通过不使用 enum，改成 const 来实现。
+
+```
+const MyCount = {
+    A: 1,
+    B: 5,
+    C: 8
+} as const
+
+//获取 MyCount 所有键名 组成的联合类型，即："A" | "B" | "C"
+type Keys = keyof typeof MyCount
+
+//获取 MyCount 所有键值 组成的联合类型，即：1 | 5 | 8
+type Values = typeof MyCount[keyof typeof MyCount]
+```
+
+
+
+## (19)const enum——仅编译过程中存在，编译后会消失的枚举对象
+
+通常情况下定义枚举对象的方式为：enum Xxx {}，Xxx 编译后是一个对象。如果在定义时添加 const，即：const enum Xxx{}，那么这样定义的枚举对象只有在编写代码，编译过程中存在，编译后则会消失。
+
+```
+enum EnumA { A = 1, B = 5, C = 8 }
+
+const enum EnumB { A = 1, B = 5, C = 8}
+
+const aa = EnumA.A
+const bb = EnumB.A
+
+// EnumA 和 EnumB 的区别是什么 ？
+// EnumA 被编译后是一个对象，而 EnumbB 编译后则会消失
+
+// aa 和 bb 被编译后的区别是什么 ？
+// aa = EnumA.A、bb = 1
+
+/**
+  EnumA 被编译后是一个对象，长这个样子：
+  var EnumA;
+  (function (EnumA) {
+      EnumA[EnumA["A"] = 1] = "A";
+      EnumA[EnumA["B"] = 5] = "B";
+      EnumA[EnumA["C"] = 8] = "C";
+  })(EnumA || (EnumA = {}));
+
+  而经过 TS 编译后的代码中，根本不存在 EnumB
+*/
+```
+
