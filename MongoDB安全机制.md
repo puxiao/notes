@@ -57,13 +57,13 @@ security:
 1. 可以使用 mongo.exe 直接连接 mongod所创建的数据库，但是直接运行 mongo.exe 连接时无法设置连接参数，例如端口为27017，无法设置账户密码等。如果 mongod 创建的数据库端口不是 27017，则 mongo.exe 连接失败，窗口会自动关闭，此时只能通过 cmd 命令窗口来连接。
 
    ```
-   ./mongo.exe 127.0.0.1:27017 -u xxx -p xxx
+   ./mongo.exe 127.0.0.1:27017 -u namexxx -p pwdxxx
    ```
 
-   或者直接连接到某数据库
+   或者直接连接到某数据库，例如数据库名为dbnamexxx，代码如下：
 
    ```
-   ./mongo.exe 127.0.0.1:27017/xxx -u xxx -p xxx
+   ./mongo.exe 127.0.0.1:27017/dbnamexxx -u namexxx -p pwdxxx
    ```
 
    > 如果是希望连接远程服务器数据库，则把上述代码中的 IP 地址更换为服务器 IP
