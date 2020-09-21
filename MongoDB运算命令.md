@@ -244,7 +244,7 @@ MongoDB默认自动生成的_id格式遵循以下规则：
 | 语法 | 解释 |  
 | ---- | ---- |  
 | $each | 配合$push或$addToSet，以数组形式储存要验证或添加的每一项 |   
-| $position | 配合$push，表明插入的位置 |   
+| $position | 配合$push，表明插入的位置，$position:0 即表示插入在开头第1项，<br />但是请注意 $position 必须配合 $push 的 $each:[] 的形式才可以，示例：$push:{ myarr: { $each:[xxx,xxx], $position:0 }} |   
 | $slice | 配合$push，控制修改之后属性值数组的长度，若超出则进行数组裁切 |   
 | $sort | 配合$push，表明以升序(值为-1)或降序(值为1)进行排序 |   
 
