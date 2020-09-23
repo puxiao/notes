@@ -43,6 +43,9 @@ npm i --save qs
 示例代码如下：
 
 ```
+import axios from 'axios'
+import qs from 'qs'
+
 axios.post( 
         'http://127.0.0.1/login',
         qs.stringify( { uid: 'puxiao', pwd: '123456' } ),
