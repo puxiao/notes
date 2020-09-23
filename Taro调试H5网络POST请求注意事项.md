@@ -47,7 +47,7 @@ import axios from 'axios'
 import qs from 'qs'
 
 axios.post( 
-        'http://127.0.0.1/login',
+        'http://xxxx/login',
         qs.stringify( { uid: 'puxiao', pwd: '123456' } ),
         {
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
