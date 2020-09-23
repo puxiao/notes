@@ -33,7 +33,7 @@ ctx.response.set('Access-Control-Allow-Origin', '*')
 npm i --save qs
 ```
 
-#### axios配置
+#### 配置axios
 
 一共 2 处配置：
 
