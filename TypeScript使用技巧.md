@@ -746,3 +746,21 @@ const bb = EnumB.A
 */
 ```
 
+## (20)<const\>——让const声明的对象属性也变为只读
+
+使用 const 定义的变量，虽然对象本身类型不能再发生变化，但是该对象的属性却可以被修改。
+
+通过以下 2 种方式，均可以让 对象 属性也变为只读(哪怕属性本身也是一个复杂类型的对象)
+
+```
+const person = { name:'puxiao', age:'34'}
+person.age = 18 //可以被修改
+
+const person = <const>{ name:'puxiao', age:'34'}
+或
+const person = { name:'puxiao', age:'34'} as const
+
+person.age = 18 //无法分配到 "age" ，因为它是只读属性。
+
+```
+
