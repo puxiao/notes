@@ -260,7 +260,7 @@ find ./ -type d -print|xargs chmod 755;
 
 压缩文件：tar -czvf xxx filepath
 
-| 压缩或解压文件名后缀 |
+| 常见的压缩文件名后缀 |
 | -------------------- |
 | .tar                 |
 | .tar.gz              |
