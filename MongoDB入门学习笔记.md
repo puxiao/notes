@@ -213,7 +213,7 @@ security:
 执行以下代码：
 
 ````
-killall -9 nginx
+killall -9 mongod
 ````
 
 
