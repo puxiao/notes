@@ -51,6 +51,35 @@ security:
   authorization: enabled
 ````
 
+#### 常见的启动失败解决办法
+
+当执行启动 mongod 命令后，如果顺利启动，则会收到类似以下信息：
+
+```
+about to fork child process, waiting until server is ready for connections.
+forked process: 30172
+child process started successfully, parent exiting
+```
+
+如果没有看到 successfully 则可能是启动失败，以下为常见的2种启动失败原因和解决办法。
+
+
+
+**第1种：第一次启动 mongod，启动前并未创建数据库和日志的目录**
+
+一定要提前创建好存放数据和日志的目录，并确保目录有读写的权限，例如上面配置示例中的 ../data 和 ../log，若启动之前并未创建对应目录，则会启动失败，收到以下类似的错误提示：
+
+```
+about to fork child process, waiting until server is ready for connections.
+forked process: 26716(这个数字每次是会变化的)
+ERROR: child process failed, exited with 1
+To see additional information in this output, start without the "--fork" option.
+```
+
+**第2种：之前的 mongod 异常关闭**
+
+还有另外一种情况，就是之前启动了 mongod 却未正常关闭，导致 mongod 处于一种 “异常关闭保护性被锁” 的状态，目的是为了保持在非正常关闭那一刻记录还未保持的数据(本人目前暂时的理解)，也会出现启动失败，这时解决方法是 找到 data 目录，删除里面的 mongod.lock 文件，再次执行启动命令即可。
+
 
 #### Windows系统启动 mongod 的注意事项
 
@@ -243,6 +272,11 @@ MongoDB 支持 TLS/SSL 来加密 MongoDB 的所有网络传输(客户端应用�
 ````
 mongod -f mongod.conf
 ````
+
+> 再次强调：
+>
+> 1. 若是第1次启动 mongod，一定要提前创建好储存数据和日志的目录，否则会启动失败。
+> 2. 若是后续启动过程中遇到错误，可以尝试删除数据库目录中的 mongod.lock 文件后，再次执行启动。
 
 重新通过 mongo 连接数据库。启用鉴权后，无密码可以登录，但是只能执行创建用户操作。
 
