@@ -360,7 +360,7 @@ Successfully added user: {
 
 连接成功之后，可以开始创建项目管理员账户。
 
-假设项目对应的数据库名为 mydb、集合(collection)名为 students，给该集合的管理员分配的角色身份为 dbOwner，用户名 admin。
+假设项目对应的数据库名为 students、集合(collection)名为 mycollection，给该集合的管理员分配的角色身份为 dbOwner，用户名 admin。
 
 那么对应创建项目管理员代码如下：
 
