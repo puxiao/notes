@@ -912,6 +912,11 @@ docker push ccr.ccs.tencentyun.com/puxiao/mynode:0.1
 > 默认会先查找并启动本地资源中的镜像文件，如果本地找不到，则会尝试 从 DockerHub 下载该名称的镜像
 > 若想直接从 仓库中下载，则使用 docker pull xxx:xx
 
+#### 关于参数特别强调：
+
+启动容器的命令格式为：docker run 参数1 imagename 参数2
+
+**其中 `参数1` 的参数是给 docker 使用的、`参数2` 的参数是给 镜像文件中应用程序使用的**
 
 
 ## 容器互连
