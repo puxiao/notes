@@ -103,6 +103,9 @@ find ./ -type d -print|xargs chmod 755;
 
 请求某网址：curl https://xxx.xx
 
+更多关于 curl 的用法，参见：[Curl常用命令](https://github.com/puxiao/notes/blob/master/Curl%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4.md)
+
+
 
 
 ## 进程相关
