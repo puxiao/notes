@@ -434,9 +434,9 @@ ENTRYPOINT 形式为：
 > "<executeable\>"为可执行命令或函数，"<param1\>" 为参数
 
 
-#### MAINTAINER(作者)设置
+#### MAINTAINER(作者、维护者)设置
 
-通过 MAINTAINER 设置镜像文件的作者名称。在实际使用中，更加推荐使用 LABEL 标签，因为 LABEL 除了设置作者标签外还可以添加更多其他你需要添加的标签。
+通过 MAINTAINER 设置镜像文件的作者或维护者名称。在实际使用中，更加推荐使用 LABEL 标签，因为 LABEL 除了设置作者标签外还可以添加更多其他你需要添加的标签。
 
 MAINTAINER 形式为：
 
