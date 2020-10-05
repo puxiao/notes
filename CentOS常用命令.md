@@ -1,11 +1,25 @@
 # CentOS常见命令
 
 
-## 系统相关
+## 系统信息
 
-升级系统：yum update -y
+查看当前系统信息：uname [可选参数]
 
-查看当前系统版本：uname -r  
+可选参数有：
+
+| 参数                      | 对应含义                                                     |
+| ------------------------- | ------------------------------------------------------------ |
+| -a \| --all               | 输出全部可以显示的信息(若某值为 unknown 则忽略不显示)        |
+| -m \| --machine           | 输出电脑类型                                                 |
+| -n \| --nodename          | 输出在网络上的主机名称                                       |
+| -r \| --release           | 输出操作系统的发行编号                                       |
+| -s \| --sysname           | 输出操作系统的名称                                           |
+| -v                        | 输出操作系统的内核版本信息(注意不是版本号，而是该内核建立的时间和CPU架构)<br />例如：#1 SMP Tue Jun 23 15:46:38 UTC 2020 中 "1 SMP" 指单核架构、"Tue Jun 23 15:46:38 UTC 2020" 指内核建立的时间 |
+| -p \| --processor         | 输出处理器类型或“unknown”                                    |
+| -i \| --hardware-platform | 输出硬件平台或“unknown”                                      |
+| -o \| --operating-system  | 输出操作系统名称                                             |
+
+
 
 ## 服务相关
 
@@ -19,21 +33,22 @@
 
 执行命令(command)分别为：
 
-| 命令      | 对应含义                         |
-| --------- | -------------------------------- |
-| start     | 立即启动                         |
-| stop      | 立即关闭                         |
-| restart   | 立即重启                         |
-| reload    | 不关闭情况下 ，重新载入配置文件  |
-| enable    | 设置下次开机时，自动启动         |
-| disable   | 设置下次开机时，不自动启动       |
-| status    | 打印当前状态                     |
-| is-active | 目前是否正在运行中(若打印 active 即表示运行中)               |
-| is-enable | 打印开机时是否默认启动           |
-| kill      | 向服务进程发送信号(并非关闭服务) |
-| show      | 打印出服务配置                   |
-| mask      | 注销服务，且无法再启动           |
-| unmask    | 取消注销服务                     |
+| 命令      | 对应含义                                       |
+| --------- | ---------------------------------------------- |
+| start     | 立即启动                                       |
+| stop      | 立即关闭                                       |
+| restart   | 立即重启                                       |
+| reload    | 不关闭情况下 ，重新载入配置文件                |
+| enable    | 设置下次开机时，自动启动                       |
+| disable   | 设置下次开机时，不自动启动                     |
+| status    | 打印当前状态                                   |
+| is-active | 目前是否正在运行中(若打印 active 即表示运行中) |
+| is-enable | 打印开机时是否默认启动                         |
+| kill      | 向服务进程发送信号(并非关闭服务)               |
+| show      | 打印出服务配置                                 |
+| mask      | 注销服务，且无法再启动                         |
+| unmask    | 取消注销服务                                   |
+
 
 
 ## 开关机相关
@@ -50,6 +65,8 @@ root用户操作重启：shutdown -r [time]  [time]如果为now立即重启、10
 
 root用户操作关机：shutdown -h [time]  [time]如果为now立即关机、10表示10分钟后关机、20:35表示20:35关机  
 
+
+
 ## 权限设置
 
 常见的 Nginx 网站目录需要 755 权限，目录下的文件需要 644 权限，设置方式如下。
@@ -59,6 +76,7 @@ root用户操作关机：shutdown -h [time]  [time]如果为now立即关机、10
 chmod 644 -R ./
 find ./ -type d -print|xargs chmod 755;
 ````
+
 
 
 ## 网络相关
@@ -71,9 +89,13 @@ find ./ -type d -print|xargs chmod 755;
 
 查看网址DNS解析记录(可以用来检测网址是否有CND加速)：nslookup www.xxx.com
 
+
+
 ## 网络请求
 
 请求某网址：curl https://xxx.xx
+
+
 
 ## 进程相关
 
@@ -91,13 +113,13 @@ find ./ -type d -print|xargs chmod 755;
 
 在性能打印结果中，上半部分输出内容如下：
 
-| 输出结果第N行   | 对应内容                                                     |
-| --------------- | ------------------------------------------------------------ |
-| top      | 系统当前时间、当前登录用户个数、系统负载(load average)       |
-| Tasks    | 系统总进程数(total)、运行中进程数(running)、休眠(sleeping)、睡眠(stopped)、僵尸进程数量(zombie) |
-| %Cpu     | CPU 当前使用情况：用户空间占用CPU百分比(us)、内核空间占用CPU百分比(sy)、用户进程空间内改变过优先级的进程占用CPU百分比(ni)、<br />空闲CPU百分比(id)、等待输入输出的CPU时间百分比(wa)、硬件中断(hi)、软件中断(si)、实时(st) |
-| KiB Men  | 内存当前使用情况：总内存(total)、空闲可用内存(free)、已用内存(used)、硬盘缓存(buff/cache) |
-| KiB Swap | Swap(硬盘缓存) 空间当前使用情况：可用内存(avail Mem)         |
+| 输出结果第N行 | 对应内容                                                     |
+| ------------- | ------------------------------------------------------------ |
+| top           | 系统当前时间、当前登录用户个数、系统负载(load average)       |
+| Tasks         | 系统总进程数(total)、运行中进程数(running)、休眠(sleeping)、睡眠(stopped)、僵尸进程数量(zombie) |
+| %Cpu          | CPU 当前使用情况：用户空间占用CPU百分比(us)、内核空间占用CPU百分比(sy)、用户进程空间内改变过优先级的进程占用CPU百分比(ni)、<br />空闲CPU百分比(id)、等待输入输出的CPU时间百分比(wa)、硬件中断(hi)、软件中断(si)、实时(st) |
+| KiB Men       | 内存当前使用情况：总内存(total)、空闲可用内存(free)、已用内存(used)、硬盘缓存(buff/cache) |
+| KiB Swap      | Swap(硬盘缓存) 空间当前使用情况：可用内存(avail Mem)         |
 
 下半部分，每一行结果内容如下：
 
@@ -115,6 +137,7 @@ find ./ -type d -print|xargs chmod 755;
 | %MEM    | 更新时间间隔内进程所使用的内存百分比      |
 | TIME+   | 进程使用的CPU时间，精确到 0.01s           |
 | COMMAND | 进程名称                                  |
+
 
 
 ## 查看文件或目录信息
@@ -162,6 +185,8 @@ find ./ -type d -print|xargs chmod 755;
 | 第2组字母               | 属组权限     |
 | 第3组字母               | 其他用户权限 |
 
+
+
 ## 常见权限
 
 修改权限命令构成：chmod + 数字 + 文件或目录路径
@@ -188,6 +213,8 @@ find ./ -type d -print|xargs chmod 755;
 | 755  | rwxr-xr-x |
 | 777  | rwxrwxrwx |
 
+
+
 ## 文件夹相关
 
 创建文件夹：mkdir xxx
@@ -195,6 +222,8 @@ find ./ -type d -print|xargs chmod 755;
 查看当前所在目录的绝对路径：pwd
 
 查看某程序 xxx 所在安装目录：which xxx  
+
+
 
 ## 文件相关
 
@@ -204,6 +233,8 @@ find ./ -type d -print|xargs chmod 755;
 
 输出文件内容：cat xxx.xx
 
+
+
 ## 查找文件或目录
 
 查找文件：find / -name 'xxx'
@@ -211,6 +242,8 @@ find ./ -type d -print|xargs chmod 755;
 查找目录：find / -name 'xxx' -type d
 
 查找内容：find . | xargs grep -ri 'xxxx'
+
+
 
 ## 管理文件或目录
 
@@ -230,13 +263,21 @@ find ./ -type d -print|xargs chmod 755;
 
 移动目录：mv -f xxx /xx 参数 -f 表示强制将 xxx 移动到 /xx 目录下，如果 /xx 目录中原本存在名为 xxx 的目录，则会被强制覆盖
 
+
+
 ## 输出显示
 
 输出 xxxx 字符：echo xxxx
 
 输出 xxx 文件内容：echo xxx.xx
 
-## yum安装软件
+
+
+## yum相关
+
+升级yum和所有的已安装包：yum -y update
+
+仅升级所有的已安装包，不升级yum本身：yum -y upgrade
 
 安装本地 .rpm 文件包：yum install /xxx/xxx.rpm
 
@@ -246,6 +287,8 @@ find ./ -type d -print|xargs chmod 755;
 
 卸载 xxx 程序：yum remove xxx  
 
+
+
 ## 下载文件
 
 安装wget下载程序：yum install wget
@@ -253,6 +296,8 @@ find ./ -type d -print|xargs chmod 755;
 使用wget下载某文件：wget http://xxx.xxxx.xxx/xxx.xx
 
 使用curl下载某文件：curl http://xxx.xxxx.xxx/xxx.xx  
+
+
 
 ## 解压文件
 
@@ -271,12 +316,12 @@ find ./ -type d -print|xargs chmod 755;
 | .tgz                 |
 
 | 表明哪种操作的字母参数(只能5选1) | 代表含义                   |
-| ---------------------- | -------------------------- |
-| -c                     | 建立压缩档案               |
-| -x                     | 解压                       |
-| -t                     | 查看内容                   |
-| -r                     | 向压缩归档文件末尾追加文件 |
-| -u                     | 更新原压缩包中的文件       |
+| -------------------------------- | -------------------------- |
+| -c                               | 建立压缩档案               |
+| -x                               | 解压                       |
+| -t                               | 查看内容                   |
+| -r                               | 向压缩归档文件末尾追加文件 |
+| -u                               | 更新原压缩包中的文件       |
 
 | 辅助字母参数(数量不限) | 代表含义                         |
 | ---------------------- | -------------------------------- |
@@ -300,6 +345,8 @@ find ./ -type d -print|xargs chmod 755;
 删除软连接：rm -rf /usr/local/bin/xx，如果进入到了bin目录，则为：rm -rf ./xx （仅删除软连接不删除目标文件）
 
 
+
+
 ## 编辑文本
 
 编辑文件(类似windows记事本)
@@ -315,6 +362,8 @@ find ./ -type d -print|xargs chmod 755;
 退出编辑器：摁 exc 或 :q 或 ctrl+z(不会保存)  
 
 
+
+
 ## 查看/编辑某文档
 
 查看：vim xxxx
@@ -324,6 +373,8 @@ find ./ -type d -print|xargs chmod 755;
 保存：摁w
 
 退出：Esc 或 q 或 ctr + z  
+
+
 
 
 ## 命令执行与切换
@@ -347,6 +398,9 @@ find ./ -type d -print|xargs chmod 755;
 终止某个(无论是不是在后台)命令：kill -9 pid  pid是通过ps -ef 命令查找到的该命令对应的pid数字
 
 终止某个服务所有相关的进行：killall -9 name  name是通过ps -ef 命令查找到的该命令名称  
+
+
+
 ## 防火墙相关
 
 查看防火墙：firewall-cmd --state  若输出 running 即表示已启动
@@ -356,11 +410,16 @@ find ./ -type d -print|xargs chmod 755;
 关闭防火墙：service firewall stop
 
 重启防火墙：service firewall restart
+
+
+
 ## 其他命令
 
 调出之前的命令：摁上下键
 
 快速补全单词：输入若干字母后，摁 Tab 键，会智能补全你有可能要输入的单词
+
+
 
 ## 目录结构
 
