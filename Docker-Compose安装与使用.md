@@ -60,4 +60,4 @@ docker-compose --version
 
 **强调说明：**
 
-在上面安装示例代码中，都是默认将 docker-compose 安装到 ``/usr/local/bin/` 中，但事实是可以修改为其他任意目录中的。
+在上面安装示例代码中，都是默认将 docker-compose 安装到 `/usr/local/bin/` 中，但事实是可以修改为其他任意目录中的。
