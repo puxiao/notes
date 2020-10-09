@@ -107,7 +107,6 @@ find ./ -type d -print|xargs chmod 755;
 
 
 
-
 ## 进程相关
 
 查看当前系统全部进程：ps -ef
@@ -273,6 +272,7 @@ find ./ -type d -print|xargs chmod 755;
 > 注意：对于文本文件来说，永远不会有执行权限，即使你通过命令给他添加执行权限后，依然是不会有执行权限的。
 
 
+
 ## 文件夹相关
 
 创建文件夹：mkdir xxx
@@ -320,14 +320,6 @@ find ./ -type d -print|xargs chmod 755;
 移动目录：mv  xxx  /xx 将目录 xxx 移动到 /xx目录内，最终新路径为 /xx/xxx，注意：如果 /xx 目录下本身就存在 名为 xxx 的目录 ，则移动失败
 
 移动目录：mv -f xxx /xx 参数 -f 表示强制将 xxx 移动到 /xx 目录下，如果 /xx 目录中原本存在名为 xxx 的目录，则会被强制覆盖
-
-
-
-## 输出显示
-
-输出 xxxx 字符：echo xxxx
-
-输出 xxx 文件内容：echo xxx.xx
 
 
 
@@ -401,6 +393,20 @@ find ./ -type d -print|xargs chmod 755;
 创建软连接：ln -s /xxx/xxx/xx /usr/local/bin/xx
 
 删除软连接：rm -rf /usr/local/bin/xx，如果进入到了bin目录，则为：rm -rf ./xx （仅删除软连接不删除目标文件）
+
+
+
+## 输出显示
+
+输出 xxxx 字符：echo xxxx
+
+输出 xxx 文件内容：echo xxx.xx
+
+
+
+## 打印文本
+
+输出 xxx 文本文件内容：cat xxx
 
 
 
