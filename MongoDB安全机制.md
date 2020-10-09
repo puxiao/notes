@@ -362,7 +362,9 @@ Successfully added user: {
 
 假设项目对应的数据库名为 students、集合(collection)名为 mycollection，给该集合的管理员分配的角色身份为 dbOwner，用户名 admin。
 
-那么对应创建项目管理员代码如下：
+> 事实上集合名 mycollection 并不是必须现在就要创建的，重点是先创建数据库 students，至于集合名等到需要添加数据时再自动创建也可以。
+
+对应创建项目管理员代码如下：
 
     use mycollection
     db.createUser(
