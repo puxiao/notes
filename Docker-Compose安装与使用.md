@@ -165,11 +165,18 @@ docker-compose.yml 版本对应 的 docker 版本号
 
 **关于 docker-compose 创建的网络补充说明：**
 
-docker-compose 创建一个 docker 网卡，宿主机分配到的 IP 为：172.17.0.1，然后 docker-compose 中运行的服务(容器)，依次对应的IP为：172.17.0.2、172.17.0.3...
+docker-compose 默认的网络模式为 bridge，在这个模式下 创建一个 docker 网卡，宿主机分配到的 IP 为：172.17.0.1，然后 docker-compose 中运行的服务(容器)，依次对应的IP为：172.17.0.2、172.17.0.3...
 
 然后 服务(容器) 之间就靠着 同一网段 不同 IP 来进行通信，docker-compose 与宿主机通过创建的 docker 网卡 转发(不同端口之间的转发)进行通信。
 
-> 以上补充内容未经实际测试，所以不保证一定正确
+> 如果添加 docker-compose 网络配置，不使用 bridge 模式，而是使用 host (宿主机网络) 模式，则不会有上面的内容。
+
+
+
+**如何查看容器内部运行的网卡和IP**
+
+1. 进入容器中：docker exec -it xxx bash
+2. 容器中不能使用 netstat 或 ipconfig 命令，只能通过查看 host 配置文件来查看
 
 
 
@@ -287,7 +294,7 @@ AGE=34
 
 
 
-## Docker-Compose常用命令
+## Docker-Compose命令
 
 #### 命令格式
 
@@ -327,7 +334,7 @@ docker-compose 命令格式为：docker-compose  [-f <arg\>]  [options] [COMMAND
 
 
 
-#### 命令
+#### 全部命令
 
 | 命令    | 对应含义                                                     |
 | ------- | ------------------------------------------------------------ |
@@ -362,3 +369,38 @@ docker-compose 命令格式为：docker-compose  [-f <arg\>]  [options] [COMMAND
 为了运行方便，通常情况下都不会每次手工书写这么多参数，而是会选择把需要的各个参数都写入到 docker-compose.yml 中，然后仅执行：docker-compose -f xxx up
 
 > 就好像我们启动 mongodb 服务时，通常会将配置参数写入到 mongod.conf 文件中，然后以该文件为启动配置项：mongod -f mongod.conf
+
+
+
+## 常用命令示例
+
+#### 创建并启动容器：up
+
+通过 -f 来指定 docker-compose.yml 文件路径，通过 -d 来设置以后台模式运行
+
+```
+docker-compose -f xxxx.yml up -d
+```
+
+若当前已经进入保存 docker-compose.yml 文件的目录，则上述命令还可以简化为：
+
+```
+docker-compose up -d
+```
+
+
+
+#### 进入某容器：exec
+
+当执行完创建并启动容器后，可以通过 `docker-compose ps` 或 `docker ps`来查看正在运行的容器列表。
+
+假设某容器的名字为 mymongo，那么如果想进入该容器，则执行：
+
+```
+docker exec -it mymongo bash
+```
+
+> 1. 请注意上面代码中是 docker 而不是 docker-compose
+> 2. `-it` 的意思是：显示命令交互界面
+> 3. `bash` 的意思是：以 bash(shell 命令) 方式进行交互
+> 4. 退出该容器，执行：exit
