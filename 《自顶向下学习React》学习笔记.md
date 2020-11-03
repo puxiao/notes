@@ -584,7 +584,19 @@ Fiber 节点保存了组件需要更新的状态、副作用。
 
 ### 1.6 如何调试源码
 
+**下载最新源码：**
+
 ```
 git clone https://github.com/facebook/react.git
 ```
+
+**源码目录文件说明：**
+
+真正 React 核心源码，需要关注的只有 3 个目录：
+
+1. **fixtures**：存放着一些给贡献者准备的小型 React 测试项目
+2. **packages**：存放着 React 尚未编译的所有核心源码
+3. **scripts**：存放着各种工具链的脚本，例如 git、eslint、jest 等
+
+> 关于更加详细，完整的目录文件结构说明，请参考我的另外一篇文章：[React源码目录文件构成](https://github.com/puxiao/notes/blob/master/React%E6%BA%90%E7%A0%81%E7%9B%AE%E5%BD%95%E6%96%87%E4%BB%B6%E6%9E%84%E6%88%90.md)
 
