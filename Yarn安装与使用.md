@@ -525,14 +525,17 @@ ____
 **前期工作：构建本地React包**
 
 ```
-//拉取 react 源码
+//拉取 react 源码 17.0.1
 git clone https://github.com/facebook/react.git
 
 //安装 react 依赖包
 yarn install
 
-//构建 本地 react 包
-yarn build react/index,react-dom/index,scheduler --type=NODE
+//构建 本地 react 包，版本 17.0.1
+yarn build react,react-dom,scheduler --type=NODE
+
+//补充一下：如果你拉取的不是 react 17+，而是 react 16+，那么上面的构建本地 react 包代码需要修改成
+//yarn build react/index,react-dom/index,scheduler --type=NODE
 ```
 
 > 构建完成后，会在源码目录下，创建 build 目录，build 目录包含我们刚才打包构建的本地 react 包
