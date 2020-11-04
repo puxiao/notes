@@ -1,5 +1,13 @@
 # Yarn安装与使用
 
+## 目录
+
+* **[yarn简介](https://github.com/puxiao/notes/blob/master/Yarn%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8.md#yarn%E7%AE%80%E4%BB%8B)**
+* **[yarn安装](https://github.com/puxiao/notes/blob/master/Yarn%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8.md#yarn%E7%AE%80%E4%BB%8B)**
+* **[yarn命令](https://github.com/puxiao/notes/blob/master/Yarn%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8.md#yarn%E7%AE%80%E4%BB%8B)**
+* **[yarn创建软连接](https://github.com/puxiao/notes/blob/master/Yarn%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8.md#yarn%E5%88%9B%E5%BB%BA%E8%BD%AF%E8%BF%9E%E6%8E%A5)**
+
+
 ## yarn简介
 
 Yarn 是 Facebook 推出的，快速、可靠、安全的依赖包管理工具，和 NPM 类似。
