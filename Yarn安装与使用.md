@@ -33,7 +33,7 @@ yarn 对中国用户非常友好，提供中文官方文档：https://classic.ya
 **校验是否安装成功：**
 
 ```
-yarm -v 或 yarn --version
+yarn -v 或 yarn --version
 ```
 
 **特别提醒：**
