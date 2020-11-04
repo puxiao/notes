@@ -1,6 +1,6 @@
 # 《自顶向下学习React》学习笔记
 
-> 凡是出现 引用形式的文字，都是我个人的理解，并非课程中的原话。
+> 凡是出现 引用形式的文字，都包含有我个人的理解，并非完全的课程原话。
 
 
 
@@ -590,7 +590,136 @@ Fiber 节点保存了组件需要更新的状态、副作用。
 git clone https://github.com/facebook/react.git
 ```
 
-**源码目录文件说明：**
+> 当前最新版本为 react 17.0.1
+
+
+
+**安装依赖包：**
+
+> 注意：下面命令中使用的是 yarn 安装依赖包的方式，而不是 npm。有关 yarn 的安装与使用，请参考我另外一篇文章：Yarn安装与使用.md
+
+```
+yarn 或 yarn install
+```
+
+> 我在安装依赖包时，发生了报错，我估计应该并未大碍：
+>
+> ```
+> [4/4] Building fresh packages...
+> [-/12] ⠈ waiting...
+> [-/12] ⠈ waiting...
+> [-/12] ⠈ waiting...
+> [-/12] ⠁ waiting...
+> error F:\xxx\react\node_modules\electron: Command failed.
+> Exit code: 1
+> Command: node install.js
+> Arguments:
+> Directory: F:\react\react-src\react\node_modules\electron
+> Output:
+> RequestError: connect ETIMEDOUT 52.217.73.140:443
+> ```
+
+
+
+**构建本地React包：**
+
+```
+yarn build react,react-dom,scheduler --type=NODE
+```
+
+> 上面命令中，yarn build 是 yarn run build 的简写，build 是 package.json script 中定义的命令。
+
+> 当构建命令执行完毕后，会在 源码目录下，创建 build 目录，build/node_modules/ 下存放着刚才构建好的包。
+
+
+
+**创建软连接：**
+
+```
+cd ./build/node_modules/react
+yarn link
+
+cd ../react-dom
+yarn link
+```
+
+
+
+**使用create-react-app创建一个测试项目：**
+
+若还没有安装 create-react-app，则先执行安装命令：
+
+```
+//使用 npm 方式安装
+npm i -g create-react-app --registry=https://registry.npm.taobao.org
+
+//使用 yarn 方式安装
+yarn global add create-react-app
+```
+
+> yarn 安装包的速度要比 npm 快很多，因此 yarn 安装不需要使用第三方提供的镜像源(淘宝镜像源)
+
+
+
+使用 create-react-app 创建一个测试项目：
+
+> 假设我们给测试项目目录名为 test-react
+
+```
+//切换到存放 test-react 的上级目录路径中
+//注意，不要将 test-react 放到 react 源码目录中，应该单独使用另外一个相对独立的目录位置
+cd xxxx
+
+npx create-react-app test-react
+```
+
+
+
+**使用软连接：**
+
+```
+cd test-react
+
+yarn link react react-dom
+```
+
+若收到以下信息，则表明已经将 test-react 中所用到的 react 和 react-dom 映射为 我们本地从 react 源码中构建的对应包：
+
+```
+yarn link v1.22.5
+success Using linked package for "react".
+success Using linked package for "react-dom".
+```
+
+
+
+**测试是否映射成功：**
+
+1. 修改本地构建的 react-dom 文件，例如：xxxxx/react/build/node_modules/react-dom/cjs/react-dom.development.js
+
+   ```
+   'use strict';
+   
+   //在此添加一行代码
+   console.log('this message come from my current react-dom')
+   
+   if (process.env.NODE_ENV !== "production") {
+     (function() {
+   'use strict';
+   ....
+   ```
+
+2. 切换到由 create-react-app 创建的 test-react 项目中，并启动该项目
+
+   ```
+   yarn start
+   ```
+
+3. 若能正常启动，且在启动后输出 `this message come from my current react-dom` 即表示 映射成功
+
+
+
+### 1.7 源码目录结构
 
 真正 React 核心源码，需要关注的只有 3 个目录：
 
@@ -598,5 +727,5 @@ git clone https://github.com/facebook/react.git
 2. **packages**：存放着 React 尚未编译的所有核心源码
 3. **scripts**：存放着各种工具链的脚本，例如 git、eslint、jest 等
 
-> 关于更加详细，完整的目录文件结构说明，请参考我的另外一篇文章：[React源码目录文件构成](https://github.com/puxiao/notes/blob/master/React%E6%BA%90%E7%A0%81%E7%9B%AE%E5%BD%95%E6%96%87%E4%BB%B6%E6%9E%84%E6%88%90.md)
+> 关于更加详细，完整的目录文件结构说明，请参考我的另外一篇文章：[React源码目录文件构成.md](https://github.com/puxiao/notes/blob/master/React%E6%BA%90%E7%A0%81%E7%9B%AE%E5%BD%95%E6%96%87%E4%BB%B6%E6%9E%84%E6%88%90.md)
 
