@@ -534,7 +534,7 @@ yarn install
 //构建 本地 react 包，版本 17.0.1
 yarn build react,react-dom,scheduler --type=NODE
 
-//补充一下：如果你拉取的不是 react 17+，而是 react 16+，那么上面的构建本地 react 包代码需要修改成
+//补充一下：如果你拉取的不是 react 17.0.1，而是 以前较低的版本，甚至包括 (react 17 alpha)，那么上面的构建本地 react 包代码需要修改成
 //yarn build react/index,react-dom/index,scheduler --type=NODE
 ```
 
