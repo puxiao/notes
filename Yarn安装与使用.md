@@ -2,10 +2,11 @@
 
 ## 目录
 
-* **[yarn简介](https://github.com/puxiao/notes/blob/master/Yarn%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8.md#yarn%E7%AE%80%E4%BB%8B)**
-* **[yarn安装](https://github.com/puxiao/notes/blob/master/Yarn%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8.md#yarn%E7%AE%80%E4%BB%8B)**
-* **[yarn命令](https://github.com/puxiao/notes/blob/master/Yarn%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8.md#yarn%E7%AE%80%E4%BB%8B)**
-* **[yarn创建软连接](https://github.com/puxiao/notes/blob/master/Yarn%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8.md#yarn%E5%88%9B%E5%BB%BA%E8%BD%AF%E8%BF%9E%E6%8E%A5)**
+* **[yarn简介](#yarn%E7%AE%80%E4%BB%8B)**
+* **[yarn安装](#yarn%E7%AE%80%E4%BB%8B)**
+* **[yarn命令](#yarn%E7%AE%80%E4%BB%8B)**
+* **[yarn创建软连接](#yarn%E5%88%9B%E5%BB%BA%E8%BD%AF%E8%BF%9E%E6%8E%A5)**
+
 
 
 ## yarn简介
@@ -581,6 +582,41 @@ yarn link v1.22.5
 success Using linked package for "react".
 success Using linked package for "react-dom".
 ```
+
+
+
+**测试方式1：通过修改源码，测试是否映射成功：**
+
+1. 修改本地构建的 react-dom 文件，例如：xxxxx/react/build/node_modules/react-dom/cjs/react-dom.development.js
+
+   ```
+   'use strict';
+   
+   //在此添加一行代码
+   console.log('this message come from my current react-dom')
+   
+   if (process.env.NODE_ENV !== "production") {
+     (function() {
+   'use strict';
+   ....
+   ```
+
+2. 切换到由 create-react-app 创建的 test-react 项目中，并启动该项目
+
+   ```
+   yarn start
+   ```
+
+3. 若能正常启动，且在启动后输出 `this message come from my current react-dom` 即表示 映射成功
+
+
+
+**测试方式2：通过浏览器，测试是否映射成功：**
+
+1. 启动测试项目：`yarn start`
+2. 打开浏览器中的调试工具，切换到 Source(源代码) 面板
+3. 在 **页面 > localhost:3000 > static/js > f:/xxx > build/node_modules/ > ...  检查是否为在本机React构建的包和文件**
+4. 若存在本机 React 构建的包(包为本机的目录)，若存在即表明 测试项目中 使用软连接配置生效
 
 
 
