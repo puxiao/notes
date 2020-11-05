@@ -531,7 +531,7 @@ ____
 
 以下以调试 react 源码为例，来实际讲述一下创建和使用软连接的过程。
 
-**前期工作：构建本地React包**
+**1、前期工作：构建本地React包**
 
 ```
 //拉取 react 源码 17.0.1
@@ -556,7 +556,7 @@ yarn build react,react-dom,scheduler --type=NODE
 
 
 
-**创建yarn软连接**
+**2、创建yarn软连接**
 
 ```
 cd /the/path/to/build/node_modules/react
@@ -568,7 +568,7 @@ yarn link
 
 
 
-**项目中使用软连接：**
+**3、项目中使用软连接：**
 
 ```
 cd /the/path/to/test-react
@@ -585,7 +585,7 @@ success Using linked package for "react-dom".
 
 
 
-**测试方式1：通过修改源码，测试是否映射成功：**
+**4、测试方式1：通过修改源码，测试是否映射成功：**
 
 1. 修改本地构建的 react-dom 文件，例如：xxxxx/react/build/node_modules/react-dom/cjs/react-dom.development.js
 
@@ -611,7 +611,7 @@ success Using linked package for "react-dom".
 
 
 
-**测试方式2：通过浏览器，测试是否映射成功：**
+**5、测试方式2：通过浏览器，测试是否映射成功：**
 
 1. 启动测试项目：`yarn start`
 2. 打开浏览器中的调试工具，切换到 Source(源代码) 面板
@@ -620,6 +620,7 @@ success Using linked package for "react-dom".
 
 
 
-**删除软连接**
+**6、删除软连接**
 
 不再过多叙述，就是将 link 改为 unlink，反向执行一遍。
+
