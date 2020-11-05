@@ -585,7 +585,7 @@ success Using linked package for "react-dom".
 
 
 
-**4、测试方式1：通过修改源码，测试是否映射成功：**
+**4、测试方式一：通过修改源码，测试是否映射成功：**
 
 1. 修改本地构建的 react-dom 文件，例如：xxxxx/react/build/node_modules/react-dom/cjs/react-dom.development.js
 
@@ -611,7 +611,7 @@ success Using linked package for "react-dom".
 
 
 
-**5、测试方式2：通过浏览器，测试是否映射成功：**
+**5、测试方式二：通过浏览器，测试是否映射成功：**
 
 1. 启动测试项目：`yarn start`
 2. 打开浏览器中的调试工具，切换到 Source(源代码) 面板
@@ -623,4 +623,3 @@ success Using linked package for "react-dom".
 **6、删除软连接**
 
 不再过多叙述，就是将 link 改为 unlink，反向执行一遍。
-
