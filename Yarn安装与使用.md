@@ -614,7 +614,7 @@ success Using linked package for "react-dom".
 **5、测试方式二：通过浏览器，测试是否映射成功：**
 
 1. 启动测试项目：`yarn start`
-2. 打开浏览器中的调试工具，切换到 Source(源代码) 面板
+2. 打开浏览器中的调试工具，切换到 源代码(Sources) 面板
 3. 在 **页面 > localhost:3000 > static/js > f:/xxx > build/node_modules/ > ...  检查是否为在本机React构建的包和文件**
 4. 若存在本机 React 构建的包(包为本机的目录)，若存在即表明 测试项目中 使用软连接配置生效
 
