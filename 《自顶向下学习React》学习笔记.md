@@ -6,9 +6,12 @@
 
 ## 需要额外学习的知识点
 
-1. ReactTest：在 React中单元测试
-2. ReactArt：在 React 中绘制 画布 或 SVG
-3. 代数效应(Algebraic Effects)
+1. 数据结构：栈、队列、链、树
+2. ReactTest：在 React中单元测试
+3. ReactArt：在 React 中绘制 画布 或 SVG
+4. 代数效应(Algebraic Effects)
+5. Yarn安装与命令
+6. 浏览器调试工具：性能(Performance)面板
 
 
 
@@ -693,7 +696,7 @@ success Using linked package for "react-dom".
 
 
 
-**测试是否映射成功：**
+**测试方式1：通过修改源码，测试是否映射成功：**
 
 1. 修改本地构建的 react-dom 文件，例如：xxxxx/react/build/node_modules/react-dom/cjs/react-dom.development.js
 
@@ -719,6 +722,15 @@ success Using linked package for "react-dom".
 
 
 
+**测试方式2：通过浏览器，测试是否映射成功：**
+
+1. 启动测试项目：`yarn start`
+2. 打开浏览器中的调试工具，切换到 Source(源代码) 面板
+3. 在 **页面 > localhost:3000 > static/js > f:/xxx > build/node_modules/ > ...  检查是否为在本机React构建的包和文件**
+4. 若存在本机 React 构建的包(包为本机的目录)，若存在即表明 测试项目中 使用软连接配置生效
+
+
+
 ### 1.7 源码目录结构
 
 真正 React 核心源码，需要关注的只有 3 个目录：
@@ -728,3 +740,98 @@ success Using linked package for "react-dom".
 3. **scripts**：存放着各种工具链的脚本，例如 git、eslint、jest 等
 
 > 关于更加详细，完整的目录文件结构说明，请参考我的另外一篇文章：[React源码目录文件构成.md](https://github.com/puxiao/notes/blob/master/React%E6%BA%90%E7%A0%81%E7%9B%AE%E5%BD%95%E6%96%87%E4%BB%B6%E6%9E%84%E6%88%90.md)
+
+
+
+
+
+## 第二章：架构篇至 render 阶段
+
+### 2.1 架构工作流程概览
+
+**浏览器调试过程：**
+
+1. 启动测试项目：`yarn start`
+
+2. 打开浏览器调试工具，切换到 性能(Performance) 面板
+
+   > 谷歌浏览器(Chrom)的调试面板是英文的，而微软的 Edge 浏览器调试面板是中文的，对于新手或英文不好的人来说，优先使用 Edge 浏览器。
+
+3. 点击 “记录(Record)”按钮 之后，刷新页面就可以看到页面不同时间段执行的过程
+
+   > 点击 记录(Record) 按钮(此后需要你手动刷新页面)，对应的快捷键为：Ctrl + E
+   >
+   > 点击 记录(Record) 按钮并刷新页面，对应的快捷键为：Ctrl + Shift + E
+
+4. 若要调试页面引用的 React 代码，则切换至 源代码(Sources) 面板，展开左侧折叠的菜单，找到本机 React 包文件，可以进行修改或打测试断点。
+
+   > 左侧折叠菜单为：top(顶部) > localhost:3000 > static > js > f:/xxx > build/node_modules > react-dom
+
+
+
+**浏览器执行阶段关键词：**
+
+| 绘制过程(缩写字母)             | 对应含义                 |
+| ------------------------------ | ------------------------ |
+| DCL (Dom Content Loaded)       | 页面加载和解析完成       |
+| FP (First Paint)               | 首次绘制                 |
+| FCP (First Contentful Paint)   | 首次内容绘制             |
+| LCP (Largest Contentful Paint) | 最大内容渲染             |
+| L (onLoad)                     | 页面依赖资源全部加载完毕 |
+| FMP (First Meaningful Paint)   | 首次有效绘制             |
+
+
+
+**找到需要观察的 React 执行过程：**
+
+> 在 第一章 React Fiber 架构介绍中，提到的 “为了实现快速响应目标，React Fiber 会执行 双缓存策略”。在这个策略作用下，浏览器实际执行的任务顺序是：
+>
+> 1. 分析HTML
+> 2. 编译和执行 React 脚本
+> 3. React 在内存中计算得到 虚拟DOM，并将 虚拟DOM 专递给浏览器
+> 4. 此时，浏览器开始执行 DCL 任务，以及后续的其他任务
+
+1. 首先找到 DCL 阶段，DCL 阶段之前的，即是我们要观察的 React 首次渲染执行任务过程。
+
+2. 在 React 执行阶段中，找到 render 部分，即 React 开始渲染的过程
+
+3. 在 render 部分中，又分为 3 个阶段：
+
+   | 阶段划分(所执行的函数)           | 对应React架构中的 |
+   | -------------------------------- | ----------------- |
+   | legacyRenderSubtreeIntoContainer | 调度器            |
+   | unbatchedUpdates                 | 协调器            |
+   | commitRoot                       | 渲染器            |
+
+
+
+### 2.2 深入理解 JSX
+
+> 我们知道 JSX 其实是 React.createElement() 的语法糖，本小节重点讲述 JSX 是如何被转化的。
+
+**思考以下 2 个问题：**
+
+1. JSX 与 Fiber 的关系
+2. React Component 与 React Element 的关系
+
+
+
+**使用 babel 在线编译 JSX：**
+
+1. 访问 babel 官网的在线编译页：
+
+   * 中文：https://www.babeljs.cn/repl
+
+   * 英文：https://babeljs.io/repl
+
+2. 左侧窗口中输入 JSX ，右侧窗口则事实编译出 转化后的代码。
+
+   > 卡颂的原本视频中提到，需要在左侧设置窗口中，添加插件 @babel/plugin-transfrom-react-jsx，当时使用到的 babel 版本为 7.10.4。  
+   > 但目前最新的 babel 版本 7.12.3 已经不需要此步骤，默认即可正常编译 JSX。
+
+
+
+**查看React.createElement()函数源码：**
+
+1. 找到 React 源码，打开 package/react/src/ReactElement.js 查看 createElement 函数源码。
+
