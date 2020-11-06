@@ -833,5 +833,97 @@ success Using linked package for "react-dom".
 
 **查看React.createElement()函数源码：**
 
-1. 找到 React 源码，打开 package/react/src/ReactElement.js 查看 createElement 函数源码。
+找到 React 源码，打开 package/react/src/ReactElement.js 查看 createElement 函数源码。
+
+```
+export function createElement(type, config, children) { 
+  ... 
+  return ReactElement(
+    type,key,ref,self,source,ReactCurrentOwner.current,props,
+  )
+}
+```
+
+从上面可以看出，createElement 函数接收 3 个参数：类型(原生DOM类型)、配置(属性)、子项(内容)，这说明 JSX 代码最终将被转化为以上 3 个参数。
+
+同时 createElement 最终会 return 一个 ReactElement 实例。
+
+
+
+**查看ReactElement函数源码：**
+
+```
+const ReactElement = function(type, key, ref, self, source, owner, props) {
+  const element = {
+    // This tag allows us to uniquely identify this as a React Element
+    $$typeof: REACT_ELEMENT_TYPE,
+
+    // Built-in properties that belong on the element
+    type: type,
+    key: key,
+    ref: ref,
+    props: props,
+
+    // Record the component responsible for creating this element.
+    _owner: owner,
+  };
+  
+  if (__DEV__) {
+    ...
+  }
+  
+  return element;
+}
+```
+
+重点关注 `$$typeof: REACT_ELEMENT_TYPE`：
+
+1. $$typeof 中的 $$ 并不是什么 JS 特殊语法，而仅仅是为了明显区分 $$typeof 和 type  这 2 个属性，而故意设置的属性名。
+
+2. $$typeof 的值为一个 Symbol 实例，这样可以确保该值 只能是当前 JS 环境下所创建的，杜绝通过 JSON 动态生成的对象，以避免 XSS 攻击。
+
+   > JSON 不支持 Symbol ，所以 JSON 是无法生成包含属性值为 Symbol 的对象。
+   >
+   > 例如下面代码 就可能在执行过程中，通过 JSON.parse() 动态创建一个对象：
+   >
+   > ```
+   > <div>{JSON.parse('{ ... }')}</div>
+   > ```
+
+
+
+回顾一下代码：React.createElement() > ReactElement   
+因此我们知道 ReactElement 其实是 React.createElement() 内部创建并返回的实例对象。
+
+
+
+**问题：React Component 与 React Element 的关系？**  
+答：React Component 是我们通过 类或函数，以及 JSX 语法糖 创建的 React 组件。而这些组件最终都会经过 React.createElement()  函数转化为 React Element 实例。
+
+**还可以使用另外一种说法描述：**React Component 其实是 React.createElement() 函数中第一个参数(也就是 type 参数)，而 React Element 是 React.createElement() 函数的返回值。
+
+
+
+**问题：JSX 与 Fiber 的关系？**  
+答：JSX 是原始 React 代码，在 React 发生更新时，Fiber 会将新的 JSX 与 当前已存在的 ReactElement 做对比，并得到最终的更新代码。
+
+
+
+### 2.3 “递”阶段moun时流程
+
+> 本章讲的内容是 render，而创建的测试项目是基于浏览器的，所以和渲染相关的 JS 源码，应该去 react-dom 包中查看。
+
+Fiber 中调度器执行的渲染(render)过程，是一个 递归过程。而每个 “递” 和 “归” 又分别有各自的：
+
+1. mount：准备时流程
+2. update：更新时流程
+
+本小节首先讲的是 **“ 递 阶段中 准备 时流程”**。
+
+
+
+**前期准备：删除测试项目 index.js 中一些不必要的代码**
+
+1. 删除 reportWebVitals() 相关
+2. 删除 <React.StrictMode> 相关
 
