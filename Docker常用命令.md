@@ -282,11 +282,12 @@ dockerfile 是用来描述如何去构建镜像文件。
 dockerfile 文件遵循以下原则：
 
 1. dockerfile 通常存放在项目输出根目录下
-2. dockerfile 不需要文件后缀名，内容遵循 yml 格式
-3. dockerfile 虽然内容格式不区分大小写，但是通常建议将 命令 使用全大写，以方便和参数进行区分
-4. dockerfile 每一行开头无论有多少个空格都会被忽略，都不影响该行的命令效果
-5. dockerfile 结尾处可以换行，但不会忽略换行前面的空格
-6. dockerfile 必须以 FROM 参数为开端，FROM 参数之前只允许出现 注释 或者 ARG(声明给 FROM 使用的变量)
+2. dockerfile 文件名建议命名为：dockerfile，因为 windows 下文件名是不区分大小写，但是 Linux 下是区分大小写的，为了兼容所以文件名建议都用小写字母
+3. dockerfile 不需要文件后缀名，内容遵循 yml 格式
+4. dockerfile 虽然内容格式不区分大小写，但是通常建议将 命令 使用全大写，以方便和参数进行区分
+5. dockerfile 每一行开头无论有多少个空格都会被忽略，都不影响该行的命令效果
+6. dockerfile 结尾处可以换行，但不会忽略换行前面的空格
+7. dockerfile 必须以 FROM 参数为开端，FROM 参数之前只允许出现 注释 或者 ARG(声明给 FROM 使用的变量)
 
 
 
@@ -684,6 +685,16 @@ Docker build .  构建镜像文件是通过 Docker daemon (守护进程) 运行�
 **特别提醒：**
 
 假设第二次重新构建镜像时，若 -t 的值 和第一次构建时相同，那么本次构建的镜像名称将使用 -t 的值，而之前的镜像会依然保留，只是 tag 名字自动改为 none，若想删除之前镜像，只能靠 删除镜像ID 的方式。
+
+
+
+**特别提醒：在 Linux 下 文件是区分大小写的，因此只能将文件名设置为 dockerfile 或 Dockerfile**
+
+错误命名：例如 DOCKERFILE，则会报错，提示找不到文件
+
+```
+unable to prepare context: unable to evaluate symlinks in Dockerfile path: lstat /mykoa/test-git/Dockerfile: no such file or directory
+```
 
 
 
