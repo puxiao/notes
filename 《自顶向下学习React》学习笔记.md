@@ -927,3 +927,108 @@ Fiber 中调度器执行的渲染(render)过程，是一个 递归过程。而�
 1. 删除 reportWebVitals() 相关
 2. 删除 <React.StrictMode> 相关
 
+
+
+**开始观察beginWork()、completeWork()**
+
+找到 DOM 渲染对应的文件：xxxx/build/node_modules/react-dom/cjs/react-dom.development.js
+
+从函数 beginWork() 开始 往下进行调试。
+
+```
+function beginWork(current, workInProgress, renderLanes) { ... }
+function completeWork(current, workInProgress, renderLanes) { ... }
+```
+
+**观察重点**：第 2 个 参数 workInProgress 的:
+
+1. elementType 值——节点类型(就是节点名)
+2. pendingProps 值——对应的参数值
+
+beginWork() 函数大体行为是：采用深度优先遍历(DFS)，通过递归，不断执行 beginWork()，每遍历到 子节点的最深节点后执行 completeWork()，再去遍历父节点的同级其他节点(也就是兄弟节点)，直至遍历完整个 app 内容。
+
+此过程大体为：
+
+1. 第1 次执行 beginWork()，第 1 个参数 值为 3(即 HostRoot)，第 2 个参数值为 null
+
+2. 第 2 次执行 beginWork()，第 1 个参数值为 null，第 2 个参数的 elementType 为 app
+
+   > 此后第1个参数均为 null
+
+3. 第 3 次执行 beginWork()，第 2 个参数的 elementType 为 app 最外层元素(假设为 div)
+
+4. 第 4 次执行 beginWork()，第 2 个参数的 elementType 为 div 下第1个节点
+
+5. ... div 第 1 个节点 下若再无同级节点，则执行 completeWork()，此时开始遍历 div 下第 2 个节点
+
+6. ... 直至遍历完所有节点 
+
+
+
+**关于子节点的补充**
+
+假设有一个节点如下：
+
+```
+<p>Edit <code>src/App.js</code> and save to reload.</p>
+```
+
+对于 <p\> 节点来说，他是有 3 个子节点，分别是：
+
+1. 文本：Edit
+2. 组件：<code\>
+3. 文本：and save to reload
+
+**若子节点是纯文本，React 进行了节点优化：纯文本的节点不存在 FiberNode，即 纯文本的 elementType 值为 null，pendingProps 值为纯文本的文字内容。**
+
+在 beginWork 执行到 p 标签时，会针对这 3 个子节点依次执行 beginWork，恰巧 这 3 个子节点又均无下一级节点，因此也会对等执行 3 次 completeWork，过程如下：
+
+1. beginWork() > p
+2. beginWork() > null(Edit)
+3. completeWork() > null
+4. beginWork() > code
+5. completeWork() > code
+6. beginWork() > null(and save to reload)
+7. completeWork() > null
+8. completeWork() > p
+
+> 每次执行 beginWork，都只针对 1 个子节点，且最多只会创建一个 FiberNode  
+>
+> > 假设子节点的值是纯文本，为了优化，是不会创建 FiberNode 的
+
+
+
+**beginWork()函数内具体做了什么？**
+
+1. 判断节点是什么类型、标记更新状态
+
+   > 所谓状态，包含：是否需要插入、是否需要更新、是否需要删除等等)
+
+   1. 根据节点不同类型，执行不同的操作(创建对应的节点)
+
+      > 这一步调用的函数是 createChild()
+
+   2. 标记子节点更新状态
+
+   > 所谓不同类型，包括：纯文本或数字、数组、React Element 等等，不同类型有不同的下一步操作
+
+2. 通过不断递归，遍历整个 app
+
+
+
+**补充：子节点为数组**
+
+```
+<header className="App-header">
+  <img src={logo} className="App-logo" alt="logo" />
+  <p>Edit <code>src/App.js</code> and save to reload.</p>
+  <a className="App-link" href="https://reactjs.org" target="_blank"
+     rel="noopener noreferrer">Learn React</a>
+</header>
+```
+
+对于节点(FiberNode) header 来说，他的子节点就是一个数组，该数组的值为：[ <img\>, <p\>, <a\> ]
+
+> 再次强调：若子节点仅为1个，且内容为 纯文本(字符串或数字)，React 为了优化是不会给 纯文本创建 FiberNode，也就是说假设 <header\> xxx </header\> 中的 xxx 是纯文本，那么此时 header 的子节点不再是数组，而仅仅是特殊处理后的文本。
+
+
