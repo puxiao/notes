@@ -7,6 +7,6 @@ function debounce(fun,wait){
     clearTimeout(time)
     timer = setTimeout(() => {
       fun(...args)
-    })
+    }, wait)
   }
 }
