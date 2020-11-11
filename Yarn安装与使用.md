@@ -139,6 +139,10 @@ npm i xxx@1.8
 
 ```
 yarn add xxx --dev
+yarn add xxx
+// 不添加任何参数，默认即添加到 dependencies，相当于 npm 的 --save
+
+//特别提醒，如果添加 --peer，则会安装到 peerDependencies
 yarn add xxx --peer
 ```
 
