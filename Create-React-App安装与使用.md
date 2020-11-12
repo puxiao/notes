@@ -11,6 +11,7 @@
 yarn global add create-react-app
 ```
 
+> 目前最新版本为 4.0.0
 
 
 ## 初始化普通React项目
