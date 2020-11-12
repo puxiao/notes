@@ -66,11 +66,11 @@ yarn create react-app test-rect --template typescript
 ## 添加Scss/Sass支持
 
 ```
-//npm i node-sass@4.14.1 --save
+//npm i node-sass@4.14.1 --save-dev
 
 //sass最新版本为 5.0.0
 //但是由于 create-react-app 4.0.0 中的 sass-loader 目前不支持 sass 5，所以只能先安装 sass 4
-yarn add node-sass@4.14.1
+yarn add node-sass@4.14.1 --dev
 ```
 
 
