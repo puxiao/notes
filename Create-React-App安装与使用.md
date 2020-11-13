@@ -14,6 +14,7 @@ yarn global add create-react-app
 > 目前最新版本为 4.0.0
 
 
+
 ## 初始化普通React项目
 
 ```
@@ -52,7 +53,11 @@ yarn create react-app test-rect --template typescript
 
 
 
-**特别说明：**目前 create-react-app 4.0.0 版本中，tsconfig.json 是无法配置 alias 的，配置就会报错。
+**特别说明：**
+
+目前 create-react-app 4.0.0 版本中，tsconfig.json 是无法配置 alias 的，配置就会报错。因为 create-react-app 默认使用的是 react 17.0.1，在 react 17 版本中，对 jsx 提供了新的转化方式，目前的 typescript 4.0.5 依然无法支持 react 17。
+
+根据 TS 官方通告，**在即将发布的 typescript 4.1 版本中会添加对 react 17 的支持**。
 
 ```
 "baseUrl": "./src", //源代码目录，这里设置是为了给 paths 使用
