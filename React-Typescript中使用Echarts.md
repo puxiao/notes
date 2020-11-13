@@ -135,7 +135,7 @@ yarn add echarts @types/echarts --save
 
 
 
-## 第5步：编写Hello World
+## 第5步：编写Hello World (封装自己的Echart)
 
 > 细节不过多说，此处只演示 2 个组件源码
 >
