@@ -643,7 +643,6 @@ ThisType<Type\>：
 
 
 
-
 ## (16)Tuple——约束元祖数组初始化时的长度
 
 默认元祖数组只能约束元素类型，但是无法约束数组长度，可通过以下定义来实现初次赋值时进行长度限定。
@@ -657,6 +656,7 @@ const arr:MyArr = [0,1,2,3,4,5,6]
 ```
 
 特别提醒：上述中的 Tuple 仅仅只是约束第一次初始化赋值时数组的长度，但是 实例 arr 依然可以执行后续的 push、pop 等操作，来改变数组的长度。
+
 
 
 ## (17)EnumType——根据枚举属性名，获得指定类型的属性值
@@ -746,6 +746,8 @@ const bb = EnumB.A
 */
 ```
 
+
+
 ## (20)<const\>——让const声明的对象属性也变为只读
 
 使用 const 定义的变量，虽然对象本身类型不能再发生变化，但是该对象的属性却可以被修改。
@@ -764,3 +766,40 @@ person.age = 18 //无法分配到 "age" ，因为它是只读属性。
 
 ```
 
+
+
+## (21)obj[key]——严格模式下，如何避免报错
+
+在最新的 TS 4 版本中，tsconfig.json 中 strict 默认值为 true，即 默认开启严格模式。
+
+在严格模式下 无论 noImplicitAny 的值是 true 还是 false，如果代码中 TS 自动推断出有值为 any，就会报错：
+
+```
+元素隐式具有 "any" 类型，因为类型为 "string" 的表达式不能用于索引类型 "{}"。
+```
+
+**在之前默认非严格模式下，以下代码是没有问题的：**
+
+```
+const removeUndefined = (obj: object) => {
+    for (let key in obj) {
+        if (obj[key] === undefined) {
+            delete obj[key]
+        }
+    }
+    return obj
+}
+```
+
+**但是如果是 TS 4 的严格模式下，只有修改成以下代码后才可以：**
+
+```
+const removeUndefined = (obj: object) => {
+    for (let key in obj) {
+        if (obj[key as keyof typeof obj] === undefined) {
+            delete obj[key as keyof typeof obj]
+        }
+    }
+    return obj
+}
+```
