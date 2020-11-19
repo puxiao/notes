@@ -716,7 +716,7 @@ unable to prepare context: unable to evaluate symlinks in Dockerfile path: lstat
 
 查看某镜像的底层配置：docker inspect xxx
 
-为本地某镜像添加一个新的别名，并使用新的 tag：docker tat xxx:newtag xxx:oldtag
+为本地某镜像添加一个新的别名，并使用新的 tag：docker tag xxx:newtag xxx:oldtag
 
 > 注意并不是将原来镜像的 tag 进行修改，而是创建一个副本(镜像别名)，副本(镜像别名)使用新的 tag，但是这两个镜像 Image ID 是一样的，也就意味着实际上本地只储存了一份镜像，所谓新创建的副本(镜像别名)只是新增的一个镜像引用而已。
 
