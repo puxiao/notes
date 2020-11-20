@@ -16,4 +16,4 @@ function deepFreeze(obj){
 
 const me = deepFreeze({age:18,do:{react:'React'}})
 me.do.react = 'Taro' //在严格模式下，会报 TypeError 错误
-console.log(me)
+console.log(me) //React
