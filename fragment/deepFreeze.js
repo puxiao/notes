@@ -6,7 +6,6 @@
 function deepFreeze(obj){
 
     for( let key in obj){
-        console.log(key)
         if(obj[key] !==null && typeof obj[key] === 'object'){
             deepFreeze(obj[key])
         }
