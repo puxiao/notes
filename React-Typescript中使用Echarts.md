@@ -3,7 +3,7 @@
 ## 目录
 
 * [第1步：全局安装Create-React-App](#第1步：全局安装Create-React-App)
-* [第2步：创建基本环境 React TypeScript Scss](#第2步：创建基本环境 React TypeScript Scss)
+* [第2步：创建基本环境 React + TypeScript + Scss](#第2步：创建基本环境 React + TypeScript + Scss)
 * [第3步：整理规划src目录结构(可选操作)](#第3步：整理规划src目录结构(可选操作))
 * [第4步：安装Echart模块](#第4步：安装Echart模块)
 * [第5步：编写Hello World (封装自己的Echart)](#第5步：编写Hello World (封装自己的Echart))
@@ -37,7 +37,7 @@ yarn global add create-react-app
 
 
 
-## 第2步：创建基本环境 React TypeScript Scss
+## 第2步：创建基本环境 React + TypeScript + Scss
 
 #### 1、初始化 React + TypeScript 项目：
 
@@ -375,20 +375,20 @@ export default Echart
    >
    > ```
    > mapStyle: {
-   >             styleJson: [{
-   >                 'featureType': 'water',
-   >                 'elementType': 'all',
-   >                 'stylers': {
-   >                     'color': '#d1d1d1'
-   >                 }
-   >             }, {
-   >                 'featureType': 'land',
-   >                 'elementType': 'all',
-   >                 'stylers': {
-   >                     'color': '#f3f3f3'
-   >                 }
-   >             }, 
-   >             ....
+   >          styleJson: [{
+   >              'featureType': 'water',
+   >              'elementType': 'all',
+   >              'stylers': {
+   >                  'color': '#d1d1d1'
+   >              }
+   >          }, {
+   >              'featureType': 'land',
+   >              'elementType': 'all',
+   >              'stylers': {
+   >                  'color': '#f3f3f3'
+   >              }
+   >          }, 
+   >          ....
    > ```
 
 
