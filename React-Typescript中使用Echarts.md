@@ -3,7 +3,7 @@
 ## 目录
 
 * [第1步：全局安装Create-React-App](#第1步：全局安装Create-React-App)
-* [第2步：创建基本环境 React + TypeScript + Scss](#第2步：创建基本环境 React + TypeScript + Scss)
+* [第2步：创建基本环境 React + TypeScript + Scss](#第2步：创建基本环境 React + TypeScript + Scss) 
 * [第3步：整理规划src目录结构(可选操作)](#第3步：整理规划src目录结构(可选操作))
 * [第4步：安装Echart模块](#第4步：安装Echart模块)
 * [第5步：编写Hello World (封装自己的Echart)](#第5步：编写Hello World (封装自己的Echart))
