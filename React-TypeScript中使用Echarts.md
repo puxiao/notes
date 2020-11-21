@@ -1,4 +1,4 @@
-# React-Typescript中使用Echarts
+# React-TypeScript中使用Echarts
 
 ## 目录
 
