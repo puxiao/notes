@@ -46,6 +46,18 @@ if(typeof Worker === 'function'){
 
 
 
+**与之对应的SharedWorker：**
+
+Web Worker 是用来创建一个 JS 线程，主线程与Worker线程相互独立。
+
+与之对应的还有另外一个函数 SharedWorker，这个函数目前浏览器支持度没有 Web Worker 高，他的作用是 将多个 JS 线程共享一个线程，包括共享该线程上的数据。 SharedWorker 不再本文讨论范文内。
+
+> 所谓多个 JS 线程，例如主窗口中的 JS 线程与该窗口中内嵌 IFrame 中的 JS 线程。
+
+关于 SharedWorker 更多知识，请访问：https://developer.mozilla.org/zh-CN/docs/Web/API/SharedWorker
+
+
+
 ## WebWorker基本用法
 
 ### 主线程对应的操作
@@ -158,23 +170,24 @@ worker.terminate()
 **监听主线程发送的消息**
 
 ```
-this.addEventListener('message',function(eve){
+addEventListener('message',function(eve){
   console.log(eve.data)
 },false)
-//上述代码中的 this 可以省略，即修改为 addEventListener('message',function...)
+//上述代码中其实隐含的是 this.addEventListener(...)，但是在 TS 语法下 this 会被报有可能未定义，因此还是不写 this 为好。
 ```
 
 或者
 
 ```
-this.onmessage=function(eve){
+self.onmessage=function(eve){
   console.log(eve.data)
 }
+//请注意，这里是 self 而不是 this
 ```
 
 解释说明：
 
-1. Web Worker 内部，可以使用 this.addEventListener() 或 this.onmessage 来监听主线程发送的消息。
+1. Web Worker 内部，可以使用 addEventListener() 或 self.onmessage 来监听主线程发送的消息。
 2. event.data 为消息内容。
 
 
@@ -182,7 +195,7 @@ this.onmessage=function(eve){
 **向主线程发送消息**
 
 ```
-this.postMessage(xxx)
+self.postMessage(xxx)
 ```
 
 解释说明：
@@ -212,7 +225,7 @@ importScripts('aaa.js','bbb.js')
 **Web Worker监听错误**
 
 ```
-this.onerror(function(eve){
+self.onerror(function(eve){
     console.log(eve.lineno) //错误代码行号
     console.log(eve.filename) //错误代码文件名
     console.log(eve.message) //错误代码文字内容
@@ -222,7 +235,7 @@ this.onerror(function(eve){
 或者
 
 ```
-this.addEventListener('error',function(eve){
+addEventListener('error',function(eve){
     ...
 })
 ```
@@ -236,13 +249,13 @@ this.addEventListener('error',function(eve){
 **WebWorker监听 onmessageerror 错误**
 
 ```
-this.onmessageerror(function(eve){ ... })
+self.onmessageerror(function(eve){ ... })
 ```
 
 或者
 
 ```
-this.addEventListener('onmessageerror',function(eve){ ... })
+addEventListener('onmessageerror',function(eve){ ... })
 ```
 
 解释说明：
@@ -254,7 +267,7 @@ this.addEventListener('onmessageerror',function(eve){ ... })
 **WebWorker主动关掉自己**
 
 ```
-this.close()
+self.close()
 ```
 
 解释说明：
@@ -278,14 +291,14 @@ this.close()
 
 **WebWorker线程：**
 
-| 操作内容 | 对应代码                                   |
-| -------- | ------------------------------------------ |
-| 发送消息 | this.postMessage(xxx)                      |
-| 接收消息 | this.onmessage = function(eve){ eve.data } |
-| 加载脚本 | importScripts('xxx.js')                    |
-| 监听错误 | this.onerror(function(eve){ ... })         |
-|          | this.onmessageerror(function(eve){ ... })  |
-| 关闭自身 | this.close()                               |
+| 操作内容         | 对应代码                                   |
+| ---------------- | ------------------------------------------ |
+| 发送消息         | self.postMessage(xxx)                      |
+| 接收消息         | self.onmessage = function(eve){ eve.data } |
+| 加载脚本         | importScripts('xxx.js')                    |
+| 监听错误         | self.onerror(function(eve){ ... })         |
+| 监听发送消息错误 | self.onmessageerror(function(eve){ ... })  |
+| 关闭自身         | self.close()                               |
 
 
 
@@ -319,6 +332,20 @@ worker.postMessage(arrBuffer,[arrBuffer])
 ```
 
 > 这样操作后，相当于搭建好了 pige 数据管道，以后主线程中再对 arrBuffer 中的任何数据写入都会直接让  web worker 获取到。
+
+
+
+## Worker新建Worker
+
+顾名思义，就是 worker 内部再创建 worker。
+
+> 目前有极少数浏览器支持该功能。
+
+在 worker 中新建 worker 的方式和主线程新建 worker 的方式完全相同。也是通过 new Worker(‘xxx.js’) 方式实例化的。
+
+**使用场景：**
+
+假设有一个非常大量的计算任务，那么可以将该任务拆分成 N 个小任务，同时创建 N 个worker，向每一个 worker 通过 postMessage(xxx) 发送执行各自任务的消息。最终再将所有 worker 的计算结果汇总在一起。 
 
 
 
@@ -366,17 +393,55 @@ worker.postMessage = function (eve){
 
 
 
-## Worker新建Worker
+## React内嵌WebWorker代码
 
-顾名思义，就是 worker 内部再创建 worker。
+**React使用WebWorker的困境：**
 
-> 目前有极少数浏览器支持该功能。
+根据本文前面叙述，你应该了解：
 
-在 worker 中新建 worker 的方式和主线程新建 worker 的方式完全相同。也是通过 new Worker(‘xxx.js’) 方式实例化的。
+1. 创建 Web Worker 时，需要传入包含任务的 JS 代码路径
+2. 也可以将 任务 JS 代码内嵌到网页 HTML 中，通过 createObjectURL() 来模拟加载 任务 JS
 
-**使用场景：**
+但是以上 2 种方式在 React 项目中都不可以。
 
-假设有一个非常大量的计算任务，那么可以将该任务拆分成 N 个小任务，同时创建 N 个worker，向每一个 worker 通过 postMessage(xxx) 发送执行各自任务的消息。最终再将所有 worker 的计算结果汇总在一起。 
+因为 React 最终会将 所有的 JS 打包为一个 JS 文件，所以直接传入 任务 JS 文件路径的方式是不行的。如果你使用的是 React + TypeScript，那么这种方案更加不合理，总不能任务代码不采用 TS 语法来写吧。
+
+> 除非你把写好的任务 JS 文件放入 public 目录中，这样避免被 react 打包，不过这种变相解决的方式也不够好。
 
 
+
+**React使用WebWorker的解决方案：**
+
+正确的使用方式，其实和内嵌网页的方式原理相同。
+
+```
+//workcode 中是用来编写和存放 work 任务 JS 的
+const workcode = () => {
+    setInterval(() => {
+        postMessage({
+            action: 'updateTime',
+            time: 'aaaa'
+        }, 'timer')
+    }, 1000)
+
+    onmessage = (eve: MessageEvent) => {
+        console.log(eve)
+    }
+}
+
+let code = workcode.toString()
+code = code.substring(code.indexOf('{') + 1, code.lastIndexOf('}'))
+
+const blob = new Blob([code], { type: 'application/javascript' })
+const workscript = URL.createObjectURL(blob)
+
+export default workscript
+```
+
+```
+import workscript from './work'
+...
+
+let worker = new Worker(workscript)
+```
 
