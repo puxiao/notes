@@ -324,6 +324,38 @@ yarn config list
 
 
 
+**查看源地址：**
+
+```
+yarn config get registry
+```
+
+
+
+**修改源地址：**
+
+```
+yarn config set registry https://registry.npm.taobao.org
+```
+
+
+
+**查看代理地址：**
+
+```
+yarn config get proxy
+```
+
+
+
+**修改代理地址：**
+
+```
+yarn config set proxy xxxxxxxx
+```
+
+
+
 **验证当前项目包的版本与配置文件中的依赖包版本是否一致：**
 
 ```
@@ -526,6 +558,18 @@ yarn unlink my-xxx
 cd /the/paht/to/my-xxx
 yarn unlink
 ```
+
+
+
+**修改网络代理**
+
+有时候执行 yarn create react-app xxx 时提示网络不通，比较简单的解决方法是将 npm 代理 设置为 null
+
+```
+npm config set proxy null
+```
+
+设置后再重新执行 yarn 相关命令。
 
 
 
