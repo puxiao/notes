@@ -14,9 +14,15 @@
 **Web Worker 注意事项：**
 
 1. 同源限制：Web Worker 只能接受同源下的 JS 分配的任务。
+
 2. DOM限制：Web Worker 无法读取和操作 DOM 对象，无法使用 document、window、parent 这些对象，但可以使用 navigator 和 location。
+
+   > 无法使用 window对象也意味着无法使用 window.setInterval()、无法操作 CSS、SVG、Canvas 等
+
 3. 通信限制：Web Worker 只能通过消息与主线程 JS 通信。
+
 4. 脚本限制：Web Worker 不能执行 alert()、confirm()，但可以使用 XMLHttpRequest对象发出 AJAX 请求。
+
 5. 文件限制：Web Worker 不能读取本地文件，即不能打开本地文件系统(file://)，所加载的脚本必须来自网络。
 
 
@@ -55,6 +61,16 @@ Web Worker 是用来创建一个 JS 线程，主线程与Worker线程相互独�
 > 所谓多个 JS 线程，例如主窗口中的 JS 线程与该窗口中内嵌 IFrame 中的 JS 线程。
 
 关于 SharedWorker 更多知识，请访问：https://developer.mozilla.org/zh-CN/docs/Web/API/SharedWorker
+
+
+
+**与之对应的ServiceWorker：**
+
+Service worker 是一个注册在指定源和路径下的时间驱动 worker。
+
+> Service worker 是 Web Worker 的一种形态
+
+关于 Service Worker 更多知识，请访问：https://developer.mozilla.org/zh-CN/docs/Web/API/Service_Worker_API
 
 
 
@@ -395,7 +411,7 @@ worker.postMessage = function (eve){
 
 ## React内嵌WebWorker代码
 
-**React使用WebWorker的困境：**
+### React使用WebWorker的困境
 
 根据本文前面叙述，你应该了解：
 
@@ -410,17 +426,22 @@ worker.postMessage = function (eve){
 
 
 
-**React使用WebWorker的解决方案：**
+### 方案1：依然通过 Blob + URL.createObjectURL 来模拟实现
 
-正确的使用方式，其实和内嵌网页的方式原理相同。
+和内嵌网页的方式原理相同。
+
+**第1步：创建包含任务代码的模块**
 
 ```
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+//上面那行注释非常重要，忽略 ESlint 的某些错误，否则在严格模式下程序会报错误：无法找到 self
+
 //workcode 中是用来编写和存放 work 任务 JS 的
 const workcode = () => {
     setInterval(() => {
         postMessage({
-            action: 'updateTime',
-            time: 'aaaa'
+            num: Math.floor(Math.random()* 100)
         }, 'timer')
     }, 1000)
 
@@ -438,10 +459,240 @@ const workscript = URL.createObjectURL(blob)
 export default workscript
 ```
 
+> 再次强调：一定要在顶部添加 忽略 ESlint 报错的注释代码
+
+
+
+**第2步：引入并创建 web worker**
+
 ```
 import workscript from './work'
 ...
 
 let worker = new Worker(workscript)
+```
+
+
+
+### 方案2：创建一个负责转化 work 内容的类 WebWorker
+
+方案2 是在 方案1 的基础上进行了优化封装。
+
+**第1步：创建一个负责转化 work 的类：**
+
+```
+export default class WebWorker {
+    constructor(worker) {
+        const code = worker.toString();
+        const blob = new Blob(["(" + code + ")()"]);
+        return new window.Worker(URL.createObjectURL(blob));
+    }
+}
+```
+
+
+
+**第2步：在 React 中使用这个 Webworker：**
+
+```
+import React, { useState, useEffect } from 'react';
+import WebWorker from './worker.js'
+
+const App = () => {
+    const [time, setTime] = useState('')
+    const [worker, setWorker] = useState()
+
+    //在 useEffect 中，let work = function(){ ... } 定义的内容就是 web worker 的任务内容
+    useEffect(() => {
+        let work = function () {
+            setInterval(() => {
+                postMessage({
+                    action: 'updateTime',
+                    time: new Date(Date.now() + 8 * 60 * 60 * 1000).toJSON().substr(0, 19).replace('T', ' ')
+                })
+            }, 1000)
+        }
+        setWorker(new WebWorker(work))
+        return () => {
+            worker?.terminate()
+            setWorker(null)
+        }
+    }, [])
+
+    useEffect(() => {
+        if (worker) {
+            worker.onmessage = (eve) => {
+                setTime(eve.data.time)
+            }
+        }
+    }, [worker])
+
+    return (
+        <div>{time}</div>
+    );
+}
+
+export default App;
+```
+
+> 注意：无论 方案1 或 方案2，在实际运行过程中，浏览器都会发出一些错误警告，但不影响程序运行。
+
+
+
+## React+TypeScrpt内嵌WebWorker代码
+
+前面讲的是在 React 中如何内嵌 web worker 代码，其实代码并不是优雅规范的，因为上面的代码中其实利用了一些原生 JS 超强的兼容(纠错)性，加上忽略一些 ESlint 错误才运行起来。
+
+如果是 React 中使用了 TS，那么更加推荐以下方式。
+
+该解决方案是使用 别人写好的 类库：https://github.com/dai-shi/react-hooks-worker
+
+下面演示的代码，实际上是在这个 类库的基础上，适当修改而来的。
+
+
+
+### 封装 2 个模块：exposeWorker 和 useWorker
+
+#### exposeWorker：负责导出任务代码的模块
+
+文件路径：src/hooks/exposeWorker.ts
+
+```
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+//请注意，本JS顶部依然需要添加一些忽略 ESlint 错误的注释代码
+
+const exposeWorker = (func: (data: any) => any) => {
+    self.onmessage = async (e: MessageEvent) => {
+        const r = func(e.data)
+        if (r[Symbol.asyncIterator]) {
+            for await (const i of r) (self.postMessage as any)(i)
+        } else if (r[Symbol.iterator]) {
+            for (const i of r) (self.postMessage as any)(i)
+        } else {
+            (self.postMessage as any)(await r)
+        }
+    }
+}
+
+export default exposeWorker
+```
+
+
+
+#### useWorker：负责封装使用Worker的模块
+
+文件路径：src/hooks/useWorker.ts
+
+```
+import { useEffect, useMemo, useRef, useState } from 'react'
+
+type State = {
+    result?: unknown,
+    error?: 'error' | 'messageerror'
+}
+
+const initialState: State = {}
+
+const useWorker = (createWorker: () => Worker, input: unknown) => {
+    const [state, setState] = useState<State>(initialState)
+    const worker = useMemo(createWorker, [createWorker])
+    const lastWorker = useRef<Worker>(worker)
+    useEffect(() => {
+        lastWorker.current = worker
+        let setStateSafe = (nextState: State) => setState(nextState)
+        worker.onmessage = (e) => setStateSafe({ result: e.data })
+        worker.onerror = () => setStateSafe({ error: 'error' })
+        worker.onmessageerror = () => setStateSafe({ error: 'messageerror' })
+        return () => {
+            setStateSafe = () => null
+            worker.terminate()
+            setState(initialState)
+        }
+    }, [worker])
+
+
+    useEffect(() => {
+        lastWorker.current.postMessage(input)
+    }, [input])
+
+    return state
+}
+
+export default useWorker
+```
+
+
+
+### 示例1：单纯的计算任务
+
+#### 本示例说明
+
+worker 线程 的任务是单纯的数学计算，并把最终结果返回给 JS 线程。
+
+
+
+#### 编写任务文件内容
+
+我们设定计算任务是：给出一个正整数 N，计算出 1 + 2 + 3 + ... N 的结果
+
+文件路径：src/work.tsx
+
+```
+import React from 'react'
+import useWorker from './hooks/useWorker'
+
+const calcFib = (num: number) => {
+    const fib = (i: number) => {
+        let result = 0;
+        while (i > 0) {
+            result += i
+            i--
+        }
+        return result
+    }
+    return fib(num)
+}
+
+const blob = new Blob([
+    `self.func = ${calcFib.toString()};`,
+    'self.onmessage = (e) => {',
+    '  const result = self.func(e.data);',
+    '  self.postMessage(result);',
+    '};',
+], { type: 'text/javascript' })
+
+const url = URL.createObjectURL(blob)
+const createWorker = () => new Worker(url)
+
+const Work: React.FC<{ num: number }> = ({ num }) => {
+    const { result, error } = useWorker(createWorker, num)
+    if (error) {
+        return (<div>Error: { error } </div>)
+    } else {
+        return (<div>Result: { result } </div>)
+    }
+}
+
+export default Work
+```
+
+
+
+#### 实际使用示例
+
+文件路径：src/app.tsx
+
+```
+import React from 'react';
+import Work from './work';
+
+const App = () => {
+    return (
+        <Work num={10} />
+    )
+}
+
+export default App;
 ```
 
