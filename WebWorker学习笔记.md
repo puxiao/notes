@@ -1,5 +1,21 @@
 # WebWorker学习笔记
 
+## 目录
+
+* [**WebWorker简介**](#WebWorker简介)
+* [**WebWorker基本用法**](#WebWorker基本用法)
+  * [主线程对应的操作](#主线程对应的操作)
+  * [WebWorker线程对应的操作](#WebWorker线程对应的操作)
+  * [基本用法总结](#基本用法总结)
+* [**数据通信**](#数据通信)
+* [**Worker新建Worker**](#Worker新建Worker)
+* [**页面内嵌WebWorker代码**](#页面内嵌WebWorker代码)
+* [**React内嵌WebWorker代码**](#React内嵌WebWorker代码)
+* [**React+TypeScrpt内嵌WebWorker代码**](#React+TypeScrpt内嵌WebWorker代码)
+* [**关于内嵌代码的总结语**](#关于内嵌代码的总结语)
+
+
+
 ## WebWorker简介
 
 **Web Worker的由来：**
@@ -708,7 +724,6 @@ export default App;
 
 
 
-### 总结语：
+## 关于内嵌代码的总结语
 
 **官方推荐的创建 web worker 的构造函数 Worker() 是需要传入外部一个 JS 文件，因此就不要再在 React 中勉强使用 内嵌 JS 或 TS 的方式了，避免一些莫名其妙的错误。尽管上面示例中已经成功展示了如何内嵌，但依然觉得问题多多，还是老老实实在外部新建项目来专门编写对应 worker 任务脚本吧。**
-
