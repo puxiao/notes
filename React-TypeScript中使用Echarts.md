@@ -3,7 +3,7 @@
 ## 目录
 
 * [第1步：全局安装Create-React-App](#第1步：全局安装Create-React-App)
-* [第2步：创建基本环境 React + TypeScript + Scss](#第2步：创建基本环境%20React%20+%20TypeScript%20+%20Scss)
+* [第2步：创建基本环境 React + TypeScript + Scss + Alias](#第2步：创建基本环境%20React%20+%20TypeScript%20+%20Scss%20+%20Alias)
 * [第3步：整理规划src目录结构(可选操作)](#第3步：整理规划src目录结构(可选操作))
 * [第4步：安装Echart模块](#第4步：安装Echart模块)
 * [第5步：编写Hello World (封装自己的Echart)](#第5步：编写Hello%20World%20(封装自己的Echart))
@@ -37,7 +37,7 @@ yarn global add create-react-app
 
 
 
-## 第2步：创建基本环境 React + TypeScript + Scss
+## 第2步：创建基本环境 React + TypeScript + Scss + Alias
 
 #### 1、初始化 React + TypeScript 项目：
 
@@ -76,6 +76,8 @@ yarn add node-sass@4.14.1 --dev
 个人建议通过 react-app-rewired 和 react-app-rewire-alias 来实现 alias。
 
 具体操作可参考：[配置alias路径映射](https://github.com/puxiao/notes/blob/master/Create-React-App%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8.md#%E9%85%8D%E7%BD%AEalias%E8%B7%AF%E5%BE%84%E6%98%A0%E5%B0%84)
+
+> 由于之前写示例时并未配置 alias，所以本文后面的示例实际代码中，引入模块时并未真正使用到 alias，但这并不影响任何代码运行效果，此处仅做告知。
 
 
 
