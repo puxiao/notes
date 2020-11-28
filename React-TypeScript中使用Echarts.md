@@ -61,17 +61,6 @@ yarn create react-app test-rect --template typescript
 }
 ```
 
-**特别说明：** create-react-app 4.0.0 版本中，tsconfig.json 是无法配置 alias 的，配置就会报错。
-
-目前最新版本 create-react-app 4.0.1 版本中修复了此问题，可以进行配置了。
-
-```
-"baseUrl": "./src", //源代码目录，这里设置是为了给 paths 使用
-"paths": {
-  "@/components/*": ["components/*"]
-}
-```
-
 #### 3、添加Scss/Sass支持
 
 ```
@@ -81,6 +70,12 @@ yarn add node-sass@4.14.1 --dev
 ```
 
 安装完成过后，即可将项目中的 .css 文件修改为 .scss 文件
+
+#### 4、添加alias支持
+
+个人建议通过 react-app-rewired 和 react-app-rewire-alias 来实现 alias。
+
+具体操作可参考：[配置alias路径映射](https://github.com/puxiao/notes/blob/master/Create-React-App%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8.md#%E9%85%8D%E7%BD%AEalias%E8%B7%AF%E5%BE%84%E6%98%A0%E5%B0%84)
 
 
 
@@ -375,20 +370,20 @@ export default Echart
    >
    > ```
    > mapStyle: {
-   >          styleJson: [{
-   >              'featureType': 'water',
-   >              'elementType': 'all',
-   >              'stylers': {
-   >                  'color': '#d1d1d1'
-   >              }
-   >          }, {
-   >              'featureType': 'land',
-   >              'elementType': 'all',
-   >              'stylers': {
-   >                  'color': '#f3f3f3'
-   >              }
-   >          }, 
-   >          ....
+   >    styleJson: [{
+   >        'featureType': 'water',
+   >        'elementType': 'all',
+   >        'stylers': {
+   >            'color': '#d1d1d1'
+   >        }
+   >    }, {
+   >        'featureType': 'land',
+   >        'elementType': 'all',
+   >        'stylers': {
+   >            'color': '#f3f3f3'
+   >        }
+   >    }, 
+   >    ....
    > ```
 
 
