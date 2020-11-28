@@ -117,14 +117,21 @@ let worker = new Worker('work.js')
 **主线程向Web Worker发送消息**
 
 ```
-worker.postMessage('hello')
-worker.postMessage({name:'puxiao',age:18})
+worker.postMessage('hello','*')
+worker.postMessage({name:'puxiao',age:18},'http://localhost:3000/')
 ```
 
 解释说明：
 
 1. 主线程向 Web Worker 实例发送消息 通过 postMessage() 方法
+
 2. postMessage()的参数可以是 JS 支持的各种数据类型：字符串、对象、数组、二进制数据等。
+
+3. postMessage()的第2个参数是用来设定主 JS 线程所在的窗口地址或标签
+
+   > 若为 * 则表示不限制，建议将该值设置为具体的网址。
+   >
+   > 在 JS 中第二个参数不填写也不报错，但是在 TS 中则第二个参数为必填项。
 
 
 
@@ -227,12 +234,13 @@ self.onmessage=function(eve){
 **向主线程发送消息**
 
 ```
-self.postMessage(xxx)
+self.postMessage(xxx, 'xxx')
 ```
 
 解释说明：
 
 1. Web Worker 与主线程都通过 poseMessage() 来向对方发送消息。
+2. 参数用法同 主 JS 线程相同。
 
 
 
@@ -315,7 +323,7 @@ self.close()
 | 操作内容            | 对应代码                                     |
 | ------------------- | -------------------------------------------- |
 | 创建 we worker 实例 | let worker = new Worker('xxx.js')            |
-| 发送消息            | worker.postMessage(xxx)                      |
+| 发送消息            | worker.postMessage(xxx, 'xxx')               |
 | 接收消息            | worker.onmessage = function(eve){ eve.data } |
 | 监听错误            | worker.onerror(function(eve){ ... })         |
 | 监听发送消息错误    | worker.onmessageerror(function(eve){ ... })  |
@@ -325,7 +333,7 @@ self.close()
 
 | 操作内容         | 对应代码                                   |
 | ---------------- | ------------------------------------------ |
-| 发送消息         | self.postMessage(xxx)                      |
+| 发送消息         | self.postMessage(xxx, 'xxx')               |
 | 接收消息         | self.onmessage = function(eve){ eve.data } |
 | 加载脚本         | importScripts('xxx.js')                    |
 | 监听错误         | self.onerror(function(eve){ ... })         |
@@ -336,7 +344,7 @@ self.close()
 
 ## 数据通信
 
-在前文已经讲过，主线程与Web Worker之间通过 postMessage(xxx) 方式进行互发消息(数据)。
+在前文已经讲过，主线程与Web Worker之间通过 postMessage(xxx, 'xxx') 方式进行互发消息(数据)。
 
 默认情况下，这种消息数据是直接深度拷贝一份，是传值而不是引用。worker 对通信数据所作的修改并不会影响主线程中该数据。
 
@@ -460,6 +468,9 @@ const workcode = () => {
             num: Math.floor(Math.random()* 100)
         }, 'timer')
     }, 1000)
+    //补充说明：按照官方文档介绍，poseMessage()第2个参数应该是填写目标窗口的网址
+    //但是我自己试验发现也可以填写随意的字符串，例如我这里填写的 timer，也是可以正常实行的。
+    //本文后面的其他示例代码中若出现类似的情况，请留意我此刻的注释，不再重复说明
 
     onmessage = (eve: MessageEvent) => {
         console.log(eve)
