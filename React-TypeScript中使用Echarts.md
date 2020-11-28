@@ -3,10 +3,10 @@
 ## 目录
 
 * [第1步：全局安装Create-React-App](#第1步：全局安装Create-React-App)
-* [第2步：创建基本环境 React + TypeScript + Scss](#第2步：创建基本环境 React + TypeScript + Scss)
+* [第2步：创建基本环境 React + TypeScript + Scss](#第2步：创建基本环境%20React%20+%20TypeScript%20+%20Scss)
 * [第3步：整理规划src目录结构(可选操作)](#第3步：整理规划src目录结构(可选操作))
 * [第4步：安装Echart模块](#第4步：安装Echart模块)
-* [第5步：编写Hello World (封装自己的Echart)](#第5步：编写Hello World (封装自己的Echart))
+* [第5步：编写Hello World (封装自己的Echart)](#第5步：编写Hello%20World%20(封装自己的Echart))
 * [第6步：更加精细化封装Echart组件](#第6步：更加精细化封装Echart组件)
 * [组件中使用百度地图](#组件中使用百度地图)
 * [代码补充](#代码补充)
@@ -61,9 +61,9 @@ yarn create react-app test-rect --template typescript
 }
 ```
 
-**特别说明：**目前 create-react-app 4.0.0 版本中，tsconfig.json 是无法配置 alias 的，配置就会报错。
+**特别说明：** create-react-app 4.0.0 版本中，tsconfig.json 是无法配置 alias 的，配置就会报错。
 
-所以这里就不再配置 alias，但还是把配置代码先贴出来，以便后续 bug 修复后继续使用。
+目前最新版本 create-react-app 4.0.1 版本中修复了此问题，可以进行配置了。
 
 ```
 "baseUrl": "./src", //源代码目录，这里设置是为了给 paths 使用
@@ -76,7 +76,7 @@ yarn create react-app test-rect --template typescript
 
 ```
 //sass最新版本为 5.0.0
-//但是由于 create-react-app 中的 sass-loader 目前不支持 sass 5，所以只能先安装 sass 4
+//但是由于目前 create-react-app 中的 sass-loader 目前不支持 sass 5，所以只能先安装 sass 4
 yarn add node-sass@4.14.1 --dev
 ```
 
