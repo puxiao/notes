@@ -42,6 +42,7 @@ yarn create react-app test-rect --template typescript
 ```
 {
   "compilerOptions": {
+    "target": "es2017"，
     ...
     "noUnusedLocals": true, //有未使用的变量，则报错
     "noUnusedParameters": true, //有未使用的参数，则报错
@@ -50,25 +51,6 @@ yarn create react-app test-rect --template typescript
   }
 }
 ```
-
-
-
-**特别说明：**
-
-目前 create-react-app 4.0.0 版本中，tsconfig.json 是无法配置 alias 的，配置就会报错。因为 create-react-app 默认使用的是 react 17.0.1，在 react 17 版本中，对 jsx 提供了新的转化方式，目前的 typescript 4.0.5 依然无法支持 react 17。
-
-根据 TS 官方通告，**在即将发布的 typescript 4.1 版本中会添加对 react 17 的支持**。
-
-如果 TS 4.1 正式发布，那么可以向 tsconfig.json 中添加以下内容，实现 alias。
-
-```
-"baseUrl": "./src", //源代码目录，这里设置是为了给 paths 使用
-"paths": {
-  "@/components/*": ["components/*"]
-}
-```
-
-> 特别提示：在官方预告的 TS 4.1 中，tsconfig.json 中 可以设置 "jsx":"react-jsx"，只有设置该属性后才会支持  React 17。
 
 
 
@@ -108,6 +90,24 @@ const removeUndefined = (obj: object) => {
 
 
 
+## 修改发布后项目根目录
+
+React 发布后，将项目上传到服务器，默认必须是网站根目录。
+
+若实际中不是网站根目录，则需要修改 package.json 添加 homepage 字段，并将值设置为 "."
+
+```
+{
+  "name": "test-threejs",
+  "homepage": ".",
+  ...
+}
+```
+
+> 默认 package.json 中是没有 homepage 字段的，默认采用的是 "/"，即根目录。
+
+
+
 ## 添加Scss/Sass支持
 
 ```
@@ -117,6 +117,116 @@ const removeUndefined = (obj: object) => {
 //但是由于 create-react-app 4.0.0 中的 sass-loader 目前不支持 sass 5，所以只能先安装 sass 4
 yarn add node-sass@4.14.1 --dev
 ```
+
+
+
+## 配置alias路径映射
+
+由 create-react-app 创建的 react 项目，webpack 相关配置已经被封装在了内部，因此默认是无法直接获取并修改的。
+
+那么如何配置 alias 呢？
+
+**一般网上搜索到的，有以下 3 种实现途径：**
+
+1. 添加 .env 文件，设置内容为 NODE_PATH=src
+2. 通过执行 `npm eject`，反向编译出 webpack 配置文件，然后进行对应的 alias 配置
+3. 使用 react-app-rewired 和 react-app-rewire-alias 来实现 alias
+
+以上 3 种 各有利弊，相对而言，本人更加推荐使用第 3 种方式来实现 alias。那么接下来说一下第 3 种的实现步骤。
+
+**第1步：安装对应模块**
+
+```
+//npm i --save-dev react-app-rewired react-app-rewire-alias
+yarn add --dev react-app-rewired react-app-rewire-alias
+```
+
+**第2步：新建文件 tsconfig.paths.json**
+
+在项目根目录，新建文件 tsconfig.paths.json，内容暂时设置为：
+
+```
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@/src/*": ["./src/*"],
+            "@/components/*": ["./src/components/*"]
+        }
+    }
+}
+```
+
+**第3步：新建文件 config-overrides.js**
+
+在项目根目录，新建文件 config-overrides.js，内容为：
+
+```
+const { alias, configPaths } = require('react-app-rewire-alias')
+
+module.exports = function override(config) {
+  alias(configPaths('./tsconfig.paths.json'))(config)
+
+  return config
+}
+```
+
+**第4步：新建文件 global.d.ts**
+
+注意：本步骤的目的是为了让 TS 忽略对 react-app-rewire-alias 和其他一些非常规格式文件的导入检查。
+
+> 本步骤是可选的，不是必须的，你可以跳过本步骤。
+
+```
+declare module '*.png';
+declare module '*.gif';
+declare module '*.jpg';
+declare module '*.jpeg';
+declare module '*.svg';
+declare module '*.css';
+declare module '*.less';
+declare module '*.scss';
+declare module '*.sass';
+declare module '*.styl';
+declare module 'react-app-rewire-alias';
+```
+
+**第5步：修改 tsconfig.json 文件**
+
+修改 tsconfig.json 文件，添加以下一行内容：
+
+```
+{
+  "extends": "./tsconfig.paths.json",
+  "compilerOptions": {
+    ...
+  }
+}
+```
+
+> 请注意 extends 是和 compilerOptions 平级的。
+
+**第6步：继续修改 tsconfig.json 文件**
+
+将命令中 start、build、test 3 条命令中的 react-scripts 修改为 react-app-rewired
+
+```
+"scripts": {
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
+    "test": "react-app-rewired test",
+    "eject": "react-scripts eject"
+  },
+```
+
+至此，alias 已经配置成功。
+
+特别说明：以上操作步骤是假定你在 React 项目中使用了 TypeScript。
+
+**若你没有使用 TypeScript，那么：**
+
+1. 忽略第 4 步的操作
+2. 第 5 步、第 6 步 中提到的 tsconfig.json 对应的是 jsconfig.json。 
 
 
 
