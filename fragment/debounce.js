@@ -14,7 +14,6 @@ function debounce(fun,wait){
 
 //以下为 TypeScript 中的写法
 export type Fun = (...args: any) => any
-
 const debounce = (fun: Fun, wait: number) => {
     let timer: number
     return (...args: any[]) => {
@@ -24,5 +23,4 @@ const debounce = (fun: Fun, wait: number) => {
         }, wait)
     }
 }
-
 export default debounce
