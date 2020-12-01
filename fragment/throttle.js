@@ -7,9 +7,26 @@ function throttle(fun,wait){
     if(timer){
       return
     }
-    timer = setTimerout(() => {
+    timer = setTimeout(() => {
       fun(...args)
       timer = null
     }, wait)
   }
 }
+
+
+//以下为 TypeScript 中的写法
+export type Fun = (...args: any) => any
+const throttle = (fun: Fun, wait: number) => {
+  let timer: number | null
+  return (...args: any[]) => {
+    if (timer) {
+      return
+    }
+    timer = window.setTimeout(() => {
+      fun(...args)
+      timer = null
+    }, wait)
+  }
+}
+export default throttle
