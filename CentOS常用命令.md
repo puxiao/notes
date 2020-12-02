@@ -61,6 +61,8 @@
 
 ## 开关机相关
 
+查看已开机运行时间：uptime
+
 普通重启：reboot
 
 root用户操作重启：shutdown -r [time]  [time]如果为now立即重启、10表示10分钟后重启、20:35表示20:35重启
@@ -84,6 +86,34 @@ root用户操作关机：shutdown -h [time]  [time]如果为now立即关机、10
 chmod 644 -R ./
 find ./ -type d -print|xargs chmod 755;
 ````
+
+
+
+## 硬盘相关
+
+查看分区和硬盘：lsblk
+
+查看硬盘使用情况：df -h
+
+查看硬盘别名(label)：blkid
+
+查看当前目录下的各个目录或文件大小：du -sh ./*
+
+
+
+## 内存相关
+
+查看当前内存使用情况：free -h
+
+
+
+## CPU相关
+
+查看当前CPU信息：cat /proc/cpuinfo
+
+查看当前为几核CPU：cat /proc/cpuinfo| grep "cpu cores"| uniq
+
+查看当前CPU使用情况：top 详情参见 [系统性能状态](#系统性能状态)
 
 
 
@@ -116,6 +146,8 @@ find ./ -type d -print|xargs chmod 755;
 终止某进程：kill -9 pid  pid为该进程在 ps -ef中对应的pid
 
 终止某xxxx相关全部进程：killall -9 xxxx    
+
+
 
 ## 系统性能状态
 
@@ -516,4 +548,3 @@ find ./ -type d -print|xargs chmod 755;
 | usr/src            | 程序源码的目录                                               |
 | var                | 动态数据保存目录(缓存、日志、软件产生的文件)                 |
 | var/log            | 系统日志目录                                                 |
-
