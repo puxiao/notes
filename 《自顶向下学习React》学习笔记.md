@@ -539,7 +539,7 @@ Fiber 节点保存了组件需要更新的状态、副作用。
 
    > 此时 FiberRootNode.current = A，且页面显示为空白
 
-3. 开始进入首屏渲染阶段，此时无论是首屏渲染，或调用 this.setState() 或 使用 hoos 修改数据，都会从根节点 A 创建一个新的空白根节点 B (同 A 一样，B 也是一个 RootFiber)
+3. 开始进入首屏渲染阶段，此时无论是首屏渲染，或调用 this.setState() 或 使用 hooks 修改数据，都会从根节点 A 创建一个新的空白根节点 B (同 A 一样，B 也是一个 RootFiber)
 
    > 两个根节点通过属性 alternate 彼此互相连接指向对方：A.alternate = B、B.alternate = A
 
