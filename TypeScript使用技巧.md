@@ -803,3 +803,13 @@ const removeUndefined = (obj: object) => {
     return obj
 }
 ```
+
+
+
+## (22)获取数组中所有元素的值的类型
+
+```
+const arr = ['a','b','c'] as const
+type value = typeof arr[num] // 'a'|'b'|'c'
+```
+
