@@ -3,9 +3,8 @@
     justify-content: center;
     align-items: center;
 
-    height: 190px;
-
     margin: 100px auto;
+    height: 190px;
 }
 
 $top-color:seagreen;
@@ -21,10 +20,15 @@ $right-bottom-color:purple;
     justify-content: space-between;
 
     position: relative;
-
     height: inherit;
 
-    animation: breathe 1s ease-in-out 0s infinite alternate;
+    background-color: rgb(10, 10, 10);
+}
+
+.box-content {
+    font-size: 24px;
+    text-align: center;
+    color: #888888;
 }
 
 .left-box {
@@ -90,72 +94,72 @@ $right-bottom-color:purple;
 
 @keyframes breathe-top {
     0% {
-        box-shadow:
-            0px -4px 10px 0px rgba($top-color, 0.6)
+        opacity: 0.4;
+        box-shadow: 0px -4px 10px 0px rgba($top-color, 0.6)
     }
 
     100% {
-        box-shadow:
-            0px -4px 10px 0px rgba($top-color, 1)
+        opacity: 1;
+        box-shadow: 0px -4px 10px 0px rgba($top-color, 1)
     }
 }
 
 @keyframes breathe-bottom {
     0% {
-        box-shadow:
-            0px 4px 10px 0px rgba($bottom-color, 0.6)
+        opacity: 0.4;
+        box-shadow: 0px 4px 10px 0px rgba($bottom-color, 0.6)
     }
 
     100% {
-        box-shadow:
-            0px 4px 10px 0px rgba($bottom-color, 1)
+        opacity: 1;
+        box-shadow: 0px 4px 10px 0px rgba($bottom-color, 1)
     }
 }
 
 @keyframes breathe-left-top {
     0% {
-        box-shadow:
-            0px -4px 10px 0px rgba($left-top-color, 0.6)
+        opacity: 0.4;
+        box-shadow: 0px -4px 10px 0px rgba($left-top-color, 0.6)
     }
 
     100% {
-        box-shadow:
-            0px -4px 10px 0px rgba($left-top-color, 1)
+        opacity: 1;
+        box-shadow: 0px -4px 10px 0px rgba($left-top-color, 1)
     }
 }
 
 @keyframes breathe-right-bottom {
     0% {
-        box-shadow:
-            0px 4px 10px 0px rgba($right-bottom-color, 0.6)
+        opacity: 0.4;
+        box-shadow: 0px 4px 10px 0px rgba($right-bottom-color, 0.6)
     }
 
     100% {
-        box-shadow:
-            0px 4px 10px 0px rgba($right-bottom-color, 1)
+        opacity: 1;
+        box-shadow: 0px 4px 10px 0px rgba($right-bottom-color, 1)
     }
 }
 
 @keyframes breathe-right-top {
     0% {
-        box-shadow:
-            0px -4px 10px 0px rgba($right-top-color, 0.6)
+        opacity: 0.4;
+        box-shadow: 0px -4px 10px 0px rgba($right-top-color, 0.6)
     }
 
     100% {
-        box-shadow:
-            0px -4px 10px 0px rgba($right-top-color, 1)
+        opacity: 1;
+        box-shadow: 0px -4px 10px 0px rgba($right-top-color, 1)
     }
 }
 
 @keyframes breathe-left-bottom {
     0% {
-        box-shadow:
-            0px 4px 10px 0px rgba($left-bottom-color, 0.6)
+        opacity: 0.4;
+        box-shadow: 0px 4px 10px 0px rgba($left-bottom-color, 0.6)
     }
 
     100% {
-        box-shadow:
-            0px 4px 10px 0px rgba($left-bottom-color, 1)
+        opacity: 1;
+        box-shadow: 0px 4px 10px 0px rgba($left-bottom-color, 1)
     }
 }
