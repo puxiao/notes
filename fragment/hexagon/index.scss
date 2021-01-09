@@ -3,115 +3,159 @@
     justify-content: center;
     align-items: center;
 
-    width: 200px;
-    height: 200px;
+    height: 190px;
 
     margin: 100px auto;
 }
 
 $top-color:seagreen;
 $bottom-color:tomato;
-$left-top-color:purple;
+$left-top-color: #900000;
 $left-bottom-color:teal;
 $right-top-color:mediumblue;
-$right-bottom-color:mediumturquoise;
+$right-bottom-color:purple;
 
 .box {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    flex-direction: column;
+    justify-content: space-between;
 
     position: relative;
-    width: 54%;
-    height: 90%;
-    background-color: black;
 
-    border-top: solid 4px $top-color;
-    border-bottom: solid 4px $bottom-color;
+    height: inherit;
 
-    animation: breathe-box 1s ease-in-out 0s infinite alternate;
+    animation: breathe 1s ease-in-out 0s infinite alternate;
 }
 
-.box::before,
-.box::after {
-    content: '';
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
+.left-box {
     position: absolute;
-    width: 100%;
-    height: 100%;
-    background-color: black;
-}
-
-.box::before {
     transform: rotateZ(60deg);
-    border-top: solid 4px $right-top-color;
-    border-bottom: solid 4px $left-bottom-color;
-
-    animation: breathe-before 1s ease-in-out 0s infinite alternate;
 }
 
-.box::after {
+.right-box {
+    position: absolute;
     transform: rotateZ(-60deg);
-    border-top: solid 4px $left-top-color;
-    border-bottom: solid 4px $right-bottom-color;
-
-    animation: breathe-after 1s ease-in-out 0s infinite alternate;
 }
 
-@keyframes breathe-box {
+.box-line {
+    width: 108px;
+    height: 4px;
+}
+
+.top-line {
+    background-color: $top-color;
+    animation: breathe-top 1s ease-in-out 0s infinite alternate;
+    //box-shadow: 0px -4px 10px 0px $top-color;
+}
+
+.bottom-line {
+    background-color: $bottom-color;
+    animation: breathe-bottom 1s ease-in-out 0s infinite alternate;
+    //box-shadow: 0px 4px 10px 0px $bottom-color;
+}
+
+.left-top-line {
+    background-color: $left-top-color;
+    animation: breathe-left-top 1s ease-in-out 0s infinite alternate;
+    //box-shadow: 0px -4px 10px 0px $left-top-color;
+}
+
+.right-bottom-line {
+    background-color: $right-bottom-color;
+    animation: breathe-right-bottom 1s ease-in-out 0s infinite alternate;
+    //box-shadow: 0px 4px 10px 0px $right-bottom-color;
+}
+
+.right-top-line {
+    background-color: $right-top-color;
+    animation: breathe-right-top 1s ease-in-out 0s infinite alternate;
+    //box-shadow: 0px -4px 10px 0px $right-top-color;
+}
+
+.left-bottom-line {
+    background-color: $left-bottom-color;
+    animation: breathe-left-bottom 1s ease-in-out 0s infinite alternate;
+    //box-shadow: 0px 4px 10px 0px $left-bottom-color;
+}
+
+@keyframes breathe {
     0% {
-        border-top-color: rgba($color: $top-color, $alpha: 0.4);
-        border-bottom-color: rgba($color: $bottom-color, $alpha: 0.4);
-        box-shadow:
-            0px -4px 10px -2px rgba($top-color, 0),
-            0px 4px 10px -2px rgba($bottom-color, 0);
+        opacity: 0.4;
     }
 
     100% {
-        border-top-color: rgba($color: $top-color, $alpha: 1);
-        border-bottom-color: rgba($color: $bottom-color, $alpha: 1);
-        box-shadow:
-            0px -4px 10px -2px rgba($top-color, 0.8),
-            0px 4px 10px -2px rgba($bottom-color, 0.8);
+        opacity: 1;
     }
 }
 
-@keyframes breathe-before {
+@keyframes breathe-top {
     0% {
-        border-top-color: rgba($color: $right-top-color, $alpha: 0.4);
-        border-bottom-color: rgba($color: $left-bottom-color, $alpha: 0.4);
         box-shadow:
-            0px -4px 10px -2px rgba($right-top-color, 0),
-            0px 4px 10px -2px rgba($left-bottom-color, 0);
+            0px -4px 10px 0px rgba($top-color, 0.6)
     }
 
     100% {
-        border-top-color: rgba($color: $right-top-color, $alpha: 1);
-        border-bottom-color: rgba($color: $left-bottom-color, $alpha: 1);
         box-shadow:
-            0px -4px 10px -2px rgba($right-top-color, 0.8),
-            0px 4px 10px -2px rgba($left-bottom-color, 0.8);
+            0px -4px 10px 0px rgba($top-color, 1)
     }
 }
 
-@keyframes breathe-after {
+@keyframes breathe-bottom {
     0% {
-        border-top-color: rgba($color: $left-top-color, $alpha: 0.4);
-        border-bottom-color: rgba($color: $right-bottom-color, $alpha: 0.4);
         box-shadow:
-            0px -4px 10px -2px rgba($left-top-color, 0),
-            0px 4px 10px -2px rgba($right-bottom-color, 0);
+            0px 4px 10px 0px rgba($bottom-color, 0.6)
     }
 
     100% {
-        border-top-color: rgba($color: $left-top-color, $alpha: 1);
-        border-bottom-color: rgba($color: $right-bottom-color, $alpha: 1);
         box-shadow:
-            0px -4px 10px -2px rgba($left-top-color, 0.8),
-            0px 4px 10px -2px rgba($right-bottom-color, 0.8);
+            0px 4px 10px 0px rgba($bottom-color, 1)
+    }
+}
+
+@keyframes breathe-left-top {
+    0% {
+        box-shadow:
+            0px -4px 10px 0px rgba($left-top-color, 0.6)
+    }
+
+    100% {
+        box-shadow:
+            0px -4px 10px 0px rgba($left-top-color, 1)
+    }
+}
+
+@keyframes breathe-right-bottom {
+    0% {
+        box-shadow:
+            0px 4px 10px 0px rgba($right-bottom-color, 0.6)
+    }
+
+    100% {
+        box-shadow:
+            0px 4px 10px 0px rgba($right-bottom-color, 1)
+    }
+}
+
+@keyframes breathe-right-top {
+    0% {
+        box-shadow:
+            0px -4px 10px 0px rgba($right-top-color, 0.6)
+    }
+
+    100% {
+        box-shadow:
+            0px -4px 10px 0px rgba($right-top-color, 1)
+    }
+}
+
+@keyframes breathe-left-bottom {
+    0% {
+        box-shadow:
+            0px 4px 10px 0px rgba($left-bottom-color, 0.6)
+    }
+
+    100% {
+        box-shadow:
+            0px 4px 10px 0px rgba($left-bottom-color, 1)
     }
 }
