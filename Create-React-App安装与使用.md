@@ -230,6 +230,137 @@ declare module 'react-app-rewire-alias';
 
 
 
+
+## 配置worker-loader
+
+假设我们在 React + TypeScript 项目中需要使用 web worker，而 初始化 worker 代码如下：
+
+```
+const worker = new Worker('xx/xxx.js')
+```
+
+我们可以看到 worker 需要加载 xxx.js，假设这个 xxx.js 是由我们自己编写，那就会遇到以下情况：
+
+1. 假设我们希望使用 ts 语法，也就是说我们创建的是 xxx.ts，那么还需要经过编译才可以转为 xxx.js，难道我们需要单独再新建一个项目专门用来编译 xxx.ts 吗？
+2. 假设我们不采取新建项目策略，那么就只能不使用 typescript 语法，直接创建 xxx.js 的形式。
+
+为了解决以上问题，最佳的解决方案就是使用 webpack 的插件 worker-loader。
+
+
+
+#### 安装并配置 worker-loader
+
+**第1步：安装**
+
+```
+yarn add worker-loader --dev
+//npm i worker-loader --save-dev
+```
+
+**第2步：添加 worker-loader 对应的 TypeScript 声明文件**
+
+在 src 目录下，创建 typing/worker-loader.d.ts，内容如下：
+
+```
+declare module "worker-loader!*" {
+  class WebpackWorker extends Worker {
+    constructor();
+  }
+  export = WebpackWorker;
+}
+```
+
+**第3步：添加 ESLint 声明**
+
+默认 create-react-app 已经包含有默认的 ESLint 规则，我们需要通过添加 .eslintrc 文件来做一些规则修改。
+
+在 项目根目录，也就是和 src 平级的目录下新建 .eslintrc 文件，内容如下：
+
+```
+{
+    "rules": {
+        "no-restricted-globals": ["error", "event", "fdescribe"],
+        "import/no-webpack-loader-syntax": "off"
+    }
+}
+```
+
+解释说明：
+
+1. "no-restricted-globals": ["error", "event", "fdescribe"] 这条规则的意思是，可以让我们在 worker.ts 中使用 `self` 而不报错
+2.  "import/no-webpack-loader-syntax": "off" 这条规则的意思是，可以让我们在通过 import 导入 worker.ts 的路径中，使用 “!” 这个特殊符号而不报错。
+
+
+
+**第4步：重启 VScode**
+
+之所以强调重启 VSCode 就是为了确保刚才所作的  .eslintrc 配置一定生效
+
+
+
+**第5步：编写 worker.ts 文件 **
+
+先编写一个比较简单的 worker 逻辑代码：
+
+```
+const handleMessage = (eve: MessageEvent<any>) => {
+    console.log(eve.data)
+}
+self.addEventListener('message', handleMessage)
+
+export default {}
+```
+
+> 注意：假设将来你实际调试时，收到浏览器警告提示：
+>
+> `Assign object to a variable before exporting as module default  import/no-anonymous-default-export`
+>
+> 这个警告的意思是 ESLint 希望你在导出对象之前，先将对象赋给一个变量。
+>
+> 你可以将上面代码中 `export default {}` 修改为：
+>
+> ```
+> const nothing = null
+> export default nothing
+> ```
+
+> 额外强调一点：通常我们约定将 worker 相关的文件命名为 worker.ts 或者 xxx.worker.ts
+
+
+
+**第6步：引入 worker.ts 文件**
+
+index.tsx 引入 worker.ts 的代码为：
+
+> 我们假设 index.tsx 和 worker.ts 位于同一目录中
+
+```
+import Worker from 'worker-loader!./worker'
+```
+
+> 切记，引入 worker.ts 的路径，一定要以 `worker-loader!`为开头。
+
+
+
+创建 Worker 的代码如下：
+
+```
+import Worker from 'worker-loader!./worker'
+const HomePage = () => {
+    const worker = new Worker()
+    const handleClick = () => {
+        worker.postMessage({ data: 'hello worker' })
+    }
+    return (
+        <div onClick={handleClick} style={{ width: '300px', height: '300px',backgroundColor:'green' }} ></div>
+    )
+}
+export default HomePage
+```
+
+至此，关于 worker-loader 是配置和演示完成，可以愉快得使用 ts 语法来编写 worker 内容了。
+
+
 ## 安装echart模块
 
 ```
