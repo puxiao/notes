@@ -11,8 +11,6 @@
 * [**Worker新建Worker**](#Worker新建Worker)
 * [**页面内嵌WebWorker代码**](#页面内嵌WebWorker代码)
 * [**React内嵌WebWorker代码**](#React内嵌WebWorker代码)
-* [**React+TypeScrpt内嵌WebWorker代码**](#React+TypeScrpt内嵌WebWorker代码)
-* [**关于内嵌代码的总结语**](#关于内嵌代码的总结语)
 
 
 
@@ -132,6 +130,14 @@ worker.postMessage({name:'puxiao',age:18},'http://localhost:3000/')
    > 若为 * 则表示不限制，建议将该值设置为具体的网址。
    >
    > 在 JS 中第二个参数不填写也不报错，但是在 TS 中则第二个参数为必填项。
+   >
+   > 在 React + TypeScript 中，Worker 的第 2 个参数类型和 JS 中不一样
+   >
+   > ```
+   > type Transferable = ArrayBuffer | MessagePort | ImageBitmap | OffscreenCanvas;
+   > 
+   > postMessage(message: any, transfer: Transferable[]): void;
+   > ```
 
 
 
@@ -375,6 +381,16 @@ worker.postMessage(arrBuffer,[arrBuffer])
 
 
 
+或者是 canvas：
+
+```
+const canvas = document.querySelector('#canvas')
+const offscreen = canvas.transferControlToOffscreen
+const worker = new Worker('xxx.js',[offscreen])
+```
+
+
+
 ## Worker新建Worker
 
 顾名思义，就是 worker 内部再创建 worker。
@@ -450,291 +466,129 @@ worker.postMessage = function (eve){
 
 
 
-### 方案1：依然通过 Blob + URL.createObjectURL 来模拟实现
+### 终极方案：使用worker-loader
 
-和内嵌网页的方式原理相同。
+为了解决以上问题，最佳的解决方案就是使用 webpack 的插件 worker-loader。
 
-**第1步：创建包含任务代码的模块**
+下面我们讲解在 React + TypeScript 环境下配置 worker-loader 的步骤。
 
-```
-/* eslint-disable @typescript-eslint/no-explicit-any */
+#### 安装并配置 worker-loader
 
-//上面那行注释非常重要，忽略 ESlint 的某些错误，否则在严格模式下程序会报错误：无法找到 self
-
-//workcode 中是用来编写和存放 work 任务 JS 的
-const workcode = () => {
-    setInterval(() => {
-        postMessage({
-            num: Math.floor(Math.random()* 100)
-        }, 'timer')
-    }, 1000)
-    //补充说明：按照官方文档介绍，poseMessage()第2个参数应该是填写目标窗口的网址
-    //但是我自己试验发现也可以填写随意的字符串，例如我这里填写的 timer，也是可以正常实行的。
-    //本文后面的其他示例代码中若出现类似的情况，请留意我此刻的注释，不再重复说明
-
-    onmessage = (eve: MessageEvent) => {
-        console.log(eve)
-    }
-}
-
-let code = workcode.toString()
-code = code.substring(code.indexOf('{') + 1, code.lastIndexOf('}'))
-
-const blob = new Blob([code], { type: 'application/javascript' })
-const workscript = URL.createObjectURL(blob)
-
-export default workscript
-```
-
-> 再次强调：一定要在顶部添加 忽略 ESlint 报错的注释代码
-
-
-
-**第2步：引入并创建 web worker**
+**第1步：安装**
 
 ```
-import workscript from './work'
-...
-
-let worker = new Worker(workscript)
+yarn add worker-loader --dev
+//npm i worker-loader --save-dev
 ```
 
 
 
-### 方案2：创建一个负责转化 work 内容的类 WebWorker
+> 假设你的 React 中并未使用 TypeScript，那么请忽略第 2 步
+>
+> 并且将后面步骤中 worker.ts(包括 worker 中的代码) 都修改成对应的 worker.js 版本
 
-方案2 是在 方案1 的基础上进行了优化封装。
+**第2步：添加 worker-loader 对应的 TypeScript 声明文件**
 
-**第1步：创建一个负责转化 work 的类：**
+在 src 目录下，创建 typing/worker-loader.d.ts，内容如下：
 
 ```
-export default class WebWorker {
-    constructor(worker) {
-        const code = worker.toString();
-        const blob = new Blob(["(" + code + ")()"]);
-        return new window.Worker(URL.createObjectURL(blob));
-    }
+declare module "worker-loader!*" {
+  class WebpackWorker extends Worker {
+    constructor();
+  }
+  export = WebpackWorker;
 }
 ```
 
 
 
-**第2步：在 React 中使用这个 Webworker：**
+**第3步：添加 ESLint 声明**
+
+默认 create-react-app 已经包含有默认的 ESLint 规则，我们需要通过添加 .eslintrc 文件来做一些规则修改。
+
+在 项目根目录，也就是和 src 平级的目录下新建 .eslintrc 文件，内容如下：
 
 ```
-import React, { useState, useEffect } from 'react';
-import WebWorker from './worker.js'
+{
+    "rules": {
+        "no-restricted-globals": ["error", "event", "fdescribe"],
+        "import/no-webpack-loader-syntax": "off"
+    }
+}
+```
 
-const App = () => {
-    const [time, setTime] = useState('')
-    const [worker, setWorker] = useState()
+解释说明：
 
-    //在 useEffect 中，let work = function(){ ... } 定义的内容就是 web worker 的任务内容
-    useEffect(() => {
-        let work = function () {
-            setInterval(() => {
-                postMessage({
-                    action: 'updateTime',
-                    time: new Date(Date.now() + 8 * 60 * 60 * 1000).toJSON().substr(0, 19).replace('T', ' ')
-                })
-            }, 1000)
-        }
-        setWorker(new WebWorker(work))
-        return () => {
-            worker?.terminate()
-            setWorker(null)
-        }
-    }, [])
+1. "no-restricted-globals": ["error", "event", "fdescribe"] 这条规则的意思是，可以让我们在 worker.ts 中使用 `self` 而不报错
+2.  "import/no-webpack-loader-syntax": "off" 这条规则的意思是，可以让我们在通过 import 导入 worker.ts 的路径中，使用 “!” 这个特殊符号而不报错。
 
-    useEffect(() => {
-        if (worker) {
-            worker.onmessage = (eve) => {
-                setTime(eve.data.time)
-            }
-        }
-    }, [worker])
 
+
+**第4步：重启 VScode**
+
+之所以强调重启 VSCode 就是为了确保刚才所作的  .eslintrc 配置一定生效
+
+
+
+**第5步：编写 worker.ts 文件 **
+
+先编写一个比较简单的 worker 逻辑代码：
+
+```
+const handleMessage = (eve: MessageEvent<any>) => {
+    console.log(eve.data)
+}
+self.addEventListener('message', handleMessage)
+
+export default {}
+```
+
+> 注意：假设将来你实际调试时，收到浏览器警告提示：
+>
+> `Assign object to a variable before exporting as module default  import/no-anonymous-default-export`
+>
+> 这个警告的意思是 ESLint 希望你在导出对象之前，先将对象赋给一个变量。
+>
+> 你可以将上面代码中 `export default {}` 修改为：
+>
+> ```
+> const nothing = null
+> export default nothing
+> ```
+
+> 额外强调一点：通常我们约定将 worker 相关的文件命名为 worker.ts 或者 xxx.worker.ts
+
+
+
+**第6步：引入 worker.ts 文件**
+
+index.tsx 引入 worker.ts 的代码为：
+
+> 我们假设 index.tsx 和 worker.ts 位于同一目录中
+
+```
+import Worker from 'worker-loader!./worker'
+```
+
+> 切记，引入 worker.ts 的路径，一定要以 `worker-loader!`为开头。
+
+
+
+创建 Worker 的代码如下：
+
+```
+import Worker from 'worker-loader!./worker'
+const HomePage = () => {
+    const worker = new Worker()
+    const handleClick = () => {
+        worker.postMessage({ data: 'hello worker' })
+    }
     return (
-        <div>{time}</div>
-    );
-}
-
-export default App;
-```
-
-> 注意：无论 方案1 或 方案2，在实际运行过程中，浏览器都会发出一些错误警告，但不影响程序运行。
-
-
-
-## React+TypeScrpt内嵌WebWorker代码
-
-前面讲的是在 React 中如何内嵌 web worker 代码，其实代码并不是优雅规范的，因为上面的代码中其实利用了一些原生 JS 超强的兼容(纠错)性，加上忽略一些 ESlint 错误才运行起来。
-
-如果是 React 中使用了 TS，那么更加推荐以下方式。
-
-该解决方案是使用 别人写好的 类库：https://github.com/dai-shi/react-hooks-worker
-
-下面演示的代码，实际上是在这个 类库的基础上，适当修改而来的。
-
-
-
-### 封装 2 个模块：exposeWorker 和 useWorker
-
-#### exposeWorker：负责导出任务代码的模块
-
-文件路径：src/hooks/exposeWorker.ts
-
-```
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-//请注意，本JS顶部依然需要添加一些忽略 ESlint 错误的注释代码
-
-const exposeWorker = (func: (data: any) => any) => {
-    self.onmessage = async (e: MessageEvent) => {
-        const r = func(e.data)
-        if (r[Symbol.asyncIterator]) {
-            for await (const i of r) (self.postMessage as any)(i)
-        } else if (r[Symbol.iterator]) {
-            for (const i of r) (self.postMessage as any)(i)
-        } else {
-            (self.postMessage as any)(await r)
-        }
-    }
-}
-
-export default exposeWorker
-```
-
-
-
-#### useWorker：负责封装使用Worker的模块
-
-文件路径：src/hooks/useWorker.ts
-
-```
-import { useEffect, useMemo, useRef, useState } from 'react'
-
-type State = {
-    result?: unknown,
-    error?: 'error' | 'messageerror'
-}
-
-const initialState: State = {}
-
-const useWorker = (createWorker: () => Worker, input: unknown) => {
-    const [state, setState] = useState<State>(initialState)
-    const worker = useMemo(createWorker, [createWorker])
-    const lastWorker = useRef<Worker>(worker)
-    useEffect(() => {
-        lastWorker.current = worker
-        let setStateSafe = (nextState: State) => setState(nextState)
-        worker.onmessage = (e) => setStateSafe({ result: e.data })
-        worker.onerror = () => setStateSafe({ error: 'error' })
-        worker.onmessageerror = () => setStateSafe({ error: 'messageerror' })
-        return () => {
-            setStateSafe = () => null
-            worker.terminate()
-            setState(initialState)
-        }
-    }, [worker])
-
-
-    useEffect(() => {
-        lastWorker.current.postMessage(input)
-    }, [input])
-
-    return state
-}
-
-export default useWorker
-```
-
-
-
-### 示例1：单纯的计算任务
-
-#### 本示例说明
-
-worker 线程 的任务是单纯的数学计算，并把最终结果返回给 JS 线程。
-
-
-
-#### 编写任务文件内容
-
-我们设定计算任务是：给出一个正整数 N，计算出 1 + 2 + 3 + ... N 的结果
-
-文件路径：src/work.tsx
-
-```
-import React from 'react'
-import useWorker from './hooks/useWorker'
-
-const calcFib = (num: number) => {
-    const fib = (i: number) => {
-        let result = 0;
-        while (i > 0) {
-            result += i
-            i--
-        }
-        return result
-    }
-    return fib(num)
-}
-
-const blob = new Blob([
-    `self.func = ${calcFib.toString()};`,
-    'self.onmessage = (e) => {',
-    '  const result = self.func(e.data);',
-    '  self.postMessage(result);',
-    '};',
-], { type: 'text/javascript' })
-
-const url = URL.createObjectURL(blob)
-const createWorker = () => new Worker(url)
-
-const Work: React.FC<{ num: number }> = ({ num }) => {
-    const { result, error } = useWorker(createWorker, num)
-    if (error) {
-        return (<div>Error: { error } </div>)
-    } else {
-        return (<div>Result: { result } </div>)
-    }
-}
-
-export default Work
-```
-
-
-
-#### 实际使用示例
-
-文件路径：src/app.tsx
-
-```
-import React from 'react';
-import Work from './work';
-
-const App = () => {
-    return (
-        <Work num={10} />
+        <div onClick={handleClick} style={{ width: '300px', height: '300px',backgroundColor:'green' }} ></div>
     )
 }
-
-export default App;
+export default HomePage
 ```
 
+至此，关于 worker-loader 是配置和演示完成，可以愉快得使用 ts 语法来编写 worker 内容了。
 
-
-### 示例2：定时器，不断触发计算任务
-
-#### 示例说明
-
-原计划想写一个实例，worker 内部有一个定时器，每个 1 秒执行一次计算任务，并把结果通过 postMessage 发送给 JS 主线程。
-
-结果试验了很久都没写成功，因为会触发各种意想不到的错误，姑且暂时放下。
-
-
-
-## 关于内嵌代码的总结语
-
-**官方推荐的创建 web worker 的构造函数 Worker() 是需要传入外部一个 JS 文件，因此就不要再在 React 中勉强使用 内嵌 JS 或 TS 的方式了，避免一些莫名其妙的错误。尽管上面示例中已经成功展示了如何内嵌，但依然觉得问题多多，还是老老实实在外部新建项目来专门编写对应 worker 任务脚本吧。**
