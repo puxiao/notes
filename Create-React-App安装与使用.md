@@ -368,7 +368,7 @@ export default HomePage
 
 不过最简单的办法就是避免 index.tsx 和 worker.ts 都使用第三方库。
 
-本人建议：如果使用 worker，那么就将运算转转移得彻底一些，只让 worker.ts 引用第三方库，index.tsx 不再引用第三方库。
+本人建议：如果使用 worker，那么就将运算转转移得彻底一些，只让 worker.ts 引用某个第三方库，index.tsx 不再引用这个第三方库。
 
 
 ## 安装echart模块
