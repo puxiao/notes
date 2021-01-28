@@ -215,10 +215,9 @@ worker.terminate()
 **监听主线程发送的消息**
 
 ```
-addEventListener('message',function(eve){
+self.addEventListener('message',function(eve){
   console.log(eve.data)
 },false)
-//上述代码中其实隐含的是 this.addEventListener(...)，但是在 TS 语法下 this 会被报有可能未定义，因此还是不写 this 为好。
 ```
 
 或者
@@ -233,9 +232,27 @@ self.onmessage=function(eve){
 解释说明：
 
 1. Web Worker 内部，可以使用 addEventListener() 或 self.onmessage 来监听主线程发送的消息。
+
 2. event.data 为消息内容。
 
+3. 在 TS 环境中可能会报错：self 未定义，解决办法是在 worker.ts 顶部添加一条注释语句，让 ESLint 忽略这个错误：
 
+   ```
+   /* eslint-disable-next-line no-restricted-globals */
+   self.addEventListener...
+   ```
+
+   或者在项目根目录(并非src目录)新建 .eslintrc 文件，内容为：
+
+   ```
+   {
+       "rules": {
+           "no-restricted-globals": ["error", "event", "fdescribe"]
+       }
+   }
+   ```
+
+   
 
 **向主线程发送消息**
 
@@ -345,6 +362,58 @@ self.close()
 | 监听错误         | self.onerror(function(eve){ ... })         |
 | 监听发送消息错误 | self.onmessageerror(function(eve){ ... })  |
 | 关闭自身         | self.close()                               |
+
+
+
+### 实用技巧：index.js 调用 worker.js 中某个函数
+
+假设 worker.js 中需要定义有 3 个不同用途的函数，且函数参数也不同，通常我们使用以下方式。
+
+```
+/* eslint-disable-next-line no-restricted-globals */
+
+const funA = (str) =>{
+    ...
+}
+
+const funB = (num) => {
+    ...
+}
+
+const funC = (arr) => {
+    ...
+}
+
+const handles = {
+    funA,
+    funB,
+    funC
+}
+
+const handleMessage = (eve) =>{
+    const fun = handles[eve.data.type] //通过区分 type 来知道需要调用哪个函数
+    if(fun === undefined){
+        throw new Error(`no handle for type:${eve.data.type}`)
+    }
+    fun(eve.data.params) //获取参数，并调用该函数
+}
+
+self.addEventListener('message',handleMessage)
+```
+
+这样 index.js 就可以在发送数据时，通过添加 type 和 params 属性值来告知 worker.js 来执行哪个函数以及该函数的参数：
+
+```
+worker.poseMessage({type:'funA',params:'hello worker'})
+```
+
+
+
+**使用条件判断来决定执行哪个函数**
+
+可以不选择使用 const handles = { ... } 这种方式，而是通过 switch(eve.data.type) 来判断该执行哪个函数，尤其是在 TS 环境中，这种方式更加合适。
+
+
 
 
 
@@ -520,7 +589,7 @@ declare module "worker-loader!*" {
 解释说明：
 
 1. "no-restricted-globals": ["error", "event", "fdescribe"] 这条规则的意思是，可以让我们在 worker.ts 中使用 `self` 而不报错
-2.  "import/no-webpack-loader-syntax": "off" 这条规则的意思是，可以让我们在通过 import 导入 worker.ts 的路径中，使用 “!” 这个特殊符号而不报错。
+2. "import/no-webpack-loader-syntax": "off" 这条规则的意思是，可以让我们在通过 import 导入 worker.ts 的路径中，使用 “!” 这个特殊符号而不报错。
 
 
 
@@ -593,14 +662,13 @@ export default HomePage
 至此，关于 worker-loader 是配置和演示完成，可以愉快得使用 ts 语法来编写 worker 内容了。
 
 
+
 **补充说明：第三方库会被打包 2 次，会增大最终包的文件体积**
 
-假设 index.tsx 和 worker.ts 都使用了某个第三方库，那么这个库的代码会被分别打包进去 2 次，会造成最终打包成包的文件体积比较大。
+假设 index.tsx 和 worker.ts 都使用了同一个第三方库，那么这个库的代码会被分别打包进去 2 次，会造成最终打包成包的文件体积比较大。
 
 请一定记得这个隐患，暂时还未找到解决方案。
 
 不过最简单的办法就是避免 index.tsx 和 worker.ts 都使用第三方库。
 
 本人建议：如果使用 worker，那么就将运算转转移得彻底一些，只让 worker.ts 引用某个第三方库，index.tsx 不再引用这个第三方库。
-
-
