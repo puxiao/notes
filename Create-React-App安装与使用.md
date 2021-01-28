@@ -230,7 +230,6 @@ declare module 'react-app-rewire-alias';
 
 
 
-
 ## 配置worker-loader
 
 假设我们在 React + TypeScript 项目中需要使用 web worker，而 初始化 worker 代码如下：
@@ -288,7 +287,7 @@ declare module "worker-loader!*" {
 解释说明：
 
 1. "no-restricted-globals": ["error", "event", "fdescribe"] 这条规则的意思是，可以让我们在 worker.ts 中使用 `self` 而不报错
-2.  "import/no-webpack-loader-syntax": "off" 这条规则的意思是，可以让我们在通过 import 导入 worker.ts 的路径中，使用 “!” 这个特殊符号而不报错。
+2. "import/no-webpack-loader-syntax": "off" 这条规则的意思是，可以让我们在通过 import 导入 worker.ts 的路径中，使用 “!” 这个特殊符号而不报错。
 
 
 
@@ -308,21 +307,9 @@ const handleMessage = (eve: MessageEvent<any>) => {
 }
 self.addEventListener('message', handleMessage)
 
-export default {}
+//导出 {} 是因为 .ts 类型的文件必须有导出对象才可以被 TS 编译成模块，而不是全局对象
+export {}
 ```
-
-> 注意：假设将来你实际调试时，收到浏览器警告提示：
->
-> `Assign object to a variable before exporting as module default  import/no-anonymous-default-export`
->
-> 这个警告的意思是 ESLint 希望你在导出对象之前，先将对象赋给一个变量。
->
-> 你可以将上面代码中 `export default {}` 修改为：
->
-> ```
-> const nothing = null
-> export default nothing
-> ```
 
 > 额外强调一点：通常我们约定将 worker 相关的文件命名为 worker.ts 或者 xxx.worker.ts
 
@@ -360,6 +347,8 @@ export default HomePage
 
 至此，关于 worker-loader 是配置和演示完成，可以愉快得使用 ts 语法来编写 worker 内容了。
 
+
+
 **补充说明：第三方库会被打包 2 次，会增大最终包的文件体积**
 
 假设 index.tsx 和 worker.ts 都使用了某个第三方库，那么这个库的代码会被分别打包进去 2 次，会造成最终打包成包的文件体积比较大。
@@ -371,10 +360,13 @@ export default HomePage
 本人建议：如果使用 worker，那么就将运算转转移得彻底一些，只让 worker.ts 引用某个第三方库，index.tsx 不再引用这个第三方库。
 
 
+
 ## 安装echart模块
 
 ```
 //npm i echarts @types/echarts --save
-yarn add echarts @types/echarts --save
+yarn add echarts @types/echarts
 ```
+
+
 
