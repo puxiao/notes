@@ -11,8 +11,6 @@
 yarn global add create-react-app
 ```
 
-> 目前最新版本为 4.0.0
-
 
 
 ## 初始化普通React项目
@@ -113,7 +111,7 @@ React 发布后，将项目上传到服务器，默认必须是网站根目录�
 ```
 //npm i node-sass --save-dev
 
-yarn add node-sass
+yarn add node-sass --dev
 
 //如果你的 create-react-app 版本不是最新的，那么你只能安装
 yarn add node-sass@4.14.1 --dev
