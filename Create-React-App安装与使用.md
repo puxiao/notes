@@ -111,10 +111,11 @@ React 发布后，将项目上传到服务器，默认必须是网站根目录�
 ## 添加Scss/Sass支持
 
 ```
-//npm i node-sass@4.14.1 --save-dev
+//npm i node-sass --save-dev
 
-//sass最新版本为 5.0.0
-//但是由于 create-react-app 4.0.0 中的 sass-loader 目前不支持 sass 5，所以只能先安装 sass 4
+yarn add node-sass
+
+//如果你的 create-react-app 版本不是最新的，那么你只能安装
 yarn add node-sass@4.14.1 --dev
 ```
 
