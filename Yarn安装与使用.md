@@ -35,11 +35,79 @@ yarn 对中国用户非常友好，提供中文官方文档：https://classic.ya
 
 ## yarn安装
 
+#### Windows系统安装：
+
 **安装文件下载地址：**https://classic.yarnpkg.com/zh-Hans/docs/install
 
 **Windows系统安装：**https://classic.yarnpkg.com/latest.msi
 
-**校验是否安装成功：**
+
+
+#### Linux、CentOS7安装：
+
+**第1种安装方式(推荐)：使用官方提供的脚本安装**
+
+```
+curl -o- -L https://yarnpkg.com/install.sh | bash
+```
+
+上述命令执行完成后，会输出以下内容：
+
+```
+> GPG signature looks good
+> Extracting to ~/.yarn...
+> Adding to $PATH...
+> We've added the following to your /root/.bashrc
+> If this isn't the profile of your current shell then please add the following to your correct profile:
+   
+export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+
+> Successfully installed Yarn 1.22.5! Please open another terminal where the `yarn` command will now be available.
+```
+
+请特别留意上面的提示内容。
+
+**尽管已安装成功，但假设你依然无法使用 yarn** (因为系统 PATH 中未创建 yarn 真正目录连接)，
+
+例如你执行：
+
+```
+yarn -v
+```
+
+收到错误提示：
+
+```
+-bash: yarn: command not found
+```
+
+那么请执行：
+
+```
+export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+```
+
+执行过后，就可以愉快使用 yarn 了。
+
+
+
+**第2种安装方式：使用 npm 安装**
+
+```
+npm i -g yarn
+```
+
+**第3种安装方式：使用 yum 安装**
+
+```
+yum install -y yarn
+```
+
+> 本人不推荐的理由是担心 yum 仓库中 yarn 版本不是最新的
+
+
+
+#### 校验是否安装成功：
 
 ```
 yarn -v 或 yarn --version
