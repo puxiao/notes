@@ -282,7 +282,7 @@ location / {
 
 http://localhost:3000/
 
-在 code-server 执行调试后测试地址依然是 http://localhost:3000/，而我们在客户端是没法访问服务器的 http://localhost:3000/
+在 code-server 执行调试后测试地址依然是 http://localhost:3000/ 而我们在客户端是没法访问服务器的 http://localhost:3000/
 
 因此为了解决这个问题，还需要额外通过 Nginx 配置一个 3000 端口供外网访问。
 
