@@ -159,6 +159,24 @@ systemctl restart code-server@$USER
 
 
 
+#### 补充：管理 code-server
+
+关闭，停止 code-server：
+
+```
+systemctl stop code-server@$USER
+```
+
+启动 code-server：
+
+```
+systemctl start code-server@USER
+```
+
+
+
+
+
 ## 添加Nginx配置
 
 #### 我们需要做的事情：
@@ -247,7 +265,6 @@ location / {
 
 
 
-
 ## 注意事项
 
 #### 调试脚本
@@ -289,4 +306,3 @@ http://localhost:3000/
 或者为了省事，直接通过服务器 IP 来访问调试地址。
 
 例如服务器 IP 为：106.54.232.192，那么对应调试地址：http://106.54.232.192:3000/
-
