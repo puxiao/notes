@@ -245,3 +245,48 @@ location / {
 
 [CentOS安装Nodejs.md](https://github.com/puxiao/notes/blob/master/CentOS%E5%AE%89%E8%A3%85Nodejs.md)、[NPM常用命令.md](https://github.com/puxiao/notes/blob/master/NPM%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4.md)、[Yarn安装与使用.md](https://github.com/puxiao/notes/blob/master/Yarn%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8.md)
 
+
+
+
+## 注意事项
+
+#### 调试脚本
+
+默认 code-server 使用的是 sh，即 /bin/sh，这个命令工具可能无法调用某些程序。
+
+例如我在服务端已经安装好了 yarn，但是在浏览器端一直提示找不到 yarn 程序。
+
+> 我甚至在服务端尝试重启 code-server，重启之后依然不管用
+
+所以我建议修改 code-server 的脚本工具，将 sh 修改为 bash，即 /bin/bash。
+
+**修改方式：**
+
+1. 第1步：打开命令工具，快键键和本机 VSCode 一模一样：ctrl + `
+
+2. 第2步：点击命令工具选择框，点击 “Select Default Shell”
+
+3. 第3步：在弹出的选择框中，点击 “bash  /bin/bash”
+
+4. 第4步：刷新当前浏览器
+
+   > 经过测试，只有刷新浏览器后，刚才的设置才会真正生效。
+
+修改之后，使用 bash 命令工具就可以找到 yarn 了。
+
+
+
+#### 关于调试
+
+在本机 VSCode 执行 `yarn start` 或 `npm run start` 时，默认会创建并弹出调试地址：
+
+http://localhost:3000/
+
+在 code-server 执行调试后测试地址依然是 http://localhost:3000/，而我们在客户端是没法访问服务器的 http://localhost:3000/
+
+因此为了解决这个问题，还需要额外通过 Nginx 配置一个 3000 端口供外网访问。
+
+或者为了省事，直接通过服务器 IP 来访问调试地址。
+
+例如服务器 IP 为：106.54.232.192，那么对应调试地址：http://106.54.232.192:3000/
+
