@@ -1,0 +1,247 @@
+# code-server安装与使用
+
+通过浏览器可以在任意电脑上使用 VSCode 了。
+
+
+
+## code-server简介
+
+code-server 是安装在服务器端，高仿 VSCode 的一款应用程序。
+
+服务器端安装成功后，可以使用浏览器访问线上地址，获得与本地 VSCode 相似的开发界面。
+
+> 说直白一点就是浏览器版的 VScode，让你何时何地都可以写、调试代码
+
+
+
+code-server 官网：https://coder.com/
+
+code-server 项目地址：https://github.com/cdr/code-server
+
+
+
+## code-server安装
+
+> code-server 目前最新版本为 3.9.0
+
+有非常多种 安装运行 code-server 的方式，可以查阅官方提供的安装指南：
+
+https://github.com/cdr/code-server/blob/v3.8.1/docs/install.md
+
+安装的方式有：yarn、npm、docker、install.sh 脚本安装等。
+
+由于服务器端多数都是 Linux 系统，所以本文只讲解在 CentOS7 上如何安装。
+
+> 若服务端是 Windows，那么我推荐你使用 yarn、npm、docker
+
+
+
+**我的服务器是腾讯云 CentOS7。**
+
+
+
+**最开始我尝试使用官方提供的 Docker 安装方式，但是 docker 容器一启动就关闭。**
+
+```
+mkdir -p ~/.config
+docker run -it --name code-server -p 127.0.0.1:8080:8080 \
+  -v "$HOME/.config:/home/coder/.config" \
+  -v "$PWD:/home/coder/project" \
+  -u "$(id -u):$(id -g)" \
+  -e "DOCKER_USER=$USER" \
+  codercom/code-server:latest
+```
+
+> 我也不清楚哪里出问题， 最终我选择放弃 Docker 这种方式。
+
+
+
+#### 最后，我选择使用 rpm 方式安装，并且安装成功。
+
+接下来我将详细讲解安装步骤。
+
+#### 第1步：下载获取 rpm 程序包
+
+打开 code-server 最新版本介绍页，当前最新版本为 3.9.0：
+
+https://github.com/cdr/code-server/releases/tag/v3.9.0
+
+找到最新 rpm 包下载地址：
+
+https://github.com/cdr/code-server/releases/download/v3.9.0/code-server-3.9.0-amd64.rpm
+
+
+
+下载该 rpm 文件到服务器某程序目录。
+
+> 我本人习惯是将安装程序放到 /software 中
+
+下载方式有 2 种：
+
+1. 使用 curl 命令方式下载
+
+   ```
+   curl -fOL https://github.com/cdr/code-server/releases/download/v3.9.0/code-server-3.9.0-amd64.rpm
+   ```
+
+2. 在客户端下载 rpm 文件，然后通过 xftp 工具上传到服务器中
+
+
+
+#### 第2步：执行安装
+
+```
+dpkg -i code-server_3.9.0_amd64.deb
+systemctl enable --now code-server@$USER
+```
+
+执行完成后，你可能会看到以下输出信息：
+
+```
+[rootxxxxxxxxxxx]# systemctl enable --now code-server@$USER
+Created symlink from /etc/systemd/system/default.target.wants/code-server@root.service to /usr/lib/systemd/system/code-server@.service.
+```
+
+这表明已安装成功，但是此时 code-server 还并未真正可以使用，我们还需修改配置文件。
+
+
+
+#### 第3步：修改配置文件
+
+默认 code-server 的配置文件位于：
+
+```
+~/.config/code-server/config.yaml
+```
+
+> 特别提醒：
+>
+> 1. 假设目录名以 . 开头，在 xftp 中是无法直接查看该目录的
+> 2. 但是是可以通过 shell 命令查看到
+> 3. 若想在 xftp 中访问该目录，则需要在 xftp 目录路径中手工输入该地址，即可查看到该目录下的文件内容
+
+> 我实在不习惯使用 vim 在线编辑文档，所以我采用的是将 config.yaml 文件下载到本机，修改内容后再上传替换。
+
+我们可以看到 config.yaml 默认的内容为：
+
+```
+bind-addr: 127.0.0.1:8080
+auth: password
+password: b0sdfsfasdfasdf34242
+cert: false
+```
+
+1. bind-addr: 127.0.0.1:8080：由于服务器端 8080 端口通常会被占用，所以我们需要修改成特定的端口，例如 8120
+2. password: b0sdfsas....：这一行是 code-server 默认帮我们设定的密码，我们可以修改成自己的密码，例如 myxxxxx
+
+最终我们可以将内容修改为：
+
+```
+bind-addr: 127.0.0.1:8120
+auth: password
+password: myxxxxx
+cert: false
+```
+
+然后将 config.yaml 上传替换 之前的文件。
+
+
+
+#### 第4步：重启 code-server
+
+```
+systemctl restart code-server@$USER
+```
+
+重启之后，我们刚才修改的端口和密码就可以生效了。
+
+但是此时 code-server 仅仅可以在服务端 127.0.0.1:8120 访问，我们需要通过添加 Nginx 配置，设置反向代理，让客户端(外网)也可以访问。
+
+
+
+## 添加Nginx配置
+
+#### 我们需要做的事情：
+
+1. 添加域名解析到服务器，例如 xxx.xxxxx.com
+2. 申请免费的 https 证书，实现 https
+3. 添加对应的 配置文件，反向代理本地 127.0.0.1:8120 端口
+4. 执行 nginx -s reload，让新添加的配置生效。
+
+上述具体的 Nginx 相关操作，可参考我的另外一篇文章 [Nginx学习笔记.md](https://github.com/puxiao/notes/blob/master/Nginx%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.md)
+
+这里重点讲解一下配置文件中的一点注意事项。
+
+
+
+#### 配置文件示例：
+
+```
+#------xxx.xxxxx.com------
+
+#HTTP server
+server {
+    listen 80;
+    server_name xxx.xxxxx.com;
+    return 301 https://$host$request_uri;
+}
+
+#HTTPS server
+server {
+    listen       443 ssl;
+    server_name  xxx.xxxxx.com;
+
+    ssl_certificate      ./ssl/1_code.puxiao.com_bundle.crt;
+    ssl_certificate_key  ./ssl/2_code.puxiao.com.key;
+
+    ssl_session_cache    shared:SSL:1m;
+    ssl_session_timeout  5m;
+
+    ssl_ciphers  ECDHE-RSA-AES128-GCM-SHA256:HIGH:!aNULL:!MD5:!RC4:!DHE;
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+    ssl_prefer_server_ciphers  on;
+
+    location / {
+        proxy_pass http://127.0.0.1:8120;
+        proxy_set_header Host $host;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection upgrade;
+    }
+}
+```
+
+请注意上面配置中，关于反向代理的特殊设置。
+
+```
+location / {
+        proxy_pass http://127.0.0.1:8120;
+        proxy_set_header Host $host;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection upgrade;
+    }
+```
+
+每一项都要添加，这样才可以保证浏览器访问时，页面可以显示正常。
+
+> 由于 code-server 使用到了 websocket，所以必须添加 proxy_set_header、proxy_set_header、proxy_set_header
+
+
+
+当该配置文件生效后，前端浏览器访问 xxx.xxxxx.com 即可看到。
+
+> 第一次打开该页面，需要你输入 config.yaml 当时配置的密码
+
+
+
+## 其他安装
+
+对于前端开发者来说，为了顺利正确使用 code-server，还需要提前在服务端安装好相关的其他软件：
+
+1. nodejs
+2. npm
+3. yarn
+
+如何安装上述程序，请参考我的另外文章：
+
+[CentOS安装Nodejs.md](https://github.com/puxiao/notes/blob/master/CentOS%E5%AE%89%E8%A3%85Nodejs.md)、[NPM常用命令.md](https://github.com/puxiao/notes/blob/master/NPM%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4.md)、[Yarn安装与使用.md](https://github.com/puxiao/notes/blob/master/Yarn%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8.md)
+
