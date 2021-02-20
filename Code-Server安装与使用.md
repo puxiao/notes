@@ -56,6 +56,32 @@ docker run -it --name code-server -p 127.0.0.1:8080:8080 \
 
 
 
+我也尝试使用 Docker-Compose 启动，也是失败。
+
+```
+# code-server 配置
+version: '3.8'
+services:
+    code-server:
+        image: codercom/code-server:3.9.0
+        container_name: code-server
+        command: mkdir -p ~/.config
+        environment: 
+            - DOCKER_USER=root
+            - PASSWORD=xxxxxx
+            - auth=password
+        volumes: 
+            - /root/coder/.config:/root/coder/.config
+            - /root/coder/project:/root/coder/project
+        ports: 
+            - 8120:8080
+        restart: always
+```
+
+> 如果你知道我错在哪里了，请告诉我。
+
+
+
 #### 最后，我选择使用 rpm 方式安装，并且安装成功。
 
 接下来我将详细讲解安装步骤。
@@ -172,8 +198,6 @@ systemctl stop code-server@$USER
 ```
 systemctl start code-server@USER
 ```
-
-
 
 
 
@@ -309,7 +333,6 @@ http://localhost:3000/
 
 
 
-
 **注意记得关闭调试**
 
 假设你在浏览器中执行了调试，服务器已经创建了 http://localhost:3000/，而此后你并没有主动执行关闭调试，即使你关闭了浏览器，服务器中会依然一直运行着 http://localhost:3000/。
@@ -333,5 +356,3 @@ http://localhost:3000/
    ```
 
    > 注意：是 kill 而不是 killall
-
-
