@@ -881,3 +881,170 @@ arr.forEach((_,index) => {
 当然这种写法并不特别提倡，毕竟代码阅读性不是特别好。
 
 > 如果别人不知道 下划线 _ 可以来充当变量名，起到占位作用，是会看懵的。
+
+
+
+
+## (24)可辨识类型
+
+在日常 TS 使用中，我们会使用这种形式
+
+```
+type xxx = string | number | any[]
+```
+
+这种形式叫 “联合类型”，和这个形式类似的还有另外一种高级用法——可辨识联合类型
+
+
+
+**可辨识类型的使用示例：**
+
+```
+interface Aaa {
+    type: 'a',
+    name: string
+}
+
+interface Bbb {
+    type: 'b',
+    age: number
+}
+
+interface Ccc {
+    type: 'c',
+    list:string[]
+}
+
+type ABC = Aaa | Bbb | Ccc
+```
+
+我们先定义彼此不相干的 3 个类，最后通过 Aaa | Bbb | Ccc 这种类似联合的形式组成了 ABC。
+
+那么 TypeScript 会去检查 3 个类的共同特点，然后推理出 ABC 应该拥有的特点。
+
+1. TS 发现这 3 个类的共同特征是都拥有 type 属性，且 type 属性的类型都不相同。
+2. 当我们在其他地方使用 ABC 类型时，就可以通过 ABC.type 来判断出究竟是哪个类的实例，并且给出该类型特有的其他属性语法提示和检查。
+
+
+
+**换一种说法：**
+
+在传统的面向对象编程语言中，我们必须先定义好父类，才能再定义子类。但是在 TS 中，我们可以先定义若干个 “子类”，然后将这些 “子类” 联合起来，让 TS 推理出 他们的 “父类” 应该是什么样子。
+
+> 切记，这些单独定义的 “子类” 应该至少有 1 项有相同的属性名且属性类型不同，这样的 ABC 才可以备 TS 可辨识推理出来。
+
+> 请注意是相同的属性名、不同的属性类型
+>
+> 如果是相同的属性名、不同的属性值，TS 是无法推理的。
+
+
+
+**应用场景：定义多个具有相似结构的子类，然后通过 Xxx.type 进行 TS 实例推理，得到对应具体子类的属性语法提示和检查。**
+
+
+
+**关于 类 class 在 TS 中的知识点补充：**
+
+假设我们定义一个 Person 的类
+
+```
+export class Person {
+    name: string
+    constructor() {
+        this.name = 'ypx'
+    }
+}
+```
+
+上面代码中 Person 包含 2 层意思：
+
+1. 一个名为 Person 的类
+
+2. 一个名为 Person 的类型，相当于
+
+   ```
+   interface Person {
+       name: string
+   }
+   ```
+
+   或者是
+
+   ```
+   type Person = {
+       name: string
+   }
+   ```
+
+因此我们即可以把 Person 当类使用，也可以把 Person 当接口(interface) 或 类型别名(type) 来使用。
+
+
+
+还有 2 个点需要了解一下：接口合并、接口实现
+
+**接口合并：**
+
+```
+export interface IPerson {
+    name: string
+}
+
+export interface IPerson {
+    age: number
+}
+```
+
+**接口实现：**
+
+```
+export interface IPerson {
+    name: string
+}
+
+export interface IPerson {
+    age: number
+}
+
+//类型“Person”缺少类型“IPerson”中的以下属性: name, age
+export class Person implements IPerson {
+    constructor() {
+    }
+}
+```
+
+上面代码中，Person 需要实现 IPerson 所规定的 2 个属性，由于没有还未实现所以 TS 会报错。
+
+
+
+**接口实现的错误演示示例：**
+
+```
+interface Person {
+    name: string
+}
+
+interface Person {
+    age: number
+}
+
+//下面为错误的 接口实现 方式
+
+class Person {
+    constructor() {
+    }
+}
+
+//或
+class Person implements Person {
+    constructor() {
+    }
+}
+```
+
+请注意，上面代码在 TS 中并不会报错，恰恰是因为没有报错才证明我们接口没有实现。
+
+这是因为我们定义的 class 名字 Person 和 接口名字 Person 相同，那么 TS 其实把 class Person { ... } 重新定义出一个 Person 的类型。
+
+也就是说错误示例中其实发生的并不是接口实现，而是 3 个 Person 接口合并。
+
+
