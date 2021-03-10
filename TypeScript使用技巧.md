@@ -867,7 +867,7 @@ arr.forEach((_,index) => {
 
 **补充说明：**
 
-1. 使用下划线来作为变量名，这其实是 JS 所支持的
+1. 使用下划线来作为变量名，这其实是  JS 所支持的
 2. TypeScript 只是不针对 下划线 变量 进行 已定义但从未读取的检测
 
 
@@ -881,7 +881,6 @@ arr.forEach((_,index) => {
 当然这种写法并不特别提倡，毕竟代码阅读性不是特别好。
 
 > 如果别人不知道 下划线 _ 可以来充当变量名，起到占位作用，是会看懵的。
-
 
 
 
@@ -1047,4 +1046,143 @@ class Person implements Person {
 
 也就是说错误示例中其实发生的并不是接口实现，而是 3 个 Person 接口合并。
 
+
+
+## (25)给.js文件添加TS声明
+
+假设我们自己编写了一个 xxx.js 文件，或者我们引用了别人写好的 xxx.js 文件，为了获得 TS 语法提示和自动检测，我们需要给 xxx.js 添加对应的 TS 声明。
+
+添加声明分为 2 种：
+
+1. 向全局添加声明
+2. 向具体模块添加声明
+
+
+
+**向全局添加声明：**
+
+所谓 “全局” 是指我们在任意一个 .ts 或 .tsx 文件中都可以直接使用 而无需 “引入”。
+
+1. 在项目根目录，打开或新建 global.d.ts 文件
+2. 在该文件中，使用 `declare` 作为关键词，开始声明对应的 TS 内容
+
+
+
+**全局声明的几种类型：**
+
+1. declare var ：声明全局变量
+
+2. declare function ：声明全局方法
+
+3. declare class ：声明全局类
+
+4. declare enum ：声明全局可枚举类型
+
+5. declare namespace ：声明含有子属性的全局对象
+
+   > 所谓 “含有子属性” 是指可以内嵌多种类型(类、类型、变量、方法)的对象类型
+
+6. declare interface、declare type ：声明全局类型
+
+7. declare global ：声明全局变量
+
+8. declare module ：声明全局扩展模块
+
+   > declare module 实际上是全局声明 “类” 的另外一种形式(也可以说是一种简写形式)
+
+
+
+**向具体模块添加声明：**
+
+所谓 “具体模块” 是指我们在任意一个 .ts 或 .tsx 文件中若想使用则必须先 “引入”。
+
+1. 在 xxx.js 同目录下，创建相同名字的 xxx.d.ts 文件
+2. 在该 xxx.d.ts 文件中，就像普通定义 TS 类型那样，将 xxx.js 中的内容重新定义一次即可
+
+提醒：xxx.d.ts 中定义的类型应该与 xxx.js 中保持一致，不要尝试将 xxx.d.ts 中的某类型修改成其他含义，那样 TS 并不会被 “欺骗” 到。
+
+
+
+**导出的 2 种类型：**
+
+1. export + 导出对象
+
+2. export default + 导出对象
+
+   > 请注意以下 2 点：
+   >
+   > 1. 假设 xxx.js 中使用的是 export default，那么 xxx.d.ts 中也必须是 export default
+   > 2. 如果使用 export default，一定要确保 tsconfig.json 中 "esModuleInterop": true
+
+> 1. export 这种导出形式用法和普通 TS 文件中导出的形式是一模一样
+> 2. 但是 export  主要针对的是 “向模块添加声明”
+> 3. 对于 “向全局添加声明” 是不需要使用 export 的，当使用 declare 之后就相当于已导出了。
+
+
+
+<br>
+
+**global.d.ts的补充：**
+
+通常情况下，我们在项目中会引入很多非 js 或 ts 的静态资源文件，例如 图片 或 CSS 文件。
+
+为了避免 TS 提示找不到对应的 TS 定义，我们会在  global.d.ts 文件中添加以下内容：
+
+```
+declare module '*.png';
+declare module '*.gif';
+declare module '*.jpg';
+declare module '*.jpeg';
+declare module '*.svg';
+declare module '*.css';
+declare module '*.less';
+declare module '*.scss';
+declare module '*.sass';
+declare module '*.styl';
+declare module '*.asc';
+```
+
+由于使用的是 declare 关键词，那么意味着这是向全局中添加的声明，这样我们就可以在任意的 .ts 或 .tsx 文件中引入这些静态资源文件。
+
+
+
+<br>
+
+补充说明：
+
+我们以 `declare module '*.jpg'` 这样代码为例，来讲解一下这行究竟定义了什么内容。
+
+1. `declare` 意思是此处为 “全局定义 ”
+
+2. `module` 意思是模块，我们可以把它看做是 “类(class)” 的简写形式
+
+3. '*.jpg' 意思是代表所有以 xxxx.jpg 形式命名的文件
+
+   > 因为 * 可以匹配到任意字符
+
+`declare module '*.jpg'` 这样代码实际上是以下代码的简写形式：
+
+```
+declare '*.jpg' {
+    const content = string;
+    export default content;
+}
+```
+
+
+
+假设我们在项目中引入一张图片，我们希望知道该图片将来经过 webpack 编译之后的路径，我们可以使用以下形式：
+
+```
+const url = require('./imgs/xxx.jpg').default
+// url 就是该图片经过编译之后的路径
+```
+
+> 上面示例中使用的是相对路径，但实际项目中由于该 ts 或 tsx 文件也会被编译，究竟最终路径是什么很容易混乱，所以推荐在项目中配置 alias (路径映射) 来方便指向最终资源路径。假设配置好 alias 后，可能上述代码资源路径可修改为：
+>
+> ```
+> const url = require('@/assets/imgs/xxx.jpg').default
+> ```
+
+> 具体如何配置 alias (路径映射) ，可参考：[配置alias路径映射](https://github.com/puxiao/notes/blob/master/Create-React-App%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8.md#%E9%85%8D%E7%BD%AEalias%E8%B7%AF%E5%BE%84%E6%98%A0%E5%B0%84)
 
