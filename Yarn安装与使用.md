@@ -282,6 +282,18 @@ npm update xxx -g
 
 
 
+**查看全局安装文件目录**
+
+```
+yarn global dir
+```
+
+```
+npm root -g
+```
+
+
+
 **运行scripts中定义的脚本：**
 
 ```
