@@ -1192,7 +1192,11 @@ const url = require('./imgs/xxx.jpg').default
 
 上面讲解的，其实是某些极少数 .js 或 其他静态资源需要我们手工定义 .d.ts。
 
-如果我们编写的 .js 文件非常多，那么手工编写 .d.ts 就会显得麻烦且没有必要，此时我们就需要使用 jsdoc 这个模块来自动帮我们生成每个 .js 对应的 .d.ts。
+
+
+**让 TypeScript 识别 JSDoc注释，来充当类型定义。**
+
+假设项目中使用到了符合 JSDoc 规范的注释，那么你无需额外定义 .d.ts 文件，TS 会自动根据 JSDoc 规范来推断出对应的类型。
 
 具体 jsdco 如何使用，请参考：[JSDoc的安装与使用.md](https://github.com/puxiao/notes/blob/master/JSDoc%E7%9A%84%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8.md)
 
