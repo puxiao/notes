@@ -803,6 +803,26 @@ JSDoc 的标签分为 2 种：
 
 
 
+**如果每次都靠我们手工输入各种标签会很麻烦，推荐 VSCode 安装插件：koroFileHeader**
+
+当我们写完 js 类、属性、函数 后，只需要将鼠标光标位于要添加 jsdoc 的代码行中，使用快捷键即可自动生成对应的各种标签，我们需要做的就是将各种标签信息进行完善。
+
+**给 ‘此成员’ 添加 jsdoc 标签的快捷键为：**
+
+1. window：ctrl+alt+t
+2. mac：ctrl+cmd+t
+3. linux: ctrl+meta+t
+
+**给整个文档添加 jsdoc 标签的快捷键为：**
+
+1. window：ctrl+alt+i
+2. mac：ctrl+cmd+i
+3. linux: ctrl+meta+i
+
+> 当我们新建一个代码文件时，默认会自动添加头部信息
+
+
+
 <br>
 
 
