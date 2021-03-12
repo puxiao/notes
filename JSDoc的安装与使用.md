@@ -689,6 +689,34 @@ JSDoc 的标签分为 2 种：
 
 表明函数的返回值
 
+> 具体用法为 `@return {xxx} yyy` 其中 xxx 即返回对象的类型，yyy 为该返回值的说明文字。
+>
+> > xxx 为必填、yyy 为选填
+> >
+> > xxx 既可以是 JS 内置的类型，也可以是我们自定义的对象类型
+> >
+> > 在实际使用中，我们可以把 xxx yyy 写成一模一样的，即 `@return {xxx} xxx`，例如：
+> >
+> > ```
+> > class Element { ... }
+> > 
+> > this.items = { }
+> > 
+> > /**
+> >  * @description: add item by id
+> >  * @param {string} id
+> >  * @return {Element} Element
+> >  */
+> > function addItem(id){
+> >     items[id] = new Element()
+> >     return items[id]
+> > }
+> > ```
+> >
+> > 在上面示例中，假设我们没有给 addItem() 添加 jsdoc 注释，那么默认会认为 addItem() 返回值为 any。
+> >
+> > 但是由于我们在 jsdoc 中明确指出 `@return {Element} Element`，那么当其他地方在调用这个函数时，VSCode 或 TS 便会自动推导出该返回值的类型为 Element，而不是 any。
+
 
 
 **@see**
