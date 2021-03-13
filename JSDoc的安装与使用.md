@@ -384,6 +384,8 @@ JSDoc 中类型的表达与 TypeScript 相似却又不同，主要体现在类�
 
 > 一个数组，该数组元素为 MyClass 实例
 
+
+
 <br>
 
 ```
@@ -391,6 +393,10 @@ JSDoc 中类型的表达与 TypeScript 相似却又不同，主要体现在类�
 ```
 
 > 一个对象，该对象属性名均为字符串，属性值均为数字
+
+**注意：上面这种形式 `{Object.<String, Number>}` 是我在学习 jsdoc 某些教程上看到的，但是我实际测试并不可行。**
+
+
 
 <br>
 
@@ -840,18 +846,18 @@ JSDoc 的标签分为 2 种：
 >
 >```
 >/**
-> * @typedef {Object} MEvent
-> * @property {string} type
-> * @property {*} id 
-> */
+>* @typedef {Object} MEvent
+>* @property {string} type
+>* @property {*} id 
+>*/
 >```
 >
 >上面代码中，我们将 id 类型设置为 *，代表这任意类型，也就是 TS 中的 any，因此上面代码表达的意思如下：
 >
 >```
 >type MEvent = {
->    type: string;
->    id: any;
+>   type: string;
+>   id: any;
 >}
 >```
 >
