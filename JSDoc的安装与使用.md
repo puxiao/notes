@@ -14,6 +14,14 @@ JSDoc 是一个  NPM 包，主要帮我们做 2 件事情：
 
 <br>
 
+**补充：.js 文件对应的是 JSDoc，对于 .ts 文件来说，可以通过 `typedoc` 自动生成对应的 jsdoc 风格的代码注释。**
+
+**但是：目前最新版的 typedoc 0.20.30 并不支持 React 17.0.0 以上版本。**
+
+<br>
+
+
+
 ## 安装JSDoc
 
 **全局安装(推荐)**
@@ -316,6 +324,150 @@ https://jsdoc.app/about-configuring-jsdoc.html
 
 
 
+## JSDoc中的类型
+
+#### JSDoc类型与TS的区别
+
+JSDoc 中类型的表达与 TypeScript 相似却又不同，主要体现在类型首字母是否大写上。
+
+1. 对于一些简单类型 2 者使用相同，例如字符串，string 或 String 都可以
+2. 对于一些复杂类型，TS 往往采用值的字面来表达，例如 对象 {}、数组 []，但是对于 jsdoc 来说，对象必须使用 Object、数组必须使用 Array、函数必须使用 Function
+3. 在 jsdoc 中类型都需要使用 大括号 包裹
+
+<br>
+
+#### 一些特殊标记
+
+1. 在 jsdoc 中大括号 { } 表示 `一定或必填`，而 中括号 [] 表示为 `可选`
+
+   > 在表达某属性为可选属性时，都需要用到 []
+   >
+   > jsdoc 中也可以使用 ?: 来表示属性为可选
+   >
+   > 但是 jsdoc 有一种特殊的用法 {xxx=}，具体如何使用请参考下文中关于 @property 讲解
+
+2. 使用星号 * 来表示任意类型，相当于 TS 中的 any
+
+   > 在实际使用中，我们更多会选择使用 * 来表示 any
+
+
+
+<br>
+
+
+
+#### JSDoc的几种类型
+
+**第1类：名称标记型**
+
+就是最为常见的内置类型，例如：{Boolean}、{Number}、{Object}、{Array}
+
+> 再次提醒：对于简单类型来说首字母是可以小写的，例如 boolean、number，究竟使用大写还是小写取决于个人习惯
+
+此外，还可以直接使用已经定义好的某类型，例如：{myNamespace.MyClass}
+
+
+
+**第2类：联合类型**
+
+这个和 TS 中的联合类型是相同的，例如：{Number | Boolean}
+
+
+
+**第3类：元数组或元对象**
+
+这一点的用法基本上和 TS 也是相同的。
+
+```
+{Array.<MyClss\>} 或者 {MyClass[]}
+```
+
+> 一个数组，该数组元素为 MyClass 实例
+
+<br>
+
+```
+{Object.<String, Number>}
+```
+
+> 一个对象，该对象属性名均为字符串，属性值均为数字
+
+<br>
+
+```
+{{a:Number, b:String, c:*, d?:string}} myObj
+```
+
+> 一个对象类型为 myObj，属性 a 类型为数字，属性 b 类型为字符串，属性 c 类型为 any，属性 d 为可选属性，属性 d 的值类型为 string | undefined
+
+上面这段对象结构类型定义的另外一种表达形式为：
+
+```
+{Object} myObj
+{Number} myObj.a
+{String} myObj.b
+{*} myObj.c
+{string} [myObj.d]
+
+//最后一行 {string} [myObj.d] 也可以修改为 {string=} myObj.d，不过感觉这种可读性比较差，不推荐这样使用
+```
+
+> 究竟使用哪种形式可根据个人喜好来选择。
+
+<br>
+
+
+
+**第3类：可空或非可空类型**
+
+所谓“可空”的意思是：可能为空(null)
+
+> 注意：是可空(null)，而不是未定义(undefined)
+
+```
+{?Number}
+```
+
+> 相当于 Number | Null
+
+<br>
+
+
+
+所谓 “非可空” 的意思是： 一定为该类型
+
+```
+{!Number}
+```
+
+> 对于目前较新版本的 jsdoc 来说，{!Number} 和 {Number} 是没有区别的，因此可以忽略这个知识点。
+
+<br>
+
+
+
+**第4类：参数数量类型**
+
+```
+@param {...Number} num
+```
+
+> 具体如何使用我也不清楚，暂时不讲解
+
+<br>
+
+
+
+**第5类：可选参数和参数默认值**
+
+```
+@param {Number} [foo=1]
+```
+
+<br>
+
+
+
 ## JSDoc注释规则
 
 **提前说明：**
@@ -323,6 +475,8 @@ https://jsdoc.app/about-configuring-jsdoc.html
 下面解释中出现的 “此成员” 是指本注释对应的对象，包括：接口、类、属性、方法、参数等等。
 
 如果是明确针对特定对象的，则会直接使用该对象的具体类型名称，例如只针对函数，那么就直接写明 “此函数”，而不再使用 “此成员”。
+
+<br>
 
 
 
@@ -386,6 +540,8 @@ JSDoc 的标签分为 2 种：
 **@callback**
 
 表明这是一个回调函数
+
+> 这个标签非常有用
 
 
 
@@ -657,9 +813,83 @@ JSDoc 的标签分为 2 种：
 
 **@property 或 @prop**
 
-表明这是对象的属性
+表明这是对象的属性，@property 通常是和 @typedef 配合使用的。
+
+> 请看示例 1：
+>
+> ```
+> /**
+>  * @typedef {Object} Event
+>  * @property {string} type
+>  * @property {string} [id] 
+>  */
+> ```
+>
+> 由于我们把属性 id 的属性名使用中括号 [] 包括，那么就表示 id 有可能不存在，因此上面代码表达的意思如下：
+>
+> ```
+> type MEvent = {
+>     type: string;
+>     id?: string | undefined;
+> }
+> ```
+>
+> 注意：`@property {string} [id] ` 还有另外一种写法 —— 将属性名 id 不使用中括号，而是在类型中添加一个 等于号，即 `@property {string=} id `
+
+>请看示例 2：
+>
+>```
+>/**
+> * @typedef {Object} MEvent
+> * @property {string} type
+> * @property {*} id 
+> */
+>```
+>
+>上面代码中，我们将 id 类型设置为 *，代表这任意类型，也就是 TS 中的 any，因此上面代码表达的意思如下：
+>
+>```
+>type MEvent = {
+>    type: string;
+>    id: any;
+>}
+>```
+>
+>当然你可以选择另外一种简写形式 `@property id`，由于并未定义类型是什么，那么 jsdoc 也认为 id 为 any 类型。 
+>
+>不过个人并不建议这样使用，因为不够直观，想表达 any 还是继续添加上 {*} 吧。
+
+> 请看示例 3：
+>
+> ```
+> /**
+>  * @typedef {Object} MEvent
+>  * @property {string} type
+>  * @property {*} [id] 
+>  */
+> ```
+>
+> 在上面代码中，属性名 [id] 是可选的，属性值的类型 {*} 是 任意的，因此上面代码表达的意思如下：
+>
+> ```
+> type MEvent = {
+>     type: string;
+>     id?: any;
+> }
+> ```
+
+> 在上面示例中继承的对象是 Object，而在 JS 中默认对象都是 Object 因此第 2 项 {Object} 是可以省略掉的，即 `@typedef MEvent`
+
+> `@typedef {Object} MEvent` 事实上相当于以下 2 行代码
+>
+> ```
+> @typedef MEvent
+> @type {Object}
+> ```
 
 
+
+<br>
 
 **@protected**
 
@@ -747,6 +977,22 @@ JSDoc 的标签分为 2 种：
 
 
 
+**@template**
+
+泛型
+
+> 和 TS 中的泛型相同
+
+示例：
+
+```
+* @template T
+* @param {T} param
+* @return {T}
+```
+
+
+
 **@this**
 
 表明此处的 this 是指谁
@@ -778,6 +1024,8 @@ JSDoc 的标签分为 2 种：
 **@typedef**
 
 对象的自定义类型
+
+> 这个对于习惯使用 TypeScript 的人来说，非常有用。具体用法参见 @property 中的示例
 
 
 
