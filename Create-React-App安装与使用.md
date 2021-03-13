@@ -369,3 +369,41 @@ yarn add echarts @types/echarts
 
 
 
+## 安装jsdoc或typedoc
+
+**jsdoc：**
+
+假设我们使用的是 .js 来创建代码文件，在代码中使用 jsdoc 风格的注释，那么可以通过 jsdoc 来自动生成文档，同时也可以让 .js 拥有类似 .ts 一样的类型声明功能(代码提示、自动补全、代码检查)。
+
+```
+//npm i jsod --save-dev
+yarn add jsdoc --dev
+```
+
+关于 jsdoc 的用法，请参考：[JSDoc的安装与使用.md](https://github.com/puxiao/notes/blob/master/JSDoc%E7%9A%84%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8.md)
+
+<br>
+
+
+
+**typedoc：**
+
+假设我们使用的是 .ts 来创建代码文件，那么可以使用 typedoc 来自动为我们的代码添加 jsdoc风格的注释。
+
+```
+//npm i typedoc -g
+yarn global add typedoc
+
+//执行命令：typedoc xxx.ts
+```
+
+注意：上面代码中我们是将 typedoc 安装到了全局中，你也可以安装到项目中，只不过执行 typedoc 命令时需要使用 npx。
+
+```
+//npm i typedoc --save-dev
+yarn add typedoc --dev
+
+//执行命令：npx typedoc xxx.ts
+```
+
+补充：当前最新版本 typedoc 0.20.30 并不支持 React 17.0.1，所以是否安装 typedoc 需要慎重决定。
