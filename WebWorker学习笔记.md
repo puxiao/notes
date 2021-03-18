@@ -9,10 +9,16 @@
   * [基本用法总结](#基本用法总结)
 * [**数据通信**](#数据通信)
 * [**Worker新建Worker**](#Worker新建Worker)
+* [**Worker的作用域**](#Worker的作用域)
+* [**Worker的importScript()用法**](#Worker的importScript()用法)
 * [**页面内嵌WebWorker代码**](#页面内嵌WebWorker代码)
 * [**React内嵌WebWorker代码**](#React内嵌WebWorker代码)
+* [**修改tsconfig.json相关配置**](#修改tsconfig.json相关配置)
+* [**使用TS特有注释，忽略TS语法检查，解决报错问题**](#使用TS特有注释，忽略TS语法检查，解决报错问题)
 
 
+
+<br>
 
 ## WebWorker简介
 
@@ -87,6 +93,8 @@ Service worker 是一个注册在指定源和路径下的时间驱动 worker。
 关于 Service Worker 更多知识，请访问：https://developer.mozilla.org/zh-CN/docs/Web/API/Service_Worker_API
 
 
+
+<br>
 
 ## WebWorker基本用法
 
@@ -209,6 +217,8 @@ worker.terminate()
 1. 当 web worker 不再需要工作时，主线程可以通过 terminate() 将其终止。
 
 
+
+<br>
 
 ### WebWorker线程对应的操作
 
@@ -339,6 +349,8 @@ self.close()
 
 
 
+<br>
+
 ### 基本用法总结
 
 **主线程：**
@@ -364,6 +376,8 @@ self.close()
 | 关闭自身         | self.close()                               |
 
 
+
+<br>
 
 ### 实用技巧：index.js 调用 worker.js 中某个函数
 
@@ -415,7 +429,7 @@ worker.poseMessage({type:'funA',params:'hello worker'})
 
 
 
-
+<br>
 
 ## 数据通信
 
@@ -460,6 +474,8 @@ const worker = new Worker('xxx.js',[offscreen])
 
 
 
+<br>
+
 ## Worker新建Worker
 
 顾名思义，就是 worker 内部再创建 worker。
@@ -473,6 +489,95 @@ const worker = new Worker('xxx.js',[offscreen])
 假设有一个非常大量的计算任务，那么可以将该任务拆分成 N 个小任务，同时创建 N 个worker，向每一个 worker 通过 postMessage(xxx) 发送执行各自任务的消息。最终再将所有 worker 的计算结果汇总在一起。 
 
 
+
+<br>
+
+## Worker的作用域
+
+本文最开始讲过，实际上 “worker” 目前分为 3 类：
+
+1. Worker
+2. SharedWorker
+3. ServiceWorker
+
+> 本文主要讲解的是第 1 种 Worker 的用法。
+
+
+
+以上 3 种 worker 他们共同的作用域对象为：WorkerGlobalScope
+
+具体请查阅：https://developer.mozilla.org/zh-CN/docs/Web/API/WorkerGlobalScope
+
+
+
+**这 3 种 worker 对应的作用域：**
+
+1. DedicatedWorkerGlobalScope( Worker 实例的作用域)
+
+   >https://developer.mozilla.org/zh-CN/docs/Web/API/DedicatedWorkerGlobalScope
+
+2. SharedWorkerGlobalScope( SharedWorker 实例的作用域)
+
+   > https://developer.mozilla.org/en-US/docs/Web/API/SharedWorkerGlobalScope
+
+3. ServiceWorkerGlobalScope( ServiceWorker 实例的作用域)
+
+   > https://developer.mozilla.org/zh-CN/docs/Web/API/ServiceWorkerGlobalScope
+
+他们都继承于 WorkerGlobalScope，并且实现了一些特有的属性和接口。
+
+
+
+<br>
+
+## Worker的importScript()用法
+
+试想一下以下场景：
+
+假设你需要编写几个不同的 worker 代码文件，而这些文件中有 60% 的代码片段是完全一模一样的，那么我们可不可以将这 60% 的代码抽离出来，供其他几个 worker 共同引入使用？
+
+> 请注意：
+>
+> 1. 这里说的 60% 代码 指是 代码片段，而不是指某些共用的方法
+> 2. 这里说的 引入 是指 “include”(复制一份)，而不是 “import”(从模块中导入)。
+
+
+
+答案是可以实现。
+
+**使用到 WorkerGlobalScope.importScripts() 这个函数**。
+
+> 更加详细的用法，请查阅：https://developer.mozilla.org/zh-CN/docs/Web/API/WorkerGlobalScope/importScripts
+
+> 上一小节提到 目前 3 种 worker 的作用域都继承 WorkerGlobalScope，所以 3 种 worker 中都可以使用 importScripts() 这个方法。
+
+
+
+具体做法很简单，我们将那 60% 的代码片段单独写在 xxx.js 文件中，然后在具体的 worker 代码中导入进来这些代码片段。
+
+```
+self.importScripts('xxx.js')
+```
+
+> self 也可以省略不写，直接写 `importScripts('xxx.js')`
+
+
+
+**请注意：importScript() 使用 同步方式导入，而不是异步方式。**
+
+> 同步导入的方式保证了我们编写的 worker 中一定会等 xxx.js 代码全部加载进来后再执行后面的代码。
+
+
+
+**补充说明：**
+
+假设你项目使用 TypeScript，那么默认直接使用 importScripts() 可能会提示找不到该函数。
+
+具体原因和解决办法，请查看本文后面关于“修改tsconfig.json相关配置”的内容。
+
+
+
+<br>
 
 ## 页面内嵌WebWorker代码
 
@@ -517,6 +622,8 @@ worker.postMessage = function (eve){
 特别提醒：上述代码中 Blob 属于 ES 草案新增内置构造函数，不是所有浏览器都会支持的。
 
 
+
+<br>
 
 ## React内嵌WebWorker代码
 
@@ -660,4 +767,96 @@ export default HomePage
 不过最简单的办法就是避免 index.tsx 和 worker.ts 都使用第三方库。
 
 本人建议：如果使用 worker，那么就将运算转转移得彻底一些，只让 worker.ts 引用某个第三方库，index.tsx 不再引用这个第三方库。
+
+
+
+<br>
+
+## 修改tsconfig.json相关配置
+
+假设我们项目中使用 TypeScript，默认的 tsconfig.json 文件中  lib 配置如下：
+
+```
+"compilerOptions": {
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ]
+}
+```
+
+ **在 tsconfig.json 中 lib 的含义为：编译过程中需要引入的库文件的列表**
+
+因此默认的 lib 配置中，只引入了 dom(主线程) 相关的，而没有引入 web worker 相关的。
+
+换句话说，TypeScript 默认判定项目中编写的 .ts 或 .js 文件是给 DOM 主线程使用的，而不是给 web worker 线程使用的。
+
+> 此时代码中的语法提示都是针对 DOM 主线程中使用到的，而 web worker 的一些方法则不会有代码提示，且报错显示找不到该方法。
+>
+> 例如 webworker 中特有的 importScripts() 方法
+
+
+
+**因此，我们 “可能” 需要修改 tsconfig.json 文件，将 lib 项中添加上 web worker 相关的内容。**
+
+```
+"compilerOptions": {
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "WebWorker",
+      "WebWorker.ImportScripts",
+      "esnext"
+    ]
+}
+```
+
+这样，当我们再在 worker 中使用 self.xxx 的时候，就能可以使用 webworker 相关的特有函数，例如 self.importScripts()。
+
+
+
+**补充说明 1：为什么是“可能”需要修改，而不是必须修改？**
+
+假设你的 worker 代码中并未使用到 WorkerGlobalScope、DedicatedWorkerGlobalScope 特有的属性或方法，而仅仅使用了：
+
+1. postMessage()
+2. 监听 “message”、"messageerror" 事件
+
+那么这些方法和事件的用法本身和 DOM 主线程中的用法完全相同，所以此时即使你不修改 tsconfig.json 中 lib 的配置，那么 TS 依然会给你正确的语法提示。
+
+只有当你需要使用 WorkerGlobalScope 或 DedicatedWorkerGlobalScope 特有的属性或方法，例如 importScript() ，此时就必须去修改 lib 的配置了。
+
+
+
+<br>
+
+## 使用TS特有注释，忽略TS语法检查，解决报错问题
+
+首先我们要明白：
+
+1. JS 在运行环境中 是弱引用类型的语言
+2. TS 在开发阶段中 是强引用类型语言
+
+换句话说：
+
+1. 在 JS 的实际执行过程中，任何对象的任何属性或方法都是可以动态修改变更的
+2. 在 TS 的开发阶段中，TS 规定了很多属性或方法的可用性、只读性等规范和约定
+
+
+
+那么假如你明确知道某行代码在 JS 中是可以这样编写的，但是在 TS 中默认报错误，此时我们可以使用最简单、省事的办法，那就是直接添加特殊的注释，让 TS 忽略对该行代码的检查。
+
+例如：在 TS 中默认认为 self.document 为只读属性，不可以修改。
+
+假设出于某种原因就是要修改，那么我们可以添加 `//@ts-ignore` 让 TS 忽略这一行代码的检查，解决 TS 报错。
+
+```
+//@ts-ignore
+self.document = {} 
+```
+
+> 一般情况下，最好还是不要这样做，除了某些特殊场景下。
+
+<br>
 
