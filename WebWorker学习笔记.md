@@ -816,7 +816,9 @@ export default HomePage
 
 
 
-**补充说明 1：为什么是“可能”需要修改，而不是必须修改？**
+<br>
+
+**补充说明：为什么是“可能”需要修改，而不是必须修改？**
 
 假设你的 worker 代码中并未使用到 WorkerGlobalScope、DedicatedWorkerGlobalScope 特有的属性或方法，而仅仅使用了：
 
@@ -859,4 +861,3 @@ self.document = {}
 > 一般情况下，最好还是不要这样做，除了某些特殊场景下。
 
 <br>
-
