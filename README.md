@@ -2,7 +2,7 @@
 前端技术栈：React/Taro/Webpack/Less/TypeScript  
 前端第三方类库：Echarts/Threejs  
 数据库：Mysql/MongoDB  
-后端技术栈：Nodejs/Koa/Middleware/Redis/Nginx/Npm  
+后端技术栈：Nodejs/Koa/Middleware/Redis/Nginx/Npm/Yarn  
 运维部署：Git/PM2/Docker/Docker-Compose/CentOS  
 3D建模：Blender  
 
