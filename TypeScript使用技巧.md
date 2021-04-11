@@ -1381,7 +1381,7 @@ export type { Person }
 
 
 
-**请注意 使用 import type 导入的类不可以当做值使用 **
+**请注意 使用 import type 导入的类不可以当做值使用**
 
 
 
