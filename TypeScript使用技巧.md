@@ -1200,3 +1200,216 @@ const url = require('./imgs/xxx.jpg').default
 
 具体 jsdco 如何使用，请参考：[JSDoc的安装与使用.md](https://github.com/puxiao/notes/blob/master/JSDoc%E7%9A%84%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8.md)
 
+
+
+<br>
+
+## (26)import type/export type 仅导入/导出类型声明
+
+首先在此重申一件事情：我们所有编写的 ts 相关代码，最终都会经过 TypeScript + Babel 转译成 .js。
+
+那么我们在 .ts 或 .tsx 中定义的对象类型最终是会消失在 .js 中的。
+
+
+
+有了这个前提概念，那么我们来看下面的代码，假设我们有 4 个文件 test-a.ts、test-b.ts、test-c.ts、test-d.ts
+
+
+
+test-a.ts：
+
+```
+export interface Person {
+    name: string,
+    age: number
+}
+```
+
+> test-a.ts 仅导出 Person 的类型
+
+
+
+<br>
+
+test-b.ts：
+
+```
+export class Person {
+
+    name: string
+    age: number
+
+    constructor() {
+        this.name = 'ypx'
+        this.age = 34
+    }
+}
+```
+
+> test-b.ts 仅导出 Person 的实际值(是一个类)
+
+
+
+<br>
+
+test-c.ts：
+
+```
+interface Person {
+    name: string,
+    age: number
+}
+class Person {
+    constructor() {
+        this.name = 'ypx'
+        this.age = 34
+    }
+}
+
+export { Person }
+```
+
+>test-c.ts 即导出 Person 的类型，又导出 Person 实际定义的值(是一个类)
+
+
+
+<br>
+
+以上 3 个代码文件中，分别导出了 Person，但究竟 Person 是什么实际上并不一样的。
+
+1. test-a.ts：仅 Person 类型
+
+2. test-b.ts：仅 Person 实际值
+
+   > 请注意：尽管 Person 是一个实际值(是一个类)，但是 TypeScript 依然可以通过类型推导，自动得出 Person 的类型
+
+3. test-c.ts：即有 Person 类型，也有 Person 实际值
+
+
+
+<br>
+
+我们在 test-d.ts 中，有可能会出现以下的代码：
+
+```
+//test-x 有可能为 test-a 或 test-b 或 test-c
+import { Person } from './test-x'
+```
+
+
+
+<br>
+
+**思考一下上面的代码**
+
+第一：肉眼观察上面的 test-d.ts 中引入的 Person，实际上我们是无法直观感受到 Person 究竟是 类型还是实际值的，除非你非常清楚 test-x 到底导出的是什么。
+
+第二：假设我们引入的是 test-b.ts 或 test-c.ts，那么在 test-c.ts 中 import 的 Person 即包含实际值，也包含或自动推理出的 Person 类型。 
+
+平时我们也都是这样使用的，没有什么问题，但是试想一下这个代码场景：
+
+```
+import { Person } from './test-c'
+
+export const myFun = (person: Person) => {
+    console.log(person.name)
+}
+```
+
+在上面代码中，我们始终从未实例化(new)过 Person，也未曾通过继承(extends) 编写出 Person 的子类。
+
+我们仅仅是需要使用 Person 的类型而已，但上面代码经过 TypeScript + Babel 转义过后，test-d.js 中虽然去除了 Person 的 TS 类型，但依然会保留 Person 的实际值的引入，很显然这个是我们不需要的。
+
+> 编译之后的 test-d.js 中可能依然会保留 import { Person } from './test-x'
+
+
+
+<br>
+
+相反，假设某些时候，我们只希望 test-c.ts 中只导出 Person 的类型，不导出 Person 的实际值，那又该如何实现呢？
+
+
+
+<br>
+
+**怎么办？**
+
+答：在 TypeScript 3.8 版本中，新增加了 import type 和 export type 用法，可以解决我们上面的问题。
+
+具体用法就是我们在传统的 导出或引入 时，在 import 或 export 后面加上 type，例如上面的代码修改为：
+
+```
+import type { Person } from './test'
+
+export const myFun = (person: Person) => {
+    console.log(person.name)
+}
+```
+
+由于我们明确告知 TypeScript，我们仅仅是引入类型(import type)，所以 TypeScript + Babel 在最终编译后，text-d.js 中不会再出现 Person 的实际值，也就是不会出现 `import { Person } from './test'`
+
+
+
+<br>
+
+同理，假设我们在 test-c.ts 中将代码修改为：
+
+```
+interface Person {
+    name: string,
+    age: number
+}
+class Person {
+    constructor() {
+        this.name = 'ypx'
+        this.age = 34
+    }
+}
+
+export type { Person }
+```
+
+> 我们之前 test-c.ts 中导出代码为 `export { Person }`
+
+由于我们的导出代码是 `export type { Person }`，所以相当于明确告诉 TypeScript 仅导出类型，而不导出实际值。
+
+> 请注意这样修改之后，经过 TypeScript + Babel 编译之后的 test-c.js 中也不会有导出 { Person } 的任何值的代码。
+
+
+
+<br>
+
+假设即使没有修改 test-c.ts 的导出方式，当我们在 test-d.ts 中使用 `import type ...` 时，依然是仅导入 Person 的类型。
+
+
+
+**请注意，使用 import type 导入的类不可以当做值使用。 **
+
+也就是 ：
+
+1. 无法实例化
+2. 无法继承
+
+假设 test-c.ts 导出使用了 `export type ...`，那么以下代码是会报错误的：
+
+```
+import type { Person } from './test'
+
+export const myFun = (person: Person) => {
+    new Person() //报错："Person" 是使用 "import type" 导入的，因此不能用作值。
+    console.log(person.name)
+}
+```
+
+
+
+<br>
+
+通常情况下我们仅需要使用函数的参数对应的某个类型时，import type 或 export type 会非常有用。
+
+> 当然你要就是不添加 type，代码也不会有任何问题，只是会有一些多余无用的 类实际值会保留在编译后的代码中。
+
+
+
+<br>
+
