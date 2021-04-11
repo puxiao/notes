@@ -1247,6 +1247,8 @@ export class Person {
 ```
 
 > test-b.ts 仅导出 Person 的实际值(是一个类)
+>
+> 请注意：尽管 Person 是一个实际值(是一个类)，但是 TypeScript 依然可以通过类型推导，自动得出 Person 的类型
 
 
 
@@ -1278,11 +1280,7 @@ export { Person }
 以上 3 个代码文件中，分别导出了 Person，但究竟 Person 是什么实际上并不一样的。
 
 1. test-a.ts：仅 Person 类型
-
 2. test-b.ts：仅 Person 实际值
-
-   > 请注意：尽管 Person 是一个实际值(是一个类)，但是 TypeScript 依然可以通过类型推导，自动得出 Person 的类型
-
 3. test-c.ts：即有 Person 类型，也有 Person 实际值
 
 
@@ -1385,6 +1383,8 @@ export type { Person }
 
 **请注意，使用 import type 导入的类不可以当做值使用。 **
 
+
+
 也就是 ：
 
 1. 无法实例化
@@ -1407,7 +1407,7 @@ export const myFun = (person: Person) => {
 
 通常情况下我们仅需要使用函数的参数对应的某个类型时，import type 或 export type 会非常有用。
 
-> 当然你要就是不添加 type，代码也不会有任何问题，只是会有一些多余无用的 类实际值会保留在编译后的代码中。
+> 当然你要就是不添加 type，代码也不会有任何问题，只是会有一些多余无用的 类实际值 会被引入，保留在编译后的代码中。
 
 
 
