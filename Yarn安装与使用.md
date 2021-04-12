@@ -759,6 +759,8 @@ yarn link my-xxx
 
 
 
+<br>
+
 **项目中删除软连接：**
 
 ```
@@ -768,6 +770,8 @@ yarn unlink my-xxx
 
 
 
+<br>
+
 **删除yarn中的软连接：**
 
 ```
@@ -776,6 +780,8 @@ yarn unlink
 ```
 
 
+
+<br>
 
 **修改网络代理**
 
@@ -794,6 +800,8 @@ ____
 
 
 以下以调试 react 源码为例，来实际讲述一下创建和使用软连接的过程。
+
+<br>
 
 **1、前期工作：构建本地React包**
 
@@ -820,6 +828,8 @@ yarn build react,react-dom,scheduler --type=NODE
 
 
 
+<br>
+
 **2、创建yarn软连接**
 
 ```
@@ -831,6 +841,8 @@ yarn link
 ```
 
 
+
+<br>
 
 **3、项目中使用软连接：**
 
@@ -848,6 +860,8 @@ success Using linked package for "react-dom".
 ```
 
 
+
+<br>
 
 **4、测试方式一：通过修改源码，测试是否映射成功：**
 
@@ -875,6 +889,8 @@ success Using linked package for "react-dom".
 
 
 
+<br>
+
 **5、测试方式二：通过浏览器，测试是否映射成功：**
 
 1. 启动测试项目：`yarn start`
@@ -883,6 +899,8 @@ success Using linked package for "react-dom".
 4. 若存在本机 React 构建的包(包为本机的目录)，若存在即表明 测试项目中 使用软连接配置生效
 
 
+
+<br>
 
 **6、删除软连接**
 
