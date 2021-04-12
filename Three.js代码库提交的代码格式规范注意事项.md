@@ -53,7 +53,7 @@ yarn add @types/three
 
 
 
-**Three.js 团队目前已经将 TS 类型包从 @types/three 中拆分独立出来，目前专属的仓库为 three-ts-types **
+**Three.js 团队目前已经将 TS 类型包从 @types/three 中拆分独立出来，目前专属的仓库为 three-ts-types**
 
 仓库地址由：https://github.com/DefinitelyTyped/DefinitelyTyped/
 
@@ -67,7 +67,7 @@ yarn add @types/three
 
 拆分出来的仓库地址为：https://github.com/three-types/three-ts-types/
 
-也就是说，当你想修改 Three.js 的 TS 类型包内容时，向该仓库提交 PR。
+也就是说，当你想修改 Three.js 的 TS 类型包内容时，应向该仓库提交 PR。
 
 
 
