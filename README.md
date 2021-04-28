@@ -5,6 +5,7 @@
 后端技术栈：Nodejs/Koa/Middleware/Redis/Nginx/Npm/Yarn  
 运维部署：Git/PM2/Docker/Docker-Compose/CentOS  
 3D建模：Blender  
+其他知识：点云(PCD)、数据标注
 
 
 持续添加更新中...
