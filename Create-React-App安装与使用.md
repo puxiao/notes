@@ -4,6 +4,8 @@
 
 
 
+<br>
+
 ## 全局安装Create-React-App
 
 ```
@@ -12,6 +14,8 @@ yarn global add create-react-app
 ```
 
 
+
+<br>
 
 ## 初始化普通React项目
 
@@ -23,6 +27,8 @@ yarn create react-app test-rect
 
 
 
+<br>
+
 ## 初始化React+TypeScript项目
 
 ```
@@ -32,6 +38,8 @@ yarn create react-app test-rect --template typescript
 ```
 
 
+
+<br>
 
 ## 修改tsconfig.json配置
 
@@ -51,6 +59,8 @@ yarn create react-app test-rect --template typescript
 ```
 
 
+
+<br>
 
 #### 关于 TypeScript 4 的一个补充说明
 
@@ -88,6 +98,8 @@ const removeUndefined = (obj: object) => {
 
 
 
+<br>
+
 ## 修改发布后项目根目录
 
 React 发布后，将项目上传到服务器，默认必须是网站根目录。
@@ -106,6 +118,8 @@ React 发布后，将项目上传到服务器，默认必须是网站根目录�
 
 
 
+<br>
+
 ## 添加Scss/Sass支持
 
 ```
@@ -118,6 +132,8 @@ yarn add node-sass@4.14.1 --dev
 ```
 
 
+
+<br>
 
 ## 配置alias路径映射
 
@@ -229,6 +245,8 @@ declare module 'react-app-rewire-alias';
 
 
 
+<br>
+
 ## 配置worker-loader
 
 假设我们在 React + TypeScript 项目中需要使用 web worker，而 初始化 worker 代码如下：
@@ -246,6 +264,8 @@ const worker = new Worker('xx/xxx.js')
 
 
 
+<br>
+
 #### 安装并配置 worker-loader
 
 **第1步：安装**
@@ -254,6 +274,10 @@ const worker = new Worker('xx/xxx.js')
 yarn add worker-loader --dev
 //npm i worker-loader --save-dev
 ```
+
+
+
+<br>
 
 **第2步：添加 worker-loader 对应的 TypeScript 声明文件**
 
@@ -267,6 +291,10 @@ declare module "worker-loader!*" {
   export = WebpackWorker;
 }
 ```
+
+
+
+<br>
 
 **第3步：添加 ESLint 声明**
 
@@ -290,11 +318,15 @@ declare module "worker-loader!*" {
 
 
 
+<br>
+
 **第4步：重启 VScode**
 
 之所以强调重启 VSCode 就是为了确保刚才所作的  .eslintrc 配置一定生效
 
 
+
+<br>
 
 **第5步：编写 worker.ts 文件 **
 
@@ -328,6 +360,8 @@ import Worker from 'worker-loader!./worker'
 
 
 
+<br>
+
 创建 Worker 的代码如下：
 
 ```
@@ -348,6 +382,8 @@ export default HomePage
 
 
 
+<br>
+
 **补充说明：第三方库会被打包 2 次，会增大最终包的文件体积**
 
 假设 index.tsx 和 worker.ts 都使用了某个第三方库，那么这个库的代码会被分别打包进去 2 次，会造成最终打包成包的文件体积比较大。
@@ -360,6 +396,23 @@ export default HomePage
 
 
 
+<br>
+
+## 配置ESLint
+
+默认情况下，create-react-app 已经安装有 ESLint 和 ESLint 一些常见插件。
+
+当我们需要修改 ESLint 默认配置规则时：
+
+1. 在项目根目录创建 `.eslintrc` 的文件，并编写相应的 ESLint 配置
+2. 在项目根目录创建 `.eslintignore` 的文件，并编写 ESLint 可以忽略的文件
+
+关于 ESLint 的用法，请参考：[ESLint学习笔记.md](https://github.com/puxiao/notes/blob/master/ESLint%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.md)
+
+
+
+<br>
+
 ## 安装echart模块
 
 ```
@@ -368,6 +421,8 @@ yarn add echarts @types/echarts
 ```
 
 
+
+<br>
 
 ## 安装jsdoc或typedoc
 
@@ -382,9 +437,9 @@ yarn add jsdoc --dev
 
 关于 jsdoc 的用法，请参考：[JSDoc的安装与使用.md](https://github.com/puxiao/notes/blob/master/JSDoc%E7%9A%84%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8.md)
 
+
+
 <br>
-
-
 
 **typedoc：**
 
