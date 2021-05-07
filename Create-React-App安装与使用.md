@@ -247,6 +247,52 @@ declare module 'react-app-rewire-alias';
 
 <br>
 
+## 配置ESLint
+
+默认情况下，create-react-app 已经安装有 ESLint 和 ESLint 一些常见插件。
+
+当我们需要修改 ESLint 默认配置规则时：
+
+1. 在项目根目录创建 `.eslintrc` 的文件，并编写相应的 ESLint 配置
+2. 在项目根目录创建 `.eslintignore` 的文件，并编写 ESLint 可以忽略的文件
+
+关于 ESLint 的用法，请参考：[ESLint学习笔记.md](https://github.com/puxiao/notes/blob/master/ESLint%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.md)
+
+
+
+<br>
+
+**当我们在 React 中使用 TypeScript 的 as 语法时，ESLint 有可能会报错：**
+
+```
+Parsing error: Unexpected token, expected ","
+```
+
+**解决办法是向 .eslintrc 中添加：**
+
+```
+{
+	"extends": ["react-app", "react-app/jest"],
+}
+```
+
+> 尽管 package.json 中，create-react-app 已经自动添加有以下内容
+>
+> ```
+> "eslintConfig": {
+>     "extends": [
+>         "react-app",
+>         "react-app/jest"
+>     ]
+> },
+> ```
+>
+> 但是依然需要我们再在 .eslintrc 中添加一次，这点究竟原因是为什么，暂时还没理解。
+
+
+
+<br>
+
 ## 配置worker-loader
 
 假设我们在 React + TypeScript 项目中需要使用 web worker，而 初始化 worker 代码如下：
@@ -393,21 +439,6 @@ export default HomePage
 不过最简单的办法就是避免 index.tsx 和 worker.ts 都使用第三方库。
 
 本人建议：如果使用 worker，那么就将运算转转移得彻底一些，只让 worker.ts 引用某个第三方库，index.tsx 不再引用这个第三方库。
-
-
-
-<br>
-
-## 配置ESLint
-
-默认情况下，create-react-app 已经安装有 ESLint 和 ESLint 一些常见插件。
-
-当我们需要修改 ESLint 默认配置规则时：
-
-1. 在项目根目录创建 `.eslintrc` 的文件，并编写相应的 ESLint 配置
-2. 在项目根目录创建 `.eslintignore` 的文件，并编写 ESLint 可以忽略的文件
-
-关于 ESLint 的用法，请参考：[ESLint学习笔记.md](https://github.com/puxiao/notes/blob/master/ESLint%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.md)
 
 
 
