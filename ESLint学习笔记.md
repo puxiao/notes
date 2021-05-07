@@ -315,6 +315,37 @@ module.exports = {
 
 <br>
 
+**当我们在 React 中使用 TypeScript 的 as 语法时，ESLint 有可能会报错：**
+
+```
+Parsing error: Unexpected token, expected ","
+```
+
+**解决办法是向 .eslintrc 中添加：**
+
+```
+{
+	"extends": ["react-app", "react-app/jest"],
+}
+```
+
+> 尽管 package.json 中，create-react-app 已经自动添加有以下内容
+>
+> ```
+> "eslintConfig": {
+>     "extends": [
+>         "react-app",
+>         "react-app/jest"
+>     ]
+> },
+> ```
+>
+> 但是依然需要我们再在 .eslintrc 中添加一次，这点究竟原因是为什么，暂时还没理解。
+
+
+
+<br>
+
 ### 查看更多配置
 
 具体的 ESLint 配置项，可查阅：
