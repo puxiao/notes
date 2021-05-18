@@ -1,5 +1,5 @@
 ## 我的学习笔记
-前端技术栈：React/Taro/Webpack/ESLint/TypeScript  
+前端技术栈：React/Taro/Webpack/ESLint/TypeScript/Recoil  
 前端第三方类库：Echarts/Threejs  
 数据库：Mysql/MongoDB  
 后端技术栈：Nodejs/Koa/Middleware/Redis/Nginx/Npm/Yarn  
