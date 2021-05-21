@@ -244,7 +244,7 @@ DATA binary
 | --------- | ------------------------------ | ------------------------------------------------------------ |
 | #         | 注释                           | 简单表明文件遵循的标准和版本                                 |
 | VERSION   | PCD版本                        | 目前最新标准版本为 0.7                                       |
-| FIELDS    | 每个点所包含的N个维度信息      | x y z [intensity] [rgb]<br />xyz 为点的空间坐标<br />intensity 为激光反射强度<br />rbg 为颜色信息 |
+| FIELDS    | 每个点所包含的N个维度信息      | x y z [intensity] [rgb]<br />xyz 为点的空间坐标<br />intensity 为激光反射强度<br />rbg 为颜色信息<br />timestamp为时间戳 |
 | SIZE      | 用字节数指定每个维度的大小     | unsigned char：占1个字节<br />unsigned short：占2个字节<br />unsigned int/float：占4个字节<br />double：占8个字节 |
 | TYPE      | 用字符指定每个维度的类型       | I：int8(char)、int16(short)、int32(int)<br />U：uint8(unsigned char)、uint16(unsigned short)、uint32(unsigned int)<br />F：float |
 | COUNT     | 每个维度包含的元素数量         | 默认为1，但是也有例外，例如 VFH 特征就是 308 个              |
