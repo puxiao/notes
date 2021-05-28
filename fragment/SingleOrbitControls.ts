@@ -23,7 +23,7 @@ class SingleOrbitControls extends EventDispatcher {
     public minAzimuthAngle: number = -Infinity
     public maxAzimuthAngle: number = Infinity
 
-    private readonly mouseButtons = { LEFT: MOUSE.LEFT, MIDDLE: MOUSE.DOLLY, RIGHT: MOUSE.RIGHT }
+    public mouseButtons = { LEFT: MOUSE.LEFT, MIDDLE: MOUSE.DOLLY, RIGHT: MOUSE.RIGHT }
 
     private readonly STATE = {
         NONE: -1,
@@ -362,7 +362,7 @@ class SingleOrbitControls extends EventDispatcher {
         switch (mouseAction) {
             case MOUSE.ROTATE:
                 if (event.ctrlKey || event.metaKey || event.shiftKey) {
-                    if (this.enabled === false) return
+                    if (this.enablePan === false) return
                     this.handleMouseDownPan(event)
                     this.state = this.STATE.PAN
                 } else {
@@ -382,7 +382,7 @@ class SingleOrbitControls extends EventDispatcher {
                     this.handleMouseDownRotate(event)
                     this.state = this.STATE.ROTATE
                 } else {
-                    if (this.enableRotate === false) return
+                    if (this.enablePan === false) return
                     this.handleMouseDownPan(event)
                     this.state = this.STATE.PAN
                 }
