@@ -1,5 +1,3 @@
-////@ts-nocheck
-
 import { PerspectiveCamera, OrthographicCamera, EventDispatcher, Vector2, Vector3, Matrix4, MOUSE, Spherical, Quaternion } from "three";
 
 const _changeEvent = { type: 'change' }
