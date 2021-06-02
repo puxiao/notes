@@ -4,10 +4,22 @@ const _changeEvent = { type: 'change' }
 const _startEvent = { type: 'start' }
 const _endEvent = { type: 'end' }
 
+export const ControlsModeTypes = {
+    DEFAULT: -1,
+    ROTATE: 0,
+    DOLLY: 1,
+    PAN: 2
+} as const
+
+export type ControlsModeValue = typeof ControlsModeTypes[keyof typeof ControlsModeTypes]
+
 /**
  * @description: Single orbit controls: PAN or ROTATE or ZOOM
  */
 class SingleOrbitControls extends EventDispatcher {
+
+    private _mode: ControlsModeValue = ControlsModeTypes.DEFAULT
+
     public camera: PerspectiveCamera | OrthographicCamera
     public domElement: HTMLElement
 
@@ -18,12 +30,18 @@ class SingleOrbitControls extends EventDispatcher {
     public maxDistance: number = Infinity
     public minZoom: number = 0
     public maxZoom: number = Infinity
+
+    // public minPolarAngle: number = Math.PI / 4
+    // public maxPolarAngle: number = Math.PI / 4 * 3
+    // public minAzimuthAngle: number = -Math.PI / 4
+    // public maxAzimuthAngle: number = Math.PI / 4
+
     public minPolarAngle: number = 0
     public maxPolarAngle: number = Math.PI
-    public minAzimuthAngle: number = -Infinity
-    public maxAzimuthAngle: number = Infinity
+    public minAzimuthAngle: number = -Math.PI
+    public maxAzimuthAngle: number = Math.PI
 
-    public mouseButtons = { LEFT: MOUSE.LEFT, MIDDLE: MOUSE.DOLLY, RIGHT: MOUSE.RIGHT }
+    private readonly mouseButtons = { LEFT: MOUSE.LEFT, MIDDLE: MOUSE.DOLLY, RIGHT: MOUSE.RIGHT }
 
     private readonly STATE = {
         NONE: -1,
@@ -346,7 +364,14 @@ class SingleOrbitControls extends EventDispatcher {
         let mouseAction = -1
         switch (event.button) {
             case 0:
-                mouseAction = this.mouseButtons.LEFT
+                switch (this._mode) {
+                    case ControlsModeTypes.DEFAULT:
+                        mouseAction = -1
+                        break
+                    default:
+                        mouseAction = this._mode
+                        break
+                }
                 break
             case 1:
                 mouseAction = this.mouseButtons.MIDDLE
@@ -501,6 +526,14 @@ class SingleOrbitControls extends EventDispatcher {
         this.domElement.addEventListener('pointerdown', this.handlePointerDown)
         this.domElement.ownerDocument.addEventListener('pointermove', this.handlePointerMove)
         this.domElement.ownerDocument.addEventListener('pointerup', this.handlePointerUp)
+    }
+
+    public get mode() {
+        return this._mode
+    }
+
+    public set mode(num: ControlsModeValue) {
+        this._mode = num
     }
 }
 
