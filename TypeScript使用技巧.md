@@ -1413,3 +1413,112 @@ export const myFun = (person: Person) => {
 
 <br>
 
+## (27)protected 让父类不可以被实例化
+
+假设使用 TS 定义了一个父类 ParentClass，那么可以通过给父类的构造函数前面添加 `protected` 关键词，让父类不可以被实例化，但是子类构造函数中调用 super() 是被允许的。
+
+
+
+<br>
+
+```
+class ParentClass{
+    protected constructor(){
+        ...
+    }
+}
+```
+
+
+
+<br>
+
+如果尝试实例化 ParentClass，`new ParentClass()` 则会收到以下报错：
+
+```
+类“ParentClass”的构造函数是受保护的，仅可在类声明中访问。
+```
+
+
+
+<br>
+
+## (28)override 显示重写父类的方法
+
+**注意：override 这个关键词是 TypeScript 4.3 版本中才新增的关键词。**
+
+**但是目前并不是所有的编译工具都可以正确编译该关键词，例如目前的 react 17.0.2 还不支持编译该关键词。**
+
+
+
+<br>
+
+**之前子类重写父类方法的示例：**
+
+以前子类重写父类的某个方法，都是采用匿名的方式。例如：
+
+```
+class ParentClass {
+    doSomting(){
+        ...
+    }
+}
+
+class ChildClass extends ParentClass {
+    doSomthing(){
+        ...
+    }
+}
+```
+
+也就是说，子类所谓重写父类的某个方法，其实就是 使用相同的名字即可。
+
+
+
+<br>
+
+但是这样存在一个问题，假设有一天父类中删除了 doSomthing() 这个方法，而子类并不知道。
+
+那么子类中的 doSomthing() 此刻就由 “覆盖” 变成了 “新增”。
+
+
+
+<br>
+
+最新版的 TS 4.3 中，在 tsconfig.json 文件内我们可以新添加一个关键词 `noImplicitOverride`：
+
+```
+{
+    "compilerOptions": {
+        "noImplicitOverride": true
+    }
+}
+```
+
+当 noImplicitOverride 的值为 true 是，即不允许子类匿名重写父类的方法。
+
+子类在重写父类方法时，必须明确使用 “override” 关键词才可以。
+
+
+
+<br>
+
+**最新重写方式：**
+
+```
+class ParentClass {
+    doSomting(){
+        ...
+    }
+}
+
+class ChildClass extends ParentClass {
+    override doSomthing(){
+        ...
+    }
+}
+```
+
+
+
+<br>
