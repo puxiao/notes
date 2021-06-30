@@ -1443,7 +1443,7 @@ class ParentClass{
 
 <br>
 
-## (28)override 显示重写父类的方法
+## (28)override 显式重写父类的方法
 
 **注意：override 这个关键词是 TypeScript 4.3 版本中才新增的关键词。**
 
