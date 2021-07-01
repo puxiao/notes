@@ -1413,7 +1413,86 @@ export const myFun = (person: Person) => {
 
 <br>
 
-## (27)protected 让父类不可以被实例化
+## (27)public/private/protected 类的属性或方法的修饰词
+
+在传统面向对象编程语言中，类的属性或方法前面都可以添加 修饰词语，例如：
+
+1. public：公开的，任何人都可以访问
+2. private：私密的，仅类本身内部可访问
+3. protected：受保护的，仅类、子类可访问
+
+目前，TypeScript 也完全支持这 3 种修饰词。
+
+
+
+**public**
+
+在 TypeScript 中如果属性或方法不添加修饰词，那么默认即为 public。
+
+```
+class MyClass{
+    name:string
+    doSomting(){ ... }
+}
+
+//完全等价于
+
+class MyClass{
+    public name:string
+    public doSomting(){ ... }
+}
+```
+
+> 对于原生 JS 而言，类的所有属性或方法默认都是 public。
+>
+> 我个人推荐在 TS 中添加上 public，因为这样容易一样就能知道该属性或方法为 public，并且这样做容易和其他修饰符进行对等呼应。
+
+
+
+<br>
+
+**private**
+
+使用该修饰词后，该属性或方法仅可类本身内部使用，外部或子类都不可以调用(访问)。
+
+```
+class MyClass{
+    private name:string
+    private doSomting(){ ... }
+}
+```
+
+> 对于原生 JS 而言，在新的 ES 标准中，类内部私有属性或方法采用的是添加  `#` 作为前缀。
+>
+> ```
+> class MyClass{
+>     #name = 'aaa'
+>     #doSomting(){ ... }
+> }
+> ```
+
+
+
+<br>
+
+**protected**
+
+当给类的某个属性或方法添加 `protected` 之后，那么该属性或类只允许本类、子类访问和调用。
+
+```
+class MyClass {
+  protected _type: string = 'aaa'
+  protected doSomting(){ ... }
+}
+```
+
+> 对于原生 JS 而言，目前还不存在 protected 这个概念
+
+
+
+<br>
+
+## (28)protected 让父类不可以被实例化
 
 假设使用 TS 定义了一个父类 ParentClass，那么可以通过给父类的构造函数前面添加 `protected` 关键词，让父类不可以被实例化，但是子类构造函数中调用 super() 是被允许的。
 
@@ -1443,7 +1522,7 @@ class ParentClass{
 
 <br>
 
-## (28)override 显式重写父类的方法
+## (29)override 显式重写父类的方法
 
 **注意：override 这个关键词是 TypeScript 4.3 版本中才新增的关键词。**
 
@@ -1485,7 +1564,7 @@ class ChildClass extends ParentClass {
 
 <br>
 
-最新版的 TS 4.3 中，在 tsconfig.json 文件内我们可以新添加一个关键词 `noImplicitOverride`：
+最新版的 TS 4.3 中，在 tsconfig.json 文件内我们可以新添加一个配置关键词 `noImplicitOverride`：
 
 ```
 {
@@ -1522,3 +1601,73 @@ class ChildClass extends ParentClass {
 
 
 <br>
+
+## (30)模板字符串中使用类型
+
+在日常开发中，我们可能会对某个变量类型定义成 string，例如：
+
+```
+let url:string = 'xxxx'
+```
+
+
+
+我们也可以使用 模板字符串 拼接变量和字符串。
+
+```
+const num = 2
+console.log(`num${num}`)
+```
+
+
+
+目前 TypeScript 中可以对字符串进行更加详细的结构定义。
+
+<br>
+
+
+
+**基础用法**
+
+例如：
+
+```
+type MyURL = `https://${string}` //我们定义了一个字符串类型，该字符串必须以 'https://' 为开头
+
+const url1: MyURL = 'puxiao.com' //不能将类型“"puxiao.com"”分配给类型“`https://${string}`”。
+
+const url2: MyURL = 'https://puxiao.com' //这个是符合 MyURL 规范的
+```
+
+
+
+<br>
+
+**约束字符串数字格式**
+
+例如：
+
+```
+type StrNum = `${number}-${number}-${number}`
+
+const str0:StrNum = '22-2' // 这个格式是错误的
+const str1:StrNum = '22-2-22' //这个格式正确
+```
+
+
+
+**变量类型还可以采用组合形式**
+
+例如：
+
+```
+type ColorType = 'red' | 'green'
+type NumType = 'one' | 'two'
+
+type StrType = `${ColorType | NumType} flower`
+```
+
+
+
+<br>
+
