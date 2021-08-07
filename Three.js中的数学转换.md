@@ -228,7 +228,7 @@ console.log(c) // Vector3 {x: 0, y: 0, z: 1}
 | .floor () : this                                             | 将当前向量的 x、y 向下取整                                   |
 | .fromArray ( array : Array, offset : Integer ) : this        | 将当前向量 x 设置为 array[offset]，y 为 array[offset+1]，<br />默认 offset 为0 |
 | .fromBufferAttribute ( attribute : BufferAttribute, index : Integer ) : this | 将当前向量 x 设置为 attribute.getX(index)，y 为attribute.getY(index) |
-| .getComponent ( index : Integer ) : Float                    | 若 index 为 0 返回 x，若 index 为 1 返回 y                   |
+| .getComponent ( index : Integer ) : Float                    | 若 index 为 0 返回 x，若 index 为 1 返回 y<br />`component` 在这里的意思为 “分量” |
 | .length () : Float                                           | 返回从(0,0)到(x,y)的几何长度，即该向量的长度                 |
 | .lengthSq () : Float                                         | 返回该向量长度的平方值                                       |
 | .manhattanLength () : Float                                  | 返回该向量的 `曼哈顿` 长度                                   |
@@ -344,76 +344,100 @@ console.log(c) // Vector3 {x: 0, y: 0, z: 1}
 
 
 
-| 方法名                                                   | 对应含义                                              |
-| -------------------------------------------------------- | ----------------------------------------------------- |
-| .add ( v : Vector3 ) : this                              | 将当前向量的 x y z 分别加上 v 的 x y z                |
-| .addScalar ( s : Float ) : this                          | 将当前向量的 x y z 分别加上 s                         |
-| .addScaledVector ( v : Vector3, s : Float ) : this       | 将当前向量的 x y z 分别加上 v  与 s 的相乘结果        |
-| .addVectors ( a : Vector3, b : Vector3 ) : this          | 将当前向量的值设置为 a + b 的结果                     |
-| .applyAxisAngle ( axis : Vector3, angle : Float ) : this | 计算 axis 和 angle 的旋转结果，并应用于当前向量(旋转) |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
-|                                                          |                                                       |
+| 方法名                                                       | 对应含义                                                     |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| .add ( v : Vector3 ) : this                                  | 将当前向量的 x y z 分别加上 v 的 x y z                       |
+| .addScalar ( s : Float ) : this                              | 将当前向量的 x y z 分别加上 s                                |
+| .addScaledVector ( v : Vector3, s : Float ) : this           | 将当前向量的 x y z 分别加上 v  与 s 的相乘结果               |
+| .addVectors ( a : Vector3, b : Vector3 ) : this              | 将当前向量的值设置为 a + b 的结果                            |
+| .applyAxisAngle ( axis : Vector3, angle : Float ) : this     | 计算 axis 和 angle 的旋转结果，并应用于当前向量(旋转)        |
+| .applyEuler ( euler : Euler ) : this                         | 先将参数 euler 欧拉角 转换为四元素，然后将该四元素应用于当前向量 |
+| .applyMatrix3 ( m : Matrix3 ) : this                         | 将当前向量乘以(应用)参数 三阶矩阵 m                          |
+| .applyMatrix4 ( m : Matrix4 ) : this                         | 将当前向量乘以(应用)参数 四阶矩阵 m，请注意会隐式得将参数m第4维度值为 1 |
+| .applyNormalMatrix ( m : Matrix3 ) : this                    | 将当前向量乘以正规矩阵 m，并将结果进行归一化                 |
+| .applyQuaternion ( quaternion : Quaternion ) : this          | 将四元数参数 quaternion 应用于当前向量上                     |
+| .angleTo ( v : Vector3 ) : Float                             | 以弧度返回当前向量与向量 v 之间的角度                        |
+| .ceil () : this                                              | 将该向量的 x y z 分别向上取整                                |
+| .clamp ( min : Vector3, max : Vector3 ) : this               | 修正当前向量 x y z 的值，以确保在 min 和 max 相应xyz的范围内 |
+| .clampLength ( min : Float, max : Float ) : this             | 修正当前向量的长度 ，以确保向量长度在 min 和 max 的范围内    |
+| .clampScalar ( min : Float, max : Float ) : this             | 修正当前向量的 x y z 的值，以确保在 min 和 max 的范围内      |
+| .clone () : Vector3                                          | 复制并返回一个新的 Vector3 向量                              |
+| .copy ( v : Vector3 ) : this                                 | 将当前向量设设置成和参数 v 相同的值                          |
+| .cross ( v : Vector3 ) : this                                | 计算当前向量与参数 v 的叉积，并将结果赋值给当前向量          |
+| .crossVectors ( a : Vector3, b : Vector3 ) : this            | 计算参数 a 与 b 的叉积，然后将结果赋值给当前向量             |
+| .distanceTo ( v : Vector3 ) : Float                          | 计算当前向量与参数 v 之间的距离                              |
+| .manhattanDistanceTo ( v : Vector3 ) : Float                 | 计算当前向量与参数 v 之间的曼哈顿距离                        |
+| .distanceToSquared ( v : Vector3 ) : Float                   | 计算当前向量与参数 v 的距离的平方                            |
+| .divide ( v : Vector3 ) : this                               | 将当前向量除以参数 v，即 this.x = this.x/v.x，y z 同理       |
+| .divideScalar ( s : Float ) : this                           | 将当前向量的 x y z 分别除以 s，若 s 为 0 则当前向量将被设置为：(0,0,0) |
+| .dot ( v : Vector3 ) : Float                                 | 计算当前向量与参数 v 的点积，当前向量并不会发生任何变化      |
+| .equals ( v : Vector3 ) : Boolean                            | 检查当前向量与参数 v 是否严格相等                            |
+| .floor () : this                                             | 将当前向量的 x y z 分别向下取整                              |
+| .fromArray ( array : Array, offset : Integer ) : this        | 将当前向量的 x 的值设置为 array[offset+0]，y = array[offset+1]，z = arrya[offset+2]，offset 默认值为 0 |
+| .fromBufferAttribute ( attribute : BufferAttribute, index : Integer ) : this | 将当前向量的 x y z 的值分别设置为 attribute.getX(index)、attribute.getY(index)、attribute.getZ(index) |
+| .getComponent ( index : Integer ) : Float                    | 若 index 为 0 则返回 x，1 返回 y ，2 返回 z                  |
+| .length () : Float                                           | 向量的欧几里得长度                                           |
+| .manhattanLength () : Float                                  | 向量的曼哈顿距离                                             |
+| .lengthSq () : Float                                         | 向量的欧几里得长度的平方                                     |
+| .lerp ( v : Vector3, alpha : Float ) : this                  | 将当前向量加上当前向量与 v 的插值，this += (v - this) * alpha。alpha 取值范围为 0 至 1，因此当 alpha 为 0 时当前向量不变，当 alpha 为 1 时当前向量等于 v |
+| .lerpVectors ( v1 : Vector3, v2 : Vector3, alpha : Float ) : this | 将当前向量设置为 this = v1 + (v1 - v2) * alpha 。alpha 的取值范围同 .lerp 相同 |
+| .max ( v : Vector3 ) : this                                  | 将当前向量的 x 设置为 Math.max(this.x, v.x)，y z 也如此这样操作 |
+| .min ( v : Vector3 ) : this                                  | 将当前向量的 x 设置为 Math.min(this.x, v.x)，y z 也如此这样操作 |
+| .multiply ( v : Vector3 ) : this                             | 将当前向量与 v 进行相乘                                      |
+| .multiplyScalar ( s : Float ) : this                         | 将当前向量的 x y z 分别与 s 进行相乘                         |
+| .multiplyVectors ( a : Vector3, b : Vector3 ) : this         | 将当前向量设置为 a 与 b 相乘的结果                           |
+| .negate () : this                                            | 向量取反，即 x = -x ，y = -y ，z = -z                        |
+| .normalize () : this                                         | 将当前向量转换为单位向量(unit vector)，即向量长度为 1，方向不变。由于向量长度为1，则意味着 x y z 他们的取值范围一定是 大于等于 -1，小于等于 1。这种操作也被称为 “向量归一化” |
+| .project ( camera : Camera ) : this                          | 将此向量(坐标)从世界空间投影到相机的标准化设备坐标 (NDC) 空间。 |
+| .unproject ( camera : Camera ) : this                        | 将此向量(坐标)从相机的标准化设备坐标 (NDC) 空间投影到世界空间。 |
+| .projectOnPlane ( planeNormal : Vector3 ) : this             | 通过从该向量减去投影到平面法线上的向量，将该向量投影到平面上。 |
+| .projectOnVector ( v : Vector3 ) : this                      | 投影当前向量到参数 v 上                                      |
+| .reflect ( normal : Vector3 ) : this                         | 将该向量设置为对指定 normal 法线的表面的反射向量。<br />假设法线具有单位长度(也就是说法线长度不能为 0) |
+| .round () : this                                             | 将该向量的 x y z 分别四舍五入取整                            |
+| .roundToZero () : this                                       | 将该向量的 x y z 分别朝向 0 取整<br />以 x 为例 若 x < 0 则 x = 0，若 x > 0 则 x = Math.floor(x)，y 也类似 |
+| .set ( x : Float, y : Float, z : Float ) : this              | 分别设置当前向量的 x y z 值                                  |
+| .setComponent ( index : Integer, value : Float ) : null      | 若 index 为 0 则修改 x = value，若为 1 则修改 y ，若为 2 则修改 z |
+| .setFromCylindricalCoords ( radius : Float, theta : Float, y : Float ) : this | 从圆柱坐标系中的 radius、theta、y 设置该向量。实际上执行的是：<br />this.x = radius * Math.sin(theta)、this.y = y、<br />this.z = radius * Math.cos(theta) |
+| .setFromCylindrical ( c : Cylindrical ) : this               | 从圆柱坐标 c 中设置当前向量，相当于执行 .setFromCylindricalCoords ( c.radius, c.theta, c.y ) |
+| .setFromMatrixColumn ( matrix : Matrix4, index : Integer ) : this | 从参数四阶矩阵 matrix 由 index 指定的列中 ，设置当前向量的 x y z 的值 |
+| .setFromMatrix3Column ( matrix : Matrix3, index : Integer ) : this | 从传入的三阶矩阵 matrix 由 index 指定的列中，设置当前向量的 x 值、y 值和 z 值。 |
+| .setFromMatrixPosition ( m : Matrix4 ) : this                | 从参数四阶矩阵 m 中设置当前向量的 x y z 与位置相关的元素。其中 x = m.elements[12]、y = m.elements[13]、z = m.elements[14] |
+| .setFromMatrixScale ( m : Matrix4 ) : this                   | 从参数四阶矩阵 m 中设置当前向量的 x y z 与缩放相关的元素。   |
+| .setFromSphericalCoords ( radius : Float, phi : Float, theta : Float ) : this | 从参数球坐标 radius、phi、theta 设置当前向量。               |
+| .setFromSpherical ( s : Spherical ) : this                   | 从参数球坐标 s 中设置当前向量。实际上相当于执行 .setFromSphericalCoords(s.radius, s.phi, s.theta) |
+| .setLength ( l : Float ) : this                              | 保持当前向量方向不变，将长度修改为 l                         |
+| .setScalar ( scalar : Float ) : this                         | 将当前向量的 x y z 都设置为 scalar                           |
+| .setX ( x : Float ) : this                                   | 设置 x 的值                                                  |
+| .setY ( y : Float ) : this                                   | 设置 y 的值                                                  |
+| .setZ ( z : Float ) : this                                   | 设置 z 的值                                                  |
+| .sub ( v : Vector3 ) : this                                  | 将当前向量减去参数 v                                         |
+| .subScalar ( s : Float ) : this                              | 将当前向量的 x y z 均减去 s                                  |
+| .subVectors ( a : Vector3, b : Vector3 ) : this              | 将当前向量设置为 a - b 的结果                                |
+| .toArray ( array : Array, offset : Integer ) : Array         | 返回由当前向量 x y z 构成一个数组 [x, y, z]。若参数 array 不为 undefind 则将 [x,y,z] 赋值给 array，offset 为数组偏移量，默认为 0 |
+| .transformDirection ( m : Matrix4 ) : this                   | 由参数四阶矩阵 m 左上角 3 x 3 的子矩阵来设置当前矩阵，并将结果进行归一化。 |
+| .random () : this                                            | 将当前向量的每个分量(x、y、z)设置为介于 0 和 1 之间的伪随机数，不包括 1。 |
+
+
+
+<br>
+
+**正规矩阵(normal matrix)：**
+
+与自己的共轭转置矩阵对应的复系数方块矩阵。
+
+
+
+<br>
+
+**线性插值(linear interpolation)：**
+
+> 是线性插值，不是线性差值
+
+线性插值的意思即表示 2 点之间的直线上，计算点的位置公式。
+
+假设 2 点构成了一个抛物线，有专门计算该抛物线上点位置公式，而线性插值是指将 2 点之间连接直线，求该直线上的点位置公式。
+
+
+
+<br>
 
