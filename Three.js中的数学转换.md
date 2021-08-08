@@ -340,9 +340,7 @@ console.log(c) // Vector3 {x: 0, y: 0, z: 1}
 
 <br>
 
-### Vector3的属性和方法
-
-
+### Vector3的方法
 
 | 方法名                                                       | 对应含义                                                     |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
@@ -413,7 +411,7 @@ console.log(c) // Vector3 {x: 0, y: 0, z: 1}
 | .sub ( v : Vector3 ) : this                                  | 将当前向量减去参数 v                                         |
 | .subScalar ( s : Float ) : this                              | 将当前向量的 x y z 均减去 s                                  |
 | .subVectors ( a : Vector3, b : Vector3 ) : this              | 将当前向量设置为 a - b 的结果                                |
-| .toArray ( array : Array, offset : Integer ) : Array         | 返回由当前向量 x y z 构成一个数组 [x, y, z]。若参数 array 不为 undefind 则将 [x,y,z] 赋值给 array，offset 为数组偏移量，默认为 0 |
+| .toArray ( array : Array, offset : Integer ) : Array         | 返回由当前向量 x y z 构成一个数组 [x, y, z]。若参数 array 不为 undefined 则将 [x,y,z] 赋值给 array，offset 为数组偏移量，默认为 0 |
 | .transformDirection ( m : Matrix4 ) : this                   | 由参数四阶矩阵 m 左上角 3 x 3 的子矩阵来设置当前矩阵，并将结果进行归一化。 |
 | .random () : this                                            | 将当前向量的每个分量(x、y、z)设置为介于 0 和 1 之间的伪随机数，不包括 1。 |
 
@@ -440,4 +438,283 @@ console.log(c) // Vector3 {x: 0, y: 0, z: 1}
 
 
 <br>
+
+### Vector4的方法
+
+| 方法名                                                       | 对应含义                                                     |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| .add ( v : Vector4 ) : this                                  | 将当前向量加上 v                                             |
+| .addScalar ( s : Float ) : this                              | 当前向量的 x y z w 分别加上 s                                |
+| .addScaledVector ( v : Vector4, s : Float ) : this           | 先计算 v * s，然后将结果添加到当前向量中                     |
+| .addVectors ( a : Vector4, b : Vector4 ) : this              | 将当前向量设置为 a + b                                       |
+| .applyMatrix4 ( m : Matrix4 ) : this                         | 将当前向量乘以 四阶矩阵 m。<br />所谓矩阵变换实际上也是两个矩阵相乘。 |
+| .ceil () : this                                              | 将当前向量的 x y z w 分别向上取整                            |
+| .clamp ( min : Vector4, max : Vector4 ) : this               | 修订当前向量的 x y z w 的取值范围                            |
+| .clampLength ( min : Float, max : Float ) : this             | 修订当前向量的长度的取值范围                                 |
+| .clampScalar ( min : Float, max : Float ) : this             | 修订当前向量的 x y z w 的取值范围                            |
+| .clone () : Vector4                                          | 返回一个克隆的当前向量                                       |
+| .copy ( v : Vector4 ) : this                                 | 将当前向量设置为 v 相同的值                                  |
+| .divideScalar ( s : Float ) : this                           | 将当前向量除以标量 s。<br />若 s 的值为 0，则当前向量会被设置为 (0,0,0,0) |
+| .dot ( v : Vector4 ) : Float                                 | 计算当前向量与 v 的点积                                      |
+| .equals ( v : Vector4 ) : Boolean                            | 检查当前向量是否与 v 完全相同                                |
+| .floor () : this                                             | 将当前向量的 x y z w 向下取整                                |
+| .fromArray ( array : Array, offset : Integer ) : this        | 从参数 array 中按照 offset 的索引偏移，依次设置当前向量的 x y z w 的值。offset 默认为 0 |
+| .fromBufferAttribute ( attribute : BufferAttribute, index : Integer ) : this | 从参数 attribute 中按照 index 的索引，依次设置当前向量的 x y z w 的值，例如 this.x = attribute.getX(index)。 |
+| .getComponent ( index : Integer ) : Float                    | 按照 index 的值返回分量 x 或 y 或 z 或 w                     |
+| .length () : Float                                           | 计算并返回从 (0,0,0,0) 到当前向量的欧几里得长度              |
+| .lengthSq () : Float                                         | 计算并返回当前向量长度的平方值                               |
+| .manhattanLength () : Float                                  | 计算并返回当前向量的曼哈顿长度                               |
+| .lerp ( v : Vector4, alpha : Float ) : this                  | 将当前向量设置为当前向量与 v 的线性插值，计算过程中加入 alpha 作为相乘因素。alpha 取值范围为 0 至 1，当 alpha 为 0 时计算结果为当前向量，当 alpha 为 1 时计算结果为 v |
+| .lerpVectors ( v1 : Vector4, v2 : Vector4, alpha : Float ) : this | 将当前向量设置为 v1 与 v2 的线性插值。                       |
+| .negate () : this                                            | 向量取反，即 x = -x，y = -y ...                              |
+| .normalize () : this                                         | 将当前向量转化为单位向量(向量的归一化)。向量方向不变但长度变为 1。 |
+| .max ( v : Vector4 ) : this                                  | 将当前向量的 x 执行 Math.max(this.x, v.x)，y z w 也类似      |
+| .min ( v : Vector4 ) : this                                  | 将当前向量的 x 执行 Math.min(this.x, v.x)，y z w 也类似      |
+| .multiply ( v : Vector4 ) : this                             | 将当前向量与 v 相乘。请注意这里的 “相乘” 是真的直接相乘，<br />例如 this.x *= v.x，这与 .applyMatrix() 中 “与四阶矩阵相乘” 是不同的。 |
+| .multiplyScalar ( s : Float ) : this                         | 将当前向量的 x y z w 分别都乘以 s                            |
+| .round () : this                                             | 将当前向量的 x y z w 分别都四舍五入                          |
+| .roundToZero () : this                                       | 将当前向量的 x y z w 分别朝向 0 取整。若分量为负数则等于 0，若为正数则向下取整 |
+| .set ( x : Float, y : Float, z : Float, w : Float ) : this   | 依次设置当前向量的 x y z w 的值                              |
+| .setAxisAngleFromQuaternion ( q : Quaterion ) : this         | 将当前向量的 x y z 分别设置为四元数的轴，w 分量设置为四元数的角度 |
+| .setAxisAngleFromRotationMatrix ( m : Matrix4 ) : this       | 将当前向量的 x y z 分别设置为旋转轴，w 为角度                |
+| .setComponent ( index : Integer, value : Float ) : null      | 根据 index 的值，设置对应 x  或 y 或 z 或 w 的值             |
+| .setLength ( l : Float ) : this                              | 将当前向量的长度设置为 l，方向保持不变                       |
+| .setScalar ( scalar : Float ) : this                         | 将当前向量的 x y z w 的值都设置为 scalar                     |
+| .setX ( x : Float ) : this                                   | 设置当前向量的 x 的值                                        |
+| .setY ( y : Float ) : this                                   | 设置当前向量的 y 的值                                        |
+| .setZ ( z : Float ) : this                                   | 设置当前向量的 z 的值                                        |
+| .setW ( w : Float ) : this                                   | 设置当前向量的 w 的值                                        |
+| .sub ( v : Vector4 ) : this                                  | 当前向量减去 v                                               |
+| .subScalar ( s : Float ) : this                              | 当前向量的 x y z w 都减去标量 s                              |
+| .subVectors ( a : Vector4, b : Vector4 ) : this              | 将当前向量设置为 a - b                                       |
+| .toArray ( array : Array, offset : Integer ) : Array         | 将当前向量的 x y z w 根据 offset 的索引依次设置到 array 中。参数 array 和 offset 均为可选参数，offset 默认为 0 |
+| .random () : this                                            | 将该向量的每个分量(x、y、z、w)设置为介于 0 和 1 之间的伪随机数，不包括 1。 |
+
+
+
+<br>
+
+## 旋转
+
+在 3D 空间中，物体的变换有以下几种：
+
+1. 位移
+2. 缩放
+3. 旋转
+4. 斜切
+
+
+
+<br>
+
+**执行顺序：**
+
+对于位移和缩放是不需要考虑执行顺序的，例如我们要对一个长方体进行缩放或平移，无论先操作 x 还是 y 都不影响最终结果。
+
+但是对于旋转而言却不是这样的，旋转操作需要严格设定好执行的先后顺序。
+
+假设有一个打乱的魔方，若执行下面的 2 种操作：
+
+1. 第一种：先向左转 1 个面、再向上转 1 个面
+2. 第二种：先向上转 1 个面、再向左转 1 个面
+
+以上 2 种操作 向上或向左 的执行顺序不同，可以想象，最终魔方呈现的结果也是不一样的。
+
+对于物体的旋转而言，方向执行的先后顺序不同，其旋转后的结果状态也会不同。
+
+
+
+<br>
+
+**绕轴旋转：**
+
+假设我们说绕某轴旋转，实际情况就是对应这个轴的坐标不会发生变化，变化的是另外两个轴。
+
+1. 绕 x 轴旋转，即 x 坐标不变，y 和 z 的值会发生变化
+2. 绕 y 轴旋转，即 y 坐标不变，x 和 z 的值会发生变化
+3. 绕 z 轴旋转，即 z 坐标不变，z 和 y 的值会发生变化
+
+
+
+<br>
+
+**顺指针与逆时针：**
+
+在二维旋转中，默认我们将 逆时针旋转为正，顺时针旋转为负。
+
+但是在三维旋转中，是不存在 顺时针 或 逆时针 旋转这个概念的。
+
+
+
+<br>
+
+**右手螺旋法则：**
+
+虽然三维空间中并不存在 顺时针和逆时针的概念，但是对于某一个轴旋转，依然是有正旋转和负旋转之分的。
+
+判定旋转是正还是负，靠右手螺旋法则来界定。
+
+假设我们现在要绕 x 轴旋转，那么右手螺旋法则的界定方式为：
+
+1. 伸出大拇指，将大拇指朝向 x 轴的正轴方向
+2. 此时弯曲其他四指
+3. 四指弯曲的方向就是 正旋转
+4. 四指弯曲的反方向就是 负旋转
+
+
+
+<br>
+
+**飞机旋转的行业术语：**
+
+你可以想象一下现在有一个正在平稳飞行中的飞机。
+
+1. 机身左右平移被称为：偏航(yaw)
+
+   > 以与机身上下垂直的轴 进行旋转
+
+2. 机身左右旋转被称为：滚转(roll)
+
+   > 以机身为轴 进行旋转
+
+3. 机头机尾上下变化被称为：仰俯(pitch)
+
+   > 以与机身水平垂直的轴 进行旋转
+
+
+
+<br>
+
+**如何描述旋转？**
+
+在 3D 空间中，一共有 3 种数学方式可以描述和记录旋转。
+
+1. 欧拉角
+2. 四元数
+3. 矩阵
+
+矩阵稍后再讲，本小节只谈论 欧拉角与四元数。
+
+
+
+<br>
+
+### 欧拉角(euler)
+
+欧拉角是由数学家 欧拉 发明的，所以叫 欧拉角。
+
+欧拉角 通过定义 x y z 3 个轴的旋转角度来描述一个旋转变化。
+
+但是由于 x y z 旋转的依次顺序不同，其结果也不同，所以在 Three.js 中的 欧拉角 Euler 类 还增加了第 4 个属性：order，即表示旋转顺序，默认值为 “XYZ”。
+
+
+
+<br>
+
+**记录欧拉角的 3 个值：**
+
+由于 order 的默认值为 “XYZ”，所以日常使用中我们可以忽略这个属性值，而只记录 x y z 这 3 个属性值。
+
+
+
+<br>
+
+**欧拉角的缺点：**
+
+1. 欧拉角的 3 个值 x y z 执行顺序必须相对固定，若执行顺序不同其结果也不同。
+
+   这个现象被称为 “万向节死锁”。
+
+2. 欧拉角比较难易 “计算” ，比如一个物体由当前旋转状态变换为另外一种旋转状态，实际上会有多种 变换方式 都可以达到目的，也就是无法使用 唯一的一种变换来描述，增加变换的复杂性。
+
+3. 同一个欧拉角的 x y z 的值可以是不同的数字，因此很难 “倒推还原” 之前的状态和预期目标状态。
+
+
+
+<br>
+
+**欧拉角的优点：**
+
+1. 简单，容易直观理解：沿  x 轴旋转多少角度，再沿 y 轴旋转... 再沿 z 轴旋转
+2. 只需要保存 3 个数字即可表示出一个旋转
+
+
+
+<br>
+
+### 四元数(quaternion)
+
+四元数是由数学家 哈密顿 发明的数学概念，四元数解决了 欧拉角 的一些缺点问题。
+
+四元数，顾名思义，使用 4 个数字 x y z w 来描述一个旋转变换。
+
+
+
+<br>
+
+**四元数的优点：**
+
+1. 相对于欧拉角，四元数表示旋转时，只存在一个唯一值。
+2. 相对于使用 3D 空间矩阵而言，四元数更加简洁快速。
+
+
+
+<br>
+
+**四元数的缺点：**
+
+1. 相对于欧拉角，这 4 个数字含义难易理解，凭大脑很难直观想象出最终旋转的结果。
+2. 四元数只适用于 3D 空间旋转。
+
+
+
+<br>
+
+### 欧拉角(Euler)的属性和方法
+
+| 属性名 | 对应含义                                                     |
+| ------ | ------------------------------------------------------------ |
+| x      | 用弧度表示 x 轴旋转量，默认值为 0                            |
+| y      | 用弧度表示 y 轴旋转量，默认值为 0                            |
+| z      | 用弧度表示 z 轴旋转量，默认值为 0                            |
+| order  | 表示旋转顺序，默认为 “XYZ”，即先旋转 x 轴，再旋转 Y 轴，最后旋转 Z 轴 |
+
+
+
+<br>
+
+**由 X、Y、Z 共有 6 种组合方式：**
+
+1. XYZ
+2. XZY
+3. YXZ
+4. YZX
+5. ZXY
+6. ZYX
+
+因此 .order 的值应该是以上 6 种中的一种。
+
+
+
+<br>
+
+| 方法名                                                       | 对应含义                                                     |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| .copy ( euler : Euler ) : Euler                              | 将当前欧拉角设置为参数中的 euler 值                          |
+| .clone () : Euler                                            | 克隆并返回一份                                               |
+| .equals ( euler : Euler ) : Boolean                          | 检查并返回布尔值，确认当前欧拉角是否与参数 euler 相同        |
+| .fromArray ( array : Array ) : Euler                         | 参数 array 是一个长度为 3 或 4 的数组，依次设置当前欧拉角的 x y z order 的值 |
+| .reorder ( newOrder : String ) : Euler                       | 首先将当前欧拉角转化为一个四元数，然后用这个四元数与参数 newOrder 所表示的新顺序来设置当前欧拉角 |
+| .set ( x : Float, y : Float, z : Float, order : String ) : Euler | 依次设置当前欧拉角的 x y z order 的值                        |
+| .setFromRotationMatrix ( m : Matrix4, order : String) : Euler | 根据 order 顺序的纯旋转矩阵(参数 m 上的 3x3 部分)来设置当前欧拉角 |
+| .setFromQuaternion ( q : Quaternion, order : String ) : Euler | 根据 order 顺序，使用归一化四元数 q 来设置当前欧拉角         |
+| .setFromVector3 ( vector : Vector3, order : String ) : Euler | 将当前欧拉角的 x y z 对应设置为参数 vector 的 .x y z，<br />将当前欧拉角的 order 设置为参数中的 order。order 为可选参数 |
+| .toArray ( array : Array, offset : Integer ) : Array         | 将当前欧拉角的 x y z order 以 offset 的偏移索引填入数组 array 中。offset 默认为 0 |
+| .toVector3 ( optionalResult : Vector3 ) : Vector3            | 将当前欧拉角的 x y z 设置为对应参数 optionalResult 中，返回该 Vector3。 |
+
+
+
+<br>
+
+### 四元数(quaternion)的属性和方法
 
