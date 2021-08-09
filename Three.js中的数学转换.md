@@ -648,6 +648,8 @@ console.log(c) // Vector3 {x: 0, y: 0, z: 1}
 
 四元数，顾名思义，使用 4 个数字 x y z w 来描述一个旋转变换。
 
+四元数实际上是使用简化版的 四维空间 来解决 三维空间中的旋转变换。
+
 
 
 <br>
@@ -718,3 +720,61 @@ console.log(c) // Vector3 {x: 0, y: 0, z: 1}
 
 ### 四元数(quaternion)的属性和方法
 
+| 属性名 | 对应含义          |
+| ------ | ----------------- |
+| x      | x坐标，默认值为 0 |
+| y      | y坐标，默认值为 0 |
+| z      | z坐标，默认值为 0 |
+| w      | w坐标，默认值为 1 |
+
+> 注意：上述表格中称呼 x y z w 为坐标，你可以简单得理解为 四元数实际上是一个 四维空间中的向量。通过四维空间中的这个向量来解决三维中的旋转。
+
+
+
+<br>
+
+| 方法名                                                       | 对应含义                                                     |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| .angleTo ( q : Quaternion ) : Float                          | 已弧度为单位返回与参数 四元数 q 之间的夹角                   |
+| .clone () : Quaternion                                       | 返回一份克隆的四元数                                         |
+| .copy ( q : Quaternion ) : Quaternion                        | 将当前四元数设置为 q                                         |
+| .conjugate () : Quaternion                                   | 返回当前四元素的旋转共轭，此操作会修改当前四元数。<br />所谓旋转共轭就是指围绕旋转轴做反方向的旋转。 |
+| .equals ( v : Quaternion ) : Boolean                         | 将当前四元素与参数 v 进行比较并返回比较结果                  |
+| .dot ( v : Quaternion ) : Float                              | 计算当前四元素与 v 的点积                                    |
+| .fromArray ( array : Array, offset : Integer ) : Quaternion  | 将参数 array 按照 offset 偏移索引依次设置当前四元数的 x y z w 的值。offset 默认为 0 |
+| .identity () : Quaternion                                    | 将当前四元数回归初始化，即 (0,0,0,1)，此时的四元数相当于不做任何旋转。 |
+| .invert () : Quaternion                                      | 反转并返回当前四元数。此方法与 .conjugate() 完全相同         |
+| .length () : Float                                           | 计算并返回当前四元数的欧几里得长度                           |
+| .lengthSq () : Float                                         | 计算并返回当前四元数的欧几里得长度的平方                     |
+| .normalize () : Quaternion                                   | 将当前四元数进行归一化，方向不变，长度变为 1。<br />你需要把四元数理解成四维空间中的一个向量 |
+| .multiply ( q : Quaternion ) : Quaternion                    | 将当前四元数乘以 q                                           |
+| .multiplyQuaternions ( a : Quaternion, b : Quaternion ) : Quaternion | 将当前四元数设置为 a 乘以 b 的运算结果                       |
+| .premultiply ( q : Quaternion ) : Quaternion                 | 使用 q 乘以当前四元数<br />请注意这个与 .multiply() 相乘的顺序是相反的，而相乘顺序不同其结果也不同。 |
+| .rotateTowards ( q : Quaternion, step : Float ) : Quaternion | 将该四元数按照步长 step(弧度) 向目标 q 进行旋转。该方法确保最终的四元数不会超过 q。 |
+| .slerp ( qb : Quaternion, t : Float ) : Quaternion           | 处理四元数之间的球面线性插值。t 表示该四元数(其中 t 为 0) 和 qb (其中t为1) 之间的旋转量。该四元数会被设置为上述计算的结果。另请参阅下面 slerp 的静态版本。 |
+| .slerpQuaternions ( qa : Quaternion, qb : Quaternion, t : Float ) : this | 在给定的四元数之间执行球面线性插值，并将结果存储在这个四元数中 |
+| .set ( x : Float, y : Float, z : Float, w : Float ) : Quaternion | 设置当前四元数的 x y z w                                     |
+| .setFromAxisAngle ( axis : Vector3, angle : Float ) : Quaternion | 将当前四元数沿着 axis 轴 和 angle 角度进行旋转。<br />假定 axis 已经被归一化 |
+| .setFromEuler ( euler : Euler ) : Quaternion                 | 将当前四元数根据 euler 进行旋转                              |
+| .setFromRotationMatrix ( m : Matrix4 ) : Quaternion          | 从参数四阶矩阵 m 的旋转分量中来设置该四元数                  |
+| .setFromUnitVectors ( vFrom : Vector3, vTo : Vector3 ) : Quaternion | 将该四元数设置为从方向向量 vFrom 旋转到方向向量 vTo 所需的旋转 |
+| .toArray ( array : Array, offset : Integer ) : Array         | 将当前四元数的 x y z w 按照 offset 偏移索引写入到 array 中。offset 默认值为 0 |
+| .fromBufferAttribute ( attribute : BufferAttribute, index : Integer ) : this | 从参数 attribute 中按照 offset 索引依次设置当前四元数的 x y z w 的值 |
+
+
+
+<br>
+
+**静态方法：.slerpFlat()**
+
+.slerpFlat ( dst : Array, dstOffset : Integer, src0 : Array, srcOffset0 : Integer, src1 : Array, srcOffset1 : Integer, t : Float ) : null
+
+1. dst：输出数组
+2. dstOffset：输出数组的偏移量
+3. src0：起始四元数的源数组
+4. srcOffset0：数组 src0 的偏移量
+5. src1：目标四元数的源数组
+6. srcOffset1：数组 src1 的偏移量
+7. t：归一化插值因子(介于 0 和 1 之间)
+
+类似于四元数实例的 .slerp() 方法，但直接对平面数组进行操作。
