@@ -745,7 +745,7 @@ console.log(c) // Vector3 {x: 0, y: 0, z: 1}
 | .dot ( v : Quaternion ) : Float                              | 计算当前四元素与 v 的点积                                    |
 | .fromArray ( array : Array, offset : Integer ) : Quaternion  | 将参数 array 按照 offset 偏移索引依次设置当前四元数的 x y z w 的值。offset 默认为 0 |
 | .identity () : Quaternion                                    | 将当前四元数回归初始化，即 (0,0,0,1)，此时的四元数相当于不做任何旋转。 |
-| .invert () : Quaternion                                      | 翻转并返回当前四元数。此方法与 .conjugate() 完全相同         |
+| .invert () : Quaternion                                      | 反转并返回当前四元数。此方法与 .conjugate() 完全相同         |
 | .length () : Float                                           | 计算并返回当前四元数的欧几里得长度                           |
 | .lengthSq () : Float                                         | 计算并返回当前四元数的欧几里得长度的平方                     |
 | .normalize () : Quaternion                                   | 将当前四元数进行归一化，方向不变，长度变为 1。<br />你需要把四元数理解成四维空间中的一个向量 |
@@ -1029,3 +1029,56 @@ console.log(matrix3.elements) // [1, 4, 7, 2, 5, 8, 3, 6, 9]
 
 ## 射线(Ray)
 
+**射线的作用：**
+
+射线是由一个原点向一个确定的方向发射的线。在 Three.js 中射线主要用于 Raycaster(光线投射) 中，用于在 3D 空间中拾取物体。
+
+这里说的 “拾取物体” 实际上就是鼠标点击选中物体。
+
+
+
+<br>
+
+### 射线(Ray)的属性和方法
+
+| 属性名               | 对应含义                                                  |
+| -------------------- | --------------------------------------------------------- |
+| .origin : Vector3    | 射线的原点，默认值为 (0,0,0)                              |
+| .direction : Vector3 | 射线的方向，该方向必须是归一化后的向量。默认值为 (0,0,-1) |
+
+<br>
+
+
+
+射线的绝大多数方法都是针对以上 2 个属性进行操作的。
+
+<br>
+
+| 方法名                                                       | 对应含义                                                     |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| .applyMatrix4 ( matrix4 : Matrix4 ) : Ray                    | 将参数 matrix4 变换应用于当前射线。内部执行的是：<br />this.origin.applyMatrix4(matrix4)、<br />this.direction.transformDirection(matrix4) |
+| .at ( t : Float, target : Vector3 ) : Vector3                | 获得射线上给定距离 t 处的向量，将该向量赋值给 target 后返回 target |
+| .clone () : Ray                                              | 创建并返回一份克隆的射线                                     |
+| .closestPointToPoint ( point : Vector3, target : Vector3 ) : Vector3 | 沿着当前射线，获得与参数 point 最接近的点，将该点赋值给 target，并返回 target |
+| .copy ( ray : Ray ) : Ray                                    | 将当前射线设置为 参数 ray                                    |
+| .distanceToPoint ( point : Vector3 ) : Float                 | 获得当前射线与 point 之间最近的距离                          |
+| .distanceSqToPoint ( point : Vector3 ) : Float               | 获得当前射线与 point 之间最近的距离的平方                    |
+| .distanceToPlane ( plane : Plane ) : Float                   | 获得当前射线原点到平面 plane 之间的距离。若射线与平面不相交则返回 null |
+| .distanceSqToSegment ( v0 : Vector3, v1 : Vector3, optionalPointOnRay : Vector3, optionalPointOnSegment : Vector3 ) : Float | 获取当前射线与线段(起点为 v0，终点为 v1)之间的距离的平方。<br />若 optionalPointOnRay 有值则将接收射线上距离线段最近的点、<br />若 optionalPointOnSegment 有值则将接收线段上距离射线最近的点。 |
+| .equals ( ray : Ray ) : Boolean                              | 比较当前射线与 参数 ray 是否相同                             |
+| .intersectBox ( box : Box3, target : Vector3 ) : Vector3     | 若当前射线与 box3(包围盒) 相交，则返回相交点。<br />若不相交则返回 null。<br />若相交且 target 有值则将相交点赋值给 target。 |
+| .intersectPlane ( plane : Plane, target : Vector3 ) : Vector3 | 若当前射线与 plane(平面) 相交，则返回相交点。<br />若不相交则返回 null。<br />若相交且 target 有值则将相交点赋值给 target。 |
+| .intersectSphere ( sphere : Sphere, target : Vector3 ) : Vector3 | 若当前射线与 sphere(球) 相交，则返回相交点。<br />若不相交则返回 null。<br />若相交且 target 有值则将相交点赋值给 target。 |
+| .intersectTriangle ( a : Vector3, b : Vector3, c : Vector3, backfaceCulling : Boolean, target : Vector3 ) : Vector3 | 若当前射线与 由 a,b,c 组成的三角形 相交，则返回相交点。<br />若不相交则返回 null。<br /><br />参数 backfaceCulling 表示是否使用背面剔除。<br />若相交且 target 有值则将相交点赋值给 target。 |
+| .intersectsBox ( box : Box3 ) : Boolean                      | 计算当前射线是否与 box3 相交                                 |
+| .intersectsPlane ( plane : Plane ) : Boolean                 | 计算当前射线是否与 plane 相交                                |
+| .intersectsSphere ( sphere : Sphere ) : Boolean              | 计算当前射线是否与 sphere 相交                               |
+| .lookAt ( v : Vector3 ) : Ray                                | 调整当前射线的方向到世界坐标中该向量所指的点(坐标)           |
+| .recast ( t : Float ) : Ray                                  | 将当前射线的原点沿着其方向移动到 t 给定的距离                |
+| .set ( origin : Vector3, direction : Vector3 ) : Ray         | 设置当前射线的原点和方向                                     |
+
+
+
+<br>
+
+## 包装盒(Box2/Box3)
