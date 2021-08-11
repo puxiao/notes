@@ -745,7 +745,7 @@ console.log(c) // Vector3 {x: 0, y: 0, z: 1}
 | .dot ( v : Quaternion ) : Float                              | 计算当前四元素与 v 的点积                                    |
 | .fromArray ( array : Array, offset : Integer ) : Quaternion  | 将参数 array 按照 offset 偏移索引依次设置当前四元数的 x y z w 的值。offset 默认为 0 |
 | .identity () : Quaternion                                    | 将当前四元数回归初始化，即 (0,0,0,1)，此时的四元数相当于不做任何旋转。 |
-| .invert () : Quaternion                                      | 反转并返回当前四元数。此方法与 .conjugate() 完全相同         |
+| .invert () : Quaternion                                      | 翻转并返回当前四元数。此方法与 .conjugate() 完全相同         |
 | .length () : Float                                           | 计算并返回当前四元数的欧几里得长度                           |
 | .lengthSq () : Float                                         | 计算并返回当前四元数的欧几里得长度的平方                     |
 | .normalize () : Quaternion                                   | 将当前四元数进行归一化，方向不变，长度变为 1。<br />你需要把四元数理解成四维空间中的一个向量 |
@@ -814,9 +814,10 @@ console.log(c) // Vector3 {x: 0, y: 0, z: 1}
 
 > 为了和 三维向量 名字统一，所以本文以后将采用 三维矩阵 来代替 三阶矩阵。
 
-行阵式也被称为：行优先
+**矩阵元素排列顺序**
 
-列阵式也被称为：列优先
+1. 按照一行一行的顺序存储矩阵的元素，被称为行优先
+2. 按照一列一列的顺序存储矩阵的元素，被称为列优先
 
 
 
@@ -850,27 +851,27 @@ console.log(matrix3.elements) // [1, 4, 7, 2, 5, 8, 3, 6, 9]
 
 <br>
 
-| 方法名                            | 对应含义                        |
-| --------------------------------- | ------------------------------- |
-| .clone () : Matrix3               | 返回一份克隆的当前矩阵          |
-| .copy ( m : Matrix3 ) : this      | 将当前矩阵设置为参数 m 相同的值 |
-| .determinant () : Float           | 计算并返回矩阵的行列式          |
-| .equals ( m : Matrix3 ) : Boolean | 判断当前矩阵与参数 m 是否相等   |
-|                                   |                                 |
-|                                   |                                 |
-|                                   |                                 |
-|                                   |                                 |
-|                                   |                                 |
-|                                   |                                 |
-|                                   |                                 |
-|                                   |                                 |
-|                                   |                                 |
-|                                   |                                 |
-|                                   |                                 |
-|                                   |                                 |
-|                                   |                                 |
-|                                   |                                 |
-|                                   |                                 |
+| 方法名                                                       | 对应含义                                                     |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| .clone () : Matrix3                                          | 返回一份克隆的当前矩阵                                       |
+| .copy ( m : Matrix3 ) : this                                 | 将当前矩阵设置为参数 m 相同的值                              |
+| .determinant () : Float                                      | 计算并返回矩阵的行列式                                       |
+| .equals ( m : Matrix3 ) : Boolean                            | 判断当前矩阵与参数 m 是否相等                                |
+| .extractBasis ( xAxis : Vector3, yAxis : Vector3, zAxis : Vector3 ) : this | 将当前矩阵的基向量提取到提供的三个轴向中。                   |
+| .fromArray ( array : Array, offset : Integer ) : this        | 使用基于列优先格式的数组来设置该矩阵。                       |
+| .invert () : this                                            | 将当前矩阵翻转为它的逆矩阵。<br />你不能对行或列为0的矩阵进行翻转，如果尝试这样做，该方法将生成一个零矩阵。 |
+| .getNormalMatrix ( m : Matrix4 ) : this                      | 将当前矩阵设置为给定四阶矩阵的正规矩阵。<br />该方法内部执行的内容为：<br />先从参数 m 左上角获得 3 x 3 的矩阵 m3，然后再将 m3 依次进行转逆、转置。 |
+| .identity () : this                                          | 将当前矩阵重置为最初始的矩阵。<br />也就是相当于刚 new Matrix3() 时得到的矩阵。 |
+| .multiply ( m : Matrix3 ) : this                             | 将当前矩阵乘以矩阵 m                                         |
+| .multiplyMatrices ( a : Matrix3, b : Matrix3 ) : this        | 设置当前矩阵为 a乘以b 的值                                   |
+| .multiplyScalar ( s : Float ) : this                         | 将当前矩阵所有元素都乘以 s                                   |
+| .set ( n11 : Float, n12 : Float, n13 : Float, n21 : Float, n22 : Float, n23 : Float, n31 : Float, n32 : Float, n33 : Float ) : this | 使用行优先的顺序来设置当前矩阵                               |
+| .premultiply ( m : Matrix3 ) : this                          | 将矩阵 m 乘以当前矩阵                                        |
+| .setFromMatrix4 ( m : Matrix4 ) : this                       | 根据参数 m 的左上角 3 x 3 的矩阵值来设置当前矩阵             |
+| .setUvTransform ( tx : Float, ty : Float, sx : Float, sy : Float, rotation : Float, cx : Float, cy : Float ) : this | 使用偏移，重复，旋转和中心点位置设置UV变换当前矩阵。         |
+| .toArray ( array : Array, offset : Integer ) : Array         | 使用列优先的格式将当前矩阵的元素写入到数组中。               |
+| .transpose () : this                                         | 将当前矩阵进行转置。                                         |
+| .transposeIntoArray ( array : Array ) : this                 | 将当前矩阵的转置存入给定的数组中，但不改变当前矩阵，并返回当前矩阵。 |
 
 
 
@@ -889,4 +890,142 @@ console.log(matrix3.elements) // [1, 4, 7, 2, 5, 8, 3, 6, 9]
 或者说在 N 维欧几里得空间中，行列式描述的是一个线性变换对 “体积” 造成的影响。
 
 > 关于行列式的概念，确实比较难以理解，暂且这样吧。
+
+
+
+<br>
+
+**基向量**
+
+在线性代数(linear algebra)中，基(basis) 是描述刻画向量空间的基本工具。
+
+> 基 又被称为 基底
+
+向量空间的基是它的一个特殊子集，基的元素称为基向量。
+
+
+
+<br>
+
+### 四维矩阵的重要意义
+
+四维矩阵是用来解决 3D 空间中所有的矩阵变换(平移、旋转、剪切、缩放、反射、正交、透视投影等)。
+
+四维矩阵的重要程度无与伦比。
+
+
+
+<br>
+
+**所有 Object3D 对象都有的 3 个四维矩阵：**
+
+1. Object3D.matrix：存储物体的本地变换矩阵。这里的 “本地” 是相对父级对象而言。
+
+2. Object3D.matrixWorld：对象的全局或世界变换矩阵。如果对象没有父级则 .matrixWorld 等于 .matrix。
+
+3. Object3D.modelViewMatrix：对象相对于相机坐标系的变换矩阵。.modelViewMatrix 是物体世界变换矩阵乘以摄像机相对于世界空间变换矩阵的逆矩阵。
+
+   > 补充说明：
+   >
+   > 假设当前 3D 场景中存在：
+   >
+   > 1. 原点位置有一个尺寸为 1 的立方体
+   > 2. 有一个相机，位置位于 (2,0,2)
+   >
+   > 那么当渲染这个场景时，在投影阶段的计算过程是这样的：
+   >
+   > 1. 首先将相机变换到原点 (0,0,0)，也就是需要计算出相机相对世界坐标的逆矩阵
+   > 2. 然后根据相机的逆矩阵将世界坐标、立方体位置相应变换到新的位置，这样可以继续保持相机与立方体的相对位置关系不变
+   > 3. 然后开始计算立方体的投影
+   >
+   > 就是因为有这个投影变换流程，所以才会有计算 .modelViewMatrix 中那句 “摄像机相对于世界空间变换矩阵的逆矩阵”。
+
+
+
+<br>
+
+注意，Object3D.normalMatrix 并不是一个四维矩阵，而是一个三维矩阵。
+
+
+
+<br>
+
+**所有相机 Camera 都有的 3 个四维矩阵：**
+
+1. Camera.matrixWorldInverse：相机相对于世界坐标变换的逆矩阵
+2. Camera.projectionMatrix：投影变换矩阵
+3. Camera.projectionMatrixInverse：投影变换矩阵的逆矩阵
+
+
+
+<br>
+
+**提取位置(平移)、旋转和缩放**
+
+有多种选项可用于从 Matrix4 中提取位置、旋转和缩放。
+
+1. Vector3.setFromMatrixPosition：可用于提取位置相关的分量
+2. Vector3.setFromMatrixScale：可用于提取缩放相关的分量
+3. Quaternion.setFromRotationMatrix, Euler.setFromRotationMatrix or extractRotation：可用于从纯(未缩放)矩阵中提取旋转相关分量。
+4. decompose：可用于一次性提取位置、旋转和缩放
+
+
+
+<br>
+
+### 四维矩阵(Matrix4)的属性和方法
+
+| 属性名            | 对应含义                                 |
+| ----------------- | ---------------------------------------- |
+| .elements : Array | 以列优先的形式返回矩阵所有元素组成的数组 |
+
+
+
+<br>
+
+| 方法名                                                       | 对应含义                                                     |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| .clone () : Matrix4                                          | 返回一份克隆的矩阵                                           |
+| .copy ( m : Matrix4 ) : this                                 | 将当前矩阵设置为 m 相同的值                                  |
+| .compose ( position : Vector3, quaternion : Quaternion, scale : Vector3 ) : this | 根据参数 position、quaternion 和 scale 共同组合变换当前矩阵  |
+| .copyPosition ( m : Matrix4 ) : this                         | 将给定矩阵 m 的平移分量拷贝到当前矩阵中。                    |
+| .decompose ( position : Vector3, quaternion : Quaternion, scale : Vector3 ) : null | 将当前矩阵分解到给定的 position(平移)、quaternion(旋转) 和 scale(缩放) 中。 |
+| .determinant () : Float                                      | 计算并返回当前矩阵的行列式。                                 |
+| .equals ( m : Matrix4 ) : Boolean                            | 比较当前矩阵与 m 是否相同                                    |
+| .extractBasis ( xAxis : Vector3, yAxis : Vector3, zAxis : Vector3 ) : this | 将矩阵的基向量提取到指定的 3 个轴向量中。                    |
+| .extractRotation ( m : Matrix4 ) : this                      | 将给定矩阵 m 的旋转分量提取到当前矩阵的旋转分量中。<br />也就是说修改当前矩阵的旋转分量。 |
+| .fromArray ( array : Array, offset : Integer ) : this        | 使用列优先格式的数组来设置该矩阵                             |
+| .invert () : this                                            | 将当前矩阵翻转为它的逆矩阵。                                 |
+| .getMaxScaleOnAxis () : Float                                | 获取 3 个轴方向的最大缩放值                                  |
+| .identity () : this                                          | 重置当前矩阵，恢复成默认值。                                 |
+| .lookAt ( eye : Vector3, center : Vector3, up : Vector3, ) : this | 构造一个旋转矩阵，从 eye 指向 ceneter，由向量 up 定向。<br />请注意矩阵的 .lookAt() 和 相机(Camera)的 .lookAt() 参数和含义均不相同。 |
+| .makeRotationAxis ( axis : Vector3, theta : Float ) : this   | 设置当前矩阵 围绕轴 axis 旋转量为 theta 弧度。               |
+| .makeBasis ( xAxis : Vector3, yAxis : Vector3, zAxis : Vector3 ) : this | 通过给定的三个向量设置当前矩阵为 基矩阵。                    |
+| .makePerspective ( left : Float, right : Float, top : Float, bottom : Float, near : Float, far : Float ) : this | 创建一个透视投影矩阵。<br />并将当前矩阵设置为该透视投影矩阵。 |
+| .makeOrthographic ( left : Float, right : Float, top : Float, bottom : Float, near : Float, far : Float ) : this | 创建一个正交投影矩阵。<br />并将当前矩阵设置为该正交投影矩阵。 |
+| .makeRotationFromEuler ( euler : Euler ) : this              | 先将当前矩阵恢复成默认的单位矩阵(没有平移/缩放/旋转)，然后将传入的欧拉角转换为该矩阵的旋转分量(左上角的 3x3 矩阵)。<br />由于 euler 的 .order 可能存在 6 种顺序，所以该矩阵也共有 6 种可能的结果。 |
+| .makeRotationFromQuaternion ( q : Quaternion ) : this        | 先将当前矩阵恢复成默认的单位矩阵(没有平移/缩放/旋转)，然后将当前矩阵的旋转分量设置为四元数 q 指定的旋转。 |
+| .makeRotationX ( theta : Float ) : this                      | 先将当前矩阵恢复成默认的单位矩阵(没有平移/缩放/旋转)，然后将当前矩阵设置为绕 x 轴旋转 theta 弧度的矩阵。 |
+| .makeRotationY ( theta : Float ) : this                      | 先将当前矩阵恢复成默认的单位矩阵(没有平移/缩放/旋转)，然后将当前矩阵设置为绕 y 轴旋转 theta 弧度的矩阵。 |
+| .makeRotationZ ( theta : Float ) : this                      | 先将当前矩阵恢复成默认的单位矩阵(没有平移/缩放/旋转)，然后将当前矩阵设置为绕 z 轴旋转 theta 弧度的矩阵。 |
+| .makeScale ( x : Float, y : Float, z : Float ) : this        | 先将当前矩阵恢复成默认的单位矩阵(没有平移/缩放/旋转)，然后设置当前矩阵 x y z 轴 的缩放 |
+| .makeShear ( x : Float, y : Float, z : Float ) : this        | 先将当前矩阵恢复成默认的单位矩阵(没有平移/缩放/旋转)，然后设置当前矩阵的剪切变换 |
+| .makeTranslation ( x : Float, y : Float, z : Float ) : this  | 先将当前矩阵恢复成默认的单位矩阵(没有平移/缩放/旋转)，然后设置当前矩阵的平移变换。 |
+| .multiply ( m : Matrix4 ) : this                             | 将当前矩阵乘以矩阵 m<br />会修改当前矩阵                     |
+| .premultiply ( m : Matrix4 ) : this                          | 将矩阵 m 乘以当前矩阵<br />会修改当前矩阵                    |
+| .multiplyMatrices ( a : Matrix4, b : Matrix4 ) : this        | 将当前矩阵设置为 a 乘以 b 的计算结果                         |
+| .multiplyScalar ( s : Float ) : this                         | 将当前矩阵的所有元素都乘以 s                                 |
+| .scale ( v : Vector3 ) : this                                | 将当前矩阵的列向量乘以 v 的分量。<br />相当于第1列的元素都乘以 v.x，第2列的元素都乘以 v.y，第3列的元素都乘以 v.z，第4列保持不变。<br />尽管参数是一个 Vector3，但是在这里可以把它(.x,.y,.z)看做是 3 个列的缩放分量 |
+| .set ( n11 : Float, n12 : Float, n13 : Float, n14 : Float, n21 : Float, n22 : Float, n23 : Float, n24 : Float, n31 : Float, n32 : Float, n33 : Float, n34 : Float, n41 : Float, n42 : Float, n43 : Float, n44 : Float ) : this | 按照行优先的格式设置当前矩阵的元素值                         |
+| .setFromMatrix3 ( m : Matrix3 ) : this                       | 根据参数 m 的值设置当前矩阵左上角 3 x 3 的矩阵值             |
+| .setPosition ( v : Vector3 ) : this                          | 根据参数 v 的值来设置当前矩阵平移的分量。<br />也就是 第4 列前 3 个元素的值 |
+| .setPosition ( x : Float, y : Float, z : Float ) : this // optional API | 根据参数 x y z 的值来设置当前矩阵平移的分量。<br />也就是 第4 列前 3 个元素的值 |
+| .toArray ( array : Array, offset : Integer ) : Array         | 使用列优先的格式将当前矩阵的元素写入数组中。                 |
+| .transpose () : this                                         | 将当前矩阵进行转置                                           |
+
+
+
+<br>
+
+## 射线(Ray)
 
