@@ -1081,4 +1081,152 @@ console.log(matrix3.elements) // [1, 4, 7, 2, 5, 8, 3, 6, 9]
 
 <br>
 
-## 包装盒(Box2/Box3)
+## 轴对齐包围盒(Box2/Box3)
+
+**包围盒的定义：**
+
+包围盒顾名思义，就是用一个体积更大的 “盒子” 包围住物体，当我们需要对物体进行碰撞检测时通过对该包围盒的碰撞检测来 “大约” 作出判断结果。
+
+包围盒碰撞检测主要作用是通过牺牲掉一些精准度来减少碰撞检测计算量。
+
+<br>
+
+**常见的包围盒算法：**
+
+1. AABB包围盒(Axis-aligned bounding box)
+
+   > AABB包围盒就是形状为长方体的包围盒
+   >
+   > AABB包围盒又被称为：轴对齐包围盒
+   >
+   > 轴包围盒的边永远需要平行或垂直于坐标轴，这就意味着轴对齐包围盒在视觉上是无法旋转的。
+
+2. 包围球(sphere)
+
+3. 方向包围盒OBB(oriented bounding box)
+
+   > 你可以把 OBB 包围盒想象成由多个长方体拼凑而成，最接近物体本身形状的多面体不规则盒子。
+   >
+   > OBB包围盒相对 AABB包围盒更加精准，缺点是碰撞检测计算量更大。
+   >
+   > OBB包围盒的边缘无需平行或垂直于轴，也就是说 OBB 包围盒在视觉上是可以旋转的。
+
+4. 固定方向凸包FDH(Fixed directions hulls 或 k-DOP)
+
+
+
+<br>
+
+**在本小节中提到的 Box2、Box3 均属于 AABB包围盒，也就是轴对齐包围盒。**
+
+
+
+<br>
+
+### 二维轴对齐包围盒(Box2)的属性和方法
+
+| 属性名       | 对应含义                                                     |
+| ------------ | ------------------------------------------------------------ |
+| .min:Vector2 | 包围盒的下边界，也就是说包围盒最小的 x 和 y 坐标。<br />默认值为 ( + Infinity, + Infinity ) |
+| .max:Vector2 | 包围盒的上边界，也就是说包围盒最大的 x 和 y 坐标。<br />默认值为( - Infinity, - Infinity ) |
+
+> 你是否疑惑为什么 上边界默认值是最大整数，而下边界默认值是最大负数，不应该是反过来才对吗？
+
+
+
+<br>
+
+**空包围盒**
+
+按照道理，包围盒的上边界数值应该大于下边界，但是如果情况相反，那么我们就认定该包围盒虽然存在但是一个空的包围盒，也就是说该包围盒内部包含任何顶点。
+
+> 当初始化一个 Box2 实例，默认就是一个空包围盒。
+>
+> ```
+> new Box2().isEmpty() // true
+> ```
+
+
+
+<br>
+
+| 方法名                                                       | 对应含义                                                     |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| .clampPoint ( point : Vector2, target : Vector2 ) : Vector2  | 计算出 point 在当前包围盒内的收窄结果，将计算结果赋值给 target 后再返回 target |
+| .clone () : Box2                                             | 返回一份克隆的包围盒                                         |
+| .containsBox ( box : Box2 ) : Boolean                        | 检查参数 box 是否完全被当前包围盒包围住，如果完全重叠也返回 true |
+| .containsPoint ( point : Vector2 ) : Boolean                 | 检查参数 point 是否在包围盒边界或边界内                      |
+| .copy ( box : Box2 ) : Box2                                  | 将当前包围盒设置为 box                                       |
+| .distanceToPoint ( point : Vector2 ) : Float                 | 返回当前包围盒与参数 point 之间的距离，若 point 位于包围盒内部则判定距离为 0 |
+| .equals ( box : Box2 ) : Boolean                             | 对比当前包围盒与参数 box 是否相同                            |
+| .expandByPoint ( point : Vector2 ) : Box2                    | 扩展包围盒的边界来包含住该点 point。<br />若参数 point 本身就在包围盒内部则包围盒不做任何修改，也就是说包围盒只会扩大，不会收窄。 |
+| .expandByScalar ( scalar : Float ) : Box2                    | 将包围盒的上下边界都扩展 scalar 。<br />若 scalar 为正数则相当于扩展，若 scalar 为负数则相当于收缩。 |
+| .expandByVector ( vector : Vector2 ) : Box2                  | 将包围盒的宽度方向扩展 vector.x、高度方向扩展 vector.y。<br />由于 vector 的 x y 都有可能为负数，所以该操作也可能会收缩当前包围盒。 |
+| .getCenter ( target : Vector2 ) : Vector2                    | 以二维向量的形式返回盒子的中心点                             |
+| .getParameter ( point : Vector2, target : Vector2 ) : Vector2 | 返回参数 point 每个维度减去当前包围盒对应下边界后 与当前包围盒的宽度和高度的比例，同时将各个比例赋值给 target。<br />例如 x 维度比例为：( point.x - this.min.x ) / ( this.max.x - this.min.x ) |
+| .getSize ( target : Vector2 ) : Vector2                      | 将该包围盒的宽度和高度赋值给 target                          |
+| .intersect ( box : Box2 ) : Box2                             | 返回当前包围盒与参数 box 相交的盒子。<br />请注意该方法并不会去判断 2 个盒子是否真的相交。<br />该方法只是将 “相交盒子” 上线设置为两者上线中较小者、下限设置为两者下限中的较大者。<br />也就是说即使两个盒子本身不相交，但是也会返回一个盒子，且该盒子的 .min 和 .max 均有值，只不过该盒子会被视为空盒子。 |
+| .intersectsBox ( box : Box2 ) : Boolean                      | 检查当前包围盒是否与参数 box 相交                            |
+| .isEmpty () : Boolean                                        | 检查当前包围盒是否为空。所谓为空就是指当前包围盒包含 0 个顶点。若 |
+| .makeEmpty () : Box2                                         | 将当前包围盒重置为初始化默认值，也就是说下边界为 \+ Infinity，上边界为 \- Infinity，这样当前盒子即为空盒子。 |
+| .set ( min : Vector2, max : Vector2 ) : Box2                 | 设置当前包围盒的下边界和上边界                               |
+| .setFromCenterAndSize ( center : Vector2, size : Vector2 ) : Box2 | 根据参数先设定包围盒的中心为 center，然后设置包围盒的尺寸为 size 的 .x(宽) 和 .y(高) |
+| .setFromPoints ( points : Array ) : Box2                     | 设置当前包围盒上下边界，确保其包含 points 中所有的点。<br />参数 points 为数组，数组元素均为 Vector2。 |
+| .translate ( offset : Vector2 ) : Box2                       | 按照参数 offset 平移当前包围盒                               |
+| .union ( box : Box2 ) : Box2                                 | 将当前包围盒与参数 box 进行合并，这样会获得一个较大的包围盒。<br />实际上就是可以包围这 2 个包围盒的包围盒。 |
+
+
+
+<br>
+
+### 三维轴对齐包围盒(Box3)的属性和方法
+
+| 属性名         | 对应含义                                                     |
+| -------------- | ------------------------------------------------------------ |
+| .min : Vector3 | 包围盒下边界。默认值是（ + Infinity, + Infinity, + Infinity ） |
+| .max : Vector3 | 包围盒上边界。默认值是（ - Infinity, - Infinity, - Infinity ） |
+
+
+
+<br>
+
+| 方法名                                                       | 对应含义                                                     |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| .applyMatrix4 ( matrix : Matrix4 ) : this                    | 将参数 matrix 应用于当前包围盒中。<br />实际上是将该包围盒的 8 个顶点( 8 个 vector3) 依次都执行 Vecotr3.applyMatrix4(matrix) |
+| .clampPoint ( point : Vector3, target : Vector3 ) : Vector3  | 根据 point 的值来计算被限定(收窄)在当前包围盒范围内的点。并将该点赋值给 target。 |
+| .clone () : Box3                                             | 返回一个克隆的包围盒                                         |
+| .containsBox ( box : Box3 ) : Boolean                        | 检测参数 box 是否与当前包围盒重叠，或 被包含在当前包围盒内。 |
+| .containsPoint ( point : Vector3 ) : Boolean                 | 检查参数 point 是否被包含在当前包围盒内，即使 point 位于包围盒边界之上，也返回 true。 |
+| .copy ( box : Box3 ) : this                                  | 将当前包围盒设置为参数 box                                   |
+| .distanceToPoint ( point : Vector3 ) : Float                 | 返回当前包围盒与参数 point 最近的距离。若 point 位于包围盒内部，则返回 0 |
+| .equals ( box : Box3 ) : Boolean                             | 检测当前包围盒与参数 box 是否相同                            |
+| .expandByObject ( object : Object3D ) : this                 | 扩展当前包围盒的边界，确保可以包裹住参数 object 和 object 的子对象。<br />该方法可能会导致一个比严格需要的更大的框。 |
+| .expandByPoint ( point : Vector3 ) : this                    | 扩展当前包围盒的边界，确保可以包裹住参数 point。<br />如果 point 本身就在当前包围盒内，并不会缩小当前包围盒 |
+| .expandByScalar ( scalar : Float ) : this                    | 按照参数 scalar 扩展当前包围盒。若 scalar 为负责则实际上是缩小当前包围盒。 |
+| .expandByVector ( vector : Vector3 ) : this                  | 按照参数 vector 每个维度来扩展当前包围盒。                   |
+| .getBoundingSphere ( target : Sphere ) : Sphere              | 获取当前包围盒对应的包围球。并将计算结果赋值给 target。      |
+| .getCenter ( target : Vector3 ) : Vector3                    | 获取当前包围盒的中心点。若当前为空包围盒则返回 (0,0,0)       |
+| .getParameter ( point : Vector3, target : Vector3 ) : Vector3 | 返回参数 point 每个维度减去当前包围盒对应下边界后 与当前包围盒的宽度、高度和深度的比例，同时将各个比例赋值给 target。<br />例如 x 维度比例为：( point.x - this.min.x ) / ( this.max.x - this.min.x ) |
+| .getSize ( target : Vector3 ) : Vector3                      | 返回包围盒的宽度，高度和深度，将这 3 个值赋值给 target。<br />若当前为空包围盒则返回 (0,0,0) |
+| .intersect ( box : Box3 ) : this                             | 计算当前包围盒与参数 box 的相交盒子。将该相交盒子的上边界设置为两个框max较小的那个，下边界设置为两个包围盒的 min 较大的那个。<br />如果两个包围盒不相交，则清空当前包围盒。 |
+| .intersectsBox ( box : Box3 ) : Boolean                      | 判断当前包围盒是否与参数 包围盒 box 相交                     |
+| .intersectsPlane ( plane : Plane ) : Boolean                 | 判断当前包围盒是否与参数 平面 plane 相交                     |
+| .intersectsSphere ( sphere : Sphere ) : Boolean              | 判断当前包围盒是否与参数 球体 sphere 相交                    |
+| .intersectsTriangle ( triangle : Triangle ) : Boolean        | 判断当前包围盒是否与参数 三角形 triangle 相交                |
+| .isEmpty () : Boolean                                        | 判断当前包围盒是否为空。如果包含 0 个顶点则返回 true。<br />注意，若下边界等于上边界，此时的包围盒仅为 1 个点，并不会判定当前包围盒为空，会返回 false。 |
+| .makeEmpty () : this                                         | 清空包围盒，即恢复当前包围盒为初始化的 Box3()                |
+| .set ( min : Vector3, max : Vector3 ) : this                 | 根据参数分别设置当前包围盒的 .min 和 .max                    |
+| .setFromArray ( array : Array ) : this                       | 参数 array 是一个长度为 n x 3 的数组，每一个元素都是一个数字。<br />设置当前包围盒的边界，确保可以包裹住 array 中每 3 个元素为一组所代表的 点。 |
+| .setFromBufferAttribute ( attribute : BufferAttribute ) : this | 设置当前包围盒的边界，确保可以包裹住 attribute 中所有位置数据。 |
+| .setFromCenterAndSize ( center : Vector3, size : Vector3 ) : this | 设置当前包围盒的中心点为参数 center，并将包围盒的宽度、高度和深度设置为 size 的 x y z。 |
+| .setFromObject ( object : Object3D ) : this                  | 设置当前包围盒为参数 object 的包围盒，需要包裹住参数 object 和 它的所有子项。<br />请注意 .expandByObject(object) 是将当前包围盒扩展到可以包裹住 object，而 .setFromObject(object) 是将当前包围盒设置为 object 的包围盒。 |
+| .setFromPoints ( points : Array ) : this                     | 参数 points 中每一个元素都是 Vector3。<br />首先清空当前包围盒，然后设置当前包围盒的上下边界，确保可以包裹住 points 中所有的点。<br />准确来讲和 .setFromObject() 方法类似，并不是扩展，而是匹配。 |
+| .translate ( offset : Vector3 ) : this                       | 根据参数 offset 上每个维度的值和方向，移动当前包围盒。       |
+| .union ( box : Box3 ) : this                                 | 返回当前包围盒与参数 box 合并后的包围盒。                    |
+
+
+
+<br>
+
+## 平面(Plane)
+
