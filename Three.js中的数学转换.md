@@ -1230,3 +1230,118 @@ console.log(matrix3.elements) // [1, 4, 7, 2, 5, 8, 3, 6, 9]
 
 ## 平面(Plane)
 
+**平面的定义：**
+
+在三维空间中无限延伸的二维平面。
+
+平面方程用 “单位长度(归一化)的法向量” 和 “常数” 表示 海塞法向量( Hessian normal form )形式。
+
+> hessian：音译 海塞
+>
+> normal form：法向量
+
+
+
+<br>
+
+**平面方程：**
+
+平面方程是指空间中所有处于同一平面的点所对应的方程。
+
+一般形式为 ：Ax + By + Cz + D = 0
+
+但是该公式有一种特殊情况，即 海塞法向量。
+
+
+
+<br>
+
+**海塞法向量：**
+
+`法线形式` 是一种当直线或平面的 法向量 已知时，使用 `向量方程` 描述直线或者平面的另一种表示形式。
+
+平面的任何点都可以通过平面的法向量和该点到该平面的已知点的矢量差的点积来描述。
+
+此点积必须为零。
+
+一种特殊的形式是 `海塞法向量(Hessian normal form)`，其中法向量被归一化到值为 1。
+
+海塞法向量的结论是：
+
+任何一点 到平面的距离都可以简单表示为 D =n0 x0 + d
+
+
+
+<br>
+
+以上能理解多少算多少，但是请记住上述文字中提到的 **“单位长度(归一化)的法向量” 和 “常数”** 。
+
+
+
+<br>
+
+### 平面(Plane)的属性和方法
+
+| 属性名            | 对应含义                                       |
+| ----------------- | ---------------------------------------------- |
+| .normal : Vector3 | 单位长度(归一化)的平面法向量。默认值为 (1,0,0) |
+| .constant : Float | 从原点到平面的有符号距离。默认值为 0           |
+
+> 有符号距离 意思是这个数字有可能为正数，也可能为负数
+
+
+
+<br>
+
+**补充说明：**
+
+你可以脑补一下这个画面，来看一下一个平面是如何被确定(规定)的：
+
+1. 以原点为球心，半径为 constant 的球
+
+2. 当我们知道这个球表面某个点的平面法向量 normal 后，就可以反向计算出该点的位置
+
+3. 沿球心到这个点可以产生一个向量，继而得到垂直于该向量的平面
+
+   > 我们知道两个相互垂直的向量的 点积 一定为 0
+
+我们再回过头看一下关于平面的定义：
+
+1. 在三维空间中无限延展的二维平面
+2. 该平面由 海塞法向量 定义
+3. 海塞法向量由 “一个归一化的法向量” 和 一个“常数” 构成
+
+是不是就更加容易理解了。
+
+
+
+<br>
+
+| 方法名                                                       | 对应含义                                                     |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| .applyMatrix4 ( matrix : Matrix4, optionalNormalMatrix : Matrix3 ) : Plane | 在一个平面上应用矩阵 matrix，其中 matrix 必须是仿射齐次变换矩阵(也就是说该矩阵第 4 行一定是 (0,0,0,0) 或 (0,0,0,1)。<br />optionalNormalMatrix 为可选参数，<br />如果提供则使用该参数，<br />如果不提供则内部自己根据 matrix 计算得出：_normalMatrix.getNormalMatrix( matrix ) |
+| .clone () : Plane                                            | 返回一个克隆的平面                                           |
+| .coplanarPoint ( target : Vector3 ) : Vector3                | 返回一个共面点的坐标。通过原点的法向量在平面上投影算得。<br />该共面点会写入到参数 target 中。<br />补充：这个共面点实际上就是在上面提到的 “这个球表面某个点” |
+| .copy ( plane : Plane ) : Plane                              | 将当前平面设置为参数 plane                                   |
+| .distanceToPoint ( point : Vector3 ) : Float                 | 返回参数 点 point 到当前平面的有符号距离                     |
+| .distanceToSphere ( sphere : Sphere ) : Float                | 返回参数 球面 sphere 的边缘到当前平面的最短距离              |
+| .equals ( plane : Plane ) : Boolean                          | 检查当前平面与参数 plane 是否相同                            |
+| .intersectLine ( line : Line3, target : Vector3 ) : Vector3  | 返回参数线段 line 与当前平面的相交点，将结果写入到 target 中。<br />若不相交则返回 null，<br />若 line 与当前平面共面(线段在当前平面里)，则返回该线段的起始点。 |
+| .intersectsLine ( line : Line3 ) : Boolean                   | 检查当前平面是否与参数 line 相交                             |
+| .intersectsBox ( box : Box3 ) : Boolean                      | 检查当前平面是否与参数 box 相交                              |
+| .intersectsSphere ( sphere : Sphere ) : Boolean              | 检查当前平面是否与参数 sphere 相交                           |
+| .negate () : Plane                                           | 将法向量与常量求反，即各自都乘以 -1。<br />这样相当于把当前平面变为 “以球为介质” 的对面的平面 |
+| .normalize () : Plane                                        | 归一化法向量 normal，并在内部相应调整常量 constant 数值。<br />实际上 .normal 本身就应该是被归一化的，这里是假设 .normal 存在未被归一化的情况。<br />如果当前本身 .normal 就已经是被归一化的，那么执行该方法后不会有任何变化，同时 constant 也不会有任何变化。 |
+| .projectPoint ( point : Vector3, target : Vector3 ) : Vector3 | 将参数 点 point 投射到该平面上，将在该平面上离投射点最近的点 写入到 target 中。 |
+| .set ( normal : Vector3, constant : Float ) : Plane          | 设置当前平面的 法向量和常量                                  |
+| .setComponents ( x : Float, y : Float, z : Float, w : Float ) : Plane | 根据参数中的分量来设置 法向量 和常量。<br />参数中的 x y z 为设置法向量 的 x y z 值，<br />参数中 w 为设置常量 .constant 的值 |
+| .setFromCoplanarPoints ( a : Vector3, b : Vector3, c : Vector3 ) : Plane | 通过参数提供的 a b c 这 3 个点来确定一个平面，并将当前平面设置为该平面。<br />如果三个点在一条直线上，即这 3 个点无法构成一个平面，则将抛出错误。<br />通过右手螺旋法则来确定(向量叉乘)平面的 法向量 normal。 |
+| .setFromNormalAndCoplanarPoint ( normal : Vector3, point : Vector3 ) : Plane this : Vector3 | 通过参数提供的法线 和 原点到该平面上最近距离的点来修改当前平面。 |
+| .translate ( offset : Vector3 ) : Plane                      | 根据参数 offset 指定的方向和大小平移当前平面。<br />注意这只会影响平面的常量，不会影响平面的法向量。 |
+
+
+
+<br>
+
+## 球(Sphere)
+
