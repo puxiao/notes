@@ -1511,7 +1511,7 @@ console.log(matrix3.elements) // [1, 4, 7, 2, 5, 8, 3, 6, 9]
 这些约定都是人为的，例如在有的球坐标系中会约定：
 
 1.  φ，取值范围 -90 至 90度
-2. θ，取值范围 -180 至 180度
+2.  θ，取值范围 -180 至 180度
 
 还有，在 Three.js 中球坐标约定的是 (r, φ, θ)，但是在别的系统中可能写成 (r, θ, φ)。
 
@@ -1580,5 +1580,355 @@ console.log(matrix3.elements) // [1, 4, 7, 2, 5, 8, 3, 6, 9]
 
 <br>
 
+## 圆柱坐标(Cylindrical)
+
+**圆柱坐标的定义：**
+
+在上一节中，我们提到了 二维球坐标，二维球坐标实际上就是一个平面圆对应的相关坐标。
+
+那么我们只需要给这个平面圆增加一个 高度(厚度)，就会由一个平面圆变为一个圆柱体。
+
+> 在 Three.js 的 圆柱体坐标中，实际上就是增加了 y 来表示圆柱体的高度。
+
+这就是圆柱坐标的由来。
+
+
+
+<br>
+
+### 圆柱坐标(Cylindrical)的属性和方法
+
+| 属性名          | 对应含义                                                     |
+| --------------- | ------------------------------------------------------------ |
+| .radius : Float | 圆柱体的半径，也就是从原点到 x-z 平面上某一点的距离，默认值为 0 |
+| .theta : Float  | 在x-z平面内逆时针角度，以z轴正方向的计算弧度。默认值为 0     |
+| .y : Float      | 在 x-z 平面上的高度，默认值为 0                              |
+
+
+
+<br>
+
+| 方法名                                                       | 对应含义                                                     |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| .clone () : Cylindrical                                      | 返回一个克隆的圆柱坐标                                       |
+| .copy ( other : Cylindrical ) : Cylindrical                  | 将当前圆柱坐标设置为 参数 other                              |
+| .set ( radius : Float, theta : Float, y : Float ) : Cylindrical | 设置当前圆柱坐标的 3 个属性                                  |
+| .setFromCartesianCoords ( x : Float, y : Float, z : Float ) : Cylindrical | 根据参数中的笛卡尔坐标 x y z 位置信息转化并设置当前圆柱坐标  |
+| .setFromVector3 ( vec3 : Vector3 ) : Cylindrical             | 根据参数中的向量 vec3 的 x y z 位置信息转化并设置当前圆柱坐标 |
+
+
+
+
+
+<br>
+
 ## 三角形(Triangle)
+
+一个三角形是由 3 个 三维点坐标(Vector3) 所定义的。
+
+
+
+<br>
+
+### 三角形(Triangle)的属性和方法
+
+| 属性名       | 对应含义                            |
+| ------------ | ----------------------------------- |
+| .a : Vector3 | 三角形的第 1 个角，默认值为 (0,0,0) |
+| .b : Vector3 | 三角形的第 2 个角，默认值为 (0,0,0) |
+| .c : Vector3 | 三角形的第 3 个角，默认值为 (0,0,0) |
+
+
+
+<br>
+
+| 方法名                                                       | 对应含义                                                     |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| .clone () : Triangle                                         | 返回一个克隆的三角形                                         |
+| .closestPointToPoint ( point : Vector3, target : Vector3 ) : Vector3 | 返回三角形上最靠近参数 point 的点。<br />若参数 point 本身位于三角形内部则不作任何修改直接返回 point。 |
+| .containsPoint ( point : Vector3 ) : Boolean                 | 检测参数 point 的点是否可以投影到三角形的平面内              |
+| .copy ( triangle : Triangle ) : Triangle                     | 将当前三角形设置为参数 triangle                              |
+| .equals ( triangle : Triangle ) : Boolean                    | 对比当前三角形与参数 triangle 是否相同                       |
+| .getArea () : Float                                          | 返回当前三角形的面积                                         |
+| .getBarycoord ( point : Vector3, target : Vector3 ) : Vector3 | 根据参数 point 返回一个重心坐标                              |
+| .getMidpoint ( target : Vector3 ) : Vector3                  | 计算三角形的中心点，并将结果赋值给参数 target                |
+| .getNormal ( target : Vector3 ) : Vector3                    | 计算三角形的法向量，并将结果赋值给参数 target。<br />若三角形仅为一个点(不是一个正常的三角形)，则返回 (0,0,0) |
+| .getPlane ( target : Plane ) : Plane                         | 返回三角形对应的平面，将结果赋值给 target<br />这里说的 平面是指 3D 空间中无限延展的 平面。 |
+| .intersectsBox ( box : Box3 ) : Boolean                      | 检测当前三角形与参数 box 是否相交                            |
+| .set ( a : Vector3, b : Vector3, c : Vector3 ) : Triangle this : Triangle | 设置当前三角形的三个角                                       |
+| .setFromPointsAndIndices ( points : Array, i0 : Integer, i1 : Integer, i2 : Integer ) : Triangle this : Triangle | 参数 points 的元素都是 Vector3。<br />设置当前三角形的三个角依次为：<br />this.a 的值为 points[i0]<br />this.b 的值为 points[i1]<br />this.c 的值为 points[i2] |
+
+
+
+<br>
+
+**三角形的各种 心：**
+
+1. 重心：三条中线的交点
+2. 垂心：三条高的交点
+3. 内心：三角形内切圆的圆心，到三条边的距离相等
+4. 外心：三角形外接圆的圆心，到三个顶点的距离相等
+5. 旁心：三角形 3 个旁切圆的圆心，一共有 3 个
+6. 中心：只有正三角形才会有中心，重心、垂心、内心、外心 全部重合。
+
+
+
+<br>
+
+## 视椎体(Frustum)
+
+**视椎体的定义：**
+
+视椎体也被称为 平接头体。
+
+由 上下左右前后 共 6 个面构成。
+
+在 Three.js 中视椎体主要应用于镜头的视野：透视相机和正交相机
+
+
+
+<br>
+
+**视椎体 6 个面的顺序说明：**
+
+在我们初始化并设置一个正交相机时 平面是有明确的顺序的。
+
+```
+OrthographicCamera( left : Number, right : Number, top : Number, bottom : Number, near : Number, far : Number )
+```
+
+但是对于视椎体本身而言 6 个面的顺序是无所谓的。
+
+就好像我们描述一个三角形时，三角形的三个角的顺序发生变化并不影响这个三角形的形状。
+
+
+
+<br>
+
+### 视椎体(Frustum)的属性和方法
+
+| 属性名          | 对应含义                       |
+| --------------- | ------------------------------ |
+| .planes : Array | 当前视椎体的 6 个面 组成的数组 |
+
+
+
+<br>
+
+| 方法名                                                       | 对应含义                                                     |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| .clone () : Frustum                                          | 返回一个克隆的视椎体                                         |
+| .containsPoint ( point : Vector3 ) : Boolean                 | 检测参数 点 point 是否在当前视椎体内                         |
+| .copy ( frustum : Frustum ) : Frustum                        | 设置当前视椎体为参数 frustum                                 |
+| .intersectsBox ( box : Box3 ) : Boolean                      | 检测当前视椎体是否与参数 box 相交                            |
+| .intersectsObject ( object : Object3D ) : Boolean            | 检测当前视椎体是否与 object 的包围球相交                     |
+| .intersectsSphere ( sphere : Sphere ) : Boolean              | 检测当前视椎体是否与 球体 sphere 相交                        |
+| .intersectsSprite ( sprite : Sprite ) : Boolean              | 检测当前视椎体是否与 精灵 sprite 相交。<br />在内部实际上是创建一个中心点位于 (0,0)，<br />半径为 0.5 的平方根 也就是 0.7071067811865476 ，<br />然后再将该球体使用 精灵 sprite 的世界变化矩阵，<br />最终将得到的球体与当前视椎进行相交检测。 |
+| .set ( p0 : Plane, p1 : Plane, p2 : Plane, p3 : Plane, p4 : Plane, p5 : Plane ) : this | 设置当前视椎体的6个平面。                                    |
+| .setFromProjectionMatrix ( matrix : Matrix4 ) : this         | 根据投影矩阵 matrix 来设置当前视椎体的 6 个面。              |
+
+
+
+<br>
+
+## 插值器(Interpolant)
+
+**插值器的定义：**
+
+插值器不是某种几何图形，而是一种用于表达曲线上某种时间或路径间隔的抽象基类。
+
+
+
+<br>
+
+由于是抽象类，所以该类的一些属性都是需要用户自己去设定的。
+
+
+
+<br>
+
+### 插值器(Interpolant)的属性和方法
+
+| 属性名                     | 对应含义                     |
+| -------------------------- | ---------------------------- |
+| .parameterPositions : null | 位置集合                     |
+| .resultBuffer : null       | 用于存储插值结果的缓冲区     |
+| .sampleValues : null       | 样本集合                     |
+| .settings : Object         | 可选的，特定于子类的设置结构 |
+| .valueSize : null          | 结果大小                     |
+
+
+
+<br>
+
+| 方法名                          | 对应含义                  |
+| ------------------------------- | ------------------------- |
+| .evaluate ( t : Number ) : null | 计算不减函数在位置 t 的值 |
+
+
+
+<br>
+
+## 颜色(Color)
+
+请注意，颜色 是一种色彩数学对象模型，这与本文上面所将的 线性代数变换、坐标、几何图形等全部不属于同一类。
+
+
+
+<br>
+
+**颜色 Color 初始化时合法的颜色值：**
+
+1. 十六进制的颜色值，例如 0xff00ff
+2. 类似 CSS 中的颜色值，例如：
+   1. “rgb(250,0,0)”
+   2. "rgb(100%,0%,0%)"
+   3. "hsl(0,100%,50%)"
+   4. "#ff0000"
+   5. “#f00”
+   6. "red"
+3. 直接 r g b 对应的 3 个数值，数值取值范围应该是 0 - 1
+4. 参数可以是另外一个颜色实例，此时会将当前颜色设置为和参数颜色相同的值
+
+
+
+<br>
+
+**请注意颜色本身不包含透明度信息。**
+
+
+
+<br>
+
+### 颜色(Color)的属性和方法
+
+| 属性名     | 对应含义                                 |
+| ---------- | ---------------------------------------- |
+| .r : Float | 红色通道的值，取值范围 0 - 1，默认值为 1 |
+| .g : Float | 绿色通道的值，取值范围 0 - 1，默认值为 1 |
+| .b : Float | 蓝色通道的值，取值范围 0 - 1，默认值为 1 |
+
+> 默认 new Color() 的颜色为白色
+
+
+
+<br>
+
+| 方法名                                                       | 对应含义                                                     |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| .add ( color : Color ) : Color                               | 将参数 color 的 RGB 值添加到当前颜色的 RGB 中。<br />也就是说 this.r += color.r，g 和 b 同样也这样操作 |
+| .addColors ( color1 : Color, color2 : Color ) : Color        | 将当前颜色 RGB 设置为 color1 与 color2 RGB 值之和            |
+| .addScalar ( s : Number ) : Color                            | 将当前颜色的 RGB 分别都加上 s                                |
+| .clone () : Color                                            | 返回一个克隆的颜色                                           |
+| .copy ( color : Color ) : Color                              | 将当前颜色设置为 参数 color                                  |
+| .convertGammaToLinear ( gammaFactor : Float ) : Color        | 通过取当前颜色 r g b 的 gammaFactor 次方将颜色从伽马空间转换成线性空间。<br />参数 gammaFactor 为可选参数，默认值为 2。 |
+| .convertLinearToGamma ( gammaFactor : Float ) : Color        | 通过取颜色 r g b 的 1/gammaFactor 次方将颜色从线性空间转换成伽马空间。<br />参数 gammaFactor 为可选参数，默认值为 2。 |
+| .convertLinearToSRGB () : Color                              | 将当前颜色从线性空间转换成 sRGB 空间                         |
+| .convertSRGBToLinear () : Color                              | 将当前颜色从 sRGB 空间转换成线性空间                         |
+| .copyGammaToLinear ( color : Color, gammaFactor : Float ) : Color | 将参数 color 从伽马空间转换到线性空间，然后赋值给当前颜色。  |
+| .copyLinearToGamma ( color : Color, gammaFactor : Float ) : Color | 将参数 color 从线性空间转换到伽马空间，然后赋值给当前颜色。  |
+| .copyLinearToSRGB ( color : Color] ) : Color                 | 将参数 color 从线性空间转换到 sRGB 空间，然后赋值给当前颜色。 |
+| .copySRGBToLinear ( color : Color ) : Color                  | 将参数 color 从 sRGB 空间转换到线性空间，然后赋值给当前颜色。 |
+| .equals ( color : Color ) : Boolean                          | 对比当前颜色是否与参数  color 颜色相同                       |
+| .fromArray ( array : Array, offset : Integer ) : Color       | 按照 offset 的索引偏移，依次从参数 array 中读取并设置当前颜色的 r g b 值。<br />offset 默认值为 0 |
+| .fromBufferAttribute ( attribute : BufferAttribute, index : Integer ) : this | 按照 index 的索引，依次从缓冲区 attribut 中读取并设置当前颜色的 r g b 值。 |
+| .getHex () : Integer                                         | 返回当前颜色的十六进制值                                     |
+| .getHexString () : String                                    | 返回当前颜色的十六进制值对应的字符串形式<br />例如 "ffffff" ，请注意是小写字母 |
+| .getHSL ( target : Object ) : Object                         | 根据当前颜色的 r g b 转化为 HSL 格式，然后组合成如下结构的一个对象： {h: xx, s:xx, l:xx}。<br />会把该对象赋值给 target。 |
+| .getStyle () : String                                        | 返回当前颜色对应的 CSS  样式的字符串。<br />例如："rgb(255,0,0)" |
+| .lerp ( color : Color, alpha : Float ) : Color               | 将当前颜色设置为与参数 color 的插值，其中 alpha 是比例值。<br />若 alpha 为 0 则当前颜色不变。<br />若 alpha 为 1 则当前颜色变为参数 color。 |
+| .lerpColors ( color1 : Color, color2 : Color, alpha : Float ) : this | 将当前颜色设置为参数 color1 与 color2 的线性插值结果。其中 alpha 是比例值。 |
+| .lerpHSL ( color : Color, alpha : Float ) : Color            | 将当前颜色设置为与参数 color 的 HSL 插值。<br />请注意在内部计算时的方法不同于 .lerp() |
+| .multiply ( color : Color ) : Color                          | 将当前颜色的 rgb 值乘以参数 color 的 rgb 值                  |
+| .multiplyScalar ( s : Number ) : Color                       | 将当前颜色的 rgb 值都乘以参数 s                              |
+| .offsetHSL ( h : Float, s : Float, l : Float ) : Color       | 将HSL 格式的参数  h s l 的值累加到当前颜色中。<br />其中 h s l 取值范围均为 0 - 1 |
+| .set ( value : Color_Hex_or_String ) : Color                 | 设置当前颜色值                                               |
+| .setHex ( hex : Integer ) : Color                            | 根据参数 hex(十六进制) 设置当前颜色值                        |
+| .setHSL ( h : Float, s : Float, l : Float ) : Color          | 根据 HSL 格式的参数 h s l 设置为当前颜色值。<br />其中 h s l 取值范围均为 0 - 1 |
+| .setRGB ( r : Float, g : Float, b : Float ) : Color          | 根据参数 r g b 设置当前颜色。<br />其中参数 r g b 取值范围均为 0 - 1 |
+| .setScalar ( scalar : Float ) : Color                        | 将当前颜色的 r g b 的值都设置为 参数 scalar                  |
+| .setStyle ( style : String ) : Color                         | 根据 CSS 格式的颜色值设置当前颜色值。<br />请注意颜色字符串字母是不区分大小写的。 |
+| .setColorName ( style : String ) : Color                     | 根据 X11 颜色名字设置当前颜色值。                            |
+| .sub ( color : Color ) : Color                               | 将当前颜色的 r g b 都减去参数 color 的 rgb 的值。<br />若分量减去后结果为负数 则将该分量值设置为 0 |
+| .toArray ( array : Array, offset : Integer ) : Array         | 将当前颜色的 r g b 写入到数组 array 中，使用 offset 作为偏移量。<br />参数 offset 默认值为 0 |
+| .toJSON()                                                    | 等同于 .getHex()                                             |
+
+
+
+<br>
+
+## 圆柱体球谐函数3(SphericalHarmonics3)
+
+这个类也是 Three.js 数据库中的一个类，只不过目前实在不太明白，也暂时用不到该类，所以暂时不做学习。
+
+
+
+<br>
+
+## 通用数学函数(MathUtils)类
+
+Three.js 给我们提供了一个 通用数学函数 的工具类。
+
+该类名字为 MathUtils，没有属性，为我们提供了大量的 静态数学函数。
+
+> 该类不需要实例化即可使用。
+
+你可以把 MathUtils 看作是对 JS 内置的 Math 的补充。
+
+
+
+<br>
+
+| 方法名                                                       | 对应含义                                                     |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| .clamp ( value : Float, min : Float, max : Float ) : Float   | 根据 min 和 max 构成的取值范围，修订参数 value 的值。        |
+| .degToRad ( degrees : Float ) : Float                        | 将度转化为弧度                                               |
+| .radToDeg ( radians : Float ) : Float                        | 将弧度转化为度                                               |
+| .euclideanModulo ( n : Integer, m : Integer ) : Integer      | 计算 m % n 的欧几里得模：( (n%m) + m ) % m                   |
+| .generateUUID ( ) : UUID                                     | 生成并返回一个全局唯一标识符 UUID                            |
+| .isPowerOfTwo ( n : Number ) : Boolean                       | 如果参数 n 是 2 的幂，则返回 true                            |
+| .inverseLerp ( x : Float, y : Float, value : Float ) : Float | 返回参数 value 在起点 x 与终点 y 的闭区间 [0,1] 中的百分比(插值因子)。 |
+| .lerp ( x : Float, y : Float, t : Float ) : Float            | 返回给定区间的线性插值 t 的结果。<br />若 t 为 0 则返回 x，若 t 为 1 则返回 y。 |
+| .damp ( x : Float, y : Float, lambda : Float, dt : Float ) : Float | 返回使用 dt 以类似弹簧保持帧速率独立的移动的方式从 x 向 y 平滑插值的一个数值结果。 |
+| .mapLinear ( x : Float, a1 : Float, a2 : Float, b1 : Float, b2 : Float ) : Float | x 从范围 [a1, a2] 到范围 [b1,b2]的线性映射                   |
+| .pingpong ( x : Float, length : Float ) : Float              | 返回一个介于 0 和 lenght 之间的值                            |
+| .ceilPowerOfTwo ( n : Number ) : Integer                     | 返回大于等于 n 的 2 的最小次幂                               |
+| .floorPowerOfTwo ( n : Number ) : Integer                    | 返回小于等于 n 的 2 的最大次幂                               |
+| .randFloat ( low : Float, high : Float ) : Float             | 返回区间 [low, high] 内随机一个浮点数                        |
+| .randFloatSpread ( range : Float ) : Float                   | 返回区间 [-range/2, range/2] 内随机一个浮点数                |
+| .randInt ( low : Integer, high : Integer ) : Integer         | 返回区间 [low, high] 内随机一个整数                          |
+| .seededRandom ( seed : Integer ) : Float                     | 在区间 [0,1] 中生成确定性的伪随机浮点数                      |
+| .smoothstep ( x : Float, min : Float, max : Float ) : Float  | 返回一个 0 - 1 之间的值，该指标是 x 在最小值和最大值之间移动的百分比，但是当 x 接近最小值或最大值时，变化程度会平滑或减慢。 |
+| .smootherstep ( x : Float, min : Float, max : Float ) : Float | 返回一个  0 - 1 之间的值，它和 .smoothstep() 相同，但变动更加平缓。 |
+| .setQuaternionFromProperEuler ( q : Quaternion, a : Float, b : Float, c : Float, order : String ) : null | 根据 a、b、c、order 来设置 四元数 q。按照 order 指定的旋转顺序：先旋转角度 a，再旋转角度 b，最后旋转角度 c。角度以弧度为单位。 |
+
+
+
+
+
+<br>
+
+## 本文总结
+
+通过本文，我们大致了解学习了：
+
+1. 线性代数 一些基本概念，例如 向量、点乘、叉乘 等
+2. 变换相关的类，例如 欧拉角、四元数、矩阵
+3. 几何图形相关的类，例如 射线、包围盒、球体
+4. 坐标相关的类，例如 球坐标、圆柱坐标
+5. 颜色
+6. 通用数学函数
+7. 其他：线性插值、圆柱体球谐函数
+
+
+
+<br>
+
+内容足够多，需要好好消化。
+
+但这些仅仅是他们基本概念和方法，真正需要用到空间变换时，往往组合起来更加复杂。
+
+<br>
+
+**路漫漫其修远，我将上下而求索。**
 
