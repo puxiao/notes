@@ -125,10 +125,10 @@ React 发布后，将项目上传到服务器，默认必须是网站根目录�
 ```
 //npm i node-sass --save-dev
 
-yarn add node-sass --dev
+yarn add node-sass@5.0.0 --dev
 
-//如果你的 create-react-app 版本不是最新的，那么你只能安装
-yarn add node-sass@4.14.1 --dev
+//目前最新版的 create-react-app 4.0.3 还不支持 node-sass 6.0.0，所以只能安装 5.0.0
+//如果你的 create-react-app 版本不是最新的，那么你只能安装 node-sass@4.14.1
 ```
 
 
