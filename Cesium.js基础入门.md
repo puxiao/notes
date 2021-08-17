@@ -2,6 +2,10 @@
 
 从今天 2021.08.16 开始学习 Cesium.js。
 
+我建议你在学习 Cesium.js 之前，先学习了解一下 GIS 相关概念。
+
+可以查看我写的这篇学习笔记：[GIS基础概念.md](https://github.com/puxiao/notes/blob/master/GIS基础概念.md)
+
 
 
 <br>
