@@ -127,7 +127,7 @@ React 发布后，将项目上传到服务器，默认必须是网站根目录�
 
 yarn add node-sass@5.0.0 --dev
 
-//目前最新版的 create-react-app 4.0.3 还不支持 node-sass 6.0.0，所以只能安装 5.0.0
+//目前最新版的 create-react-app 4.0.3 还不支持 node-sass@6.0.0，所以只能安装 5.0.0
 //如果你的 create-react-app 版本不是最新的，那么你只能安装 node-sass@4.14.1
 ```
 
@@ -280,10 +280,10 @@ Parsing error: Unexpected token, expected ","
 >
 > ```
 > "eslintConfig": {
->     "extends": [
->         "react-app",
->         "react-app/jest"
->     ]
+>  "extends": [
+>      "react-app",
+>      "react-app/jest"
+>  ]
 > },
 > ```
 >
@@ -444,17 +444,6 @@ export default HomePage
 
 <br>
 
-## 安装echart模块
-
-```
-//npm i echarts @types/echarts --save
-yarn add echarts @types/echarts
-```
-
-
-
-<br>
-
 ## 安装jsdoc或typedoc
 
 **jsdoc：**
@@ -493,3 +482,278 @@ yarn add typedoc --dev
 ```
 
 补充：当前最新版本 typedoc 0.20.30 并不支持 React 17.0.1，所以是否安装 typedoc 需要慎重决定。
+
+
+
+<br>
+
+## 修改webpack配置
+
+当我们使用 create-react-app 创建的 react 项目，默认情况下我们是无法更改内部的 webpack 配置的。
+
+一般情况下我们也无需更改相关配置，但是对于有些特殊情况，就是需要修改或添加 webpack 配置规则时，那么以下 2 种方式。
+
+
+
+<br>
+
+**第 1 种：执行 eject，暴力还原**
+
+creact-react-app 为我们提供了一个方法：
+
+```
+//package.json script: {"eject": "react-scripts eject"}
+yarn eject
+```
+
+这样就可以将当前的 react 进行暴力还原，暴露出 webpack 配置项给我们，以便我们进行相应的配置修改。
+
+但这种操作是不可逆的，也就是说当执行过 eject 之后就再也回不去了。
+
+
+
+<br>
+
+**第 2 种：安装 craco ，柔性配置**
+
+craco 是一个第三方 NPM 包，可用于来给 creat-react-app 创建的 react 项目 修改 webpack 配置项。
+
+不光针对 webpack 配置项，还可以针对 eslint、babel、scss 等等。
+
+
+
+<br>
+
+第1步：安装 craco
+
+```
+yarn add @craco/craco
+```
+
+
+
+<br>
+
+第2步：在项目根目录，创建一个 craco.config.js 的文件，用来添加 webpack 规则。
+
+具体  craco 对应的 webpack 配置方式，可查阅：https://github.com/gsoft-inc/craco/blob/master/packages/craco/README.md#configuration
+
+> 请注意：craco 配置的规则 和 webpack 近似 但也有不同的地方。
+
+请注意：你也可以把 craco.config.js 文件命名为：.cracorc.js 或 .cracorc，但是请不要在一个项目中同时出现 2 个配置文件。
+
+
+
+<br>
+
+第3步：修改 package.json 中的 scripts 命令，修改为 craco 开头：
+
+```diff
+"scripts": {
+    "start": "craco start",
+    "build": "craco build",
+    "test": "craco test",
+    "eject": "react-scripts eject"
+},
+```
+
+
+
+<br>
+
+至此，就实现了可以修改 webpack 规则的目的。
+
+
+
+<br>
+
+**思考一下：**
+
+假设我们我们想使用 路径别名，比如我们安装使用了 react-app-rewired、react-app-rewire-alias，那么就需要将 package.json 中 scripts 的命令修改为：
+
+```
+"start": "react-app-rewired start"
+```
+
+那和
+
+```
+"start": "craco start"
+```
+
+冲突了怎么办？
+
+
+
+<br>
+
+#### Craco提供一站式解决方案
+
+前面提到，craco 可以提供修改 webpack 的配置，同时 craco 也提供日常开发中，常见的其他各种配置项。
+
+例如 style(css/sass)、eslint、babel、typescript、jest、devServer、plugins 等。
+
+
+
+<br> 之前我们为了在项目中使用 alias，采取安装 react-app-rewired、react-app-rewire-alias，那么现在可以忘掉它俩，改用 webpack 所支持的 alias 配置项。
+
+<br>
+
+**使用 Craco 配置 alias**
+
+请注意，对于 webpack 的 alias 而言，alias 是写在 resolve 下面的：
+
+```
+const path = require('path');
+module.exports = {
+  //...
+  resolve: {
+    alias: {
+      Utilities: path.resolve(__dirname, 'src/utilities/'),
+      Templates: path.resolve(__dirname, 'src/templates/'),
+    },
+  },
+};
+```
+
+但是对于 craco 来说，alias 是直接写在 webpack 下面的：
+
+```
+const path = require('path');
+module.exports = {
+    webpack: {
+        alias: {
+            "@/src": path.resolve(__dirname, "src"),
+            "@/src/components": path.resolve(__dirname, "src/components")
+        }
+    }
+}
+```
+
+> 提醒：不要在 别名 的名称结尾添加 斜杆 `/`，例如不要写成  "@/src/"，这样最终会找不到对应文件的。
+
+<br>
+
+假设你项目使用 TypeScript，记得配置文件中也需要对应有一份 paths 配置。
+
+
+
+<br>
+
+**使用 craco 忽略 cesium.js 的报错：**
+
+```
+module.exports = {
+    webpack: {
+        configure: (config) => {
+            //移除cesium警告
+            config.module.unknownContextCritical = false
+            config.module.unknownContextRegExp = /\/cesium\/cesium\/Source\/Core\/buildModuleUrl\.js/
+            return config
+        }
+    }
+};
+```
+
+
+
+<br>
+
+...
+
+你还可以使用  craco 去设置更多其他配置项。
+
+
+
+<br>
+
+**特别提醒：当你每次修改 craco.config.js 后，一定要重启 VSCode，以便确保配置生效。**
+
+
+
+<br>
+
+**附：craco 支持的配置文件示例**
+
+https://github.com/gsoft-inc/craco/blob/master/packages/craco/README.md#configuration
+
+```
+const { when, whenDev, whenProd, whenTest, ESLINT_MODES, POSTCSS_MODES } = require("@craco/craco");
+
+module.exports = {
+    reactScriptsVersion: "react-scripts" /* (default value) */,
+    style: {
+        modules: {
+            localIdentName: ""
+        },
+        css: {
+            loaderOptions: { /* Any css-loader configuration options: https://github.com/webpack-contrib/css-loader. */ },
+            loaderOptions: (cssLoaderOptions, { env, paths }) => { return cssLoaderOptions; }
+        },
+        sass: {
+            loaderOptions: { /* Any sass-loader configuration options: https://github.com/webpack-contrib/sass-loader. */ },
+            loaderOptions: (sassLoaderOptions, { env, paths }) => { return sassLoaderOptions; }
+        },
+        postcss: {
+            mode: "extends" /* (default value) */ || "file",
+            plugins: [require('plugin-to-append')], // Additional plugins given in an array are appended to existing config.
+            plugins: (plugins) => [require('plugin-to-prepend')].concat(plugins), // Or you may use the function variant.
+            env: {
+                autoprefixer: { /* Any autoprefixer options: https://github.com/postcss/autoprefixer#options */ },
+                stage: 3, /* Any valid stages: https://cssdb.org/#staging-process. */
+                features: { /* Any CSS features: https://preset-env.cssdb.org/features. */ }
+            },
+            loaderOptions: { /* Any postcss-loader configuration options: https://github.com/postcss/postcss-loader. */ },
+            loaderOptions: (postcssLoaderOptions, { env, paths }) => { return postcssLoaderOptions; }
+        }
+    },
+    eslint: {
+        enable: true /* (default value) */,
+        mode: "extends" /* (default value) */ || "file",
+        configure: { /* Any eslint configuration options: https://eslint.org/docs/user-guide/configuring */ },
+        configure: (eslintConfig, { env, paths }) => { return eslintConfig; },
+        pluginOptions: { /* Any eslint plugin configuration options: https://github.com/webpack-contrib/eslint-webpack-plugin#options. */ },
+        pluginOptions: (eslintOptions, { env, paths }) => { return eslintOptions; }
+    },
+    babel: {
+        presets: [],
+        plugins: [],
+        loaderOptions: { /* Any babel-loader configuration options: https://github.com/babel/babel-loader. */ },
+        loaderOptions: (babelLoaderOptions, { env, paths }) => { return babelLoaderOptions; }
+    },
+    typescript: {
+        enableTypeChecking: true /* (default value)  */
+    },
+    webpack: {
+        alias: {},
+        plugins: {
+            add: [], /* An array of plugins */ 
+            remove: [],  /* An array of plugin constructor's names (i.e. "StyleLintPlugin", "ESLintWebpackPlugin" ) */ 
+        },
+        configure: { /* Any webpack configuration options: https://webpack.js.org/configuration */ },
+        configure: (webpackConfig, { env, paths }) => { return webpackConfig; }
+    },
+    jest: {
+        babel: {
+            addPresets: true, /* (default value) */
+            addPlugins: true  /* (default value) */
+        },
+        configure: { /* Any Jest configuration options: https://jestjs.io/docs/en/configuration. */ },
+        configure: (jestConfig, { env, paths, resolve, rootDir }) => { return jestConfig; }
+    },
+    devServer: { /* Any devServer configuration options: https://webpack.js.org/configuration/dev-server/#devserver. */ },
+    devServer: (devServerConfig, { env, paths, proxy, allowedHost }) => { return devServerConfig; },
+    plugins: [
+        {
+            plugin: {
+                overrideCracoConfig: ({ cracoConfig, pluginOptions, context: { env, paths } }) => { return cracoConfig; },
+                overrideWebpackConfig: ({ webpackConfig, cracoConfig, pluginOptions, context: { env, paths } }) => { return webpackConfig; },
+                overrideDevServerConfig: ({ devServerConfig, cracoConfig, pluginOptions, context: { env, paths, proxy, allowedHost } }) => { return devServerConfig; },
+                overrideJestConfig: ({ jestConfig, cracoConfig, pluginOptions, context: { env, paths, resolve, rootDir } }) => { return jestConfig },
+            },
+            options: {}
+        }
+    ]
+};
+```
+
