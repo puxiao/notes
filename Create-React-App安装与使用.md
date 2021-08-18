@@ -634,7 +634,60 @@ module.exports = {
 
 <br>
 
-假设你项目使用 TypeScript，记得配置文件中也需要对应有一份 paths 配置。
+**TypeScript对应的 path 配置**
+
+假设你项目使用 TypeScript，记得也要针对 TS 进行 path 配置。
+
+配置方法和使用 react-app-rewire-alias 相同：
+
+1. 项目根目录创建 tsconfig.pahts.json
+
+   ```
+   {
+       "compilerOptions": {
+           "baseUrl": ".",
+           "paths": {
+               "@/src/*": ["./src/*"],
+               "@/components/*": ["./src/components/*"]
+           }
+       }
+   }
+   ```
+
+2. tsconfig.json 顶部添加：
+
+   ```
+   {
+       "extends": "./tsconfig.paths.json",
+       "compilerOptions": {
+       ...
+       }
+   }
+   ```
+
+
+
+<br>
+
+**问题遗留：**
+
+我尝试将上述 TS 的配置文件进行合并，即：
+
+```
+{
+    "extends": "./tsconfig.paths.json",
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@/src/*": ["./src/*"],
+            "@/components/*": ["./src/components/*"]
+        },
+        ...
+    }
+}
+```
+
+但是不清楚为什么每次执行 yarn start 后，都会自动将 tsconfig.json 中的 paths 字段删除，导致找不到对应的文件，从而引发报错。
 
 
 
