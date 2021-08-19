@@ -93,8 +93,8 @@ yarn add node-sass@5.0.0
 ```
 
 ```
-//安装 alias，我个人很喜欢使用 文件路径映射 的方式
-yarn add react-app-rewired react-app-rewire-alias
+//安装 craco，可以方便我们后期添加各种配置
+yarn add @craco/craco
 ```
 
 ```
@@ -116,7 +116,7 @@ yarn add @types/cesium
 ```
 yarn create react-app test-cesium --template typescript
 
-yarn add typescript node-sass@5.0.0 react-app-rewired react-app-rewire-alias cesium add @types/cesium
+yarn add typescript node-sass@5.0.0 @craco/craco cesium add @types/cesium
 ```
 
 
@@ -141,6 +141,8 @@ yarn add typescript node-sass@5.0.0 react-app-rewired react-app-rewire-alias ces
 
 2. 项目根目录添加 `.eslintrc` 文件内容为：
 
+   > 这是为了让我们使用 TypeScript 的 as 符号时不报错。
+
    ```
    {
        "extends": ["react-app", "react-app/jest"],
@@ -164,24 +166,28 @@ yarn add typescript node-sass@5.0.0 react-app-rewired react-app-rewire-alias ces
    }
    ```
 
-4. 项目根目录添加 `config-overrides.js` 文件内容为：
+4. 项目根目录添加  `craco.config.js` 文件内容为：
 
    ```
-   const { alias, configPaths } = require('react-app-rewire-alias')
+   const path = require('path');
    
-   module.exports = function override(config) {
-       alias(configPaths('./tsconfig.paths.json'))(config)
-       return config
-   }
+   module.exports = {
+       webpack: {
+           alias: {
+               "@/src": path.resolve(__dirname, "src/"),
+               "@/src/components": path.resolve(__dirname, "src/components/")
+           }
+       }
+   };
    ```
 
 5. 修改项目根目录的 `package.json`，将调试命令修改为：
 
    ```
    "scripts": {
-       "start": "react-app-rewired start",
-       "build": "react-app-rewired build",
-       "test": "react-app-rewired test",
+       "start": "craco start",
+       "build": "craco build",
+       "test": "craco test",
        "eject": "react-scripts eject"
    },
    ```
@@ -458,7 +464,7 @@ yarn start
 
 假设一切顺利，那么你可能会看到这样的网页内容。
 
-![hello-cesium](https://puxiao.com/temp/hello-cesium.jpg)
+![hello-cesium](https://puxiao.com/temp/hello-cesium2.jpg)
 
 
 
@@ -517,7 +523,7 @@ npx browserslist@latest --update-db
 
 **遇到的第 2 个问题：**
 
-页面虽然渲染出来了，但是控制台报了 3 个相同的错误警告：
+页面虽然渲染出来了，但是 VSCode 控制台报了 3 个相同的错误警告：
 
 ```
 ./node_modules/cesium/Source/Core/buildModuleUrl.js
@@ -528,24 +534,116 @@ Critical dependency: require function is used in a way in which dependencies can
 
 <br>
 
-**遇到的第 3 个问题：**
+经过一番网上搜索，最终知道这是因为 buildModuleUrl.js 这个文件中，计算 require 声明的 AMD 模块里的 toUrl 函数和标准的不兼容。
 
-页面虽然渲染出来了，但是浏览器控制台报了 4 个错误信息：
+需要 2 步来解决这个问题。
+
+1. 添加 webpack 配置，添加对应的规则，忽略该错误警告
+
+2. 添加 webpack 配置，明确告知存在标准不兼容
+
+   > 这一步是可选的
+
+
+
+<br>
+
+**第 1 步：忽略错误**
+
+修改项目根目录下的 `craco.config.js` 文件，添加上关于忽略 unknownContextCritical 的警告配置：
 
 ```
-Failed to load resource: the server responded with a status of 404 (Not Found)
-Failed to load resource: the server responded with a status of 404 (Not Found)
-Uncaught SyntaxError:3000/Workers/cesium…erBootstrapper.js:1 Uncaught SyntaxError: Unexpected token '<'
-Uncaught SyntaxError:3000/Workers/transf…TypedArrayTest.js:1 Uncaught SyntaxError: Unexpected token '<'
+module.exports = {
+    webpack: {
+        configure: (config) => {
+            //移除cesium警告
+            config.module.unknownContextCritical = false
+            config.module.unknownContextRegExp = /\/cesium\/cesium\/Source\/Core\/buildModuleUrl\.js/
+            return config
+        }
+    }
+};
 ```
 
 
 
 <br>
 
-**你以为渲染出来的网页就正常吗？**
+**第 2 步：明确不兼容**
 
-通过观察我们可以明显看出有以下几个问题：
+> 尽管这一步是可选的，但是依然建议添加上
+
+修改项目根目录下的 `craco.config.js` 文件，添加上 output.amd.toUrlUndefined 配置：
+
+```
+module.exports = {
+    webpack: {
+        output: {
+            amd: {
+                // Enable webpack-friendly use of require in Cesium
+                toUrlUndefined: true
+            }
+        }
+    }
+};
+```
+
+> 允许 Cesium 兼容 webpack的 require 方式
+
+
+
+<br>
+
+自此，我们的 craco.config.js 内容如下：
+
+```
+const path = require('path');
+module.exports = {
+    webpack: {
+        alias: {
+            "@/src": path.resolve(__dirname, "src/"),
+            "@/src/components": path.resolve(__dirname, "src/components/")
+        },
+        configure: (config) => {
+            //移除cesium警告
+            config.module.unknownContextCritical = false
+            config.module.unknownContextRegExp = /\/cesium\/cesium\/Source\/Core\/buildModuleUrl\.js/
+            return config
+        },
+        output: {
+            amd: {
+                // Enable webpack-friendly use of require in Cesium
+                toUrlUndefined: true
+            }
+        }
+    }
+};
+```
+
+
+
+<br>
+
+以上两个问题我们暂时都解决了，接着是第 3 个问题。
+
+
+
+<br>
+
+**遇到的第 3 个问题：**
+
+页面虽然渲染出来了，但是浏览器控制台报了 4 个错误信息：
+
+```
+http://localhost:3000/Assets/approximateTerrainHeights.json 404 (Not Found) - Resource.js:2193
+http://localhost:3000/Assets/IAU2006_XYS/IAU2006_XYS_17.json 404 (Not Found) - Resource.js:2193
+Uncaught SyntaxError: Unexpected token '<' - cesiumWorkerBootstrapper.js:1
+Uncaught SyntaxError: Unexpected token '<' - transferTypedArrayTest.js:1
+```
+
+<br>
+
+同时，通过观察渲染出来的网页，我们可以明显看出有以下几个问题：
 
 1. 网页右上角倒数第 2 个图标图片没有显示，我们暂时也不清楚该按钮的意义。通过网页源码查看该图片地址为：
 
@@ -561,7 +659,172 @@ Uncaught SyntaxError:3000/Workers/transf…TypedArrayTest.js:1 Uncaught SyntaxEr
    http://localhost:3000/Assets/Images/ion-credit.png
    ```
 
-3. 网页中间的 3D 地图似乎是按照某个固定的宽高比在显示，并未铺满整个浏览器可视区域。
+
+
+
+<br>
+
+通过查询 cesium.js 官方文档，https://cesium.com/learn/cesiumjs-learn/cesiumjs-quickstart/ ，我们知道原来缺失的文件在 npm 的 cesium 包中。
+
+我们需要做的，就是将这些文件拷贝到项目中。
+
+有 2 种拷贝方式：
+
+1. 手工拷贝文件
+2. 通过添加 webpack 配置，向 plugins 中添加 CopyWebpackPlugin 插件，以实现每次编译时自动拷贝。
+
+
+
+<br>
+
+**拷贝方式 1 ：手工拷贝**
+
+1. 在我们项目根目录的 public 中，创建一个名为 static 的目录
+
+2. 将 node_modules/cesium/Build/Cesium/ 这个目录下的 Assets、ThirdParty、Widgets、Workers 拷贝到 /public/static 中
+
+   > 特别说明：Cesium.js 官方文档中有 2 处讲解此内容时，略有不一致。
+   >
+   > 区别在于是否拷贝 ThridParty 目录。从目前来说，即使不拷贝 ThirdParty 目录是可以的。
+
+3. 修改 App.tsx，配置 CESIUM_BASE_URL
+
+   ```
+   window.CESIUM_BASE_URL = './static/Cesium/';
+   ```
+
+   > 无需在乎路径中的大小写
+
+
+
+<br>
+
+**拷贝方式 2 ：webpack 插件拷贝**
+
+1. 安装拷贝插件
+
+   ```
+   yarn add copy-webpack-plugin --dev
+   //或
+   npm install --save-dev copy-webpack-plugin
+   ```
+
+2. 添加插件 webpack 配置项，这样 craco.config.js 内容为：
+
+   ```
+   const path = require('path');
+   const CopywebpackPlugin = require('copy-webpack-plugin');
+   
+   module.exports = {
+       webpack: {
+           alias: {
+               "@/src": path.resolve(__dirname, "src/"),
+               "@/src/components": path.resolve(__dirname, "src/components/")
+           },
+           configure: (config) => {
+               //移除cesium警告
+               config.module.unknownContextCritical = false
+               config.module.unknownContextRegExp = /\/cesium\/cesium\/Source\/Core\/buildModuleUrl\.js/
+               return config
+           },
+           output: {
+               amd: {
+                   // Enable webpack-friendly use of require in Cesium
+                   toUrlUndefined: true
+               }
+           }
+           plugins: [
+               // Copy Cesium Assets, Widgets, and Workers to a static directory
+               new CopywebpackPlugin({
+                   patterns: [
+                       { from: 'node_modules/cesium/Build/Cesium/Workers', to: '/static/Cesium/Workers' },
+                       { from: 'node_modules/cesium/Build/Cesium/ThirdParty', to: '/static/Cesium/ThirdParty' },
+                       { from: 'node_modules/cesium/Build/Cesium/Assets', to: '/static/Cesium/Assets' },
+                       { from: 'node_modules/cesium/Build/Cesium/Widgets', to: '/static/Cesium/Widgets' }
+                   ]
+               })
+           ],
+       }
+   };
+   ```
+
+   
+
+<br>
+
+无论使用哪种拷贝方式均可。
+
+> 我个人推荐使用 手工拷贝，毕竟拷贝一次即可，而第二种拷贝每一次运行都需要执行一遍。
+
+
+
+<br>
+
+**等一下，有个问题：**
+
+我们实际上只需要 Assets、Widgets、Workers 目录中相关的资源文件，例如 图片 或 JSON 文件。
+
+而上面这种直接整体拷贝文件夹的形式，岂不是把里面的 .js 文件也拷贝进去了？
+
+额 ~ ，从目前来看确实存在这个问题，但是我们即使拷贝这些文件，似乎也占用不了多少文件空间，并且我们不用它们就行了。
+
+所以就不要执着这个细节了。
+
+
+
+<br>
+
+**再次运行我们的 hello cesium 程序。**
+
+执行 yarn start，此时就不会再有资源加载不到，或者其他报错信息了。
+
+一切顺利，我们会看到的网页如下：
+
+![hello-cesium](https://puxiao.com/temp/hello-cesium3.jpg)
+
+
+
+<br>
+
+**网页布局功能分析：**
+
+从上面截图可以看到，除中间地图主体外，其他地方可以划分为几个功能区域：
+
+1. 右上角 5 个图标按钮
+2. 左下角 1 个轮盘
+3. 底部中间 1 个时间轴
+4. 右下角 1 个全屏按钮
+
+
+
+<br>
+
+接下来，我们依次讲解上述 5 个区域的功能。
+
+
+
+<br>
+
+**右上角从左往右依次 5 个图标按钮对应的功能：**
+
+1. 搜索框：点击之后，出现输入框，可以通过位置关键词，定位到该地方
+2. 回首页：点击之后，相当于回首页，当前地图就会缩小，将视觉由当前区域改为全球区域( 一个 3D 地球 )
+3. 3D视图切换：点击之后，会出现下来菜单，共 3 个切换选项 3D、2D、Columbus View(哥伦布模式)
+4. 当前地区：点击之后，出现地图列表，可以切换到其他地区
+5. 帮助：点击之后，弹出交互提示文字
+   1. 平移地图：摁下鼠标左键并拖动
+   2. 放大地图：鼠标滚轴滚动 或 摁下鼠标右键并拖动
+   3. 旋转地图：摁下鼠标中键并拖动 或 摁下 Ctrl 键的同时 摁下鼠标左键并拖动
+
+
+
+<br>
+
+**网页下面 3 个区域功能：**
+
+1. 左下角 轮盘：用于控制切换进度的速度，通过鼠标可以修改仪表看上的指针来，依次来调整变换的速度。同时可以点击轮盘上的 播放键，进行自动播放。
+2. 底部中间 时间轴：鼠标点击时间轴上某个位置，可以将当前区域切换成对应时间节点的光照亮度效果。
+3. 右下角 全屏按钮：点击之后网页全屏
 
 
 
@@ -569,9 +832,9 @@ Uncaught SyntaxError:3000/Workers/transf…TypedArrayTest.js:1 Uncaught SyntaxEr
 
 **小总结：**
 
-在我们不知道为何会出现上述错误，甚至都不明白渲染出来的网页究竟是做什么的情况下，结束本小节。
+自此，我们的 React + TypeScript + Cesium 简单示例已经完成。
 
-接下来我们就沿着上述问题，逐个去探究和理解 Cesium.js。
+接下来，我们将逐步深入学习 Cesium.js。
 
 
 
