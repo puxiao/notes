@@ -859,9 +859,174 @@ https://github.com/CesiumGS/cesium-webpack-example/blob/main/webpack.config.js
 
 <br>
 
-## 开始探索Cesium.js
+## 一切的开始：Viewer
+
+从上一节的 App.tsx 中，我们可以看到：
+
+```
+const viewer = new Cesium.Viewer('cesiumContainer', {
+    terrainProvider: Cesium.createWorldTerrain()
+});
+```
+
+Cesium.Viewer 这个类是 3D 地图 一切的开始，那么我们本小节就开始学习 Viewer。
 
 
 
+<br>
 
+**关于 Cesium.js Viewer 的 API 文档：**
+
+1. 最新 1.84 版的英文文档：https://cesium.com/learn/cesiumjs/ref-doc/Viewer.html
+2. 较旧 1.72 版的中文文档：http://cesium.xin/cesium/cn/Documentation1.72/Viewer.html
+
+
+
+<br>
+
+**关于 widget 单词的解释：**
+
+在 cesium.js 官方文档中，大量使用了 widget 这个单词。
+
+widget 对应中文翻译为：小装置、小器物、小部件
+
+在 cesium.js 中，我们统一将 widget 翻译为 小部件。
+
+> 你可以把整个 cesium 应用程序想象成是一个运转的机器，而每一个 软件模块 对应这个机器上的一个 小部件，所有的小部件共同组成了整个机器。
+
+个别时候可能为了书写省事，会把 “小” 字去掉，直接使用 “部件”。
+
+> 例如当我们文字中出现 “动画小部件” 或 “动画部件” 时，你应该明白它俩是同一个意思。
+
+
+
+<br>
+
+### Viewer的简介
+
+**Viewer** 用于构建应用程序的基本小部件。它将所有标准 Cesium 小部件组合在一个可重用的程序包中。
+
+始终可以通过 mixins 扩展窗口小部件，添加对各种应用程序有用的功能。
+
+简而言之，Viewer 是 Cesium 应用程序的基石，所有功能都是添加到 Viewer 中的。
+
+
+
+<br>
+
+**Viewer 的构造参数：**
+
+| 构造参数  | 值类型             | 是否为必填 | 对应含义                               |
+| --------- | ------------------ | ---------- | -------------------------------------- |
+| container | Element \| String  | 是         | 用于包含 Viewer 的 DOM(div) 元素 或 ID |
+| options   | ConstructorOptions | 否         | 描述初始化选项的对象                   |
+
+
+
+<br>
+
+**构造函数可能引发的错误：**
+
+1. DeveloperError : Element with id "container" does not exist in the document.
+
+   > 在 DOM 中找不到 ID 对应的元素
+
+2. DeveloperError : options.selectedImageryProviderViewModel is not available when not using the BaseLayerPicker widget, specify options.imageryProvider instead.
+
+   > options.selectedImageryProviderViewModel 在不使用 BaseLayerPicker 小部件时不可用，请改为指定 options.imageryProvider。
+
+3. DeveloperError : options.selectedTerrainProviderViewModel is not available when not using the BaseLayerPicker widget, specify options.terrainProvider instead.
+
+   > options.selectedTerrainProviderViewModel 在不使用 BaseLayerPicker 小部件时不可用，请改为指定 options.terrainProvider。
+
+
+
+<br>
+
+**初始化 Viewer 示例：**
+
+```
+const viewer = new Cesium.Viewer('cesiumContainer')
+
+//
+
+const viewer = new Cesium.Viewer('cesiumContainer',{
+    sceneMode: Cesium.SceneMode.COLUMBUS_VIEW,
+    terrainProvider: Cesium.createWorldTerrain(),
+    baseLayerPicker: false
+})
+
+viewer.extend(Cesium.viewerDragDropMixin)
+viewer.dropError.addEventListener(function(dropHandler,name,error){
+    console.log(error)
+    window.alert(error)
+})
+```
+
+
+
+<br>
+
+**一个最简单的 Cesium 示例：**
+
+> 比我们上一节写的还要更加简单的示例
+
+```
+import { useEffect } from 'react';
+import * as Cesium from 'cesium';
+import 'cesium/Build/Cesium/Widgets/widgets.css';
+
+function App() {
+
+    useEffect(() => {
+
+        //@ts-ignore
+        window.CESIUM_BASE_URL = './static/Cesium/';
+
+        const viewer = new Cesium.Viewer('cesiumContainer');
+
+        return () => {
+            viewer.destroy();
+        }
+
+    }, [])
+
+    return (
+        <div id='cesiumContainer'>
+        </div>
+    );
+}
+
+export default App;
+```
+
+> 该示例运行后，会看到一个 3D 地球
+
+
+
+<br>
+
+### Viewer的属性
+
+| 属性名                                       | 是否为只读属性 | 对应含义                                                     |
+| -------------------------------------------- | -------------- | ------------------------------------------------------------ |
+| allowDataSourcesToSuspendAnimation : Boolean | 否             | 获取或设置数据源是否可以临时暂停动画，以避免向用户显示不完整的图片。 |
+| animation: Animation                         | 是             | 获取动画部件                                                 |
+|                                              |                |                                                              |
+|                                              |                |                                                              |
+|                                              |                |                                                              |
+|                                              |                |                                                              |
+|                                              |                |                                                              |
+|                                              |                |                                                              |
+|                                              |                |                                                              |
+|                                              |                |                                                              |
+|                                              |                |                                                              |
+|                                              |                |                                                              |
+|                                              |                |                                                              |
+|                                              |                |                                                              |
+|                                              |                |                                                              |
+|                                              |                |                                                              |
+|                                              |                |                                                              |
+|                                              |                |                                                              |
+|                                              |                |                                                              |
 
