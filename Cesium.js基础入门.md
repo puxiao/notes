@@ -741,7 +741,7 @@ Uncaught SyntaxError: Unexpected token '<' - transferTypedArrayTest.js:1
                        { from: 'node_modules/cesium/Build/Cesium/ThirdParty', to: '/static/Cesium/ThirdParty' },
                        { from: 'node_modules/cesium/Build/Cesium/Assets', to: '/static/Cesium/Assets' },
                        { from: 'node_modules/cesium/Build/Cesium/Widgets', to: '/static/Cesium/Widgets' }
-                   ]
+                ]
                })
            ],
        }
@@ -754,7 +754,14 @@ Uncaught SyntaxError: Unexpected token '<' - transferTypedArrayTest.js:1
 
 无论使用哪种拷贝方式均可。
 
-> 我个人推荐使用 手工拷贝，毕竟拷贝一次即可，而第二种拷贝每一次运行都需要执行一遍。
+> 这里我先选择手工拷贝，毕竟拷贝一次即可，而第 2 种拷贝每一次运行都需要执行一遍。
+>
+> 但如果选择手工拷贝也就意味着一个潜在的风险问题：
+>
+> 1. 如果项目要发布到生产环境，那么依然需要你手工拷贝，不像第 2 种方式可以实现自动化。
+> 2. 同时你还要面临将 public/static/Cesium 所有的文件都会自动提交到 Git 中的问题，当然你可以选择在 .gitignore 中添加上这个目录，以便 git 忽略这个目录的文件变动检查。
+>
+> 因此我建议在开发环境中，可以选择手工拷贝，但是如果作为正式项目要发布到生产环境，则应该选择第 2 种方式。
 
 
 
@@ -769,6 +776,18 @@ Uncaught SyntaxError: Unexpected token '<' - transferTypedArrayTest.js:1
 额 ~ ，从目前来看确实存在这个问题，但是我们即使拷贝这些文件，似乎也占用不了多少文件空间，并且我们不用它们就行了。
 
 所以就不要执着这个细节了。
+
+
+
+<br>
+
+**关于 Cesium 的 Webpack 其他配置项：**
+
+更多 webpack 相关配置项，可查阅：
+
+https://cesium.com/learn/cesiumjs-learn/cesiumjs-webpack/
+
+https://github.com/CesiumGS/cesium-webpack-example/blob/main/webpack.config.js
 
 
 
