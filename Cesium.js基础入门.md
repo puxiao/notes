@@ -1008,25 +1008,267 @@ export default App;
 
 ### Viewer的属性
 
-| 属性名                                       | 是否为只读属性 | 对应含义                                                     |
-| -------------------------------------------- | -------------- | ------------------------------------------------------------ |
-| allowDataSourcesToSuspendAnimation : Boolean | 否             | 获取或设置数据源是否可以临时暂停动画，以避免向用户显示不完整的图片。 |
-| animation: Animation                         | 是             | 获取动画部件                                                 |
-|                                              |                |                                                              |
-|                                              |                |                                                              |
-|                                              |                |                                                              |
-|                                              |                |                                                              |
-|                                              |                |                                                              |
-|                                              |                |                                                              |
-|                                              |                |                                                              |
-|                                              |                |                                                              |
-|                                              |                |                                                              |
-|                                              |                |                                                              |
-|                                              |                |                                                              |
-|                                              |                |                                                              |
-|                                              |                |                                                              |
-|                                              |                |                                                              |
-|                                              |                |                                                              |
-|                                              |                |                                                              |
-|                                              |                |                                                              |
+| 属性名                                          | 是否为只读属性 | 对应含义                                                     |
+| ----------------------------------------------- | -------------- | ------------------------------------------------------------ |
+| allowDataSourcesToSuspendAnimation : Boolean    | 否             | 获取或设置数据源是否可以临时暂停动画，以避免向用户显示不完整的图片。 |
+| animation: Animation                            | 是             | 获取动画部件                                                 |
+| baseLayerPicker:BaseLayerPicker                 | 是             | 获取BaseLayerPicker<br />，实际上就是获取地图右上角第 4 个按钮(“当前地区选择器”)下拉内容 |
+| bottomContainer: Element                        | 是             | 获取底部内容区域元素                                         |
+| camera:Camera                                   | 是             | 获取相机                                                     |
+| canvas:HTMLCanvasElement                        | 是             | 获取画布                                                     |
+| cesiumWidget:CesiumWidget                       | 是             | 获取CesiumWidget<br />，即获取包含 Cesium 场景的小部件       |
+| clock:Clock                                     | 是             | 获取时钟                                                     |
+| clockTrackedDataSource:DataSource               | 否             | 获取或设置要与查看着的时钟一起跟踪的数据源                   |
+| clockViewModel:ClockViewModel                   | 是             | 获取时钟视图模型                                             |
+| container:Element                               | 是             | 获取父容器，即 Viewer 构造函数第1个参数对应的DOM元素         |
+| dataSourceDisplay:DataSourceDisplay             | 是             | 获取用于 DataSource 可视化的显示                             |
+| dataSources:DataSourceColliection               | 是             | 获取要可视化的 DataSource 实例集合                           |
+| entities:EntityCollection                       | 是             | 获取未绑定到特定数据源的实体的集合。<br />实际上是 dataSourceDisplay.defaultDataSource.entities 的快捷方式 |
+| fullscreenButton:FullscreenButton               | 是             | 获取全屏按钮                                                 |
+| geocoder:Geocoder                               | 是             | 获取地理编码器，就是右上角那个搜索框，默认为 Bing 引擎       |
+| homeButton:HomeButton                           | 是             | 获取“主页”按钮                                               |
+| imageryLayers:ImageryLayerCollection            | 是             | 获取将在地球上渲染的图像图层的集合                           |
+| infoBox:InfoBox                                 | 是             | 获取信息框                                                   |
+| navigationHelpButton:NavigationHelpButton       | 是             | 获取“帮助”按钮                                               |
+| postProcessStages:PostProcessStageCollection    | 是             | 获取后期处理阶段                                             |
+| projectionPicker:ProjectionPicker               | 是             | 获取切换“透视或正交”的选择器                                 |
+| resolutionScale:number                          | 否             | 获取或设置渲染分辨率的缩放比。<br />若值小于 1，可用于改善性能不佳的设备上。<br />而值大于 1，可用以更高的速度呈现分辨率，然后缩小比例，从而提高视觉保真度。 |
+| scene:Scene                                     | 是             | 获取场景                                                     |
+| sceneModePicker                                 | 是             | 获取“场景模式”按钮下拉对应的选择器。<br />对应的是右上角第 3 个按钮图标。 |
+| screenSpaceEventHandler:ScreenSpaceEventHandler | 是             | 获取屏幕空间事件处理程序                                     |
+| selectedEntity:Entity\|undefined                | 否             | 获取或设置要为其显示选项指示符的对象实例                     |
+| selectedEntityChanged:Event                     | 是             | 获取所选实体更改时引发的事件                                 |
+| selectionIndicator:SelectionIndicator           | 是             | 获取选择指示器                                               |
+| shadowMap:ShadowMap                             | 是             | 获取场景的阴影贴图                                           |
+| shadows:Boolean                                 | 否             | 确定阴影是否由光源投射                                       |
+| targetFrameRate:Number                          | 否             | 在 useDefaultRenderLoop 时获取或设置小部件的目标帧速率。<br />如果未定义则使用浏览器的 requestAnimatioFrame 实现确定帧频。<br />注意：如果定义该值则数值一定要大于 0，但不要过于高，因为高于requestAnimationFrame 的值也无法实现。 |
+| terrainProvider:TerrainProvider                 | 否             | 为地球提供表面地形或几何形状的提供者                         |
+| terrainShadows:ShadowMode                       | 否             | 确定地形是投射光源还是投射阴影                               |
+| timeline:TimeLine                               | 是             | 获取时间轴小部件                                             |
+| trackedEntity:Entity\|undefined                 | 否             | 获取或设置相机当前正在跟踪的实体实例                         |
+| trackedEntityChanged:Event                      | 是             | 获取当前被跟踪实体更改时引发的事件                           |
+| useBrowserRecommendedResolution:Boolean         | 否             | 获取或设置是否使用浏览器推荐的分辨率。默认为 true。<br />如果为 true 则会忽略浏览器的设备像素比率 改用 1，根据CSS像素而不是设备像素进行渲染。<br />这样可以改善在像素密度较高、功能较弱的设备上的性能。<br />如果为 false，则渲染将以设备像素为单位。<br />注意：无论该值为什么，并不会影响 .resolutionScale 的值。 |
+| useDefaultRenderLoop:Boolean                    | 否             | 获取或设置此小部件是否控制渲染循环。<br />如果为 true 则小部件将使用 requestAnimationFrame 执行小部件的渲染和调整大小，以及驱动模拟时钟。<br />如果为 false 则必须手动调用 resize、render 方法作为自定义渲染循环的一部分。<br />注意：如果在渲染过程中发生错误，比如发生 Scene 渲染错误事件，则会将该值设置为 false。<br />必须将其设置回 true 后才可以继续渲染。 |
+| vrButton                                        | 是             | 获取 VRButton                                                |
+
+
+
+<br>
+
+**属性小总结：**
+
+通过上面 Viewer 的 40 个属性介绍，我们可以大致讲他们分为：
+
+1. 获取按钮或容器元素相关的
+2. 获取数据、地形、实体、相机相关的
+3. 获取或设置光源、投影相关的
+4. 获取或设置渲染帧频、像素比率相关的额
+
+
+
+<br>
+
+### Viewer的方法
+
+**destroy()**
+
+销毁小部件。
+
+请注意只是销毁，但并不会删除对应的 DOM 元素。如果要永久删除，还用应该从 DOM 上删除。
+
+
+
+<br>
+
+**extend(mixin,options)**
+
+1. mixin:Viewer.ViewerMixin
+2. options:Object
+
+使用提供的 mixin 扩展基本查看器功能。混合可能会添加其他属性，功能或其他行为到提供的查看器实例。
+
+> mixin 单词英文翻译为 ：混合
+
+
+
+<br>
+
+**flyTo(target,options): `Promise.<Boolean>`**
+
+1. target:Entity | Array.<Entity> | ...
+2. options:Object
+
+将相机移动至提供的 一个或多个实体或数据源。
+
+如果执行成功则异步返回 true，如果 target 并不会真实存在或取消飞行跳转则异步返回 false。
+
+请注意这是一个异步操作，如果数据源仍在加载过程中，或者可视化仍在加载中，此方法在执行 镜头移动 之前会等待数据准备就绪。
+
+偏移量是在以边界球中心为中心的局部 东北向上参考框的 航向/俯仰 范围。
+
+在 2D 模式下，必须有一个俯仰图，摄像机将被放置在目标上方并向下看。上方的高度其目标将是范围。
+
+
+
+<br>
+
+**forceResize()**
+
+强制窗口小部件重新考虑其布局，包括窗口小部件尺寸和版权声明。
+
+> 在英文文档中使用的是 credit placement，直译过来就是：信用放置，大白话就是 “放版权声明的地方”
+
+
+
+<br>
+
+**isDestroyed():Boolean**
+
+检查是否已被销毁。
+
+
+
+<br>
+
+**render()**
+
+渲染场景。
+
+该方法会自动调用，除非 viewer 的 .useDefaultRenderLoop 被设置为 false。
+
+
+
+<br>
+
+**resize()**
+
+调整窗口小部件的大小以匹配容器的大小。
+
+该方法会自动调用，除非 viewer 的 .useDefaultRenderLoop 被设置为 false。
+
+
+
+<br>
+
+**zoomTo(target,offset)**
+
+异步设置相机以查看提供的一个或多个实体或数据。
+
+如果数据源扔在加载中 或 可视化仍在加载中，此方法会在执行缩放前等待数据准备就绪。
+
+> 该方法和 flyTo() 非常相似，只不过 flyTo() 用于针对目标进行视图跳转，而 zoomTo() 用于针对目标进行视图缩放。
+
+
+
+<br>
+
+可以看出，Viewer 的方法比较简单，几乎都是指针对当前 Viewer 进行一些视觉上的操作。
+
+
+
+<br>
+
+### View初始化选项
+
+| 属性名                                                | 默认值                                   | 对应配置                                                     |
+| ----------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------ |
+| animation:Boolean                                     | true                                     | 是否创建 “动画” 小部件                                       |
+| baseLayerPicker:Boolean                               | true                                     | 是否创建 BaseLayerPicker 小部件                              |
+| fullscreenButton:Boolean                              | true                                     | 是否创建 FullscreenButton 小部件                             |
+| vrButton:Boolean                                      | false                                    | 是否创建 VRButton 小部件                                     |
+| geocoder:Boolean \|`Array.<GeocoderService>`          | true                                     | 是否创建 Geocoder 小部件<br />，就是右上角那个“搜索框”       |
+| homeButton:Boolean                                    | true                                     | 是否创建 “主页” 小部件                                       |
+| infoBox:Boolean                                       | true                                     | 是否创建 InfoBox 小部件                                      |
+| sceneModePicker:Boolean                               | true                                     | 是否创建 SceneModePicker 小部件                              |
+| selectionIndiacator:Boolean                           | true                                     | 是否创建 SelectionIndicator 小部件                           |
+| timeline:Boolean                                      | true                                     | 是否创建 时间轴 小部件                                       |
+| navigationHelpButton:Boolean                          | true                                     | 是否创建 导航帮助 按钮                                       |
+| navigationInstructionsInitiallyVisible:Boolean        | true                                     | 是否最初就应该看到导航说明                                   |
+| scene3DOnly:Booean                                    | false                                    | 是否每个几何实例仅以 3D渲染，以节省 GPU 内存                 |
+| shouldAnimate:Boolean                                 | false                                    | 默认情况下时钟是否应该尝试提前模拟时间。<br />此选项优先于 clockViewModel |
+| clockViewModel:ClockViewModel                         | new ClockViewModel(clock)                | 用于控制当前时间的时钟视图模型                               |
+| selectedImageryProviderViewModel:ProviderViewModel    |                                          | 当前基础影像图层的视图模型。<br />如果未提供则使用第一个可用的基础图层。<br />仅当 baseLayderPicker 设置为 true 是此值才有效。 |
+| imageryProviderViewModels:`Array.<ProviderViewModel>` | createDefaultImageryProviderViewModels() | 可以从BaseLayerPicker中选择的ProviderViewModels数组。<br />仅当 baseLayerPicker 设置为 true 时该值才有效。 |
+| selectedTerrainProviderViewModel:ProviderViewModel    |                                          | 当前基础地形图层的视图模式。<br />如未提供则使用第一个可用的基础图层。<br />仅当 baseLayerPicker 设置为 true 时该值才有效。 |
+| terrainProviderViewModels:`Array.<ProviderViewModel>` | createDefaultTerrainProviderViewModels() | 可以从BaseLayerPicker中选择的ProviderViewModels数组。<br />仅当 baseLayerPicker 为 ture 时该值才有效。 |
+| imageryProvider:ImageryProvider                       | createWorldImagery()                     | 要使用的图像提供程序。此值仅当 baseLayerPicker 设置为 false 时才有效。 |
+| terrainProvider:TerrainProvider                       | new EllipsoidTerrainProvider()           | 要使用的地形提供商                                           |
+| skyBox:SkyBox\|false                                  |                                          | 用于渲染星星的天空盒。<br />如果未定义则使用默认星河。<br />如果设置为 false 则不会添加 skyBox、sun 或 moon。 |
+| skyAtmosphere:SkyAtmosphere \| false                  |                                          | 用于如何渲染蓝天以及地球四周的光芒。<br />若为 false 则关闭这些 |
+| fullscreenElement:Element \| String                   | document.body                            | 摁下全屏按钮后要至于全屏模式的 元素或ID                      |
+| useDefaultRenderLoop:Boolean                          | true                                     | 此小部件是否应控制渲染循环                                   |
+| targetFrameRate:Number                                |                                          | 使用默认渲染循环时的目标帧速率                               |
+| showRenderLoopErrors:Boolean                          | true                                     | 当发生渲染循环错误时，是否自动向包含错误的用户显示 HTML 面板。 |
+| useBrowserRecommendedResolution:Boolean               | true                                     | 是否使用浏览器建议的分辨率渲染。<br />如果为 true 还会忽略 window.devicePixelRation |
+| automaticallyTrackDataSourceClocks:Boolean            | true                                     | 小部件是否自动跟踪新添加的数据源的始终设置，并在数据源的始终发生更改时进行更新。<br />如果要独立配置时钟，则需要将其设置为 false。 |
+| contextOptions:Object                                 |                                          | 传递给 Scene 的与 options 相对应的上下文 和 WebGL 创建属性。 |
+| sceneMode:SceneMode                                   | SceneMode.SCENE3D                        | 初始场景模式                                                 |
+| mapProjection:MapProjection                           | new GeographicProjection()               | 在 2D 和 Columbus(哥伦布) 视图模式下使用的地图投影           |
+| globe:Globe \| false                                  | new Globe(mapProjection.ellipsoid)       | 要在场景中使用的地球仪。如果设置为 false 这不会添加任何地球仪 |
+| orderIndependentTranslucency:Boolean                  | true                                     | 是否使用顺序无关的半透明性                                   |
+| creditContainer:Element \| String                     |                                          | 包含 CreditDIsplay 的DOM元素或 ID。<br />如果未指定则将 credits 添加到小部件本身的底部。 |
+| creditViewport:Element \| String                      |                                          | 将包含 CreditDisplay 创建的弹出窗口的 DOM 元素或 ID。<br />如果未指定，它将显示在小部件本身上。 |
+| dataSource:DataSourceCollection                       | new DataSourceCollection()               | 小部件可视化的数据源集合。<br />如果提供此参数，该实例假定为调用者所有，并在销毁查看器时也不会销毁。 |
+| terrainExaggeration:Number                            | 1                                        | 用于放大地形的标量。请注意：地形夸张并不会修改他相对于椭球的图元。 |
+| shadows:Boolean                                       | false                                    | 确定阴影是否由光源投射                                       |
+| terrainShadows:ShadowMode                             | ShadowMode.RECEIVE_ONLY                  | 确定地形是否投射或接收来自光源的阴影                         |
+| mapMode2D:MapMode2D                                   | MapMode2D.INFINITE_SCROLL                | 确定2D地图是可旋转的还是可以在水平方向无限滚动的。           |
+| projectionPicker:Boolean                              | false                                    | 是否创建 ProjectinPicker 小部件                              |
+| requestRenderMode:Boolean                             | false                                    | 仅根据场景中的更改确定是否需要渲染帧。<br />启用可减少应用程序的 CPU/GPU 使用率，并减少移动设备上的电池消耗。<br />但需要使用 `Scene.requestRender` 来呈现新的在此模式下先市镇。 |
+| maximumRenderTimeChange:Number                        | 0                                        | 如果 requestRenderMode 为 true，则此值定义在请求渲染之前允许的最大方阵时间更改。 |
+
+> 关于 requestRenderMode、maximumRenderTimeChange 属性配置，通用显示渲染提高性能：
+>
+> https://cesium.com/blog/2018/01/24/cesium-scene-rendering-performance/
+
+
+
+<br>
+
+**静态方法：Cesium.Viewer.ViewerMixin(viewer, options)**
+
+通过附加功能扩展 Viewer 实例的功能。
+
+该静态方法等同于 Viewer.extend()。
+
+
+
+<br>
+
+### 让我们尝试一下
+
+**代码目标：隐藏除中间内容外的其他所有部件。**
+
+```
+const viewer = new Cesium.Viewer('cesiumContainer', {
+    geocoder: false,
+    homeButton: false,
+    baseLayerPicker: false,
+    sceneModePicker: false,
+    navigationHelpButton: false,
+
+    animation: false,
+    timeline: false,
+    fullscreenButton: false,
+
+    skyBox: false,
+    skyAtmosphere: false,
+});
+```
+
+
+
+<br>
+
+**隐藏版权：**
+
+请注意，上面的代码中我们隐藏了绝大多数的部件，但在 Viewer.ConstructorOptions 配置项中，并没有隐藏 版权 的设置。
+
+我们可以通过获取该元素，然后通过样式将其隐藏。
+
+```
+ (viewer.cesiumWidget.creditContainer as HTMLElement).style.display = 'none';
+```
+
+
 
