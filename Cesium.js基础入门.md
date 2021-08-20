@@ -379,12 +379,35 @@ Cesium.Ion.defaultAccessToken = 'your_access_token';
 
 ## 编写HelloWorld
 
-根据 Cesium.js 官方文档提供的示例代码，我们将 src/App.tsx 内容更改为：
+首先，我们先编写全屏样式，我们将 src/App.scss 内容更改为：
+
+```
+#cesiumContainer {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    overflow: hidden;
+    border: none;
+}
+```
+
+> 请注意一定要设置 position、left、top，否则最终网页画布高度会比 body 低 4 个像素，造成底部有空白缝隙。
+
+
+
+<br>
+
+然后，根据 Cesium.js 官方文档提供的示例代码，我们将 src/App.tsx 内容更改为：
 
 ```
 import { useEffect } from 'react';
 import * as Cesium from 'cesium';
 import "cesium/Build/Cesium/Widgets/widgets.css";
+import './App.scss'
 
 function App() {
 
@@ -425,9 +448,9 @@ function App() {
 export default App;
 ```
 
-> 再次提醒：上述代码中，一定要将 token 替换成你自己真实的秘钥，否则网页是无法正常运行的。
+> 实际如果只是为了普同演示，上述 token 相关代码我们不添加也可以运行。
 >
-> 我们暂时先不去理解其他的代码
+> 至于其他代码，暂时先不用去理解都是什么含义。
 
 
 
