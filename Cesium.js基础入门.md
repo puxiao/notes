@@ -407,7 +407,7 @@ Cesium.Ion.defaultAccessToken = 'your_access_token';
 import { useEffect } from 'react';
 import * as Cesium from 'cesium';
 import "cesium/Build/Cesium/Widgets/widgets.css";
-import './App.scss'
+import './App.scss';
 
 function App() {
 
@@ -998,6 +998,7 @@ viewer.dropError.addEventListener(function(dropHandler,name,error){
 import { useEffect } from 'react';
 import * as Cesium from 'cesium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
+import './App.scss';
 
 function App() {
 
