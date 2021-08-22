@@ -1241,7 +1241,7 @@ export default App;
 | creditContainer:Element \| String                     |                                          | 包含 CreditDIsplay 的DOM元素或 ID。<br />如果未指定则将 credits 添加到小部件本身的底部。 |
 | creditViewport:Element \| String                      |                                          | 将包含 CreditDisplay 创建的弹出窗口的 DOM 元素或 ID。<br />如果未指定，它将显示在小部件本身上。 |
 | dataSource:DataSourceCollection                       | new DataSourceCollection()               | 小部件可视化的数据源集合。<br />如果提供此参数，该实例假定为调用者所有，并在销毁查看器时也不会销毁。 |
-| terrainExaggeration:Number                            | 1                                        | 用于放大地形的标量。请注意：地形夸张并不会修改他相对于椭球的图元。 |
+| (在1.83版本中已被废弃) terrainExaggeration:Number     | 1                                        | 用于放大地形的标量。请注意：地形夸张并不会修改他相对于椭球的图元。 |
 | shadows:Boolean                                       | false                                    | 确定阴影是否由光源投射                                       |
 | terrainShadows:ShadowMode                             | ShadowMode.RECEIVE_ONLY                  | 确定地形是否投射或接收来自光源的阴影                         |
 | mapMode2D:MapMode2D                                   | MapMode2D.INFINITE_SCROLL                | 确定2D地图是可旋转的还是可以在水平方向无限滚动的。           |
@@ -1450,31 +1450,41 @@ https://github.com/CesiumGS/cesium/blob/main/Source/Widgets/CesiumWidget/CesiumW
 
 ### CesiumWidget的配置项
 
-| 配置项                                    | 默认值                             | 配置内容                                                     |
-| ----------------------------------------- | ---------------------------------- | ------------------------------------------------------------ |
-| clock: Clock                              | new Color()                        | 用于控制当前时间的时钟                                       |
-| imageryProvider: ImageryProvider \| false | createWorldImagery()               | 用于基础层的图像提供者。<br />若配置值为 false 则不添加任何图像提供程序。 |
-| terrainProvider: TerrainProvider          | new EllipsoidTerrainProvider       | 地形提供者                                                   |
-| skyBox: SkyBox \| false                   |                                    | 用于渲染星星的天空盒。<br />如果未定义则使用默认天空盒，<br />如果设置为 false 则不添加天空盒、太阳和月亮 |
-| skyAtmosphere: SkyAtomsphere \| false     |                                    | 蓝天和地球周围的光芒。<br />设置为 false 则不显示光芒        |
-| sceneMode: SceneMode                      | SceneMode.SCENE3D                  | 初始场景模式                                                 |
-| scene3DOnly: Boolean                      | false                              | 如果为 true，则每个几何体实例将仅 3D 渲染，以节省 GPU 内存。 |
-| orderIndependentTranslucency:  Boolean    | true                               | 如果为 true 并配置支持它，则使用顺序无关的透明性。           |
-| mapProjection: MapProjection              | new GeographicProjection()         | 在 2D 和 Columbus(哥伦布) View 模式下使用的地图投影          |
-| globe: Globe \| false                     | new Globe(mapProjection.ellipsoid) | 场景中使用的地球仪。如果设置为 false 则不添加地球仪          |
-| useDefaultRendererLoop: Boolean           | true                               | 如果此小部件应控制渲染循环，则为 true，否则为 false          |
-| useBrowserRecommendedResolution: Boolean  | true                               | 如果为 true，则以浏览器建议的分辨率进行渲染，并忽略 window.devicePixelRatio。 |
-| targetFrameRate: Number                   |                                    | 使用默认渲染循环的目标帧速率。<br />该值需要大于 0，且小于设备能够达到的极限。<br />该值设置过大实际上也不会生效。 |
-| showRenderLoopErrors: Boolean             | true                               | 如果为 true，则在发生渲染循环错误时，此小部件将自动向包含错误的用户显示 HTML 面板。 |
-| contextOptions: Object                    |                                    | 与 options 相对应的上下文和 WebGL 创建属性传递给 Scene       |
-| creditContainer: Element \| String        |                                    | 包含 CreditDisplay 的DOM 元素或 ID。如果为指定，则添加到 bottomContainer 中 |
-| creditViewport: Element \| String         |                                    | 包含由 CreditDisplay 创建的弹出窗口的 DOM 元素或 ID。<br />如果未指定，则将显示在 小部件本身上面。 |
-| terrainExaggeration: Number               | 1                                  | 用于放大地形的标量。请注意，地形放大并不会修改其他相对于椭球的图元。 |
-| shadows: Boolean                          | false                              | 确定阴影是否由光源投射                                       |
-| terrainShadow: ShadowMode                 | ShadowMode.RECEIVE_ONLY            | 确定地形是投射还是接收来自光源的阴影                         |
-| mapMode2D: MapMode2D                      | MapMode2D.INFINITE_SCROLL          | 确定 2D 地图是可旋转还是可在水平方向无限滚动                 |
-| requestRenderMode: Boolean                | false                              | 如果为 true 则仅根据场景中的更改确定是否需要渲染帧。<br />启用可以提高应用程序的性能，但需要使用 Scene.requestRender，在此模式下显式渲染新框架。<br />在 API 的其他部分对场景进行更改后，在许多情况下这是必要的。 |
-| maximumRenderTimeChange: Number           | 0                                  | 如果 requestRenderMode 为 true，则此值定义在请求渲染之前允许的最大仿真时间更改。 |
+| 配置项                                         | 默认值                             | 配置内容                                                     |
+| ---------------------------------------------- | ---------------------------------- | ------------------------------------------------------------ |
+| clock: Clock                                   | new Color()                        | 用于控制当前时间的时钟                                       |
+| imageryProvider: ImageryProvider \| false      | createWorldImagery()               | 用于基础层的图像提供者。<br />若配置值为 false 则不添加任何图像提供程序。 |
+| terrainProvider: TerrainProvider               | new EllipsoidTerrainProvider       | 地形提供者                                                   |
+| skyBox: SkyBox \| false                        |                                    | 用于渲染星星的天空盒。<br />如果未定义则使用默认天空盒，<br />如果设置为 false 则不添加天空盒、太阳和月亮 |
+| skyAtmosphere: SkyAtomsphere \| false          |                                    | 蓝天和地球周围的光芒。<br />设置为 false 则不显示光芒        |
+| sceneMode: SceneMode                           | SceneMode.SCENE3D                  | 初始场景模式                                                 |
+| scene3DOnly: Boolean                           | false                              | 如果为 true，则每个几何体实例将仅 3D 渲染，以节省 GPU 内存。 |
+| orderIndependentTranslucency:  Boolean         | true                               | 如果为 true 并配置支持它，则使用顺序无关的透明性。           |
+| mapProjection: MapProjection                   | new GeographicProjection()         | 在 2D 和 Columbus(哥伦布) View 模式下使用的地图投影          |
+| globe: Globe \| false                          | new Globe(mapProjection.ellipsoid) | 场景中使用的地球仪。如果设置为 false 则不添加地球仪          |
+| useDefaultRendererLoop: Boolean                | true                               | 如果此小部件应控制渲染循环，则为 true，否则为 false          |
+| useBrowserRecommendedResolution: Boolean       | true                               | 如果为 true，则以浏览器建议的分辨率进行渲染，并忽略 window.devicePixelRatio。 |
+| targetFrameRate: Number                        |                                    | 使用默认渲染循环的目标帧速率。<br />该值需要大于 0，且小于设备能够达到的极限。<br />该值设置过大实际上也不会生效。 |
+| showRenderLoopErrors: Boolean                  | true                               | 如果为 true，则在发生渲染循环错误时，此小部件将自动向包含错误的用户显示 HTML 面板。 |
+| contextOptions: Object                         |                                    | 与 options 相对应的上下文和 WebGL 创建属性传递给 Scene       |
+| creditContainer: Element \| String             |                                    | 包含 CreditDisplay 的DOM 元素或 ID。如果为指定，则添加到 bottomContainer 中 |
+| creditViewport: Element \| String              |                                    | 包含由 CreditDisplay 创建的弹出窗口的 DOM 元素或 ID。<br />如果未指定，则将显示在 小部件本身上面。 |
+| (1.83版本已被废弃) terrainExaggeration: Number | 1                                  | 用于放大地形的标量。请注意，地形放大并不会修改其他相对于椭球的图元。 |
+| shadows: Boolean                               | false                              | 确定阴影是否由光源投射                                       |
+| terrainShadow: ShadowMode                      | ShadowMode.RECEIVE_ONLY            | 确定地形是投射还是接收来自光源的阴影                         |
+| mapMode2D: MapMode2D                           | MapMode2D.INFINITE_SCROLL          | 确定 2D 地图是可旋转还是可在水平方向无限滚动                 |
+| requestRenderMode: Boolean                     | false                              | 如果为 true 则仅根据场景中的更改确定是否需要渲染帧。<br />启用可以提高应用程序的性能，但需要使用 Scene.requestRender，在此模式下显式渲染新框架。<br />在 API 的其他部分对场景进行更改后，在许多情况下这是必要的。 |
+| maximumRenderTimeChange: Number                | 0                                  | 如果 requestRenderMode 为 true，则此值定义在请求渲染之前允许的最大仿真时间更改。 |
+
+
+
+<br>
+
+**补充说明：被移除的选项 terrainExaggeration**
+
+在 Cesium.js 1.83 版本中，移除了 Scene.terrainExaggeration，因此 CesiumWidget、Viewer、Scene 的配置项中也不再有 terrainExaggeration 这一项。
+
+作为替代方案，在 1.85 版本中可以通过 Globe.terrainExaggeration 来设置。
 
 
 
