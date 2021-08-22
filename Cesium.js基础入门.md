@@ -884,6 +884,14 @@ https://github.com/CesiumGS/cesium-webpack-example/blob/main/webpack.config.js
 
 ## 一切的开始：Viewer
 
+**Viewer 源码：**
+
+https://github.com/CesiumGS/cesium/blob/main/Source/Widgets/Viewer/Viewer.js
+
+
+
+<br>
+
 从上一节的 App.tsx 中，我们可以看到：
 
 ```
@@ -1295,4 +1303,260 @@ const viewer = new Cesium.Viewer('cesiumContainer', {
 ```
 
 
+
+<br>
+
+**补充说明：第一次向 Cesium.js 提交 PR**
+
+在我学习到此处的时候，我在想为什么不能直接在配置项中添加一个隐藏版权的选项？
+
+于是，我查看 Viewer.js 源码，并添加隐藏 bottomContainer 的配置项。
+
+> 由于版权(creditContainer)默认就在 bottomContainer 中，隐藏 bottomContainer 也就意味着隐藏 版权。
+
+以下是我修改的内容：
+
+source/Widgets/Viewer/Viewer.js
+
+```diff
+第1处：按照 JSDoc 代码规范，添加 `bottomContainer` 配置项的类型和注释
++  * @property {Boolean} [bottomContainer] If set to false, the {@link Viewer#bottomContainer} will not be created.
+
+
+第2处：增加判断逻辑，只有当 `bottomContainer` 被定义且值不为 false 时才创建该 DOM 元素
+-  var bottomContainer = document.createElement("div");
+-  bottomContainer.className = "cesium-viewer-bottom";
+-  viewerContainer.appendChild(bottomContainer);
++  var bottomContainer;
++  if (!defined(options.bottomContainer) || options.bottomContainer !== false) {
++    bottomContainer = document.createElement("div");
++    bottomContainer.className = "cesium-viewer-bottom";
++    viewerContainer.appendChild(bottomContainer);
++  }
+
+
+第3处：修改获取 .bottomContainer 对应的类型。由于 .bottomContainer 有可能不会被创建，所以其类型中添加 undefined
+-  * @type {Element}
++  * @type {Element | undefined}
+
+
+第4处：判断只有当 .bottomContainer 存在时才会对其添加样式
+-  this._bottomContainer.style.left = creditLeft + "px";
+-  this._bottomContainer.style.bottom = creditBottom + "px";
++  if (this._bottomContainer !== undefined) {
++    this._bottomContainer.style.left = creditLeft + "px";
++    this._bottomContainer.style.bottom = creditBottom + "px";
++  }
+```
+
+ 以上代码经过本地测试无误，可以在配置项中轻松添加隐藏版权，用法为：
+
+```
+const viewer = new Cesium.Viewer('cesiumContainer', {
+    bottomContainer: false
+})
+```
+
+
+
+<br>
+
+于是信心满满向 Cesium 提交了 PR 。
+
+https://github.com/CesiumGS/cesium/pull/9742
+
+在当天就收到了仓库管理员 hpinkos 的回复：
+
+```
+Thanks for the pull request @puxiao. However, you should not be removing the CreditDisplay from the viewer. Many data providers, including Cesium ion, have attribution requirements for using their data in applications, so hiding this would be a violation of their terms of service.
+```
+
+回复内容意思就是：我们非常注重版权，如果隐藏版权会不符合我们的服务条款。
+
+
+
+<br>
+
+**大写的尴尬！**
+
+或许我们习惯在使用开源软件时，倾向于隐藏开源软件版权的习惯。
+
+但是国外的人可能比较重视保留版权。
+
+
+
+<br>
+
+**第一次向 Cesium 提交 PR 得到的经验：**
+
+1. 假设你是个人，且第一次向 Cesium 提交 PR，那么你首选需要访问
+
+   https://docs.google.com/forms/d/e/1FAIpQLScU-yvQdcdjCFHkNXwdNeEXx5Qhu45QXuWX_uF5qiLGFSEwlA/viewform
+
+   在该页面需要填写你的姓名、与github账号相同的邮箱、国家，然后确认 “同意” 将自己贡献的代码版权捐献给 Cesium。
+
+2. 假设你是第一次提交 PR，那么除代码修改外，你还需要向 CONTRIBUTORS.md 文档中，按照格式添加上自己的大名。
+
+   > 如果你的 PR 被接受并入，那么你的名字就会出现在 贡献者名单中。
+
+3. 当你修改某个 .js 代码内容时，需要遵循 JSDoc 规范。如果你不熟悉 JSDoc 可查阅我写的这篇：[JSDoc的安装与使用](https://github.com/puxiao/notes/blob/master/JSDoc%E7%9A%84%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8.md)
+
+   > 实际上 Cesium 的 API 文档就是由 JSDoc 注释自动生成的。
+
+4. 你还需要修改 CHANGES.md，在顶部当前的时间段内 添加上你此次修改的内容。
+
+5. 如需必要，你还需要添加对应的 测试用例、使用示例。
+
+   <br>
+
+   请注意，无论是 JSDoc 还是 CHANGES.md，或者 PR 标题表述，你都需要使用英文。
+
+   如果英文不好，那你需要借助谷歌或百度翻译，同时英语的表达应尽量符合该仓库的风格。
+
+   > 你可以从该仓库过往的 PR 历史中，查看 PR 标题风格。
+
+
+
+<br>
+
+## 所有小部件的创建者：CesiumWidget
+
+**CesiumWidget 源码：**
+
+https://github.com/CesiumGS/cesium/blob/main/Source/Widgets/CesiumWidget/CesiumWidget.js
+
+
+
+<br>
+
+**CesiumWidget：**
+
+负责创建和管理 Cesium 场景中所有的小部件。
+
+
+
+### CesiumWidget的初始化
+
+**CesiumWidget的构造参数：**
+
+| 构造参数                     | 对应含义                         |
+| ---------------------------- | -------------------------------- |
+| container: Element \| String | 将包含窗口小部件的 DOM 元素或 ID |
+| options: Object              | 可选配置项                       |
+
+
+
+<br>
+
+### CesiumWidget的配置项
+
+| 配置项                                    | 默认值                             | 配置内容                                                     |
+| ----------------------------------------- | ---------------------------------- | ------------------------------------------------------------ |
+| clock: Clock                              | new Color()                        | 用于控制当前时间的时钟                                       |
+| imageryProvider: ImageryProvider \| false | createWorldImagery()               | 用于基础层的图像提供者。<br />若配置值为 false 则不添加任何图像提供程序。 |
+| terrainProvider: TerrainProvider          | new EllipsoidTerrainProvider       | 地形提供者                                                   |
+| skyBox: SkyBox \| false                   |                                    | 用于渲染星星的天空盒。<br />如果未定义则使用默认天空盒，<br />如果设置为 false 则不添加天空盒、太阳和月亮 |
+| skyAtmosphere: SkyAtomsphere \| false     |                                    | 蓝天和地球周围的光芒。<br />设置为 false 则不显示光芒        |
+| sceneMode: SceneMode                      | SceneMode.SCENE3D                  | 初始场景模式                                                 |
+| scene3DOnly: Boolean                      | false                              | 如果为 true，则每个几何体实例将仅 3D 渲染，以节省 GPU 内存。 |
+| orderIndependentTranslucency:  Boolean    | true                               | 如果为 true 并配置支持它，则使用顺序无关的透明性。           |
+| mapProjection: MapProjection              | new GeographicProjection()         | 在 2D 和 Columbus(哥伦布) View 模式下使用的地图投影          |
+| globe: Globe \| false                     | new Globe(mapProjection.ellipsoid) | 场景中使用的地球仪。如果设置为 false 则不添加地球仪          |
+| useDefaultRendererLoop: Boolean           | true                               | 如果此小部件应控制渲染循环，则为 true，否则为 false          |
+| useBrowserRecommendedResolution: Boolean  | true                               | 如果为 true，则以浏览器建议的分辨率进行渲染，并忽略 window.devicePixelRatio。 |
+| targetFrameRate: Number                   |                                    | 使用默认渲染循环的目标帧速率。<br />该值需要大于 0，且小于设备能够达到的极限。<br />该值设置过大实际上也不会生效。 |
+| showRenderLoopErrors: Boolean             | true                               | 如果为 true，则在发生渲染循环错误时，此小部件将自动向包含错误的用户显示 HTML 面板。 |
+| contextOptions: Object                    |                                    | 与 options 相对应的上下文和 WebGL 创建属性传递给 Scene       |
+| creditContainer: Element \| String        |                                    | 包含 CreditDisplay 的DOM 元素或 ID。如果为指定，则添加到 bottomContainer 中 |
+| creditViewport: Element \| String         |                                    | 包含由 CreditDisplay 创建的弹出窗口的 DOM 元素或 ID。<br />如果未指定，则将显示在 小部件本身上面。 |
+| terrainExaggeration: Number               | 1                                  | 用于放大地形的标量。请注意，地形放大并不会修改其他相对于椭球的图元。 |
+| shadows: Boolean                          | false                              | 确定阴影是否由光源投射                                       |
+| terrainShadow: ShadowMode                 | ShadowMode.RECEIVE_ONLY            | 确定地形是投射还是接收来自光源的阴影                         |
+| mapMode2D: MapMode2D                      | MapMode2D.INFINITE_SCROLL          | 确定 2D 地图是可旋转还是可在水平方向无限滚动                 |
+| requestRenderMode: Boolean                | false                              | 如果为 true 则仅根据场景中的更改确定是否需要渲染帧。<br />启用可以提高应用程序的性能，但需要使用 Scene.requestRender，在此模式下显式渲染新框架。<br />在 API 的其他部分对场景进行更改后，在许多情况下这是必要的。 |
+| maximumRenderTimeChange: Number           | 0                                  | 如果 requestRenderMode 为 true，则此值定义在请求渲染之前允许的最大仿真时间更改。 |
+
+
+
+<br>
+
+你可能会疑惑，为什么 CesiumWidget 的配置项和 Viewer 的配置项那么相似？
+
+**实际上 Viewer 就是 CesiumWidget 更高一层的管理者，Viewer 的很多配置项在内部本身就是供 CesiumWidget 使用。**
+
+> 这就是 2 者配置项为什么那么相似。实际不是相似，而是相同。
+
+
+
+<br>
+
+**简单示例：**
+
+```
+//最简单的初始化
+const widget = new Cesium.CesiumWidget('cesiumContainer');
+
+//添加一些配置项的初始化
+const widget = new Cesium.CesiumWidget('cesiumContainer',{
+    imageryProvider: Cesium.createWorldImagery(),
+    terrainProvider: Cesium.createWorldTerrain(),
+    skyBox: new Cesium.SkyBox({
+        sources:{
+            positiveX: './static/Assets/Textures/SkyBox/px.jpg',
+            negativeX: './static/Assets/Textures/SkyBox/nx.jpg',
+            positiveY: './static/Assets/Textures/SkyBox/py.jpg',
+            negativeY: './static/Assets/Textures/SkyBox/ny.jpg',
+            positiveZ: './static/Assets/Textures/SkyBox/pz.jpg',
+            negativeZ: './static/Assets/Textures/SkyBox/nz.jpg',
+        }
+    }),
+    sceneMode: Cesium.SceneMode.COLUMBUS_VIEW,
+    mapProjection: new Cesium.WebMercatorProjection()
+})
+```
+
+
+
+<br>
+
+### CesiumWidget的属性
+
+| 属性名                                           | 是否为只读属性 | 对应含义                                                     |
+| ------------------------------------------------ | -------------- | ------------------------------------------------------------ |
+| camera: Camera                                   | 是             | 获取相机                                                     |
+| canvas: THMLCanvasElement                        | 是             | 获取画布                                                     |
+| clock: Clock                                     | 是             | 获取时钟                                                     |
+| container: Element                               | 是             | 获取父容器                                                   |
+| creditContainer: Element                         | 是             | 获取版权容器                                                 |
+| creditViewport: Element                          | 是             | 获取版权详情弹层容器                                         |
+| imageryLayers: ImageryLayerCollection            | 是             | 获取将在地球上渲染的图像图层的集合                           |
+| resolutionScale: Number                          | 否             | 获取或设置渲染分辨率的缩放比，默认值为 1。<br />小于 1 的值适用于性能不佳的设备上。<br />大于 1 的值适用于高清、高保真的设备上。 |
+| scene: Scene                                     | 是             | 获取场景                                                     |
+| screenSpaceEventHandler: ScreenSpaceEventHandler | 是             | 获取屏幕空间事件的处理函数                                   |
+| targetFrameRate: Number                          | 否             | 在 useDefaultRenderLoop 为 true 时获取或设置小部件的目标帧速率。如果未定义则使用浏览器的 requestAnimationFrame 默认帧频。 |
+| terrainProvider: TerrainProvider                 | 否             | 地球表面几何形状的提供者                                     |
+| useBrowserRecommendedResolution: Boolean         | 否             | 是否使用浏览器推荐的分辨率，默认值为 true。<br />如果为 true 则会忽略浏览器的设备像素比率 而改用 1。 |
+| useDefaultRenderLoop: Boolean                    | 否             | 获取或设置此小部件是否硬控制循环渲染，默认为 true。<br />如果设置为 false 则必须手动调用 resize、render 方法去自定义渲染。<br />如果在渲染过程中发生错误则会引发 Scene renderError 事件，并且此属性将被设置为 false。<br />必须将其设置为 true 后才能继续隐式自动渲染。 |
+
+
+
+<br>
+
+### CesiumWidget的方法
+
+| 方法名                                                       | 对应含义                                                     |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| destroy()                                                    | 销毁小部件。如果希望永久销毁则应该从 DOM 节点中删除相应元素。 |
+| isDestroyed(): Boolean                                       | 返回对象是否已销毁                                           |
+| render()                                                     | 渲染场景。在 useDefaultRenderLoop 为 false 时需要手工调用以渲染场景。 |
+| resize()                                                     | 更新画布大小、相机纵横比 和 饰扣大小。在 useDefaultRenderLoop 为 false 时需要手工调用此方法。 |
+| showErrorPanel(title: String, message: String, error: String) | 想用户显示错误面板，其中标题、错误描述、被格式化的错误代码文本，可以使用 “确定” 按钮将其关闭。 |
+
+
+
+
+
+<br>
+
+## 所有3D图形的容器：Scene
 
