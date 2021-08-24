@@ -98,13 +98,8 @@ yarn add @craco/craco
 ```
 
 ```
-//安装 cesium，本项目使用版本为 1.84.0
+//安装 cesium，本项目使用版本为 1.84.0，Cesium 自带有 .d.ts TS 声明文件
 yarn add cesium
-```
-
-```
-//安装 cesium 对应的 TypeScript 声明库，本项目使用版本为 1.67.14
-yarn add @types/cesium
 ```
 
 
@@ -116,7 +111,7 @@ yarn add @types/cesium
 ```
 yarn create react-app test-cesium --template typescript
 
-yarn add typescript node-sass@5.0.0 @craco/craco cesium add @types/cesium
+yarn add typescript node-sass@5.0.0 @craco/craco cesium
 ```
 
 
@@ -1569,4 +1564,200 @@ const widget = new Cesium.CesiumWidget('cesiumContainer',{
 <br>
 
 ## 所有3D图形的容器：Scene
+
+**Scene 源码：**
+
+https://github.com/CesiumGS/cesium/blob/main/Source/Scene/Scene.js
+
+
+
+<br>
+
+**Scene** 负责管理 Cesium 中所有的 3D 图形对象。实际中并不需要手工创建 Scene，它由 CesiumWidget 隐式创建的。
+
+> 包括一些不可见的 3D 对象，例如 相机。
+>
+> 和 Three.js 中的 Scene 作用相似。
+
+
+
+<br>
+
+### Scene的构造参数
+
+```
+const scene = new Cesium.Scene(options)
+```
+
+<br>
+
+| 配置项                                         | 默认值                     | 配置内容                                                     |
+| ---------------------------------------------- | -------------------------- | ------------------------------------------------------------ |
+| canvas: HTMLCanvasElement                      |                            | 用于为其创建场景的 HTML canvas 元素                          |
+| contextOptions: Object                         |                            | 上下文和 WebGL 创建属性。                                    |
+| creditContainer: Element                       |                            | 将在其中显示版权的HTML元素                                   |
+| creditViewport: Element                        |                            | 版权详细信息弹层对应的 HTML 元素                             |
+| mapProjection: MapRrojection                   | new GeographicProjection() | 在 2D 和 Columbus(哥伦布) View 模式下使用的地图投影          |
+| orderIndependentTranslucency: Boolean          | true                       | 如果为 true 并且配置支持它，则使用顺序无关的半透明性         |
+| scene3DOnly: Boolean                           | fasle                      | 如果为true，则可以优化 3D 模式的内存使用和性能，但会禁止使用 2D 或 哥伦布模式 |
+| (在1.83版中已废弃) terrainExaggeration: Number | 1                          | 用法放大地图的标量。                                         |
+| shadows: Boolean                               | false                      | 确定阴影是否由光源投射                                       |
+| mapMode2D: MapMode2D                           | MapMode2D.INFINITE_SCROLL  | 确定2D地图是可旋转的还是可以在水平方向无限滚动的。           |
+| requestRenderMode: Boolean                     | false                      | 如果为 true 则仅根据场景中的更改确定是否需要渲染帧。<br />启用可以提高应用程序的性能，但需要使用 Scene 在此模式下显示渲染新框架。 |
+| maximumRenderTimeChange: Number                | 0                          | 如果 requestRenderMode 为 true，则此值定义在请求渲染之前允许的最大仿真时间更改。 |
+
+
+
+<br>
+
+**关于 canvas 配置项的特别说明：**
+
+尽管官方文档中提到 Scene 的配置项是可选的，但实际上并不是这样的。
+
+Scene 的配置项是必填的，并且配置项中 canvas 这一项也是必填的。
+
+例如下面的示例代码：
+
+```
+const scene = new Cesium.Scene()
+
+或
+
+const scene = new Cesium.Scene({
+    shadows: true
+})
+```
+
+由于没有配置项，或者配置项中没有 canvas 这一项，都会收到报错信息：
+
+```
+DeveloperError: options and options.canvas are required.
+```
+
+> 配置项 options 和 options.canvas 都是必须的
+
+
+
+<br>
+
+**觉得不对就去修改它！**
+
+我查看了源码，发现关于 Scene 的 JSDoc 描述中，官方错误得将 options 写成了 可选项。
+
+于是我向 Cesium 官方提交了 PR ，修改这个问题：
+
+https://github.com/CesiumGS/cesium/pull/9745
+
+```diff
+- * @param {Object} [options] Object with the following properties:
++ * @param {Object} options Object with the following properties:
+```
+
+> 对于 JSDoc 规范来说，参数如果加中括号表示这是可选参数，如果不加则表示这是必填参数。
+
+现在是 2021.08.24 16:27，我这个 PR 已经得到了 2 位管理员的回复，他们认为确实应该进行修改。
+
+但还没最终将我的修改并入，期待最终结果。
+
+
+
+<br>
+
+**关于 contextOptions 配置项的特别说明：**
+
+Scene 的初始化配置项 contextOptions 是用于配置给定 canvs、webgl 上下文 WebGLContextAttributes 的。
+
+contextOptions 默认值为：
+
+```
+{
+    webgl:{
+        alpha:false,
+        depth:true,
+        stencil:false,
+        antialias:true,
+        powerPreference:'high-preformance',
+        premultipliedAlpha:true,
+        preserveDrawingBuffer:false,
+        failIfMajorPerformanceCaveat:false
+    },
+    allowTextureFilterAnisotropic:true
+}
+```
+
+> 1. 如果需要使用 alpha 与其他 HTML元素混合，则需要将 wegl.alpha 设置为 true。
+> 2. 如果将 allowTextureFilterAnisotropic 设置为 false，会提高整体渲染性能，但损害视觉画面质量。
+
+
+
+<br>
+
+**获取 WebGL 上下文：**
+
+想获取 canvas 对应的 webgl 的上下文配置项，可通过 JS 原生的函数获取：
+
+WebGLRenderingContext.getContextAttributes()
+
+https://developer.mozilla.org/zh-CN/docs/Web/API/WebGLRenderingContext/getContextAttributes
+
+```
+const canvas = document.getElementById('canvas')
+const gl = canvas.getContext('webgl')
+gl.getContextAttributes()
+```
+
+
+
+<br>
+
+### Scene的属性
+
+| 属性名                                 | 是否为只读属性 | 属性含义                                                     |
+| -------------------------------------- | -------------- | ------------------------------------------------------------ |
+| backgroundColor: Color                 | 否             | 在未使用 skyBox 的情况下，显示的背景色                       |
+| camera: Camera                         | 是             | 获取相机，可以设置相机属性                                   |
+| cameraUnderground: Boolean             | 是             | 相机是否在地球下方。默认为 false                             |
+| canvas: HTMLCanvasElement              | 是             | 获取此场景绑定到的 canvas 元素                               |
+| clampToHeightSupported: Boolean        | 是             | 是否支持 .clampToHeight 和 .clampToHeightMosetDetailed       |
+| completeMorphOnUserInput: Boolean      | 否             | 确定是否立即完成用户输入时的场景过渡动画，默认为 true        |
+| debugCommandFilter: function           | 否             | 此属性仅用于调试，不要用于生成环境。<br />设置执行的调试函数，默认为 undefined |
+| debugFrustumStatistics: Object         | 是             | 此属性仅用于调试，不要用于生产环境。<br />当 .debugShowFrustums 为 true 时，包含每个视锥执行的命令数量的统计信息。<br />默认值为 undefined |
+| debugShowCommands: Boolean             | 否             | 此属性仅用于调试，不要用于生产环境。<br />当设置为 true 时，会随机加阴影，用于性能分析。<br />默认值为 false |
+| debugShowDepthFrustum: Number          | 否             | 此属性仅用于调试，不要用于生产环境。<br />指示哪个视锥体将显示深度信息。<br />默认值为 1 |
+| debugShowFramesPerSecond: Boolean      | 否             | 此属性仅用于调试，不要用于生产环境。<br />显示每秒的帧数、帧之间的时间。<br />默认为 false |
+| debugShowFrustumPlanes: Boolean        | 否             | 此属性仅用于调试，不要用于生产环境。<br />当设置为 true 时，绘制轮廓以显示摄像机的视锥边界。<br />默认值为 false |
+| debugShowFrustums: Boolean             | 否             | 此属性仅用于调试，不要用于生产环境。<br />当设置为 true 时，则将基于重叠的视锥体(平截头体)进行着色。<br />其中第一个平截头体 近截面为红色，远截面为蓝色。<br />下一个平截头体 近截面为 绿色，远截面依然为蓝色。<br />这样或许会出现不同的平截头体的 近截面 或 远截面 颜色重叠。<br />例如两个平截头体近截面 一个为红、一个为绿，叠加区域颜色则变成 黄色。<br />默认值为 false |
+| debugShowGlobeDepth: Boolean           | 否             | 此属性仅用于调试，不要用于生产环境。<br />显示视锥的深度信息。<br />默认为 false |
+| drawingBufferHeight: Number            | 是             | 基础 GL 上下文的 drawingBufferHeight，也就是当前绘图缓冲区的实际高度 |
+| drawingBufferWidth: Number             | 是             | 基础 GL 上下文的 drawingBufferWidth，也就是当前绘图缓冲区的实际宽度 |
+| eyeSeparation: Number                  | 否             | 当使用虚拟 WebVR 时，眼睛间距，以米为单位                    |
+| farToNearRatio: Number                 | 否             | 使用常规深度缓冲区时，多截头锥体的远近比率。<br />该值用于为创建的多个视锥设置 近 和 远值。<br />仅当 .logarithmicDepthBuffer 为 false 时才生效。<br />若 .logarithmicDepthBuffer 为 true 时请使用 .logarithmicDepthFarToNearRatio<br /<br />.farToNearRatio 默认值为 1000 |
+| focalLength: Number                    | 否             | 使用 虚拟 WebVR 时的焦距                                     |
+| fog: Fog                               | 否             | 获取或设置 雾。<br />完全处于雾中的物体将不会被渲染，依此提高渲染性能。 |
+| gamma: Number                          | 否             | 用于 伽马校正的值。仅在具有高动态范围的渲染时使用。<br />默认值为 2.2 |
+| globe: Globe                           | 否             | 获取或设置深度测试椭球(地球仪)                               |
+| groundPrimitives: PrimitiveCollection  | 是             | 获取地面图元的集合                                           |
+| highDynamicRange: Boolean              | 否             | 是否使用高动态范围渲染。<br />默认为 true                    |
+| highDynamicRangeSupported: Boolean     | 是             | 是否支持高动态范围渲染<br />默认为 true                      |
+| id: String                             | 是             | 获取此场景的位移标识符                                       |
+| imageryLayers: ImageryLayerCollection  | 是             | 获取将在地球上渲染的图像图层的集合                           |
+| imagerySplitPosition: Number           | 否             | 获取或设置图像拆分器在视口中的位置。<br />有效值在 0 到 1 之间 |
+| invertClassification: Boolean          | 否             | 如果为 false 则 3D Tiles 将正常渲染。<br />如果为 true 则已分类的 3D Tiles 将正常渲染，为分类的这使用颜色乘以 .invertClassificationColor 进行渲染。 <br />默认值为 false |
+| invertClassificationColor: Color       | 否             | 当 .invertClassification 为 true 时，未分类的 3D Tile 几何图形的突出显示颜色。<br />当颜色的 Alpha 值小于 1 时，未分类的 3D Tile 将无法与 已分类的 3D Tile 位置正确融合。<br />此外当颜色的 Alpha 值小于 1 时，必须支持 WEBGL_depth_texture 和 EXT_frag_depth WebGL扩展。<br />默认值为 Color.WHITE，即白色 |
+| invertClassificationSupported: Boolean | 是             | 如果支持 .invertClassifcation 则返回 true                    |
+| lastRenderTime: JulianDate             | 是             | 获取场景最后一次渲染的仿真时间。<br />如果场景从未被渲染过则返回 undefined。 |
+|                                        |                |                                                              |
+|                                        |                |                                                              |
+|                                        |                |                                                              |
+|                                        |                |                                                              |
+|                                        |                |                                                              |
+|                                        |                |                                                              |
+|                                        |                |                                                              |
+|                                        |                |                                                              |
+|                                        |                |                                                              |
+|                                        |                |                                                              |
+|                                        |                |                                                              |
+|                                        |                |                                                              |
+
+
 
