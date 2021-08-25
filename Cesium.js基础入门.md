@@ -1712,52 +1712,482 @@ gl.getContextAttributes()
 
 ### Scene的属性
 
-| 属性名                                 | 是否为只读属性 | 属性含义                                                     |
-| -------------------------------------- | -------------- | ------------------------------------------------------------ |
-| backgroundColor: Color                 | 否             | 在未使用 skyBox 的情况下，显示的背景色                       |
-| camera: Camera                         | 是             | 获取相机，可以设置相机属性                                   |
-| cameraUnderground: Boolean             | 是             | 相机是否在地球下方。默认为 false                             |
-| canvas: HTMLCanvasElement              | 是             | 获取此场景绑定到的 canvas 元素                               |
-| clampToHeightSupported: Boolean        | 是             | 是否支持 .clampToHeight 和 .clampToHeightMosetDetailed       |
-| completeMorphOnUserInput: Boolean      | 否             | 确定是否立即完成用户输入时的场景过渡动画，默认为 true        |
-| debugCommandFilter: function           | 否             | 此属性仅用于调试，不要用于生成环境。<br />设置执行的调试函数，默认为 undefined |
-| debugFrustumStatistics: Object         | 是             | 此属性仅用于调试，不要用于生产环境。<br />当 .debugShowFrustums 为 true 时，包含每个视锥执行的命令数量的统计信息。<br />默认值为 undefined |
-| debugShowCommands: Boolean             | 否             | 此属性仅用于调试，不要用于生产环境。<br />当设置为 true 时，会随机加阴影，用于性能分析。<br />默认值为 false |
-| debugShowDepthFrustum: Number          | 否             | 此属性仅用于调试，不要用于生产环境。<br />指示哪个视锥体将显示深度信息。<br />默认值为 1 |
-| debugShowFramesPerSecond: Boolean      | 否             | 此属性仅用于调试，不要用于生产环境。<br />显示每秒的帧数、帧之间的时间。<br />默认为 false |
-| debugShowFrustumPlanes: Boolean        | 否             | 此属性仅用于调试，不要用于生产环境。<br />当设置为 true 时，绘制轮廓以显示摄像机的视锥边界。<br />默认值为 false |
-| debugShowFrustums: Boolean             | 否             | 此属性仅用于调试，不要用于生产环境。<br />当设置为 true 时，则将基于重叠的视锥体(平截头体)进行着色。<br />其中第一个平截头体 近截面为红色，远截面为蓝色。<br />下一个平截头体 近截面为 绿色，远截面依然为蓝色。<br />这样或许会出现不同的平截头体的 近截面 或 远截面 颜色重叠。<br />例如两个平截头体近截面 一个为红、一个为绿，叠加区域颜色则变成 黄色。<br />默认值为 false |
-| debugShowGlobeDepth: Boolean           | 否             | 此属性仅用于调试，不要用于生产环境。<br />显示视锥的深度信息。<br />默认为 false |
-| drawingBufferHeight: Number            | 是             | 基础 GL 上下文的 drawingBufferHeight，也就是当前绘图缓冲区的实际高度 |
-| drawingBufferWidth: Number             | 是             | 基础 GL 上下文的 drawingBufferWidth，也就是当前绘图缓冲区的实际宽度 |
-| eyeSeparation: Number                  | 否             | 当使用虚拟 WebVR 时，眼睛间距，以米为单位                    |
-| farToNearRatio: Number                 | 否             | 使用常规深度缓冲区时，多截头锥体的远近比率。<br />该值用于为创建的多个视锥设置 近 和 远值。<br />仅当 .logarithmicDepthBuffer 为 false 时才生效。<br />若 .logarithmicDepthBuffer 为 true 时请使用 .logarithmicDepthFarToNearRatio<br /<br />.farToNearRatio 默认值为 1000 |
-| focalLength: Number                    | 否             | 使用 虚拟 WebVR 时的焦距                                     |
-| fog: Fog                               | 否             | 获取或设置 雾。<br />完全处于雾中的物体将不会被渲染，依此提高渲染性能。 |
-| gamma: Number                          | 否             | 用于 伽马校正的值。仅在具有高动态范围的渲染时使用。<br />默认值为 2.2 |
-| globe: Globe                           | 否             | 获取或设置深度测试椭球(地球仪)                               |
-| groundPrimitives: PrimitiveCollection  | 是             | 获取地面图元的集合                                           |
-| highDynamicRange: Boolean              | 否             | 是否使用高动态范围渲染。<br />默认为 true                    |
-| highDynamicRangeSupported: Boolean     | 是             | 是否支持高动态范围渲染<br />默认为 true                      |
-| id: String                             | 是             | 获取此场景的位移标识符                                       |
-| imageryLayers: ImageryLayerCollection  | 是             | 获取将在地球上渲染的图像图层的集合                           |
-| imagerySplitPosition: Number           | 否             | 获取或设置图像拆分器在视口中的位置。<br />有效值在 0 到 1 之间 |
-| invertClassification: Boolean          | 否             | 如果为 false 则 3D Tiles 将正常渲染。<br />如果为 true 则已分类的 3D Tiles 将正常渲染，为分类的这使用颜色乘以 .invertClassificationColor 进行渲染。 <br />默认值为 false |
-| invertClassificationColor: Color       | 否             | 当 .invertClassification 为 true 时，未分类的 3D Tile 几何图形的突出显示颜色。<br />当颜色的 Alpha 值小于 1 时，未分类的 3D Tile 将无法与 已分类的 3D Tile 位置正确融合。<br />此外当颜色的 Alpha 值小于 1 时，必须支持 WEBGL_depth_texture 和 EXT_frag_depth WebGL扩展。<br />默认值为 Color.WHITE，即白色 |
-| invertClassificationSupported: Boolean | 是             | 如果支持 .invertClassifcation 则返回 true                    |
-| lastRenderTime: JulianDate             | 是             | 获取场景最后一次渲染的仿真时间。<br />如果场景从未被渲染过则返回 undefined。 |
-|                                        |                |                                                              |
-|                                        |                |                                                              |
-|                                        |                |                                                              |
-|                                        |                |                                                              |
-|                                        |                |                                                              |
-|                                        |                |                                                              |
-|                                        |                |                                                              |
-|                                        |                |                                                              |
-|                                        |                |                                                              |
-|                                        |                |                                                              |
-|                                        |                |                                                              |
-|                                        |                |                                                              |
+| 属性名                                                   | 是否为只读属性 | 属性含义                                                     |
+| -------------------------------------------------------- | -------------- | ------------------------------------------------------------ |
+| backgroundColor: Color                                   | 否             | 在未使用 skyBox 的情况下，显示的背景色                       |
+| camera: Camera                                           | 是             | 获取相机，可以设置相机属性                                   |
+| cameraUnderground: Boolean                               | 是             | 相机是否在地球下方。默认为 false                             |
+| canvas: HTMLCanvasElement                                | 是             | 获取此场景绑定到的 canvas 元素                               |
+| clampToHeightSupported: Boolean                          | 是             | 是否支持 .clampToHeight 和 .clampToHeightMosetDetailed       |
+| completeMorphOnUserInput: Boolean                        | 否             | 确定是否立即完成用户输入时的场景过渡动画，默认为 true        |
+| debugCommandFilter: function                             | 否             | 此属性仅用于调试，不要用于生成环境。<br />设置执行的调试函数，默认为 undefined |
+| debugFrustumStatistics: Object                           | 是             | 此属性仅用于调试，不要用于生产环境。<br />当 .debugShowFrustums 为 true 时，包含每个视锥执行的命令数量的统计信息。<br />默认值为 undefined |
+| debugShowCommands: Boolean                               | 否             | 此属性仅用于调试，不要用于生产环境。<br />当设置为 true 时，会随机加阴影，用于性能分析。<br />默认值为 false |
+| debugShowDepthFrustum: Number                            | 否             | 此属性仅用于调试，不要用于生产环境。<br />指示哪个视锥体将显示深度信息。<br />默认值为 1 |
+| debugShowFramesPerSecond: Boolean                        | 否             | 此属性仅用于调试，不要用于生产环境。<br />显示每秒的帧数、帧之间的时间。<br />默认为 false |
+| debugShowFrustumPlanes: Boolean                          | 否             | 此属性仅用于调试，不要用于生产环境。<br />当设置为 true 时，绘制轮廓以显示摄像机的视锥边界。<br />默认值为 false |
+| debugShowFrustums: Boolean                               | 否             | 此属性仅用于调试，不要用于生产环境。<br />当设置为 true 时，则将基于重叠的视锥体(平截头体)进行着色。<br />其中第一个平截头体 近截面为红色，远截面为蓝色。<br />下一个平截头体 近截面为 绿色，远截面依然为蓝色。<br />这样或许会出现不同的平截头体的 近截面 或 远截面 颜色重叠。<br />例如两个平截头体近截面 一个为红、一个为绿，叠加区域颜色则变成 黄色。<br />默认值为 false |
+| debugShowGlobeDepth: Boolean                             | 否             | 此属性仅用于调试，不要用于生产环境。<br />显示视锥的深度信息。<br />默认为 false |
+| drawingBufferHeight: Number                              | 是             | 基础 GL 上下文的 drawingBufferHeight，也就是当前绘图缓冲区的实际高度 |
+| drawingBufferWidth: Number                               | 是             | 基础 GL 上下文的 drawingBufferWidth，也就是当前绘图缓冲区的实际宽度 |
+| eyeSeparation: Number                                    | 否             | 当使用虚拟 WebVR 时，眼睛间距，以米为单位                    |
+| farToNearRatio: Number                                   | 否             | 使用常规深度缓冲区时，多截头锥体的远近比率。<br />该值用于为创建的多个视锥设置 近 和 远值。<br />仅当 .logarithmicDepthBuffer 为 false 时才生效。<br />若 .logarithmicDepthBuffer 为 true 时请使用 .logarithmicDepthFarToNearRatio<br /<br />.farToNearRatio 默认值为 1000 |
+| focalLength: Number                                      | 否             | 使用 虚拟 WebVR 时的焦距                                     |
+| fog: Fog                                                 | 否             | 获取或设置 雾。<br />完全处于雾中的物体将不会被渲染，依此提高渲染性能。 |
+| gamma: Number                                            | 否             | 用于 伽马校正的值。仅在具有高动态范围的渲染时使用。<br />默认值为 2.2 |
+| globe: Globe                                             | 否             | 获取或设置深度测试椭球(地球仪)                               |
+| groundPrimitives: PrimitiveCollection                    | 是             | 获取地面图元的集合                                           |
+| highDynamicRange: Boolean                                | 否             | 是否使用高动态范围渲染。<br />默认为 true                    |
+| highDynamicRangeSupported: Boolean                       | 是             | 是否支持高动态范围渲染<br />默认为 true                      |
+| id: String                                               | 是             | 获取此场景的位移标识符                                       |
+| imageryLayers: ImageryLayerCollection                    | 是             | 获取将在地球上渲染的图像图层的集合                           |
+| imagerySplitPosition: Number                             | 否             | 获取或设置图像拆分器在视口中的位置。<br />有效值在 0 到 1 之间 |
+| invertClassification: Boolean                            | 否             | 如果为 false 则 3D Tiles 将正常渲染。<br />如果为 true 则已分类的 3D Tiles 将正常渲染，为分类的这使用颜色乘以 .invertClassificationColor 进行渲染。 <br />默认值为 false |
+| invertClassificationColor: Color                         | 否             | 当 .invertClassification 为 true 时，未分类的 3D Tile 几何图形的突出显示颜色。<br />当颜色的 Alpha 值小于 1 时，未分类的 3D Tile 将无法与 已分类的 3D Tile 位置正确融合。<br />此外当颜色的 Alpha 值小于 1 时，必须支持 WEBGL_depth_texture 和 EXT_frag_depth WebGL扩展。<br />默认值为 Color.WHITE，即白色 |
+| invertClassificationSupported: Boolean                   | 是             | 如果支持 .invertClassifcation 则返回 true                    |
+| lastRenderTime: JulianDate                               | 是             | 获取场景最后一次渲染的仿真时间。<br />如果场景从未被渲染过则返回 undefined。 |
+| light: Light                                             | 否             | 光源。默认为来自太阳的定向光。                               |
+| logarithmicDepthBuffer: Boolean                          | 否             | 是否使用对数深度缓冲区。<br />启用此选项将减少多视锥中的视椎，提高性能。<br />此属性取决于是否支持 fragmentDepth。 |
+| logarithmicDepthFarToNearRatio: Number                   | 否             | 使用对数深度缓冲区时，多截头圆锥体的远近比率。<br />仅当 .logarithmicDepthBuffer 为 ture 是生效。<br />当 .logarithmicDepthBuffer 为 false 时请使用 .farToNearRatio。<br />默认值为 1e9 (10的9次方，即1000000000) |
+| mapMode2d: MapMode2D                                     | 是             | 确定 2D 地图是可以旋转还是可以在水平方向无限滚动             |
+| mapProjection: MapProjection                             | 是             | 获取要在 2D 和 哥伦布模式下使用的地图投影。<br />默认值为 new GeographicProjection() |
+| maximumAliasedLineWidth: Number                          | 是             | 此 WebGL 实现支持的最大别名行宽度(以像素为单位)。最少为 1。  |
+| maximumCubeMapSize: Number                               | 是             | 此 WebGL 实现支持的多维数据集映射的一个边缘的最大长度(以像素为单位)。最少为 16。 |
+| maximumRenderTimeChange: Number                          | 否             | 如果 .requestRenderMode 为 true，则此值定义请求渲染之前允许的模拟时间。<br />较低的值会增加渲染的帧数、较高的值会减少渲染的帧数。<br />如果为 undefined 则更改为模拟时间永远不会要求渲染。<br />这个值会影响场景变化的渲染速率，例如照明、实体属性更新 和动画。<br />默认值为 0。 |
+| minimumDisableDepthTestDistance: Number                  | 否             | 距离相机禁用广告牌、标签 和 点的 深度测试的距离，以防止剪切地形。<br />设置为 0 时，深度测试应始终被应用。<br />如果小于 0 则永远不要应用深度测试。<br />设置 .disableDepthTestDistance 将覆盖此值。<br />默认值为 0。 |
+| mode: SceneMode                                          | 否             | 获取或设置场景的当前模式。<br />默认为 SceneMode.SCENE3D     |
+| moon: Moon                                               | 否             | 获取或设置 月亮<br />默认值为 undefined                      |
+| morphComplete: Event                                     | 否             | 在场景转换完成时触发的事件<br />默认为 Event()               |
+| morphStart: Event                                        | 否             | 在场景开始转换时触发的事件<br />默认为 Event()               |
+| morphTime: Number                                        | 否             | 当前的 2D、哥伦布模式 和 3D 之间的转换过渡时间。<br />其中 2D、哥伦布模式是 0，而与 3D 转换为 1。 |
+| nearToFarDistance2D: Number                              | 否             | 确定二维中的多个视锥的每个视椎的统一深度大小(以米为单位)。<br />如果原始或模型显示 z-fighting，则减小该值将消除伪影，但会降低性能。<br />另外一方面增加它会提高性能，但可能会导致靠近表面的图元中间的 z-fighting。<br />注：z-fighting 是指交会边缘像素深度错乱。<br />默认值为 1.75e6 (1750000) |
+| orderIndependentTranslucency: Boolean                    | 是             | 获取场景是否启用了顺序无关的半透明性。                       |
+| pickPositionSupported: Boolean                           | 是             | 是否支持 .pickPosition。                                     |
+| pickTranslucentDepth: Boolean                            | 否             | 如果为 true 则启用使用深度缓冲区拾取半透明几何体的功能。<br />请注意 .useDepthPicking 也必须为 true 才能使其正常工作。<br />必须在两次选择之间调用渲染。启用后性能会下降。<br />还会有额外的绘制调用以写入深度半透明的几何体。<br />默认值为 false |
+| postProcessStages: PostProcessStageCollection            | 否             | 后处理效果应用于最终渲染                                     |
+| postRender: Event                                        | 是             | 获取将在渲染场景后立即引发的事件。<br />活动订阅者将 Scene 实例作为第一个参数，将当前时间作为第二个参数。 |
+| postUpdate: Event                                        | 是             | 获取在场景更新之后和场景渲染之前立即引发的事件。<br />事件订阅者将 Scene 实例作为第一个参数，将当前时间作为第二个参数。 |
+| preRender: Event                                         | 是             | 获取场景更新之后以及场景渲染之前立即引发的事件。<br />事件的订阅者将 Scene 实例作为第一个参数，将当前时间作为第二个参数。 |
+| preUpdate: Event                                         | 是             | 获取在更新或渲染场景之前将引发的事件。<br />活动订阅者将 Scene实例作为第一个参数，将当前时间作为第二个参数。 |
+| primitives: PrimitiveCollection                          | 是             | 获取图元的集合                                               |
+| renderError: Event                                       | 是             | 在获取 render 函数引发错误时将引发的事件。<br />Scene 实例和引发错的错误是传递给事件处理程序的两个参数。<br />默认情况下此事件发生后不会重新引发错误，但可以通过设置 rethrowRenderErrors 属性来更改。 |
+| requestRenderMode: Boolean                               | 否             | 如果为 true 则仅根据场景中的更改确定是否需要渲染帧。<br />启用可以提高应用程序的性能，但需要使用 .requestRender 在此模式下显式渲染新框架。<br />默认值为 false |
+| rethrowRenderErros: Boolean                              | 否             | 总是捕获 render 中发生的异常，以提高 renderError 事件。<br />如果设置为 true 则在引发事件后重新抛出错误，如果设置为 false 则在函数引发事件后正常返回。<br />默认值为 false |
+| sampleHeightSupported: Boolean                           | 是             | 如果支持 .sampleHeight 和 .sampleHeightMostDetailed 这返回 true |
+| scene3DOnly: Boolean                                     | 是             | 获取是否 仅 3D 模式。                                        |
+| screenSpaceCameraController: ScreenSpaceCameraController | 是             | 获取用于摄像机输入处理的控制器                               |
+| shadowMap: ShadowMap                                     | 否             | 场景光源的阴影贴图。<br />启用后模型、图元和地球都可能会投射并接收阴影。 |
+| skyAtmosphere: SkyAtmosphere                             | 否             | 遍布全球的大气层。默认值为 undefined                         |
+| skyBox: SkyBox                                           | 否             | 获取或设置 星星，默认值为 undefined，则使用默认的 星空。     |
+| specularEnvironmentMaps: String                          | 否             | KTX2 文件的 url。KTX2 文件包含镜面反射环境贴图和用于 PBR 模型的  mipmap。 |
+| specularEnvironmentMapsSupported: Boolean                | 是             | 是否支持镜面环境贴图                                         |
+| sphericalHarmonicCoefficients: `Array.<Cartesian3>`      | 否             | PBR 模型基于图像的照明的球谐系数                             |
+| sun: Sun                                                 | 否             | 获取或设置太阳。默认值为 undefined                           |
+| sunBloom: Boolean                                        | 否             | 当太阳为可用时，是否使用布隆过滤器。<br />默认值为 true      |
+| terrainExaggeration: Number                              | 是             | 获取用于放大地形的标量                                       |
+| terrainProvider: TerrainProvider                         | 否             | 为地球表面提供几何形状的地形提供者                           |
+| terrainProviderChanged: Event                            | 是             | 更改地形提供者时引发的事件                                   |
+| useDepthPicking: Boolean                                 | 否             | 是否使用深度缓冲区拾取。默认为 true                          |
+| useWebVR: Boolean                                        | 否             | 是否启用 WebVR，若为 true 则将场景分为两个视口，左右眼具有立体视图。<br />默认值为 false |
 
 
+
+<br>
+
+### Scene的方法
+
+**cartesianToCanvasCoordinates(position, result): Cartesian2**
+
+1. position: Cartesian3 笛卡尔坐标中的位置
+
+2. result: Cartesian2，可选参数，一个可选对象，用于返回转换为画布坐标的输入位置
+
+3. 返回值：修改后的结果参数 或者新的 Cartesian2  实例(如果为提供第 2 个参数)。
+
+   如果输入位置靠近椭圆体的中心，则可能返回 undefined。
+
+将笛卡尔 3D 直角坐标中的位置转换为 2D 画布坐标。这通常用于放置和场景中的对象相同位置的 HTML 元素。
+
+示例：
+
+```
+const scene = widget.scene
+const ellipsoid = scene.globe.ellipsoid
+const position = new Cesium.ScreenSpaceEventHandler(scene.canvas)
+handler.setInputAction(function(movement){
+    console.log(scene.cartesianToCanvasCoordinates(position))
+}, Cesium.ScreenSpaceEventType.MOUSE_MOVE)
+```
+
+
+
+<br>
+
+**clampToHeight(cartesian, objectsToExclude, width,result): Cartesian3**
+
+1. cartesian: Cartesian3 笛卡尔位置坐标
+
+2. objectsToExclude: `Array.<Object>` ，可选参数，不需要(排除)钳制(clamp)的图元、实体或 3D Tiles 列表。
+
+3. width: Number，可选参数，默认值为 0.1，交叉口的宽度(以米为单位)
+
+4. result: Cartesian3，可选参数，返回收窄(clamped)位置的可选对象
+
+5. 返回值：修改后的结果参数，如果为提供则返回一个新的 Cartesian3 实例。
+
+   如果没有场景几何体需要收窄(clamp)，结果可能是 undefined。
+
+沿大地表面法线将给定的笛卡尔位置固定到场景的几何体中。返回收窄位置或 undefined。
+
+可用于收窄(clamp)场景中的地球物体、3D瓷砖或图元。
+
+示例：
+
+```
+const position = entity.position.getValue(Cesium.JulianDate.now())
+entity.position = viewer.scene.clampToHeight(position)
+```
+
+
+
+<br>
+
+**clampToHeightMostDetailed(cartesians, objectsToExclude, width): `Promise.<Array.<Cartesian3>>`**
+
+1. cartesians: `Array.<Cartesian3>`，笛卡尔位置更新为收窄位置。
+2. objectsToExclude: `Array.<Object>` ，可选参数，不需要(排除)收窄的图元、实体 或 3D Tiles 列表
+3. width: Number，可选参数，默认值 0.1，交叉口的宽度(以米为单位)
+4. 返回值：异步返回 查询完成后解析为提供的清单
+
+异步启动 .clampToHeight 查询 cartesians 在场景中使用 3D Tiles 最大细节级别。
+
+> 此处我也暂时不太理解具体所表达的含义
+
+代码示例：
+
+```
+const cartesians = [
+    entities[0].position.getValue(Cesium.JulianDate.now()),
+    entities[1].position.getValue(Cesium.JulianDate.now())
+]
+const promise = viewer.scene.clampToHeightMostDetailed(cartesians)
+promise.then(function(updatedCartesians){
+    entities[0].position = updatedCartesians[0]
+    entities[1].position = updatedCartesians[1]
+})
+```
+
+
+
+<br>
+
+**completeMorph()**
+
+立即完成过渡。
+
+
+
+<br>
+
+**destroy()**
+
+销毁此对象拥有的 WebGL 资源。
+
+这个操作是不依赖于垃圾回收器，而是主动明确释放 WebGL 资源。
+
+请注意，一旦执行过该操作，除了 isDestroyed()，就不应该再使用该对象的其他任何属性或方法。
+
+
+
+<br>
+
+**drillPick(windowPosition,limit,width,height): `Array.<*>`**
+
+1. windowPosition: Cartesian2，窗口坐标以执行拾取
+
+2. limit: Number，可选参数，如果提供的话，将在收集到这么多的 镐 后停止钻孔。
+
+   > 暂时理解不了这句话的含义
+
+3. width: Number，可选参数，默认值为 3，拾取矩形的宽度
+
+4. height: Number，可选参数，默认值为 3，拾取矩形的高度
+
+5. 返回值： 对象数组，每个对象包含 1 个选取的 图元。
+
+返回所有对象的对象列表，每个对象包含一个 .primitive 属性。
+
+特定的窗口坐标位置也可以设置其他属性，具体取决于类型的图元，并可用于进一步表示拾取的对象。
+
+在原始列表中按照其在场景中的视觉顺序(从前到后)排序。
+
+示例代码：
+
+```
+const pickedObjects = scene.drillPick(new Cesium.Cartesian2(100,200))
+```
+
+
+
+<br>
+
+**getCompressedTextureFormatSupported(format): Boolean**
+
+1. format: String，纹理格式。可以是格式名称或者 WebGL 扩展名称，例如 s3tc 或 WEBGL_compressed_texture_s3tc。
+2. 返回值：是否支持该格式
+
+确定是否支持压缩纹理格式。
+
+
+
+<br>
+
+**isDestroyed(): Boolean**
+
+如果此对象已销毁，则返回 true。
+
+如果该对象已被销毁，此时调用除 isDestroyed() 以外的其他属性或方法，将收到 DeveloperError 错误。
+
+
+
+<br>
+
+**morphTo2D(duration)**
+
+1. duration: Number，可选参数，默认值为 2，完成过渡动画的时间(以秒为单位)
+
+异步将场景转换为 2D 模式。
+
+
+
+<br>
+
+**morphTo3D(duration)**
+
+1. duration: Number，可选参数，默认值为 2，完成过渡动画的时间(以秒为单位)
+
+异步将场景转换为 3D 模式。
+
+
+
+<br>
+
+**morphToColumbusView(duration)**
+
+1. duration: Number，可选参数，默认值为 2，完成过渡动画的时间(以秒为单位)
+
+异步将场景切换到 哥伦布模式。
+
+
+
+<br>
+
+**pick(windowPosition, width, height): Object**
+
+1. windowPosition: Cartesian2，窗口视图中的位置坐标，用于执行拾取。
+2. width: Number，可选参数，默认值为 3，拾取矩形的宽度
+3. height: Number，可选参数，默认值为 3，拾取矩形的高度
+4. 返回值：包含拾取选取的图元的对象
+
+返回在 windowPosition 位置拾取到的图元对象。如果不存在拾取对象则返回 undefined。
+
+拾取具有 3D Tiles 贴图集的特征后，将返回 Cesium3DTileFeature 对象。
+
+示例代码：
+
+```
+handle.setInputAction(function(movement){
+    const feature = scene.pick(movement.endPosition)
+    if(feature instanceof Cesium.Cesium3DTileFeature){
+        feature.color = Cesium.Color.YELLOW
+    }
+}, Cesium.ScreenSpaceEventType.MOUSE_MOVE)
+```
+
+
+
+<br>
+
+**pickPosition(windowPosition,result): Cartesian3**
+
+1. windowPosition： Cartesian2，执行拾取的窗口坐标
+2. result: Cartesian2，可选参数，设置为结果的对象
+3. 返回值：笛卡尔位置
+
+返回从深度缓冲区和窗口位置重构的笛卡尔位置坐标。
+
+从 2D 深度缓冲区重建的位置可能与那些位置略有不同在 3D 和 哥伦布视图中重建。这是因为分布差异造成的透视图和正投影的深度值。
+
+将 .pickTranslucentDepth 设置为 true，可以拾取包括 半透明图元。
+
+
+
+<br>
+
+**render(time)**
+
+1. time： JulianDate，可选参数，渲染的模拟时间
+
+更新并渲染场景。
+
+通常情况下是不需要我们显示调用该函数的，因为默认会自动进行渲染。
+
+
+
+<br>
+
+**requestRender()**
+
+当 .requestRenderMode 设置为 true ，请求新的渲染帧。
+
+呈现速率不会超过 .targetFrameRate。
+
+
+
+<br>
+
+**sampleHeight(position,objectsToExclude,width): Number**
+
+1. position: Cartographic，制图位置到样品高度的起点
+2. objectsToExclude: `Array.<Object>`，可选参数，不需要(排除)采样高度的基本体、实体、3D Tiles 列表
+3. width: Number，可选参数，默认值 0.1，交叉口的宽度(以米为单位)
+4. 返回值：高度数值，如果场景中没有需要采样的几何体，则返回 undefined
+
+返回给指定位置处 场景中几何体的高度，如果没有几何体则返回 undefined。
+
+样品高度不受可见性影响。
+
+示例代码：
+
+```
+const position = new Cesium.Cartographic(-1.31968, 0.698874)
+const height = viewer.scene.sampleHeight(position)
+console.log(height)
+```
+
+
+
+<br>
+
+**sampleHeightMostDetailed(positions, objectsToExclude,width): `Promise.<Array.<Cartographic>>`**
+
+1. positions: `Array.<Cartographic>`，指定位置将根据采样高度进行更新
+2. objectsToExclude: `Array.<Object>`，可选参数，不需要(排除)采样高度的基本体、实体或 3D Tiles 列表
+3. width: Number，可选参数，默认值 0.1，交叉口的宽度(以米为单位)
+4. 返回值：异步查询完成后，返回的查询结果
+
+以 .sampleHeight 为高度，异步查询指定的 Cartographic 在场景中 3D Tiles 最大细节级别。
+
+如果在指定位置不存在或无法采样几何体，对应的高度将设置为 undefined。
+
+示例代码：
+
+```
+const positions = [
+    new Cesium.Cartographic(-1.13968, 0.69887),
+    new Cesium.Cartographic(-1.10489, 0.83923)
+]
+const promise = viewer.scene.sampleHeightMostDetailed(positions)
+promise.then(function(updatedPosition){
+    console.log('positions[0].height and positions[1].height have been updated.')
+})
+```
+
+
+
+<br>
+
+## 我们的眼睛：Camera
+
+**Camera 相机的 3 个组成因素：**
+
+1. 位置( position)
+2. 方向(up + direction)
+3. 视椎(fov + near + far)
+
+在 Cesium 中的相机和 Three.js 中的相机概念几乎相同。
+
+只不过在 Cesium 中不同种类的相机并不是依靠不同 相机类 创建的，而是通过设置相机视椎来决定的。
+
+```
+camera.frustum : PerspectiveFrustum | PerspectiveOffCenterFrustum | OrthographicFrustum
+```
+
+
+
+<br>
+
+**视锥：**
+
+相机的视锥是由 6 个面构成，每个平面都是由 Cartesian4 对象表示。
+
+> cartesian：笛卡尔。 Cartesian4 表示笛卡尔 4 维空间坐标
+
+
+
+<br>
+
+**创建一个相机示例：**
+
+```
+const camera = new Cesium.Camera(scene)
+camera.position = new Cesium.Cartesian3()
+camera.direction = Cesium.Cartesian3.negate(Cesium.Cartesian3.UNIT_Z,new Cesium.Cartesian3())
+camera.up = Cesium.Cartesian3.clone(Cesium.Cartesian3.UNIT_Y)
+camera.frustum.fov = Cesium.Math.PI_OVER_THREE
+camera.frustum.near = 1
+camera.frustum.far = 2
+```
+
+
+
+<br>
+
+### Camera的属性
+
+| 静态属性                          | 属性含义                                                     |
+| --------------------------------- | ------------------------------------------------------------ |
+| DEFAULT_OFFSET: HeadingPitchRange | 相机飞行岛包含边界球体的位置时使用的默认航向/俯仰/范围       |
+| DEFAULT_VIEW_FACTOR: Number       | 设置为查看矩形的标量(焦距)，可乘以摄像机位置，然后将其重新添加。<br />如果该值为 0 表示相机将查看整个默认视图矩形。<br />如果该值大于 0 则会使它远离默认视图矩阵。<br />如果该值小于 0 则使它接近默认视图矩阵。<br />实际上就相当于 拉远 或 推进 镜头。 |
+| DEFAULT_VIEW_RECTANGLE: Rectangle | 相机在创建时将查看的默认视图矩形。                           |
+
+
+
+<br>
+
+| 属性名                                                       | 是否为只读 | 属性含义                                                     |
+| ------------------------------------------------------------ | ---------- | ------------------------------------------------------------ |
+| changed: Event                                               | 是         | 获取相机改变时引发的事件                                     |
+| constrainedAxis: Cartesian3                                  | 否         | 如果设置这相机将无法沿任一方向旋转超过该轴。<br />默认值为 undefined<br />注：constrained 单词意思为 “受约束的” |
+| defaultLookAmout: Number                                     | 否         | 默认旋转相机的幅度给 look 方法。<br />默认值为 Math.PI / 60  |
+| defaultMoveAmout: Number                                     | 否         | 默认移动相机的幅度给 move 方法。<br />默认值为 100000        |
+| defaultRotateAmount: Number                                  | 否         | 默认旋转相机的幅度给 rotate 方法。<br />默认值为 Math.PI/3600 |
+| defaultZoomAmout: Number                                     | 否         | 默认移动相机时的幅度给 zoom 方法。<br />默认值为 100000      |
+| direction: Cartesian3                                        | 否         | 相机的观看方向                                               |
+| directionWC: Cartesian3                                      | 是         | 获取相机在世界坐标中的观看方向                               |
+| frustum: PerspectiveFrustum \| PerspectiveOffCenterFrustum \| OrthographicFrustum | 否         | 相机的视椎。<br />默认值为 new PerspectiveFrustum()          |
+| heading: Number                                              | 是         | 获取相机的航向(以弧度为单位)                                 |
+| inverseTransform: Matrix4                                    | 是         | 获取相机的 逆变换。<br />默认值为 Matri4.IDENTITY            |
+| inverseViewMatrix: Matrix4                                   | 是         | 获取相机视图的 逆矩阵                                        |
+| maximumZoomFactor: Number                                    | 否         | 乘以地图大小的系数，用于确定从表面缩小时将相机位置限制在何处。<br /><br />仅在 2D 地图模式下的旋转有效。<br />默认值为 1.5。 |
+| moveEnd: Event                                               | 是         | 获取相机停止移动时将引发的事件                               |
+| moveStart: Event                                             | 是         | 获取相机开始移动时引发的事件                                 |
+| percentageChanged: Number                                    | 否         | 引发 changed 事件之前，相机必须更改的数量。<br />该值是 0 - 1 范围内的百分比。<br />默认值为 0.5 |
+| pitch: Number                                                | 是         | 获取相机的倾斜(以弧度为单位)                                 |
+| position: Cartesian3                                         | 否         | 获取相机的位置                                               |
+| positinCartographic: Cartographic                            | 是         | 获取相机的 Cartographic 位置。<br />Cartographic 由 经纬度(弧度) 和 高度(米) 确定的位置。<br />在 2D 或 哥伦布模式下如果相机位于地图之外，那么返回的经纬度也可能不在有效范围之内。 |
+| positionWC: Cartesian3                                       | 是         | 获取相机在世界坐标中的位置                                   |
+| right: Cartesian3                                            | 否         | 获取相机的正确方向                                           |
+| rightWC: Cartesian3                                          | 是         | 获取相机在世界坐标中正确的方向                               |
+| roll: Number                                                 | 是         | 获取相机的滚转(以弧度为单位)                                 |
+| transform: Matrix4                                           | 是         | 获取相机的参考系。这个变换的 逆 被附加到视图矩阵。<br />默认值为 Matrix4.IDENTITY |
+| up: Cartesian3                                               | 否         | 获取或设置相机的向上方向                                     |
+| upWC: Cartesian3                                             | 是         | 获取相机在世界坐标系中的向上方向                             |
+| viewMatrix: Matrix4                                          | 是         | 获取视图矩阵                                                 |
+
+
+
+<br>
+
+### Camera的方法
 
