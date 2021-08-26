@@ -2197,3 +2197,679 @@ camera.frustum.far = 2
 
 ### Camera的方法
 
+**cameraToWorldCoordinates(cartesian,result): Cartesian4**
+
+1. cartesian：Cartesian4，要转换的向量或点
+2. result：Cartesian4，可选参数，保存计算结果
+3. 返回值：转换后的向量或点 对应的 Cartesian4 坐标
+
+将矢量或点的坐标 从参考系转换为世界坐标。
+
+
+
+<br>
+
+**cameraToWorldCoordinatesPoint(cartesian,result): Cartesian3**
+
+1. cartesian：Cartesian3，要转换的点
+2. result：Cartesian3，可选参数，保存计算结果
+3. 返回值：转换后的点坐标
+
+将一个点从相机的参考系转换为世界坐标。
+
+
+
+<br>
+
+**cameraToWorldCoordiantesVector(cartesian,result): Cartesian3**
+
+1. cartesian：Cartesian3，要转化的向量
+2. result：Cartesian3，可选参数，保存计算结果
+3. 返回值：转换后的向量
+
+将一个矢量从相机的参考系转换为世界坐标。
+
+
+
+<br>
+
+**cancelFlight()**
+
+取消当前的相机飞行，并将相机留在当前位置。
+
+如果没有进行任何飞行，则此方法不执行任何操作。
+
+
+
+<br>
+
+**completeFlight()**
+
+立即完成当前的相机飞行，直接到底目标地。
+
+如果没有进行任何飞行，则此方法不执行任何操作。
+
+
+
+<br>
+
+**computeViewRectangle(ellipsoid, result): Rectangle | undefined**
+
+1. ellipsoid: Ellipsoid，默认值 Ellipsoid.WGS84，可选参数，表示地球的椭球标准
+2. result: Rectangle，可选参数，保存计算结果
+3. 返回值：可见的矩形，如果椭球根本不可见则返回 undefined
+
+计算椭球体上的近似可见矩形。
+
+
+
+<br>
+
+**distanceToBoundingSphere(boundingSphere): Number**
+
+1. boundingSphere: BoundingSphere，世界坐标系中的边界球(包围球)
+2. 返回值：到边界球的距离
+
+返回从相机到边界球(包围球)的距离。
+
+
+
+<br>
+
+**flyHome(duration)**
+
+1. duration: Number，可选参数，飞行持续时间(以秒为单位)。如果省略该参数则 Cesium 会尝试根据要飞行的距离来自行计算理想(合理)的时间。
+
+将相机飞行到 主页 视图。
+
+
+
+<br>
+
+**flyTo(options)**
+
+1. options：Object，本次飞行配置相
+
+将相机从当前位置飞行到新位置。
+
+参数 options 为：
+
+| 配置性                                  | 是否为必填项 | 对应含义                                                     |
+| --------------------------------------- | ------------ | ------------------------------------------------------------ |
+| destination: Cartesian3 \| Rectangle    | 是           | 相机在 WGS84(世界) 坐标中的最终目标位置，<br />或者从上向下视图中可见的矩形。 |
+| orientation: Object                     | 否           | 包含方向和向上属性或航向、仰俯、滚转属性的对象。<br />默认情况下方向将指向在 3D 模式中朝向中心，在哥伦布模式中沿负 Z 方向。<br />向上方向在 3D 模式中指向正北，在哥伦布模式中指向 Y 方向。<br />在 2D 模式的无限滚动模式下 不使用方向。 |
+| duration: Number                        | 否           | 飞行持续时间(以秒为单位)。<br />如果省略则 Cesium 会自己根据距离计算出理想时长。 |
+| complete: Camera.FlightCompleteCallback | 否           | 飞行结束后执行的函数                                         |
+| cancel： Camera.FlightCancelledCallback | 否           | 取消飞行后执行的函数                                         |
+| endTransform: Matrix4                   | 否           | 表示飞行完成后相机将位于参考帧的变换矩阵                     |
+| maximumHeight: Number                   | 否           | 飞行高峰时的最大高度                                         |
+| pitchAdjustHeight: Number               | 否           | 如果相机的飞行角度高于该值，请在飞行过程中调整俯仰角以向下看，并将地球保持在视口内。 |
+| flyOverLongitude: Number                | 否           | 地球上 2 点之间(飞行)重视有两种方式。<br />此选项会强制让相机以 战斗方向 在该经度上飞行。 |
+| flyOverLongitudeWeight: Number          | 否           | 当该方式的时间不长于 flyOverLongitudeWeight 的短途时间时，才通过 flyOverLongitude 飞越指定 Ion。 |
+| convert: Boolean                        | 否           | 是否将目的地从世界坐标转换为场景坐标(仅在不使用 3D 模式时)。<br />默认为 true |
+| easingFunction: EasingFunction.Callback | 否           | 控制相机飞行过程中的插值时间(运动速率变换)。                 |
+
+**orientation 的补充说明：**
+
+配置项 orientation 实际上就是设置相机以什么姿态(角度)进行飞行。
+
+一共有 2 种配置方式：
+
+1. 方向 + 向上轴，即 direction + up
+2. 航向 + 仰俯 + 滚转：即 heading + pitch + roll
+
+请注意你只应该采用其中一种方式来设置飞行姿态，不应该 2 种同时使用。
+
+并且假设你选择的是第 1 种，那么 direction 和 up 的值你必须同时都设置，否则可能引发的错误：
+
+```
+DeveloperError: If either direction or up is given, then both are required.
+```
+
+> 如果 配置项 orientation 中 direction 或 up 被设置了，那么两者都需要设置。
+
+
+
+<br>
+
+使用示例：
+
+```
+//1、相机飞行到某个指定位置
+viewer.camera.flyTo({
+    destination: Cesium.Cartesian3.fromDegress(-117.16, 32.71, 15000)
+})
+
+//2、相机飞行到某个区域(矩形)
+viewer.camera.flyTo({
+    destination: Cesium.Rectangle.fromDegress(west,south,east,north)
+})
+
+//3、相机飞行按照某种 方向配置 飞行到某个位置。方向配置中使用的是归一化后的方向。
+viewer.camera.flyTo({
+    destination: Cesium.Cartesian3.fromDegress(-122.19, 46.25, 5000),
+    orientation:{
+        direction: new Cesium.Cartesian3(-0.04231243104240401, -0.20123236049443421, -0.97862924300734),
+        up: new Cesium.Cartesian3(-0.47934589305293746, -0.8553216253114552, 0.1966022179118339)
+    }
+})
+
+//4、相机根据 航向、仰俯、滚转 配置飞行到指定位置
+viewer.camer.flyTo({
+    destination: Cesium.Cartesian3.fromDegress(-122.19, 46.25, 5000)
+    orientation: {
+        heading: Cesium.Math.toRadians(175),
+        pitch: Cesium.Math.toRadians(-35),
+        roll: 0
+    }
+})
+```
+
+
+
+<br>
+
+**flyToBoundingSphere(boundingSphere, options)**
+
+将相机移动到所提供的的包围球的位置。
+
+1. boundingSphere：BoundingSphere，要飞行到的目标包围球。
+2. options: Object，配置项
+
+> 请注意，此方法的配置项 options 与 flyTo() 的配置项有相同的地方，也有不相同的地方。
+
+参数 options 的配置为：
+
+| 配置项                                  | 对应含义                                                     |
+| --------------------------------------- | ------------------------------------------------------------ |
+| duration: Number                        | 飞行持续的时间(以秒为单位)。<br />如果省略则 Cesium 会自己根据距离来计算出一个理想的时长。 |
+| offset: HeadingPitchRange               | 以头部仰俯(局部东北朝上)的偏移量                             |
+| complete: Camera.FlightCompleteCallback | 飞行结束后执行的函数                                         |
+| cancel: Camera.FlightCancelledCallback  | 取消飞行后执行的函数                                         |
+| endTransform: Matrix4                   | 飞行完成后摄像机的变换矩阵                                   |
+| maximumHeight: Number                   | 飞行高峰时的最大高度                                         |
+| pitchAdjustHeight: Number               | 如果相机的飞行角度高于该值，则在飞行过程中调整俯仰角度以向下看，并将地球保持在视口中。 |
+| flyOverLongitude: Number                | 地球上 2 点之间(飞行)总是有两种方式。<br />此选项会强制相机选择 战斗方向 在该经度上飞行。 |
+| flyOverLongitudeWeight: Number          | 只要该方式的时间不超过 flyOverLongitude 的短途时间，那么仅在通过 flyOverLongitude 指定的 Ion 上空飞行。 |
+| easingFunction: EasingFunction.Callback | 控制在飞行过程中如何插值时间(飞行速率变化方式)               |
+
+
+
+<br>
+
+**getMagnitude(): Number**
+
+1. 返回值：位置的大小
+
+获取相机位置的大小。 在 3D 模式中这是矢量幅度，在 2D 和哥伦布模式中这是地图的距离。
+
+
+
+<br>
+
+**getPickRay(windowPosition,result): Ray**
+
+1. windowPosition: Cartesian2，像素的 x 和 y 坐标
+2. result: Ray，可选参数，保存计算结果
+
+返回在世界坐标系中，从相机位置到 windowPosition 处像素所对应的 射线(ray)。
+
+
+
+<br>
+
+**getPixelSize(boundingSphere, drawingBufferWidth, drawingBufferHeight): Number**
+
+1. boundingSphere: BoundingSphere，世界坐标系中的包围球
+2. drawingBufferWidth: Number，绘图缓冲区的宽度
+3. drawingBufferHeight: Number，绘图缓冲区的高度
+4. 返回值：像素大小(以米为单位)
+
+返回以米为单位的像素大小。
+
+
+
+<br>
+
+**getRectangleCameraCoordinates(rectangle,result): Cartesian3**
+
+1. rectangle: Rectangle，要查看的矩形
+2. result: Cartesian3，可选参数，保存计算结果
+3. 返回值：查看矩形所需要的相机位置
+
+获取在椭球或地图上查看矩形所需要的相机位置。
+
+
+
+<br>
+
+**look(axis,angle)**
+
+1. axis: Cartesian3，旋转轴
+2. angle: Number，可选参数，旋转角度(以弧度为单位)，默认值为 defaultLookAmount。
+
+以 angle 角度沿 axis 轴旋转相机。
+
+
+
+<br>
+
+**lookAt(target, offset)**
+
+1. target: Cartesian3，世界坐标中的目标位置
+2. offset: Cartesian3 | HeadingPitchRange，偏移量。
+
+使用目标和偏移量设置相机的位置和方向。
+
+可能引发的错误：
+
+```
+DeveloperError: lookAt is not supported while morphing.
+```
+
+> 在变形的过程中不可以执行 lookAt()
+
+<br>
+
+使用示例：
+
+```
+//1、使用笛卡尔偏移
+const center = Cesium.Cartesian3.fromDegress(-98, 40)
+viewer.camera.lookAt(center, new Cesium.Cartesian3(0, -4790000, 3930000))
+
+//2、使用头部姿态偏移
+const center = Cesium.Cartesian3.fromDegress(-72, 40)
+const heading = Cesium.Math.toRadians(50)
+const pitch = Cesium.Math.toRadians(-20)
+const range = 5000
+viewer.camera.lookAt(center, new Cesium.HeadingPitchRange(heading,pitch,range))
+```
+
+
+
+<br>
+
+**lookAtTransform(transform,offset)**
+
+1. transform: Matrix4，定义参考框架的变换矩阵
+2. offset: Cartesian3 | HeadingPitchRange，可选参数，在意目标为中心的参考帧中，与目标的偏移。
+
+使用目标和变换矩阵设置相机的位置和方向。
+
+可能引发的错误：
+
+```
+DeveloperError: lookAtTransform is not supported while morphing.
+```
+
+> 不可以在变形过程中使用 lookAtTransform()
+
+<br>
+
+使用示例：
+
+```
+//1、使用笛卡尔
+const transform = Cesium.Transforms.eastNorthUpToFixedFrame(Cesium.Cartesian3.fromDegress(-98,40))
+viewer.camera.lookAtTransform(transform,new Cesium.Cartesian3(0,-4790000,3930000))
+
+//2、使用头部姿态
+const transform = Cesium.Transforms.eastNorthUpToFixedFrame(Cesium.Cartesian3.fromDegress(-72,40))
+const heading = Cesium.Math.toRadians(50)
+const pitch = Cesium.Math.toRadians(-20)
+const range = 5000
+viewer.camera.lookAtTransform(transform, new Cesium.HeadingPitchRange(heading,pitch,range))
+```
+
+
+
+<br>
+
+**lookDown(amount)**
+
+1. amount: Number，可选参数，旋转的量(以弧度为单位)。默认为 defaultLookAmout。
+
+在 3D 模式下，沿相机向上矢量的反方向，按照 amout 量旋转相机。
+
+
+
+<br>
+
+**lookLeft(amount)、lookRight(amount)、lookUp(amount)**
+
+用法和 lookDown() 相同，只是旋转的方向不同。
+
+
+
+<br>
+
+**move(direction, amount)**
+
+1. direction: Cartesian3，移动的方向
+2. amount: Number，可选参数，移动的量(以米为单位)。默认为 defaultMoveAmount。
+
+沿 direction 方向，按照 amout 量移动相机的位置。
+
+
+
+<br>
+
+**moveBackward(amount)**
+
+1. amount: Number，可选参数，移动的量(以米为单位)。默认为 defaultMoveAmount。
+
+沿相反方向，按照 amount 量移动相机的位置。
+
+注意，在 2D 模式下，这将缩小相机而不是平移相机的位置。
+
+
+
+<br>
+
+**moveForward(amount)**
+
+1. amoutn: Number，可选参数，移动的量(以米为单位)。默认为 defaultMoveAmount。
+
+沿向前方向，按照 amount 量移动相机的位置。
+
+注意，在 2D 模式下，这将放大相机而不是平移相机的位置。
+
+
+
+<br>
+
+**moveDown(amount)**
+
+1. amount: Number，可选参数，移动的量(以米为单位)。默认为 defaultMoveAmount。
+
+沿相机上矢量的相反方向，按照 amout 量平移相机的位置。
+
+
+
+<br>
+
+**moveLeft(amount)、moveRight(amount)、moveUp(amount)**
+
+用法和 moveDown() 类似，只是移动的方向不同。
+
+
+
+<br>
+
+**pickEllipsoid(windowPosition,ellipsoid,result): Cartesian3 | undefined**
+
+1. windowPosition: Cartesian2，像素的 x 和 y 坐标
+2. ellipsoid: Ellipsiod，可选参数，默认值为 Ellipsoid.WGS84，要拾取的椭球(的标注)
+3. result: Cartesian3，可选参数，保存计算结果
+4. 返回值：椭球或地球表面上点的坐标
+
+拾取一个 椭球 或 地图，返回椭球或地球表面上点的坐标。
+
+如果没有拾取到椭球或地球，则返回 undefined。
+
+示例代码：
+
+```
+const canvas viewer.scene.canvas
+const center = new Cesium.Cartesian2(canvas.clientWidth/2,canvas.clientHeight/2)
+const ellipsoid = viewer.scene.globel.ellipsoid
+const result = viewer.camera.pickEllipsoid(center,ellipsoid)
+```
+
+
+
+<br>
+
+**rotate(axis,angle)**
+
+1. axis: Cartesian3，在直接坐标系中给定的旋转轴
+2. angle: Number，可选参数，旋转角度(以弧度为单位)。默认为 defaultRotateAmount。
+
+将相机绕 axis 旋转 angle。
+
+注意：相机到参考框中心的距离保持不变。
+
+
+
+<br>
+
+**rotateDown(angle)**
+
+1. angle: Number，可选参数，旋转角度(以弧度为单位)。默认为 defaultRotateAmount。
+
+沿相机参考框的中心向下旋转 angle 。
+
+
+
+<br>
+
+**rotateLeft(angle)、rotateRight(angle)、rotateUp(angle)**
+
+他们的用法和 rotateDown(angle) 相同，只是旋转的方向不同。
+
+
+
+<br>
+
+**look、move、rotate 3 者之间的不同差异：**
+
+1. move：移动，仅改变位置
+2. rotate：旋转，仅改变角度
+3. look：朝向，仅改变朝向
+4. lookAt：即改变朝向，又改变位置
+
+
+
+<br>
+
+**setView(options)**
+
+设置相机的位置、方向和变换。
+
+参数 options 的配置项为：
+
+| 配置项                              | 是否可选 | 对应含义                                                     |
+| ----------------------------------- | -------- | ------------------------------------------------------------ |
+| destination:Cartesian3 \| Rectangle | 可选     | 相机在 WGS84 坐标中最终位置 或 从上向下视图中可见的矩形。    |
+| orientation: Object                 | 可选     | 相机的姿态，分为2种配置方式：<br />1、方向(direction) + 向上(up)<br />2、航向(heading) + 仰俯(pitch) + 滚转(roll) |
+| endTransform: Matrix4               | 可选     | 变换当前相机的矩阵                                           |
+| convert: Boolean                    | 可选     | 是否将目的地从世界坐标转换为场景坐标(仅在不使用 3D 模式时)。默认为 true |
+
+
+
+<br>
+
+示例代码：
+
+```
+// 1、设置目的地位置
+viewer.camera.setView({
+    destination : Cesium.Cartesian3.fromDegrees(-117.16, 32.71, 15000.0)
+});
+
+// 2、设置目的地、姿态
+viewer.camera.setView({
+    destination : cartesianPosition,
+    orientation: {
+        heading : Cesium.Math.toRadians(90.0), // east, default value is 0.0 (north)
+        pitch : Cesium.Math.toRadians(-90),    // default value (looking down)
+        roll : 0.0                             // default value
+    }
+});
+
+// 3、设置姿态
+viewer.camera.setView({
+    orientation: {
+        heading : Cesium.Math.toRadians(90.0), // east, default value is 0.0 (north)
+        pitch : Cesium.Math.toRadians(-90),    // default value (looking down)
+        roll : 0.0                             // default value
+    }
+});
+
+
+// 4、设置目的地矩形
+viewer.camera.setView({
+    destination : Cesium.Rectangle.fromDegrees(west, south, east, north)
+});
+
+// 5、设置目的地、方向、向上轴
+viewer.camera.setView({
+    destination : Cesium.Cartesian3.fromDegrees(-122.19, 46.25, 5000.0),
+    orientation : {
+        direction : new Cesium.Cartesian3(-0.04231243104240401, -0.20123236049443421, -0.97862924300734),
+        up : new Cesium.Cartesian3(-0.47934589305293746, -0.8553216253114552, 0.1966022179118339)
+    }
+});
+```
+
+
+
+<br>
+
+**switchToOrthographicFrustum()**
+
+将平截头体/投影切换为正交。
+
+由于在 2D 模式下始终使用的是正交，所以这个方法在 2D 模式下是无用的。
+
+
+
+<br>
+
+**switchToPerspectiveFrustum()**
+
+将平截头体/投影切换为透视。
+
+由于在 2D 模式下始终使用的是正交，所以这个方法在 2D 模式下是无用的。
+
+
+
+<br>
+
+**twistLeft(amount)**
+
+1. amount: Number，可选参数，旋转的量(以弧度为单位)。默认为 defaultLookAmount。
+
+以 amount 的量，围绕相机方向矢量 逆时针旋转照相机。
+
+
+
+<br>
+
+**twistRight(amout)**
+
+1. amount: Number，可选参数，旋转的量(以弧度为单位)。默认为 defaultLookAmount。
+
+以 amount 的量，围绕相机方向矢量 顺时针旋转照相机。
+
+
+
+<br>
+
+> twist：单词意思为 捻，你可以想象一下钟表中的分针，假设此时分针刚好指向 12 点处，如果接下来 向左走即 逆时针、向右走即 顺时针。
+>
+> 因此 twistLeft 对应 逆时针、twistRight 对应 顺时针。
+
+
+
+<br>
+
+**viewBoundingSphere(boundingSphere,offset)**
+
+1. boundingSphere: BoundingSphere，要查看的边界球。
+2. offset: HeadingPitchRange，可选参数，距离目标的偏移量
+
+设置相机，是当前视图中包含提供的边界球。
+
+
+
+<br>
+
+**worldToCameraCoordinates(cartesian,result): Cartesian4**
+
+1. cartesian: Cartesian4，要转换的向量或点
+2. result: Cartesian4，可选参数，保存计算结果
+3. 返回值：转换后的向量或点
+
+将向量或点从世界坐标转换为相机的局部坐标。
+
+
+
+<br>
+
+**worldToCameraCoordinatesPoint(cartesian,result): Cartesian3**
+
+1. cartesian: Cartesian3，转换的点
+2. result: Cartesian3，可选参数，保存计算结果
+3. 返回值：转换后的点
+
+将点从世界坐标转换为相机的局部坐标。
+
+
+
+<br>
+
+**worldToCameraCoordiantesVector(cartesian,result): Cartesian3**
+
+1. cartesian: Cartesian3，要转换的向量
+2. result: Cartesian3，可选参数，保存计算结果
+3. 返回值：转换后的向量
+
+将向量从世界坐标转化为相机的局部坐标。
+
+
+
+<br>
+
+**zoomIn(amount)**
+
+1. amount: Number，可选参数，缩放的量，默认为 defaultZoomAmount。
+
+沿相机的视图向量，按照 amount 的量缩小相机视图。
+
+
+
+<br>
+
+**zoomOut(amount)**
+
+1. amount: Number，可选参数，缩放的量，默认为 -defaultZoomAmount。
+
+沿相机的视图向量，按照 amount 的量放大相机视图。
+
+
+
+<br>
+
+我们知道 defaultZoomAmount 的默认为 100000。
+
+那么以 3D 模式为例：
+
+1. zoomIn() 内部执行的是 zoom3D(this, amount)
+2. zoomOut() 内部执行的是 zoom3D(this, -amount)
+
+
+
+<br>
+
+### Carema的静态函数
+
+**FlightCancelledCallback()**
+
+取消飞行时将执行的函数。
+
+
+
+<br>
+
+**FlightCompleteCallback()**
+
+飞行结束后执行的函数。
+
+
+
+<br>
+
+## 地图的底图(地形或几何形状)：TerrainProvider
+
