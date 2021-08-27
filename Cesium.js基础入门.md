@@ -2873,3 +2873,352 @@ viewer.camera.setView({
 
 ## 地图的底图(地形或几何形状)：TerrainProvider
 
+**TerrainProvider：地形提供者**
+
+https://github.com/CesiumGS/cesium/blob/main/Source/Core/TerrainProvider.js
+
+为椭球表面提供地形或其他几何形状。
+
+表面几何形状为根据 TilingScheme 整理成的金字塔状的瓦片。
+
+
+
+<br>
+
+**不可以被实例化：**
+
+请注意 TerrainProvider 仅是为了描述接口，不能实例化。
+
+如果你尝试实例化，例如：
+
+```
+const provider = new Cesium.TerrainProvider()
+```
+
+那么在内部就会执行这样的代码，给你报错：
+
+```
+DeveloperError.throwInstantiationError();
+```
+
+
+
+<br>
+
+**日常使用示例：**
+
+尽管 TerrainProvider 不可以直接实例化，仅为定义接口作用，我们实际中可以有多种形式的方式来设置它。
+
+第 1 种：使用 cesium 提供的在线地形
+
+```
+viewer.terrainProvider = Cesium.createWorldTerrain()
+```
+
+第 2 种：使用自定义发布的地形服务
+
+```
+viewer.terrainProvider = new Cesium.CesiumTerrainProvider({
+    url: 'http://xxx.xx/xxx',
+    requestVertexNormals: true
+})
+```
+
+第 3 种：不使用地形
+
+```
+viewer.terrainProvider = new Cesium.EllipsoidTerrainProvider()
+```
+
+
+
+<br>
+
+### TerrainProvider的属性(定义的接口)
+
+再次重申，TerrainProvider 仅为 js 定义的 接口，无法实例化，所以所谓他的 “属性” 也是 “接口”。
+
+> 如果 Cesium 在源码层使用 TypeScript 的话，就不会使用这种形式来定义接口了。
+
+<br>
+
+| 静态属性名                      | 属性含义                                                     |
+| ------------------------------- | ------------------------------------------------------------ |
+| heightmapTerrainQuality: Number | 指定从高度图创建的地形的质量。默认值为 0.25。<br />当值为 1 时将会确保相邻的高度图顶点之间的间距不超过 Globe.maximumScreenSpaceError 屏幕像素，并且可能会非常缓慢。<br />当值为 0.5 时会将估算的零级几何误差减半，允许相邻高度图之间的屏幕像素增加两倍，从而更快渲染。 |
+
+
+
+<br>
+
+| 属性名                            | 属性含义                                                     |
+| --------------------------------- | ------------------------------------------------------------ |
+| availability: TileAvailability    | 获取一个对象，该对象可用于从此地形提供者确定地形的可用性。   |
+| credit: Credit                    | 获取此地形提供者处于活动状态时显示的功劳。通常这将归功于地形的来源。 |
+| errorEvent: Event                 | 获取当地形提供者遇到异步错误时引发的事件。                   |
+| hasVertexNormals: Boolean         | 获取所请求的图块是否包含顶点法线。                           |
+| hasWaterMask: Boolean             | 获取提供者是否提供水域遮罩。<br />水域遮罩会指出地球上哪些区域是水而不是土地，因此可以添加带有动画波动的水纹发射效果。 |
+| ready: Boolean                    | 获取地形图供着是否已准备就绪，可以开始使用。                 |
+| readyPromise: `Promise.<Boolean>` | 此为只读属性，异步获取地形低筒这准备就绪的 Promise。         |
+| tilingScheme: TilingScheme        | 获取地形提供者使用的切片方案。                               |
+
+请注意：以上绝大多数属性，都应该在地形提供者已准备就绪(.ready) 之后才可以去调用。
+
+
+
+<br>
+
+### TerrainProvider的方法(定义的接口)
+
+**getEstimatedLevelZeroGeometricErrorForAHeightmap(ellipsoid, tileImageWidth, numberOfTilesAtLevelZero): Number**
+
+此为静态方法
+
+1. ellipsoid: Ellipsoid，地形所附着的椭球
+2. tileImageWidth: Number，与单个图片关联的高度图的宽度(以像素为单位)
+3. numberOfTilesAtLevelZero: Number，瓦片级别为 零 时水平方向的瓦片数量。
+4. 返回值：估计的几何误差
+
+当集合来自高度图时，估计出的几何误差。
+
+
+
+<br>
+
+**getRegularGridIndices(width,height): Uint16Array | Uint32Array**
+
+此为静态方法
+
+1. width: Number，水平方向上常规网格中的顶点数
+2. height: Number，垂直方向上常规网格中的顶点数
+3. 返回值：索引列表。
+   * Uint64Array 返回的大小不超过 64KB
+   * Uint32Array返回的大小不超过 4GB
+
+获取代表常规网格的三角形网格的索引列表。
+
+请注意：顶点总数必须小于等于 65536。
+
+
+
+<br>
+
+**getLevelMaximumGeometricError(level): Number**
+
+1. level: Number，要获得最大几何误差的图块级别
+2. 返回值：最大几何误差
+
+获取给定级别的图块中允许的最大几何误差。
+
+
+
+<br>
+
+**getTileDataAvailable(x,y,level): Boolean | undefined**
+
+1. x: Number，几何图形的图块的 x 坐标
+2. y: Number，几何图形的图块的 y 坐标
+3. level: Number，几何图形的图块级别
+4. 返回值：如果地形提供者不支持则为 undefined，否则为 true 或 false
+
+确定是否可以加载图块的数据。
+
+
+
+<br>
+
+**loadTileDataAvailability(x,y,level): `Promise.<void> | undefined`**
+
+1. x: Number，几何图形的图块的 x 坐标
+2. y: Number，几何图形的图块的 y 坐标
+3. level: Number，几何图形的图块级别
+4. 返回值：有 2 种可能，第一种是 undefined，第二种是 `Promise.<void>`
+
+确定加载图块数据的可用性。
+
+
+
+<br>
+
+**requestTileGeometry(x,y,level,request): `Promise.<TerrainData> | undefined`**
+
+1. x: Number，几何图形的图块的 x 坐标
+2. y: Number，几何图形的图块的 y 坐标
+3. level: Number，几何图形的图块级别
+4. request: Request，可选参数，请求对象，仅供内部使用。
+5. 返回值：有 2 种可能，第一种是 undefined，第二种是 `Promise.<TerrainData>`
+   * 如果返回的是 undefined，这说明当前有太多请求需要处理，请稍后重试。
+
+请求给定图块的几何形状。
+
+请注意一定要在 .ready 为 true 之后才可以调用该函数。
+
+异步返回的结果中包含 地形数据、水域遮罩，以及哪些子块可用的信息。
+
+
+
+<br>
+
+## 影像图层的根基：ImageryProvider
+
+**ImageryProvider: 椭球表面的图像提供者。**
+
+请注意，ImageryProvider 和 TerrainProvider 相似，本身都仅仅定义接口，并不能直接实例化。
+
+
+
+<br>
+
+### ImageryProvider的属性(定义的接口)
+
+| 属性名                                                 | 属性含义                                                     |
+| ------------------------------------------------------ | ------------------------------------------------------------ |
+| credit: Credit，只读属性                               | 获取此图像提供者处于活动状态时要显示的功劳。<br />通常用于记入图像的来源。 |
+| defaultAlpha: Number \| undefined                      | 默认的 alpha 混合值。<br />若值为 0 则完全透明。<br />若值为 1 则完全不透明 |
+| defaultBrightness: Number \| undefined                 | 默认的亮度。<br />若值为 1 则使用图像原有颜色，<br />若值小于 1 则图像较暗，<br />若大于 1 则图像更亮。 |
+| defaultContrast: Number \| undefined                   | 默认对比度。正常对比度值为 1                                 |
+| defaultDayAlpha: Number \| undefined                   | 全球日期的默认 alpha 混合值。                                |
+| defaultGamma: Number \| undefined                      | 默认伽玛校正值。若值为 1 即表示使用未修改的图像颜色。        |
+| defaultHue: Number \| undefiend                        | 默认的色调(以弧度为单位)。<br />若值为 0 即表示使用未修改的图像颜色 |
+| defaultMagnificationFilter: TextureMagnificationFilter | 默认纹理的放大滤镜。                                         |
+| defaultMinificationFilter: TextureMinificationFilter   | 默认纹理的缩小滤镜。                                         |
+| defaultNightAlpha: Number \| undefined                 | 夜间默认的 alpha 混合值。                                    |
+| defaultSaturation: Number \| undefined                 | 默认的饱和度。若值为 1 即表示使用为修改的图像饱和度。        |
+| errorEvent: Event，只读属性                            | 获取图像所引发的异步错误事件。                               |
+| hasAlphaChannel: Boolean，只读属性                     | 获取图像提供者是否提供了图像的 alpha 通道。                  |
+| maximumLevel: Number \| undefined，只读属性            | 获取可以请求的最大级别                                       |
+| minimumLevel: Number \| undefined，只读属性            | 获取可以请求的最低级别                                       |
+| proxy: Proxy，只读属性                                 | 获取使用的代理                                               |
+| ready: Boolean，只读属性                               | 获取图像提供者是否已准备就绪                                 |
+| readyPromise: `Promise.<Boolean>`，只读属性            | 异步获取图像提供者是否已准备就绪                             |
+| rectangle: Rectangle，只读属性                         | 获取图像的矩形(以弧度表示)                                   |
+| titleDiscardPolicy: TileDiscardPolicy，只读属性        | 获取切片丢弃策略。<br />如果未定义则通过 shouldDiscardImage 函数过滤掉 “缺失” 的图块。 |
+| tileHeight: Number，只读属性                           | 获取每个图块的高度(以像素为单位)                             |
+| tileWidth: Number，只读属性                            | 获取每个图块的宽度(以像素为单位)                             |
+| tilingScheme: TilingScheme，只读属性                   | 获取切片方案。                                               |
+
+请注意：以上绝大多数属性都需要在 图像提供者已就绪(.ready 为 true)的情况下才可调用。
+
+
+
+<br>
+
+### ImageryProvider的方法(定义的接口)
+
+**loadImage(imageryProvider, url): `Promise.<HTMLImageElement | HTMLCanvasElement> | undefined`**
+
+此为静态方法
+
+1. imageryProvider: ImageryProvider，图像提供者
+2. url: Rescource | String，图片的网址
+3. 返回值：异步返回解析的 图片或画布 元素对象。
+   * 如果当前服务器待处理请求过多，则返回 undefined，可以稍后重试。
+
+从给定的 URL 加载图像。
+
+
+
+<br>
+
+**getTileCredits(x,y,level): `Array.<Credit>`**
+
+1. x: Number，瓦片的 x 坐标
+2. y: Number，瓦片的 y 坐标
+3. level: Number，平铺级别
+4. 返回值：显示给定图块时要显示的信用
+
+获取显示给定图块时要显示的信用。
+
+
+
+<br>
+
+**pickFeatures(x,y,level,longitude,latitude): `Promise.<Array.<ImageryLayerFeatureInfo>> | undefined`**
+
+1. x: Number，瓦片的 x 坐标
+2. y: Number，瓦片的 y 坐标
+3. level: Number，平铺级别
+4. longitude: Number，选择要素的经度
+5. latitude: Number，选择要素的维度
+6. 返回值：异步返回拾取结果
+   * 如果不支持拾取，则返回 undefined
+   * 如果支持拾取，但是没有拾取到任何要素，则返回的数据为空数组
+
+异步确定哪些要素位于给定的经度和纬度的瓦片内。
+
+
+
+<br>
+
+**requestImage(x,y,level,request): `Promise.<(HTMLImageElement | HTMLCanvasElement)> | undefined`**
+
+1. x: Number，瓦片的 x 坐标
+2. y: Number，瓦片的 y 坐标
+3. level: Number，平铺级别
+4. request: Request，可选参数，请求对象，仅供内部使用。
+5. 返回值：异步返回 图片或画布 元素，或者是 undefined。
+   * 如果服务器待处理请求过多，则返回 undefined，可以稍后重试
+
+请求给定图块的图像。
+
+
+
+<br>
+
+请注意：以上绝大多方法都需要在 图像提供者已就绪(.ready 为 true)的情况下才可调用。
+
+
+
+<br>
+
+## 图像层：ImageryLayer
+
+**ImageryLayer：一个图像图层，显示来自 Globe 上单个图像提供者的平铺图像数据。**
+
+
+
+<br>
+
+**实例化一个图像层：**
+
+```
+const imageryLayer = new Cesium.ImageryLayer(imageryProvider, options)
+```
+
+1. imageryProvider: ImageryProvider，要使用的图像提供者。
+2. options: Object，可选参数，图像层的配置项。
+
+
+
+<br>
+
+**参数 options 的配置内容：**
+
+options 的所有配置项均为 可选配置项。
+
+| 配置项 | 默认值 | 配置内容 |
+| ------ | ------ | -------- |
+|        |        |          |
+|        |        |          |
+|        |        |          |
+|        |        |          |
+|        |        |          |
+|        |        |          |
+|        |        |          |
+|        |        |          |
+|        |        |          |
+|        |        |          |
+|        |        |          |
+|        |        |          |
+|        |        |          |
+|        |        |          |
+|        |        |          |
+|        |        |          |
+|        |        |          |
+|        |        |          |
+|        |        |          |
+|        |        |          |
+|        |        |          |
+|        |        |          |
+|        |        |          |
+|        |        |          |
+
