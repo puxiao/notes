@@ -3078,7 +3078,7 @@ viewer.terrainProvider = new Cesium.EllipsoidTerrainProvider()
 | defaultContrast: Number \| undefined                   | 默认对比度。正常对比度值为 1                                 |
 | defaultDayAlpha: Number \| undefined                   | 全球日期的默认 alpha 混合值。                                |
 | defaultGamma: Number \| undefined                      | 默认伽玛校正值。若值为 1 即表示使用未修改的图像颜色。        |
-| defaultHue: Number \| undefiend                        | 默认的色调(以弧度为单位)。<br />若值为 0 即表示使用未修改的图像颜色 |
+| defaultHue: Number \| undefiend                        | 默认的色相(以弧度为单位)。<br />若值为 0 即表示使用未修改的图像颜色 |
 | defaultMagnificationFilter: TextureMagnificationFilter | 默认纹理的放大滤镜。                                         |
 | defaultMinificationFilter: TextureMinificationFilter   | 默认纹理的缩小滤镜。                                         |
 | defaultNightAlpha: Number \| undefined                 | 夜间默认的 alpha 混合值。                                    |
@@ -3195,30 +3195,641 @@ const imageryLayer = new Cesium.ImageryLayer(imageryProvider, options)
 
 options 的所有配置项均为 可选配置项。
 
-| 配置项 | 默认值 | 配置内容 |
-| ------ | ------ | -------- |
-|        |        |          |
-|        |        |          |
-|        |        |          |
-|        |        |          |
-|        |        |          |
-|        |        |          |
-|        |        |          |
-|        |        |          |
-|        |        |          |
-|        |        |          |
-|        |        |          |
-|        |        |          |
-|        |        |          |
-|        |        |          |
-|        |        |          |
-|        |        |          |
-|        |        |          |
-|        |        |          |
-|        |        |          |
-|        |        |          |
-|        |        |          |
-|        |        |          |
-|        |        |          |
-|        |        |          |
+| 配置项                                            | 默认值                            | 配置内容                                                     |
+| ------------------------------------------------- | --------------------------------- | ------------------------------------------------------------ |
+| reatangle: Rectangle                              | imageryProvider.rectangle         | 图层的矩形。<br />这个矩形可限制图像提供者的可见部分。       |
+| alpha: Number \| function                         | 1                                 | 该层的 alpha 混合值。<br />有 2 种设置方式，第1种就是直接为透明度数值，<br />第2种为一个函数 function(frameState,layer,x,y,level): Number。<br />该函数通过当前帧状态，以及图层 x y 和级别，给出对应的 alpha 值。 |
+| nightAlpah: Number \| function                    | 1                                 | 在地球的夜晚，此图层的 alpha 混合值。<br />参数的 2 种设置方式和 alpha 完全相同。<br />请注意该值只有在 enableLighting 为 true 时生效。 |
+| dayAlpha: Number \| function                      | 1                                 | 地球白天，此图层的 alpha 混合值。<br />参数的 2 种设置方式和 alpha 完全相同。<br />请注意该值只有在 enableLighting 为 true 时生效。 |
+| brightness: Number \| function                    | 1                                 | 该层的亮度。                                                 |
+| contrast: Number \| function                      | 1                                 | 该层的对比度。                                               |
+| hue: Number \| function                           | 1                                 | 该层的色相(以弧度为单位)。                                   |
+| saturation: Number \| function                    | 1                                 | 该层的饱和度。                                               |
+| gamma: Number \| function                         | 1                                 | 该层的伽玛校正。                                             |
+| splitDirection: ImagerySplitDirection \| function | ImagerySplitDirection.NONE        | ImagerySplitDirection 分割以应用此图层。                     |
+| minficationFilter: TextureMinificationFilter      | TextureMinificationFilter.LINEAR  | 此图层的纹理最小化滤镜。<br />可能的值是 .LINEAR 或 .NEAREST |
+| magnificationFilter: TextureMagnificationFilter   | TextureMagnificationFilter.LINEAR | 此图层的纹理放大滤镜。<br />可能的值是 .LINEAR 或 .NEAREST   |
+| show: Boolean                                     | true                              | 是否显示该图层                                               |
+| maximumAnisotropy: Number                         | 设备webgl最大可支持的数值         | 用于纹理过滤的最大各向异性级别。<br />如果未指定此参数，则默认使用 webgl 堆栈支持的最大各向异性。<br />较大的值使图像在地平面视图中看起来更好。 |
+| minimumTerrainLevel: Number                       |                                   | 显示此图像图层的最小地形细节级别。                           |
+| maximumTerrainLevel: Number                       |                                   | 显示此图像图层的最大地形细节级别。                           |
+| cutoutRectangle: Rectangle                        |                                   | 制图矩形，用于裁剪此 图像图层 的一部分。                     |
+| colorToAlpha: Color                               |                                   | 应该设置为透明的颜色值                                       |
+| colorToAlphaThreshold: Number                     | 0.004                             | 颜色到 alpha 的阈值。<br />这里的 阈值 是指能够产生效应的最低值。 |
+
+
+
+<br>
+
+**名词解释：各向异性(Anisotropy)**
+
+各向异性是指物质的全部或部分化学、物理等性质随着方向的改变而有所变化，在不同的方向上呈现出差异的性质。
+
+
+
+<br>
+
+**名词解释：阈值(Threshold)**
+
+阈(yù)值，又叫 临界值，是指一个效应能够产生的最低值或最高值。
+
+
+
+<br>
+
+### ImageryLayer的属性
+
+类的静态属性：
+
+| 静态属性                                                 | 默认值  | 属性含义                           |
+| -------------------------------------------------------- | ------- | ---------------------------------- |
+| DEFAULT_APPLY_COLOR_TO_ALPHA_THRESHOLD: Number           | 0.004   | 默认的颜色到 alpha 的阈值          |
+| DEFAULT_BRIGHTNESS: Number                               | 1       | 默认的亮度                         |
+| DEFAULT_CONTRAST: Number                                 | 1       | 默认的对比度                       |
+| DEFAULT_GAMMA: Number                                    | 1       | 默认的伽玛校正                     |
+| DEFAULT_HUE: Number                                      | 1       | 默认的色相                         |
+| DEFAULT_MAGINFICATION_FILTER: TextureMagnificationFilter | .LINEAR | 默认的纹理放大滤镜                 |
+| DEFAULT_MINIFICATION_FILTER：TextureMinificationFilter   | .LINEAR | 默认的纹理最小化滤镜               |
+| DEFAULT_SATURATION: Number                               | 1       | 默认的饱和度                       |
+| DEFAULT_SPLIT: Number                                    | .NONE   | 默认将此值作为图像图层的默认分割。 |
+
+
+
+<br>
+
+实例的属性：
+
+| 属性名                                          | 默认值  | 属性含义                                                     |
+| ----------------------------------------------- | ------- | ------------------------------------------------------------ |
+| alpha: Number                                   | 1       | 图层的透明度                                                 |
+| brightness: Number                              | 1       | 图层的亮度                                                   |
+| colorToAlpha: Color                             |         | 应该设置为透明的颜色值。                                     |
+| colorToAlphaThreshold: Number                   | 0.004   | 颜色到 alpha 的阈值<br />取值范围 0 - 1                      |
+| contrast: Number                                | 1       | 图层的对比度                                                 |
+| cutoutRectangle: Rectangle                      |         | 图像中的裁切矩形                                             |
+| dayAlpha: Number                                | 1       | 在地球白天时该图层的 alpha 混合值                            |
+| gamma: Number                                   | 1       | 图层的伽玛校正                                               |
+| hue: Number                                     | 1       | 图层的色相(以弧度为单位)                                     |
+| imageryProvider: ImageryProvider，只读属性      |         | 获取此图层的图像提供者                                       |
+| magnificationFilter: TextureMagnificationFilter | .LINEAR | 纹理放大滤镜。只可以是以下 2 个中的其中一个：LINEAR、NEAREST。<br />如果要想让该值生效，应该实例化 添加该图层之后立即设置此属性，否则如果等加载纹理完成后即使修改也不会生效。 |
+| minificationFilter: TextureMinificationFiltert  | .LINEAR | 纹理最小化滤镜。<br />其可选值与注意事项与 magnificationFilter 相同。 |
+| nightAlpha: Number                              | 1       | 在地球夜晚时该图层的 alpha 混合值                            |
+| rectangle: Rectangle，只读属性                  |         | 获取此图层的矩形。                                           |
+| saturation: Number                              | 1       | 图层的饱和度                                                 |
+| show: Boolean                                   | true    | 是否显示该图层                                               |
+| splitDirection: ImagerySplitDirection           | .NONE   | 将此值应用于图像图层的分割。                                 |
+
+
+
+<br>
+
+### ImageryLayer的方法
+
+**destroy()**
+
+销毁此对象拥有的 WebGL 资源。
+
+
+
+<br>
+
+**getViewableRectangle(): `Promise.<Rectangle>`**
+
+1. 返回值：异步返回 交集对应的矩形
+
+计算此图层的矩形与图像提供者的可用性矩形的交集，产生可以由该图层产生的图像的整体边界。
+
+示例代码：
+
+```
+imageryLayer.getViewableRectangle().then(function(rectangle){
+  return camera.flyTo({
+  destination: rectangle
+  })
+})
+```
+
+
+
+<br>
+
+**isBaseLayer(): Boolean**
+
+检查当前图层是否为 ImageryLayerCollection。
+
+基础图层是其他所有图层的基础。
+
+它的特殊之处在于它被视为具有全局矩形，即使实际上它没有，通过在整个地球的边缘拉伸像素。
+
+
+
+<br>
+
+**isDestroyed(): Boolean**
+
+检查当前图层是否已被销毁。
+
+
+
+<br>
+
+## 坐标系和坐标转换：position，Cartesian2、Cartesian3、Cartesian4、Spherical、Cartographic
+
+**Cesium 中的几种坐标系：**
+
+1. 屏幕坐标：position
+2. 二维笛卡尔坐标：Cartesian2
+3. 三维笛卡尔坐标：Cartesian3
+4. 四维笛卡尔坐标：Cartesian4
+5. 球积坐标：Spherical
+6. 经维度+ 高度 坐标：Cartographic
+
+
+
+<br>
+
+### 屏幕坐标：position
+
+实际上就是指负责显示 Cesium 内容 的 DOM 元素上的某个位置坐标，或者是当前鼠标所处的位置坐标。
+
+即：
+
+1. x
+2. y
+
+
+
+<br>
+
+### 二维笛卡尔坐标：Cartesian2
+
+| 属性名    | 默认值 | 属性含义   |
+| --------- | ------ | ---------- |
+| x: Number | 0      | x 坐标分量 |
+| y: Number | 0      | y 坐标分量 |
+
+
+
+<br>
+
+| 类静态属性           | 属性值 | 属性含义                                                     |
+| -------------------- | ------ | ------------------------------------------------------------ |
+| packedLenght: Number | 2      | 用于将对象打包(存储到外部)到数组中的元素的个数。<br />你可以暂时理解为打包(存储到外部)输出类的静态属性时，<br />这个二维向量的核心元素个数为 2 个，即 x 和 y。 |
+| UNIT_X: Cartesian2   | (1,0)  | 一个固定不变且已归一化的二维向量，指向 x 轴正方向的          |
+| UNIT_Y: Cartesian2   | (0,1)  | 一个固定不变且已归一化的二维向量，指向 y 轴正方向的          |
+| ZERO: Cartesian2     | (0,0)  | 一个固定不变且已归一化的二维向量，位于原点                   |
+
+
+
+<br>
+
+**方法的差异：**
+
+Cesium.js 中的 Cartesian2 对应的是 Three.js 中的 Vector2。
+
+但是：
+
+1. 虽然有很多函数用途相同，但是他们的方法名字相似却不相同
+
+   > 例如计算向量的长度，Vector2 使用的是 .length()，而 Cartesian2 使用的是 .magnitude()
+
+2. 在 Vector2 中所有的方法都是实例的方法，但是在 Cartesian2 中将很多方法都作为 类的静态方法。
+
+3. 有一些完全不同的方法
+
+   > 例如 Cartesian2 有一个 Vector2 没有的方法 .equalsEpsilon()
+
+
+
+<br>
+
+**clone(result): Cartesian2**
+
+复制出一份相同的二维向量。
+
+
+
+<br>
+
+**equals(right): Boolean**
+
+判断当前二维坐标与参数 right 的各个分量是否相同。
+
+> 参数名叫 right 仅此而已，不用过多解读。
+>
+> 在 Cesium 的命名习惯中， “left 指当前”、“right 指要对比的参数”
+
+
+
+<br>
+
+**equalsEpsilon(right,relativeEpsilon,absoluteEpsilon): Boolean**
+
+1. right: Cartesian2，要对比的二维坐标
+
+2. relativeEpsilon: Number，相对公差数
+
+3. absoluteEpsilon: Number，可选参数，绝对公差数。
+
+   如果未给定 absoluteEpsilon 则会将 relativeEpsilon 也当做 absoluteEpsilon。
+
+4. 返回值：对比的布尔结果
+
+将当前二维坐标与参数 right 分别进行 相对公差比较、绝对公差比较，并返回比较结果的布尔值。
+
+**相对公差、绝对公差的计算过程**
+
+1. 假设当前二维向量为 left、另外一个二维向量为 right
+
+2. 首先判断 2 者是否是同一个二维向量的引用
+
+3. 若不不是则计算出 2 者之间 x 分量的绝对差
+
+   ```
+   const absDiff = Math.abs(left.x - right.x)
+   ```
+
+4. 然后将 absDiff 与 相对公差数 和 绝对公差数进行对比
+
+   ```
+   return absDiff <= absoluteEpsilon || absDiff <= relativeEpsilon * Math.max(Math.abs(left.x),Math.abs(right.x))
+   ```
+
+5. 然后再依次，相同的操作再对比一次 y 分量。
+
+6. 假设 left 是否和 right 为同一个二维向量的引用，对比结果为 boo1 、x 分量对比结果为 boo2、y 分量对比结果为 boo3，那么最终该方法返回的结果为：
+
+   ```
+   return boo1 || (boo2 && boo3)
+   ```
+
+**相对公差数和绝对公差数的常见取值：**
+
+大多数时候会采用 Cesium Math 的几个常量，例如：
+
+1. Cesium.Math.EPSILON1 为 0.1
+2. Cesium.Math.EPSILON1 为 0.01
+3. Cesium.Math.EPSILON3 为 0.001
+4. ...
+5. Cesium.Math.EPSILON21 为 0.000000000000000000001
+
+<br>
+
+**结论：**
+
+equalsEpsilon() 方法主要用来判断 2 个向量之间的差异是否在某个范围内。
+
+这主要是因为 JS 采用的是浮点数，不是高精的数字。比如某个坐标分量你以为它的值为 4，但实际可能是 4.000000000001，那么如果直接使用 equals() 去做对比，容易误判 2 者不相同。
+
+
+
+<br>
+
+**toString(): String**
+
+返回一个以 “`(x,y)`” 这个格式的字符串。
+
+
+
+<br>
+
+**以下为 Cartesian2 的静态方法。**
+
+
+
+<br>
+
+**abs(cartesian,result): Cartesian2**
+
+将 result 的 x y 分量分别设置为参数 cartesian 对应分量的绝对值，并返回 result。
+
+
+
+<br>
+
+**add(left,right,result): Cartesian2**
+
+1. left、right: Cartesian2
+2. result: 保存计算结果
+3. 返回值：返回 result
+
+将 2 个二维向量相加，将计算结果保存到 result 中，并返回 result。
+
+
+
+<br>
+
+**angleBetween(left,right): Number**
+
+返回二维向量 left 转向 right 所需的角度(以弧度为单位)
+
+
+
+<br>
+
+**clone(cartesian,result): Cartesian2**
+
+将 cartesian 各个分量 复制到 result 中。
+
+
+
+<br>
+
+**cross(left,right): Number**
+
+1. left: Cartesian2
+2. right: Cartesian2
+
+返回参数中 2 个二维向量的叉乘(叉积、外积)。
+
+请注意在二维坐标系中严格来说是不存在叉乘的，只有三维坐标系中才有叉乘。
+
+> 三维向量叉乘得到的是同时垂直于 left、right 的另外一个三维向量。
+
+二维向量的叉乘是指它们的 几何叉乘。
+
+这里所计算的叉乘隐含了一个设定：假定 left、right 均为一个三维向量，且 z 都为 0。
+
+
+
+<br>
+
+**distance(left,right): Number**
+
+计算二维向量 left 与 right 的距离。
+
+
+
+<br>
+
+**distanceSquared(left,right): Number**
+
+计算二维向量 left 与 right 之间距离的平方值。
+
+> 这和 Three.js 中 Vector2 完全相同，因为对于计算机而言更擅长做浮点运算，但擅长开平方根。
+>
+> 所以反而是 计算平方 性能更快。
+
+
+
+<br>
+
+**divideByScalar(cartesian,scalar,result): Cartesian2**
+
+将二维向量 cartesian 的 x y 分量都除以 标量 scalar，将计算结果保存到 result 中，并返回 result。
+
+
+
+<br>
+
+**divideComponents(left,right,result): Cartesina2**
+
+计算 left 的 x y 分量分别除以 right 的对应分量，将结果保存到 result 中，并返回 result。
+
+
+
+<br>
+
+**dot(left,right): Number**
+
+计算两个二维向量的 点乘(乘积、内积)
+
+
+
+<br>
+
+**equals(left,right): Boolean**
+
+对比两个二维向量的分量 x y 是否都相同。
+
+
+
+<br>
+
+**equalsEpsilon(left,right,relativeEpsilon,absoluteEpsilon): Boolean**
+
+通过 相对公差 和 绝对公差测试，判断 2 者是否足够接近。
+
+
+
+<br>
+
+**fromArray(array,startingIndex,result): Cartesian2**
+
+根据偏移 startingIndex，从数组 array 中读取 2 个数值并分别赋值给二维向量 result，并返回 result。
+
+
+
+<br>
+
+**fromCartesian3(cartesian,result): Cartesian2**
+
+从参数 三维向量中读取 x y 分量并赋值给二维向量 result 对应的分量，并返回 result。
+
+
+
+<br>
+
+**fromCartesian4(cartesian,result): Cartesian2**
+
+从参数 四维向量中读取 x y 分量并赋值给二维向量 result 对应的分量，并返回 result。
+
+
+
+<br>
+
+**fromElements(x,y,result): Cartesian2**
+
+将参数 x y 坐标值赋值给二维向量 result 对应的分量，并返回 result。
+
+
+
+<br>
+
+**lerp(start,end,t,result): Cartesian2**
+
+1. start、end: Cartesian2，一个开始向量，一个目标向量
+2. t: Number，插值点。t 的合理取值范围应该是 0 - 1
+3. result: 保存计算结果
+4. 返回值：根据 start、end 计算出插值 t 对应的一个二维向量
+
+计算出两个向量根据 插值 t 对应的向量位置。
+
+
+
+<br>
+
+**magnitude(cartesian): Number**
+
+计算向量的长度(length)。
+
+> 相当于 Vector2 的 .length()
+
+
+
+<br>
+
+**magnitudeSquared(cartesian): Number**
+
+计算向量长度的平方值。
+
+
+
+<br>
+
+**maximumByComponent(first,second,result): Cartesian2**
+
+将参数 first、second 中 x y 分量各取最大值，然后构成一个新的二维向量，赋值给 result，并返回 result。
+
+
+
+<br>
+
+**maximumComponent(cartesian): Number**
+
+返回参数 cartesian 的分量 x y 中最大的那个值。
+
+
+
+<br>
+
+**minimumByComponent(first,second,result): Cartesian2**
+
+将参数 first、second 中 x y 分量各取最小值，然后构成一个新的二维向量，赋值给 result，并返回 result。
+
+
+
+<br>
+
+**minimumComponent(cartesian): Number**
+
+返回参数 cartesian 的分量 x y 中最小的那个值。
+
+
+
+<br>
+
+**mostOrthogonalAxis(cartesian,result): Cartesian2**
+
+返回与参数 cartesian 最正交的轴(已归一化的向量)。其结果要么是 X 轴 (1,0)，要么是 Y 轴 (0,1)。
+
+> 所谓 最正交的轴，你暂时可以理解为 参数 cartesian 距离哪个轴更远。
+>
+> 注意：如果距离 2 个轴相等，那么会被认定为 X 轴。
+
+
+
+<br>
+
+**multiplyByScalar(cartesian,scalar,result): Cartesian2**
+
+将二维向量 cartesian 各个分量都乘以 标量 scalar，把结果赋值给 result，并返回 result。
+
+
+
+<br>
+
+**multiplyComponents(left,right,result): Cartesian2**
+
+将二维向量 left 和 right 的各个分量进行相乘，把结果赋值给 result，并返回 result。
+
+
+
+<br>
+
+**negate(cartesian,result): Cartesian2**
+
+将参数 cartesian 各个分量进行取反。即 x = -x，y = -y。
+
+
+
+<br>
+
+**normalize(cartesian,result): Cartesian2**
+
+将参数 cartesian 进行归一化。
+
+
+
+<br>
+
+**pack(value,array,startingIndex): `Array.<Number>`**
+
+1. value: Cartesian2，二维向量
+2. array: `Array.<Number>`，外部一个数组
+3. startingIndex: Number，可选值，默认值为 0，赋值数组元素索引的偏移量
+4. 返回值：返回修改后的数组
+
+将参数二维向量 value 的分量 x y 按照索引偏移量 startingIndex 赋值给 array。
+
+
+
+<br>
+
+**packArray(array,result): `Array.<Number>`**
+
+1. array: `Array.<Cartesian2>`，一个包含 N 个二维向量的数组
+2. result: `Array.<Number>`，长度为 偶数 的数组，数组中的元素均为 二维向量的分量 x y
+3. 返回值：返回 result
+
+将一组二维向量的分量展开为一个数组。
+
+
+
+<br>
+
+**subtract(left,right,result): Cartesian2**
+
+计算并返回二维向量 left 与 right 的分量差。
+
+
+
+<br>
+
+**unpack(array,startingIndex,result): Cartesian2**
+
+1. array: `Array.<Number>`，一个包含众多数字的数组
+2. startingIndex: Number，索引偏移量，默认值为 0
+3. result:  Cartesian2，保存计算结果
+4. 返回值：返回 result
+
+从数组 array 中根据索引偏移量 startingIndex 读取并将值赋值给 result 的分量 x y ，并返回 result。
+
+
+
+<br>
+
+**unpackArray(array,result): `Array.<Cartesian2>`**
+
+1. array: `Array.<Number>`，要解包的数组
+2. result: `Array.<Cartesian2>`，保存计算结果
+3. 返回值：返回 result
+
+将数组 array 按照 2 个元素一组，分别创建一个二维向量，并依次将这些向量存入 result 中，并返回 result。
+
+
+
+<br>
+
+### 三维向量：Cartesian3
+
+**三维向量的 3 个属性：**
+
+1. x
+2. y
+3. z
+
+
+
+<br>
+
+二维向量 Cartesian2 的方法同样 三维向量 Cartesian3 也都拥有。
+
+> 除了 Cartesian2 的 .fromCartesian3()
+
+这里就不再过多陈述，接下来只讲解一下三维向量特有的一些方法。
+
+
+
+<br>
 
