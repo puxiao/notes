@@ -3341,8 +3341,8 @@ imageryLayer.getViewableRectangle().then(function(rectangle){
 2. 二维笛卡尔坐标：Cartesian2
 3. 三维笛卡尔坐标：Cartesian3
 4. 四维笛卡尔坐标：Cartesian4
-5. 球积坐标：Spherical
-6. 经维度+ 高度 坐标：Cartographic
+5. 球极坐标：Spherical
+6. 经纬度+ 高度 坐标：Cartographic
 
 
 
