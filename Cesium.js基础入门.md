@@ -3078,7 +3078,7 @@ viewer.terrainProvider = new Cesium.EllipsoidTerrainProvider()
 | defaultContrast: Number \| undefined                   | 默认对比度。正常对比度值为 1                                 |
 | defaultDayAlpha: Number \| undefined                   | 全球日期的默认 alpha 混合值。                                |
 | defaultGamma: Number \| undefined                      | 默认伽玛校正值。若值为 1 即表示使用未修改的图像颜色。        |
-| defaultHue: Number \| undefiend                        | 默认的色相(以弧度为单位)。<br />若值为 0 即表示使用未修改的图像颜色 |
+| defaultHue: Number \| undefiend                        | 默认的色调(以弧度为单位)。<br />若值为 0 即表示使用未修改的图像颜色 |
 | defaultMagnificationFilter: TextureMagnificationFilter | 默认纹理的放大滤镜。                                         |
 | defaultMinificationFilter: TextureMinificationFilter   | 默认纹理的缩小滤镜。                                         |
 | defaultNightAlpha: Number \| undefined                 | 夜间默认的 alpha 混合值。                                    |
@@ -3485,6 +3485,26 @@ equalsEpsilon() 方法主要用来判断 2 个向量之间的差异是否在某�
 
 <br>
 
+**epsilon的补充解释：**
+
+epsilon 这个单词有很多种翻译，其中有一个翻译为：希腊的第 5 个字母 ε，大写为 E 。
+
+很多科学家会使用这个符号来表示公式中的 “误差”。
+
+delta 这个单词对应的是希腊第 4 个字母 δ ，大写为 Δ，科学家通常使用这个字母来表示 “距离”。
+
+> 由于 delta 对应的希腊大写为 Δ，很多翻译工具会将 delta 翻译为 “三角洲”
+
+> 当然现在 delta 又多了一个含义：德尔塔病毒，即新冠病毒第 4 代变种
+
+所以 epsilon-delta 这个词可以翻译为：误差距离
+
+而 equalsEpsilon() 直译过来就是：等于误差，即在误差范围内。
+
+
+
+<br>
+
 **toString(): String**
 
 返回一个以 “`(x,y)`” 这个格式的字符串。
@@ -3829,7 +3849,186 @@ equalsEpsilon() 方法主要用来判断 2 个向量之间的差异是否在某�
 
 这里就不再过多陈述，接下来只讲解一下三维向量特有的一些方法。
 
+以下方法均为 Cartesian3 类的静态方法。
+
 
 
 <br>
+
+**fromDegress(longitude,latitude,height,ellipsoid,result): Cartesian3**
+
+1. longitude: Number，经度，例如 -115.0
+2. latiude: Number，纬度，例如 37.0
+3. height: Number，可选参数，椭球上方的高度，默认值为 0
+4. ellipsoid: Ellipsiod，可选参数，椭球，默认为 Ellipsoid.WGS84
+5. result: Cartesian3，可选参数，保存计算结果
+6. 返回值：3维坐标
+
+从经度、纬度、高度、椭球得到对应的三维点坐标。
+
+
+
+<br>
+
+**fromDegressArray(coordinates,ellipsoid,result): `Array.<Cartesian3>`**
+
+1. coordinates: `Array.<Number>`，由 N 个经纬度数值组成的数组。
+
+   > 该数组长度一定是 偶数，因为在该数组内部都是由 1 对 经度 + 维度 组成。
+
+   > 这里其实暗含了一个意思：已知经纬度，同时假定 高度(height) 为 0
+
+2. ellipsoid: Ellipsoid，可选参数，椭球标准，默认值为 Ellipsoid.WGS84。
+
+3. result: `Array.<Cartesian3>`，保存计算结果
+
+从给定的展开的经纬度数值组成的数组中，转换得到一组 三维坐标。
+
+
+
+<br>
+
+**fromDegreesArrayHeights(coordinates,ellipsoid,result): `Array.<Cartesian3>`**
+
+和 fromDegreesArray() 用法相同，只不过这次参数 coordinates 中除经纬度外，还包含高度(height)。
+
+> 因此 coordinates 数组长度一定为 3 的倍数。
+
+
+
+<br>
+
+**fromElements(x,y,z,result): Cartesian3**
+
+1. x、y、z: Number，三个分量
+2. result: Cartesian3，可选参数，保存计算结果
+
+根据 x y z 三个分量创建一个三维坐标。
+
+
+
+<br>
+
+**fromRadians(longitude,latitude,height,ellipsoid,result): Cartesian3**
+
+1. longitude: Number，以弧度为单位的经度，例如 -2.007
+2. latitude: Number，以弧度为单位的维度，例如 0.645
+
+从给出的经纬度、高度、椭球计算出对应的三维坐标。
+
+
+
+<br>
+
+**fromRadiansArray(coordinates,ellipsoid,result): `Array.<Cartesian3>`**
+
+1. coordinates: `Array.<Number>`，N 组 经度 + 纬度 数值组成的数组
+2. ellipsoid: Ellipsoid，椭球，默认为 Ellipsoid.WGS84
+3. result: `Array.<Cartesian3>`
+
+根据给定的数组(经度 + 纬度)，返回对应的 三维坐标构成的数组。
+
+
+
+<br>
+
+**fromRadiansArrayHeight(coordinates,ellipsoid,result): `Array.<Cartesian3>`**
+
+根据给定的数组(经度 + 纬度 + 高度)，返回对应的 三维坐标构成的数组。
+
+
+
+<br>
+
+**强调一遍：degrees 和 radians**
+
+这两种都用来表示 经纬度，只是他们表达角度的方式不同。
+
+1. degrees：使用 度 来表示角度
+2. radians：使用 弧度 来表示角度
+
+
+
+<br>
+
+**fromSpherical(spherical,result): Cartesian3**
+
+1. spherical: Spherical，球极坐标
+2. result: Cartesian3，保存计算结果
+
+将球坐标转换为笛卡尔三维坐标。
+
+
+
+<br>
+
+**midpoint(left,right,result): Cartesian3**
+
+计算两个三维坐标之间的中点对应的坐标。
+
+
+
+<br>
+
+**projectVector(a,b,result): Cartesian3**
+
+1. a: Cartesian3，需要投影的向量
+2. b: Cartesian3，要投影到的向量
+3. result: Cartesian3，保存计算结果
+
+返回将向量 a 投影到向量 b 的结果。
+
+
+
+<br>
+
+### 四维向量：Cartesian4
+
+**Cartesian4 是由：x y z w 4 个分量构成的。**
+
+
+
+<br>
+
+和 Cartesian2、Cartesian3 方法名相同，用法也相同的方法这里不再重复叙述。
+
+以下只讲解 Cartesian4 特有的一些方法。
+
+同样，以下的方法都是指 Cartesian4 类静态的方法。
+
+
+
+<br>
+
+**fromColor(color,result): Cartesian4**
+
+1. color: Color，包含 red、green、blue、apha 4 个分量的颜色实例
+2. result: Cartesian4，保存计算结果
+
+将 color 的 4 个分量依次赋值给 result 的 4 个分量 x y z w，并返回 result。
+
+
+
+<br>
+
+**packFlot(value,result): Cartesian4**
+
+1. value: Number，浮点数
+2. result: Cartesian4，包含压缩浮点数的四维坐标
+
+将任意浮点数(32位)打包(拆分转化)为 4 个 uint8 的数值，然后将 4 个数值依次赋值给 result。
+
+```
+const cartesian4 = new Cesium.Cartesian4();
+Cartesian4.packFloat(1, cartesian4);
+console.log(cartesian4; //Cartesian4 {x: 0, y: 0, z: 128, w: 63}
+```
+
+> 具体转化过程，以及该方法的用途，暂时我个人也不是特别理解。
+
+
+
+<br>
+
+### 球极坐标：Spherical
 
