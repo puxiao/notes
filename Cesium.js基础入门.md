@@ -4473,6 +4473,195 @@ https://community.cesium.com/t/i-am-more-curious-why-there-is-no-4-8-9-in-screen
 
 <br>
 
+## 实体和实体集合：Entity
+
+将多个、多种形式的实体(Entity)实例聚集到单个高级对象中，这个高级对象就是所有实体的集合，即 Viewer.entities。
+
+还有一种情况，就是将这些实体放入 数据源 中，例如 CzmlDataSource 和 GeoJsonDataSource。
+
+
+
+<br>
+
+**补充说明：**
+
+你可以把 Entity 理解成 Three.js 中的 Object3D 或 Group。
+
+即它本身可以是一个实体对象，同时也可以包含若干个其他实体。
+
+> 它是其包含的子项示例的父类。
+
+
+
+<br>
+
+### 实体集合的初始化配置项
+
+| 配置项                                                       | 对应内容                                                     |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| id: String                                                   | 唯一标识符。<br />如果未提供则将由Cesium.js通过 GUID 自动生成。 |
+| name: String                                                 | 显示给用户的可读名字。它不必是唯一的。                       |
+| availability: TimeIntervalCollection                         | 与此对象相关联的可用性(如果有)                               |
+| show: Boolean                                                | 是否显示该实体及其子项                                       |
+| description: Property \| String                              | 用于该实体对应 HTML 的描述文字                               |
+| position: PositionProperty \| Cartesian3                     | 指定实体的位置                                               |
+| orientation: Property                                        | 指定实体的方向                                               |
+| viewFrom: Property                                           | 用于查看该实体的建议初始偏移量                               |
+| parent: Entity                                               | 此实体的父级实体                                             |
+| billboard: BillboardGraphic \| BillboardGraphics.ConstructorOptions | 与此实体关联的广告牌<br />所谓 “广告牌” 其实就是指 一张“图片” |
+| box: BoxGraphics \| BoxGraphics.ConstructorOptions           | 与此实体关联的框                                             |
+| corridor: CorridorGraphics \| CorridorGraphics.ConstructorOptions | 与此实体关联的走廊                                           |
+| cylinder: CylinderGraphics \| CylinderGraphics.ConstructorOptions | 与此实体关联的圆柱体                                         |
+| ellipse: EllipseGraphics \| EllipseGraphics.ConstructorOptions | 与此实体关联的椭圆                                           |
+| ellipsoid: EllipsoidGraphics \| EllipsoidGraphics.ConstructorOptions | 与此实体关联的椭球                                           |
+| label: LabelGraphics \| LabelGraphics.ConstructorOptions     | 与此实体关联的文字标签(label)<br />请注意：label 表示纯文字，与之对应的就是 图片(广告牌 billboard) |
+| model: ModelGraphics \| ModelGraphics.ConstructorOptions     | 与此实体关联的模型                                           |
+| tileset: Cesium3DTilesetGraphics \| Cesium3DTilesetGraphics.ConstructorOptions | 与此实体关联的 3D 瓦片图块                                   |
+| path: PathGraphics \| PathGraphics.ConstructorOptions        | 与此实体关联的路径                                           |
+| plane: PlaneGraphics \| PlaneGraphics.ConstructorOptions     | 与此实体关联的平面                                           |
+| point: PointGraphics \| PointGraphics.ConstructorOptions     | 与此实体关联的点                                             |
+| polygon: PolygonGraphics \| PolygonGraphics.ConstructorOptions | 与此实体关联的多边形                                         |
+| polyline: PolylineGraphics \| PolylineGraphics.ConstructorOptions | 与此实体关联的折线                                           |
+| properties: PropertyBag \| `Object.<String>`                 | 与此实体关联的任意属性                                       |
+| polylineVolume: PolylineVolumeGraphics \| PolylineVolumeGraphics.ConstructorOptions | 与此实体关联的 折线体积和相应的二维形状                      |
+| rectangle: RectangleGraphics \| RectangleGraphics.ConstructorOptions | 与此实体关联的矩形                                           |
+| wall: WallGraphics \| WallGraphics.ConstructorOptions        | 与此实体关联的墙                                             |
+
+> 从上面众多配置项量中可以看出，绝大多数都是关联 某种 类型的实体(形状)。
+>
+> 从字面上可以看出 BoxGraphics、CorridorGraphics... 这些都是具体的 Cesium.js 内置提供的图元。
+>
+> 尽管本文还未提及过 Graphics 以及它众多的子类，但是由于我有 Three.js 基础，所以比较容易理解这些不同类型的 图元。
+
+<br>
+
+对于关联某种实体，从配置项也可以看出分别有 2 种方式：
+
+1. 实体本身，例如 BoxGraphics
+2. 可以创建实体的实体配置项，例如 BoxGraphics.ConstructorOptions
+
+
+
+<br>
+
+### Entity的属性
+
+实体配置项的各项，均对应有相应的属性，且默认这些相关的实体均为 undefined。
+
+除了这些，Entity 还有一些其他属性。
+
+
+
+<br>
+
+**isShowing: Boolean**
+
+返回该实体是否为显示状态。
+
+请注意，show 与 isShowing 的区别：
+
+1. show 仅获取当前实体本身状态为是否显示
+2. isShowing 不仅获取当前实体本身是否显示的状态，还会检查该实体父级实体是否为显示状态
+
+也就是说可能存在以下情况：
+
+当前实体是 可显示状态，即 show 为 ture，但是由于其父级实体是不显示状态，所以实际上该实体并没有显示。即 .isShowing 为 false。
+
+
+
+<br>
+
+**类静态属性：definitionChanged: Event**
+
+获取每当属性或者子属性发生更改或修改时引发的事件。
+
+
+
+<br>
+
+**关于属性 properties: PropertyBag | undefined 的补充：**
+
+假设你需要很多自定义属性，这些属性是 Entity 原本不存在的，那么可以将这些自定义属性都添加到 properties 中。具体如何添加，如何读取，可以参考 PropertyBag 的用法。
+
+
+
+<br>
+
+**PropertyBag的介绍：**
+
+PropertyBag 是用于存储自定义属性的类，内部使用值键对形式进行存储。
+
+<br>
+
+**PropertyBag的属性：**
+
+1. propertyNames: `Array.<String>`，当前实例中所有的 自定义属性的键名。
+2. definitionChanged: Event，类静态属性，当此实例中属性发生变化时引发的事件。
+3. isConstant: Boolean，类静态属性，指示此实例是否恒定不变。
+
+
+
+<br>
+
+**PropertyBag的方法：**
+
+1. addProperty(propertyName,value,createPropertyCallback)，向此实例添加某属性(字段)
+
+2. removeProperty(propertyName)，向此实例移除某属性
+
+3. hasProperty(propertyName): Boolean，检查并返回此实例是否存在某属性
+
+4. getValue(time,result): Object，获取此实例中的某属性对应的值
+
+   > 请注意参数并不是 属性名，而是 time(JulianDate)。
+   >
+   > 具体用法可查看 JulianDate。
+   >
+   > julian：是一个人名，中文一般翻译为 朱利安
+   >
+   > JulianData：表示天文 朱利安日期(天数)，即表示公元前 4713 年中午以来到此刻的天数。
+   >
+   > 获取实例某属性值的示例代码：
+   >
+   > ```
+   > console.log(property.getValue(new Cesium.JulianDate()));
+   > ```
+
+5. merge(source,createPropertyCallback)，将此实例与参数中的 source(PropertyBag) 进行合并。
+
+   > 请注意，假设此实例与参数 source 中有一个自定义属性名相同，那么这种情况下是不会进行替换的。
+   >
+   > 可以通过以下示例代码说明：
+   >
+   > ```
+   > const property1 = new Cesium.PropertyBag();
+   > property1.addProperty('test', '111'); //有一个自定义属性 test
+   > const property2 = new Cesium.PropertyBag();
+   > property2.addProperty('test', '222'); //也有一个自定义属性 test
+   > property1.merge(property2);
+   > console.log(property1['test']); //查看 test 字段是否会被更改
+   > console.log(property1.getValue(new Cesium.JulianDate())); //{test: "111"}
+   > 
+   > //输出的内容为：
+   > ConstantProperty {_value: "111", _hasClone: false, _hasEquals: false, _definitionChanged: Event}
+   > //可以看出 test 属性值并未被覆盖
+   > ```
+
+
+
+<br>
+
+至此，本文我们已经：
+
+1. 配置 react + typescript + cesium.js 项目
+2. 编写了基础的 hello cesium 示例
+3. 了解了一些基础的 GIS 相关知识
+4. 学习了 Cesium.js 一些基础底层的类：Viewer、CesiumWidget、Camera、TerrainProvider、ImageryProvider、ImageryLayer、Cartesian2、... Cartographic、ScreenSpaceEventHandler、Entity。
+
+
+
+<br>
+
 **我觉得 Cesium.js 基础的一些类已经了解的差不多，可以开始进入真正的实战阶段了。**
 
 所谓实战阶段，就是由简单到深入，逐个实现 Cesium.js 常用场景。
