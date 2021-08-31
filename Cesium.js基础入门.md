@@ -4666,7 +4666,9 @@ PropertyBag 是用于存储自定义属性的类，内部使用值键对形式�
 
 所谓实战阶段，就是由简单到深入，逐个实现 Cesium.js 常用场景。
 
-本文至此结束，接下来我会创建一个新的 github 仓库，专门用来存放 Cesium.js 实战示例代码和讲解。
+本文至此结束，接下来，就请通过官方提供的示例去学习吧。
+
+https://sandcastle.cesium.com/index.html
 
 
 
