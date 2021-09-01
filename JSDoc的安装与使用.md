@@ -1286,3 +1286,210 @@ export function blend(color1, color2) {}
 
 
 
+<br>
+
+## JSDoc解决函数名与命名空间冲突的技巧
+
+假设我们有这样一段代码：
+
+```
+function myFun(str){
+  console.log('myFun: ' + str)
+}
+
+myFun.innerFun = function(str){
+  console.log('myFun.innerFun: ' + str)
+}
+
+export default myFun
+```
+
+> 你不要怀疑为什么要这样写，因为很多知名 JS 类库源码中，就会有这种写法。
+
+
+
+<br>
+
+**你会怎么写 JSDoc？**
+
+你可能会想应该这样写：
+
+```
+/**
+ * @param {String} str
+ * @returns {Void} void
+ */
+function myFun(str){
+  console.log('myFun: ' + str)
+}
+
+/**
+ * @param {String} str
+ * @returns {Void} void
+ */
+myFun.innerFun = function(str){
+  console.log('myFun.innerFun: ' + str)
+}
+```
+
+> 这种写法转换为 .d.ts 后会是以下内容：
+>
+> ```
+> /**
+>  * @param {String} str
+>  * @returns {Void} void
+>  */
+> export function myFun(str: string): void;
+> ```
+>
+> 可以看到 myFun 作为函数来说已经正确导出来了，但是 myFun.innerFun 却没有正确导出。
+>
+> 因为 JSDoc 认为 myFun 是一个函数，所以忽略了它作为命名空间的相关代码。
+
+
+
+<br>
+
+更换思路，改成这样：
+
+```
+/** @namespace myFun */
+
+/**
+ * @function
+ * @param {String} str
+ * @returns {Void} void
+ */
+function myFun(str){
+  console.log('myFun: ' + str)
+}
+
+/**
+ * @memberof myFun
+ * @param {String} str
+ * @returns {Void} void
+ */
+myFun.innerFun = function(str){
+  console.log('myFun.innerFun: ' + str)
+}
+```
+
+> 这种写法转换为 .d.ts 后会是以下内容：
+>
+> ```
+> export namespace myFun {
+>     /**
+>      * @param str
+>      * @returns void
+>      */
+>     function innerFun(str: string): void;
+> }
+> ```
+>
+> 可以看到 myFun 作为命名空间已经正确导出来了，myFun.innerFun 可以被正确访问使用，但是 myFun 作为函数来说却没有正确导出。
+>
+> 因为当 JSDoc 认为 myFun 是一个命名空间，所以忽略了它作为函数的相关代码。
+
+
+
+<br>
+
+鱼与熊掌不可兼得？！
+
+
+
+<br>
+
+**分析一下我们遇到的问题：**
+
+在上面代码中，我们可以看到：
+
+1. `myFun` 是一个函数名
+
+2. `myFun` 也是一个命名空间
+
+   > myFun.innerFun 隐含的意思就是：
+   >
+   > 1. 有一个命名空间 myFun
+   > 2. 在该命名空间中，有一个函数 innerFun
+
+由于 myFun 既是函数名，同时也是命名空间，2 者冲突了。
+
+如果我们去构建 .d.ts 文档，那么 JSDoc 无法理解 2 者究竟怎么一回事。
+
+准确来说就是 JSDoc 无法理解 myFun 什么时候该是函数名，什么时候该是命名空间。
+
+
+
+<br>
+
+**正确的解决方案：**
+
+通过不懈努力，终于找到了解决方案：
+
+https://groups.google.com/g/jsdoc-users/c/1Md5S8j2ZI4
+
+> 这是 2011 年时候的一个帖子
+
+<br>
+
+JSDoc 竟然有一个如此让人惊掉下巴的操作方式：通过添加 `(1)` 的方式告知 JSDoc 函数名和命名空间的区别。
+
+> 如果你愿意，还可以使用 (2)、(3)...
+
+
+
+<br>
+
+同时配合 @function、@memberof 标签，最终正确的 JSDoc 注释代码为：
+
+```
+/**
+ * @function myFun
+ * @param {String} str
+ * @returns {Void} void
+ */
+function myFun(str){
+  console.log('myFun: ' + str)
+}
+
+/** @namespace myFun(1) */
+
+/**
+ * @function innerFun
+ * @memberof myFun(1)
+ * @param {String} str
+ * @returns {Void} void
+ */
+myFun.innerFun = function(str){
+  console.log('myFun.innerFun: ' + str)
+}
+```
+
+> 在编译过程中，我们通过 myFun 和 myFun(1) 来告知 JSDoc 他们谁是函数，谁是命名空间。
+>
+> 但是编译结束后，JSDoc 会把 myFun(1) 中的 (1) 自动删除掉，最终实现了函数和命名空间共存。
+
+<br>
+
+当执行编译，得到 .d.ts 内容为：
+
+```
+/**
+ * @param {String} str
+ * @returns {Void} void
+ */
+export function myFun(str: string): void;
+
+export namespace myFun {
+    /**
+     * @param str
+     * @returns void
+     */
+    function innerFun(str: string): void;
+}
+```
+
+既有 myFun 这个函数，同时也有 myFun 这个命名空间，myFun.innerFun() 也可以正常使用了。
+
+完美解决！
