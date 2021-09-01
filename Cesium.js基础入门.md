@@ -118,6 +118,64 @@ yarn add typescript node-sass@5.0.0 @craco/craco cesium
 
 <br>
 
+**关于Cesium.js的TypeScript类型声明的补充说明：**
+
+Cesium.js 的源码内部使用 JSDoc 方式对所有的类、属性、方法进行了类型定义。
+
+通过构建命令 `yarn run build-ts` 在 Source 根目录生成一个 Cesium.d.ts 的文件，用来存放所有的类型声明。
+
+也就是说默认情况下 NPM 包中自带有 类型声明 文件，但是会存在以下情况：
+
+1. 每一位代码贡献者对于 JSDoc 的书写严谨程度不同
+2. 一些历史原因，为了兼容比较旧的浏览器，没有使用比较新的 ES6 语法
+3. 由 gulp 自动生成，且内部使用较低版本的 TypeScript 编译
+
+以上情况造成了默认 Cesium.d.ts 文件并不是完美的，存在一些错误或缺失的类型定义。
+
+> 个人感觉大约有 1% 的类型定义有误或缺失。
+
+
+
+<br>
+
+Cesium.js 还有第三方维护的 类型文件包：@types/cesium
+
+这个包是由一些开发人员自行维护，人工编写 Cesium 声明类型，相对于默认的 Cesium.d.js，它更加精准。
+
+你可以选择手工删除默认的 Cesium.d.ts 文件，安装并使用 @types/cesium。
+
+不过正因为是人工编写的，所以存在时效性，无法做到与官方 Cesium.js 同步更新，有一定的滞后性。
+
+> 个人感觉大约会滞后最新版本 1-2 个月时间
+
+
+
+<br>
+
+> 此时此刻：
+>
+> 1. cesium.js 最新版本为 1.84.0(更新于 1 个月前)
+> 2. @types/cesium 最新版本为 1.67.14(更新于 2 个月前)
+
+
+
+<br>
+
+**Cesium.d.ts与@types/cesium的对比总结：**
+
+1. 类型精准度：@types/cesium 优于 Cesium.d.ts
+2. 更新时效性：Cesium.d.ts 优于 @types/cesium
+
+
+
+> 对于 Three.js 而言，则将源码 .js 和 类型定义进行了单独分开，我觉得这种做法更加灵活、合理。
+>
+> @types/three 的核心维护者 也是 Three.js 开发人员，同时他也是 pixi.js 的作者。
+
+
+
+<br>
+
 **第2步：清除一些无用文件或代码**
 
 1. 删除 src 目录下除 App.css、App.tsx、index.css、index.tsx 以外的其他文件
