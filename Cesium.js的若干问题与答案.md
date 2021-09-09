@@ -1,0 +1,313 @@
+# Cesium.js的若干问题与答案
+
+本文用于整理在学习 Cesium.js 中遇到的一些问题与思考。
+
+
+
+<br>
+
+#### 为什么 Cesium.js 对 TypeScript 的支持度不好？
+
+尽管官方 NPM 包中自带有 Cesium.d.ts 文件，但是在实际使用过程中会发现，Cesium 对 TypeScript 支持度非常不好，经常遇到 TypeScript 各种报错。
+
+> 较为常见的有：
+>
+> 1. TS 提示某些方法不存在
+>
+> 2. 非常多属性值赋值时提示类型不匹配
+>
+>    因为很多属性 Cesium.js 内部都被定义为 `Property | undefined`，而这个类型实际上是模糊、无太多意义的，完全不够精准。
+
+Cesium.js 内部使用 JSDoc 注释规范，然后自动构建生成的 Cesium.d.ts 文件。
+
+我个人觉得主要是因为以下 2 个原因：
+
+1. 一些 JSDoc 注释本身就不够严谨，自然对应的 类型 也不是完全正确。
+2. Cesium.js 内部使用 ES5 的方式来定义类，未使用比较新的 ES6 语法。这就造成有一些 “奇奇怪怪” 的属性或方法未能被 JSDoc 正确理解并导出。
+
+**解决方式：**
+
+1. 不使用官方自带的 Cesium.d.ts，而是使用第三方的 @types/cesium
+
+   > 缺点是：@types/cesium 版本更新略滞后与 官方最新版本
+
+2. 通过在自己的项目中 添加手工定义的 global.d.ts 来弥补官方 Cesium.d.ts 中的不足。
+
+   > 缺点是：需要自己手工更新维护
+
+
+
+<br>
+
+#### 如何在 Cesium 中添加参数调试面板？
+
+Cesium 官方推荐使用的是 knockout 这个第三方类库。
+
+> Cesium.js 官方示例中使用的都是 knockout
+
+knockout 位于 cesium/Source/ThirdParty/knockout.js
+
+> 当然你也可以选择自己安装 `yarn add knockout`
+
+<br>
+
+**knockout使用步骤：**
+
+1. 首先在网页中创建一个承载 knockout 的 div 标签
+
+   ```
+   <div id='toolbar'></div>
+   ```
+
+2. 根据要添加的参数调试面板选项，在 toolbar 标签中添加对应的子项，假设有一项为  height，则：
+
+   ```
+   <div id='toolbar'>
+       <input type="text" size="5" data-bind="value: height">
+   </div>
+   ```
+
+   > 请注意标签中的 data-bind 字段
+
+3. 创建一个 viewModel 的对象，让该对象包含 height 这个属性字段
+
+   ```
+   let viewModel = {
+       height: 0
+   }
+   ```
+
+4. 告知 knockout 开始监听 viewModel
+
+   ```
+   knockout.track(viewModel)
+   ```
+
+5. 将 viewModel 与 toolbar 进行绑定
+
+   ```
+   let toolbar = document.getElementById('toolbar')
+   knockout.applyBindings(viewModel, toolbar)
+   ```
+
+6. 添加 viewModel 的某个属性值变化对应的处理函数，这里依然以 height 为例
+
+   ```
+   knockout.getObservable(viewModel, 'height').subscribe(
+       function(newValue){
+           ...
+       }
+   )
+   ```
+
+   > observable：单词意思为 观察
+   >
+   > subscribe：单词意思为 订阅
+
+
+
+<br>
+
+**由于本人使用的是 React 框架，所以我不使用 knockout，而是使用 react-dat-gui。**
+
+代码套路示例：
+
+```
+const getOneDiff = (objA: object, objB: object): string | undefined => {
+
+    for (let key of Object.keys(objB)) {
+        //@ts-ignore
+        if (objB[key] !== objA[key]) {
+            return key;
+        }
+    }
+
+    return undefined
+}
+
+export default getOneDiff
+```
+
+<br>
+
+```
+interface GuiData {
+    height: number,
+    shadows: boolean
+}
+
+let guiDataInit: GuiData = {
+    height: 0,
+    shadows: true // 注意，这个 shadows 属性我们并未在下面的 DatGui 中使用到
+}
+
+const HelloCesium = () => {
+
+    const [guiData, setGuiData] = useState<GuiData>(guiDataInit)
+    const viewerRef = useRef<Viewer>()
+    
+    const handleUpdate = (newData: Partial<GuiData>) => {
+    
+        //假设你需要精准知道究竟是哪一项属性值发生了变化，则可能需要以下代码
+        //const diffKey = getOneDiff(guiData, newData)
+        //if(diffKey !== undefined) {
+        //      switch(diffKey){
+        //          case 'height':
+        //              ...
+        //          break
+        //          
+        //          case 'shadows':
+        //              ...
+        //          break
+        //      }
+        //    newData[diffKey]
+        //    ...
+        //}
+        
+        setGuiData(prev => ({ ...prev, ...newData }))
+    }
+    
+    useEffect(() => {
+
+        //@ts-ignore
+        buildModuleUrl.setBaseUrl('./static/Cesium/')
+
+        const viewer = new Viewer('cesiumContainer', {});
+        viewerRef.current = viewer
+
+        setGuiData({ ...guiDataInit, ...{ height: 10 } }) //当 Viewer 初始化后，仅第一次页面渲染完成时执行该行代码
+
+    }, [])
+
+    useEffect(() => {
+        if (viewerRef.current === undefined) return
+
+        const viewer = viewerRef.current
+        viewer.xxx = guiData.height
+
+    }, [guiData])
+
+    return (
+        <Fragment>
+            <div id='cesiumContainer'></div>
+            <DatGui data={guiData} onUpdate={handleUpdate} >
+                <DatNumber path='height' label='Height' min={-50} max={50} step={1} />
+            </DatGui>
+        </Fragment>
+    )
+}
+
+export default HelloCesium
+```
+
+> 具体 react-dat-gui 的用法，参见：https://github.com/claus/react-dat-gui
+
+
+
+<br>
+
+#### 配置全局静态资源路径的 2 种方式是什么？
+
+第1种：挂载到 window 对象中
+
+```
+window.CESIUM_BASE_URL = './static/cesium/'
+```
+
+第2种：使用 setBaseUrl() 函数
+
+> setBaseUrl 函数位于 buildModuleUrl 命名空间内
+
+```
+buildModuleUrl.setBaseUrl('./static/cesium/')
+```
+
+
+
+<br>
+
+#### 如何加载 gLTF 格式的 3D 模型？
+
+外部 3d 模型资源加载到 Cesium 中后，对应的是 ModelGraphics 实例。
+
+因此加载并显示 gLTF 格式的 3D 模型，本质上的流程为：
+
+1. 创建一个 ModelGraphics 实例，并设置该实例的 uri 属性，告知 gLTF 文件资源的路径。
+
+   > 还可以设置该 ModelGraphics 的一些其他属性，例如 color(颜色)、colorBlendMode(颜色混合模式)、colorBlendAmount(颜色混合模式强度)、silhouetteColor(扩展描边颜色)、silhouetteSize(扩展描边大小)、minimumPixelSize(不管缩放如何，模型最小像素)、maximumScale(不管缩放如何，模型最大像素) 等等。
+
+2. 创建一个 Entity 实例，并将 ModelGraphics 实例添加到该 Entity 示例中
+
+   > 我们还需要设置该 Enitiy 实例对应的 position(位置)、orientation(角度方向)
+   >
+   > 也可以给该 Entity 添加一个 name(名字) 属性值，以便以后通过 . name 来区分不同的 实体(Entity)
+
+3. 通过 viewer.entities.add() 的方法，将 Entity 实例添加到主场景的 EntitiesCollection 中。
+
+4. 设置 viewer.trackedEntity 的值，开始追踪该实体，以便将当前视角切换到该实例视角。
+
+以上流程对应的代码如下：
+
+```
+const entity = viewer.entities.add({
+    name: url,
+    position,
+    orientation,
+    model: {
+        uri: url,
+        minimumPixelSize: 128,
+        maximumScale: 20000,
+        ...
+    }
+})
+
+viewer.trackedEntity = entity
+```
+
+<br>
+
+**请注意：**
+
+1. 我们只需要将 gLTF 模型资源通过 .rui 属性值告诉 Cesium 即可，无需关心底层是究竟如何加载和解析的。
+
+   > Three.js 中需要我们自己根据模型的文件类型，选择不同加载器，以及将加载后的模型添加到场景中。
+
+2. 目前 Cesium 只支持符合 gLTF 规范的 3D 模型资源，不支持其他格式的 3D 模型资源。
+
+   > 再次强调：只要是符合 gLTF 规范的 3D 模型资源即可，哪怕是经过 draco 压缩过的文件都可以。
+   >
+   > 即文件后缀为 .glb 或 .gltf。
+
+<br>
+
+**关于 orientation 的补充说明：**
+
+Entity 的配置项 orientation 用于设定实体的朝向和姿态，作为配置项时 orientation 的值可以是 四元数(Quaternion)。
+
+通常是这样设置 位置和朝向姿态的：
+
+```
+const position = Cartesian3.fromDegrees(-123.0744619, 44.0503706, height)
+const heading = 135 * Math.PI / 180.0
+const pitch = 0
+const roll = 0
+const hpr = new HeadingPitchRoll(heading, pitch, roll)
+const orientation = Transforms.headingPitchRollQuaternion(position, hpr)
+
+const entity = viewer.entities.add({
+    position,
+    orientation,
+    model: {
+        uri: url
+    }
+})
+
+viewer.trackedEntity = entity
+```
+
+
+
+<br>
+
+
+
