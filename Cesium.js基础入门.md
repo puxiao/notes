@@ -132,7 +132,7 @@ Cesium.js 的源码内部使用 JSDoc 方式对所有的类、属性、方法进
 
 以上情况造成了默认 Cesium.d.ts 文件并不是完美的，存在一些错误或缺失的类型定义。
 
-> 个人感觉大约有 1% 的类型定义有误或缺失。
+> 个人感觉大约有 8% 的类型定义有误或缺失。
 
 
 
@@ -293,26 +293,17 @@ Cesium.js 还有第三方维护的 类型文件包：@types/cesium
        "noImplicitOverride": false
      },
      "include": [
-       "src"
+       "src", "global.d.ts"
      ]
    }
    ```
 
-7. 项目根目录添加 `global.d.ts` 文件内容为：
+   > 特别注意：我们在 "include" 字段中添加了 "global.d.ts"
+
+7. 项目根目录添加 `global.d.ts` 文件内容暂时为空，方便后期我们添加一些内容：
 
    ```
-   declare module '*.png';
-   declare module '*.gif';
-   declare module '*.jpg';
-   declare module '*.jpeg';
-   declare module '*.svg';
-   declare module '*.css';
-   declare module '*.less';
-   declare module '*.scss';
-   declare module '*.sass';
-   declare module '*.styl';
-   declare module '*.asc';
-   declare module 'react-app-rewire-alias';
+   //
    ```
 
 至此，一个空白的项目创建完成。
@@ -525,6 +516,87 @@ export default App;
    可以看出来 cesium.js 需要向 window 添加一个全局变量 CESIUM_BASE_URL 。
 
    由于我们使用的是 TypeScript，检查到 window 默认并不包含该属性，所以会报错，我们这里暂时通过注释选择忽略这个问题。
+
+
+
+<br>
+
+**关于 window.CESIUM_BASE_URL 的再次补充说明：**
+
+为了避免日后每次都要添加 `//@ts-ignore`，所以我们采用这样一劳永逸的解决方式：
+
+编辑项目根目录的 global.d.ts 文件，添加以下内容：
+
+```
+interface Window {
+    CESIUM_BASE_URL: string;
+}
+```
+
+> 请注意，之前我们已经在 tesconfig.json 中有如下配置：
+>
+> ```
+> "include": [
+>     "src", "global.d.ts"
+> ]
+> ```
+
+为了确保一切生效，最好重启一下 VSCoder。
+
+这样，当我们下次再去添加 `window.CESIUM_BASE_URL` 时，就会有正确的提示，也不会再报错了。
+
+
+
+<br>
+
+**关于 window.CESIUM_BASE_URL 的第 3 次补充：**
+
+Cesium.js 还提供了另外一种设置 base url 的方式：
+
+```
+import buildModuleUrl from 'cesium/Source/Core/buildModuleUrl'
+
+buildModuleUrl.setBaseUrl('./static/cesium/') //这样我们就不再用设置 window.CESIUM_BASE_URL 了
+```
+
+他的效果和直接设置 window.CESIUM_BASE_URL 是一模一样的。
+
+不过，由于官方 JSDoc 文档的不严谨，导致 setBaseUrl() 这个函数实际上并未被真正导出到 cesium.d.ts 中。
+
+> 这是因为 buildModuleUrl 本身就是一个函数，在这个函数身上再次添加一个 setBaseUrl() 函数，此时 buildModuleUrl 又被认为是一个命名空间
+>
+> buildModuleUrl 即是一个函数，又是一个命名空间，这导致 JSDoc 理解错乱，所以才没有正确导出 setBaseUrl() 这个函数。
+
+所以，还需要这样使用 TS 注释忽略才可以：
+
+```
+//@ts-ignore
+buildModuleUrl.setBaseUrl('./static/cesium/')
+```
+
+
+
+<br>
+
+buildModuleUrl 还提供了一个名为 getCesiumBaseUrl() 的函数，可以获取已设置的 base url。
+
+```
+buildModuleUrl.getCesiumBaseUrl()
+```
+
+
+
+<br>
+
+**提交 PR，解决这个问题：**
+
+上面已经讲述过了为什么 JSDoc 没有正确导出 setBaseUrl()，经过一番查找，终于让我找到了解决办法。
+
+我已经向 Cesium.js 提交了新的 PR，用于解决 setBaseUrl() 没有正确包导出的问题。
+
+https://github.com/CesiumGS/cesium/pull/9783
+
+> 目前这个 PR 还是 Open 状态，不清楚为什么我提交快 2 周了，官方始终没有任何回复。
 
 
 
