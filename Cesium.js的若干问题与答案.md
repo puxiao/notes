@@ -6,9 +6,11 @@
 
 <br>
 
-#### 为什么 Cesium.js 对 TypeScript 的支持度不好？
+## 为什么 Cesium.js 对 TypeScript 的支持度不好？
 
 尽管官方 NPM 包中自带有 Cesium.d.ts 文件，但是在实际使用过程中会发现，Cesium 对 TypeScript 支持度非常不好，经常遇到 TypeScript 各种报错。
+
+> 是在 1.70 版本后才新增 Cesium.d.ts 的。
 
 > 较为常见的有：
 >
@@ -16,7 +18,9 @@
 >
 > 2. 非常多属性值赋值时提示类型不匹配
 >
->    因为很多属性 Cesium.js 内部都被定义为 `Property | undefined`，而这个类型实际上是模糊、无太多意义的，完全不够精准。
+>    因为很多属性 Cesium.js 内部都被定义为 `Property | undefined`，而这个类型和我们自觉上应该直接赋值有冲突。
+>
+>    关于 Property 我会在后面单独详细讲解。
 
 Cesium.js 内部使用 JSDoc 注释规范，然后自动构建生成的 Cesium.d.ts 文件。
 
@@ -30,16 +34,226 @@ Cesium.js 内部使用 JSDoc 注释规范，然后自动构建生成的 Cesium.d
 1. 不使用官方自带的 Cesium.d.ts，而是使用第三方的 @types/cesium
 
    > 缺点是：@types/cesium 版本更新略滞后与 官方最新版本
+   >
+   > 实际上自从 Cesium.js 官方开始支持 TypeScript 以后，目标就是要替换掉 @types/cesium 
 
 2. 通过在自己的项目中 添加手工定义的 global.d.ts 来弥补官方 Cesium.d.ts 中的不足。
 
    > 缺点是：需要自己手工更新维护
+   >
+   > 在本文后面我也会详细讲解如何手工添加类型声明，来弥补官方 Cesium.d.ts 中的不足。
 
 
 
 <br>
 
-#### 如何在 Cesium 中添加参数调试面板？
+## 为什么 Cesium.js 中属性类型要设置成 Property，而不是直接赋值？
+
+假设我想给一个模型添加一个描边，那么我的代码看上去应该如下：
+
+```
+model.silhouetteColor = Color.RED
+model.silhouetteSize = 4
+```
+
+如果你使用的是 .js 那么上面代码没一点问题，但是我使用的是 TypeScript，就会收到这样的报错：
+
+```
+不能将类型“number”分配给类型“Property | undefined”。
+不能将类型“4”分配给类型“Property | undefined”。
+```
+
+
+
+<br>
+
+从开始学习 cesium.js 以来，遇到 TS 类似报错我都会把原因归咎于官方 JSDoc 写的不好，像上面这个 TS 报错我也归咎于是官方 JSDoc 写的有问题。但是我从未去认真想过，为啥官方把一些 “明显可以直接赋值的属性”定义成 Property 类型。
+
+
+
+<br>
+
+刚看到了 cesium 的一个 issues (8898)
+
+https://github.com/CesiumGS/cesium/issues/8898#issuecomment-637579223
+
+官方回复有一段内容，讲解了为什么是 Porperty 类型。
+通过查阅文档， **Property 应该是和 模拟时间、增加值改变后的回调函数有关。**
+
+
+
+<br>
+
+上面那段代码最正确的写法应该是：
+
+```
+model.silhouetteColor = new ConstantProperty( Color.RED )
+model.silhouetteSize = new ConstantProperty( 4 )
+```
+
+像这样的问题，几乎涵盖了 cesium 中绝大多数类的属性，或许未来官方会有更加合理的解决方式。
+
+
+
+<br>
+
+**Property 本身只是相当于一个接口，cesium 类的属性实际上都应该是 Property 某种子类的实例。**
+
+<br>
+
+**Property的子类：**
+
+**CompositeProperty：**
+
+TimeIntervalCollection 需要用到的属性，所包含每个 TimeInterval 的 data 属性都是由其他 Property 组成的。
+
+| 与它相关的类              | 大致用途                       |
+| ------------------------- | ------------------------------ |
+| CompositeMaterialProperty | 在时间间隔中和 材质 相关的属性 |
+| CompositePositionProperty | 在时间间隔中和 位置 相关的属性 |
+
+
+
+<br>
+
+**ConstantProperty：**
+
+不会随 模拟时间 而变化的常量。
+
+实际中，我们常见的 字符串、数字或者其他复杂类型，都可以使用 ConstantProperty 进行实例化，例如：
+
+```
+model.silhouetteColor = new ConstantProperty( Color.RED )
+model.silhouetteSize = new ConstantProperty( 4 )
+```
+
+<br>
+
+| 与它相关的类             | 大致用途                     |
+| ------------------------ | ---------------------------- |
+| ConstantPositionProperty | 会和 ReferenceFrame 一起使用 |
+
+
+
+<br>
+
+**SampledProperty：**
+
+一组样本以及指定的插值算法。
+
+| 与它相关的类            | 大致用途       |
+| ----------------------- | -------------- |
+| SampledPositionProperty | 和位置插值有关 |
+
+
+
+<br>
+
+**TimeIntervalCollectionProperty：**
+
+TimeIntervalCollection 需要用到的属性，所包含每个 TimeInterval 的 data 属性都是时间值。
+
+
+
+<br>
+
+**MaterialProperty：**
+
+和材质属性相关的接口类，并不能直接实例化，只能实例化其子类。
+
+| 它的子类                        | 大致用途                       |
+| ------------------------------- | ------------------------------ |
+| ColorMaterialProperty           | 材质颜色                       |
+| CompositeMaterialProperty       | 在时间间隔中和 材质 相关的属性 |
+| GridMaterialProperty            | 材质网格                       |
+| ImageMaterialProperty           | 材质贴图                       |
+| PolylineGlowMaterialProperty    | 材质光辉                       |
+| PolylineOutlineMaterialProperty | 材质轮廓                       |
+| StripeMaterialProperty          | 材质纹理                       |
+
+
+
+<br>
+
+**PositionProperty：**
+
+位置相关属性对应的 Cartesian3，不可以直接实例化，只能实例化其子类。
+
+| 它的子类                               | 大致用途                       |
+| -------------------------------------- | ------------------------------ |
+| CompositePositionProperty              | 在时间间隔中核 位置 相关的属性 |
+| ConstantPositionProperty               | 位置 常量                      |
+| SampledPositionProperty                | 和位置插值相关的属性           |
+| TimeIntervalCollectionPositionProperty | 和时间间隔相关的位置属性       |
+
+
+
+<br>
+
+**ReferenceProperty：**
+
+关联到提供的对象(实体集)上的另外一个属性。
+
+
+
+<br>
+
+由于本人目前理解有限，以后再慢慢补充具体用法和含义。
+
+
+
+<br>
+
+## 如何手工添加 TypeScript 类型声明，弥补 Cesium.d.ts 的不足？
+
+再给属性赋值时，除了严格使用 Property 类型外，还会遇到很多其他 TS 类型报错。
+
+这些报错信息大致分为以下 3 类：
+
+1. Cesium 新增的全局属性，例如 window.CESIUM_BASE_URL
+2. cesium.d.ts 遗漏的一些类型声明，例如 buildModuleUrl.setBaseUrl()
+3. cesium.d.ts 标记错误的一些类型声明，例如 viewer.bottomContainer 实际上是 HTMLDivElement，而被错误标记成 Element。
+
+
+
+<br>
+
+目前我只找到了针对第 1 种情况的解决办法。
+
+**给 window 添加全局自定义属性：**
+
+1. 在项目根目录，创建 global.d.ts 文件，并添加以下内容：
+
+   ```
+   interface Window {
+       CESIUM_BASE_URL: string;
+   }
+   ```
+
+2. 修改 tsconfig.json 文件，在 "include" 中添加 global.d.ts ：
+
+   ```
+   "include": [
+       "src",
+       "global.d.ts"
+     ]
+   ```
+
+   > 当修改上述操作后，为了确保生效，一定要重启 VSCode。
+
+这样，再在代码中书写 window.CESIUM_BASE_URL 时就不会再有 TS 报错了。
+
+
+
+<br>
+
+剩下 2 种情况如何修改，以后再补充。
+
+
+
+<br>
+
+## 如何在 Cesium 中添加参数调试面板？
 
 Cesium 官方推荐使用的是 knockout 这个第三方类库。
 
@@ -206,7 +420,7 @@ export default HelloCesium
 
 <br>
 
-#### 配置全局静态资源路径的 2 种方式是什么？
+## 配置全局静态资源路径的 2 种方式是什么？
 
 第1种：挂载到 window 对象中
 
@@ -226,7 +440,7 @@ buildModuleUrl.setBaseUrl('./static/cesium/')
 
 <br>
 
-#### 如何加载 gLTF 格式的 3D 模型？
+## 如何加载 gLTF 格式的 3D 模型？
 
 外部 3d 模型资源加载到 Cesium 中后，对应的是 ModelGraphics 实例。
 
