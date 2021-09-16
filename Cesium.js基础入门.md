@@ -537,7 +537,7 @@ interface Window {
 >
 > ```
 > "include": [
->     "src", "global.d.ts"
+>  "src", "global.d.ts"
 > ]
 > ```
 
@@ -4805,3 +4805,14 @@ https://sandcastle.cesium.com/index.html
 <br>
 
 **加油，2021.08.30 ！**
+
+
+
+<br>
+
+> 以下更新于 2021.09.16
+
+在实际 Cesium 代码编写过程中，我会把我认为一些比较重要的知识点整理出来。
+
+欢迎阅读我写的这篇文章：[Cesium.js的若干问题与答案.md](https://github.com/puxiao/notes/blob/master/Cesium.js的若干问题与答案.md)
+
