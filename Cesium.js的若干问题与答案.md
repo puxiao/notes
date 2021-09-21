@@ -523,5 +523,74 @@ viewer.trackedEntity = entity
 
 <br>
 
+## 如何解决Cesium 1.85版本编译时 zip.js 相关报错？
 
+在 2021年 9 月初发布的 1.85 版本中，对于第三方类库 zip.js 引入时做了变动。
+
+```diff
+- import * as zip from "@zip.js/zip.js/lib/zip.js";
++ import * as zip from "@zip.js/zip.js/lib/zip-no-worker.js";
++ zip.configure({
++  useWebWorkers: false
++ });
+```
+
+而这个修改导致 react 在编译时会报错：
+
+```
+node_modules/cesium/Source/ThirdParty/zip.js 3559:74 ...
+Module parse failed: Unexpected toke (3559:74)
+File was processed with thes loaders:
+...
+```
+
+原因是目前 creact-react-app 所创建的 react 项目使用的是 webpack4，不支持上面 zip.js 中的配置。
+
+> 希望 creat-react-app 早日更新成基于 webpack5 的编译。
+
+**解决方式为：**
+
+1. 安装 `yarn add @craco/craco --dev`
+
+2. 安装 `@open-wc/webpack-import-meta-loader`
+
+   ```
+   yarn add @open-wc/webpack-import-meta-loader --dev
+   ```
+
+3. 在根目录创建 `craco.config.js` ，文件内容添加 rules 的配置：
+
+   ```
+   module.exports = {
+       webpack: {
+           configure: (config) => {
+               // remove cesium warning
+               config.module.unknownContextCritical = false
+               config.module.unknownContextRegExp = /\/cesium\/cesium\/Source\/Core\/buildModuleUrl\.js/
+   
+               // remove zip.js error in webpack4
+               config.module.rules.push({
+                   test: /\.js$/,
+                   use: { loader: require.resolve('@open-wc/webpack-import-meta-loader') }
+               });
+               return config
+           }
+   };
+   ```
+
+4. 修改 `package.json`文件：
+
+   ```diff
+   - "start": "react-scripts start",
+   - "build": "react-scripts build",
+   - "test": "react-scripts test",
+   
+   + "start": "craco start",
+   + "build": "craco build",
+   + "test": "craco test",
+   ```
+
+
+
+<br>
 
