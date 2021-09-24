@@ -653,9 +653,9 @@ handler.setInputAction(
 )
 ```
 
-请注意上述代码中，action 对应是 (mouse) => { ... }，在 VSCode 中此时 mouse的类型为 any，在函数内部 mouse.position也是 any。
+请注意上述代码中，action 对应是 (mouse) => { ... }，在 VSCode 中此时 mouse 的类型为 any，在函数内部 mouse.position 也是 any。
 
-实际上我们都知道在 LEFT_CLICK 事件处理函数中，action 的参数 mouse类型为：
+实际上我们都知道在 LEFT_CLICK 事件处理函数中，action 的参数 mouse 类型为：
 
 ```
 {
@@ -718,7 +718,7 @@ namespace ScreenSpaceEventParamsType {
 export default ScreenSpaceEventParamsType
 ```
 
-**重点说明：以上参数类型的归纳，只是我通过阅读源码个人总结出来的，有些交互场景我自己也没完全用到，所以不敢保证上面的一定百分百正确。**
+**重点说明：以上参数类型的归纳，只是我通过阅读源码个人总结出来的，我也是初学者，有些交互场景我自己也没完全用到过，所以不敢保证上面的一定百分百正确。**
 
 
 
@@ -726,12 +726,12 @@ export default ScreenSpaceEventParamsType
 
 **实际使用：**
 
-我们再写 鼠标移动 事件交互时，可以认为得去给 action 参数添加类型，方便我们在 action 函数内部去调用参数对应的属性。
+我们再写 鼠标移动 事件交互时，可以人为得去给 action 参数添加类型，方便我们在 action 函数内部去调用参数对应的属性。
 
 > 假设 ScreenSpaceEventParamsType.ts 位于 src/typings/ 目录下
 
 ```
-// 我们使用 import type ... 这种方式引入，强调我们引入的仅仅是一个定义好的 TypeScript 类型，不是真的一个类
+// 我们使用 import type ... 这种方式引入，强调我们引入的仅仅是一个定义好的 TypeScript 类型，不是真的一个类或对象
 import type ScreenSpaceEventParamsType from 'typings/screen-space-event-params-type'
 
 const scene = viewer.scene
@@ -752,7 +752,7 @@ handler.setInputAction(
 
 <br>
 
-以上这种操作在开发过程中，并不是必须的，但是通过我们对于 action 的参数类型设定，可以比较方便得到较好的 语法提示。
+以上这种操作在开发过程中，并不是必须的，但是通过我们对于 action 的参数类型设定，可以比较方便得到较好的语法提示。
 
 
 
