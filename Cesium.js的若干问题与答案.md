@@ -594,3 +594,167 @@ File was processed with thes loaders:
 
 <br>
 
+## 场景交互 SceneSpaceEventHandler 的参数类型变化规律是什么？
+
+Cesium.js 是一套框架，在 ScreenSpaceEventHandler 内部已经针对各种用户鼠标、键盘等操作进行了 “相关事件处理”。
+
+当我们需要添加一些用户交互时，通过 .setInputAction(action, type, modifier) 函数来添加的。
+
+> 这 3 个参数的类型依次为：
+>
+> 1. action：function、arrow function
+> 2. type：Number
+> 3. modifier：Number
+
+<br>
+
+例如添加 鼠标移动 交互，代码可能如下：
+
+```
+const scene = viewer.scene
+const handler = new ScreenSpaceEventHandler(scene.canvas)
+
+handler.setInputAction(
+    (movement) => {
+        const feature = scene.pick(movement.endPosition)
+        ...
+    },
+    ScreenSpaceEventType.MOUSE_MOVE
+)
+```
+
+请注意上述代码中，action 对应是 (movement) => { ... }，在 VSCode 中此时 movement 的类型为 any，在函数内部 movement.endPosition 也是 any。
+
+实际上我们都知道在 MOUSE_MOVE 事件处理函数中，action 的参数 movement 类型为：
+
+```
+{
+    startPosition: Cartesian2,
+    endPosition: Cartesian2
+}
+```
+
+
+
+<br>
+
+再换一个例子，假设我们需要添加 鼠标左键点击 交互，代码可能如下：
+
+```
+const scene = viewer.scene
+const handler = new ScreenSpaceEventHandler(scene.canvas)
+
+handler.setInputAction(
+    (mouse) => {
+        const feature = scene.pick(mouse.position)
+        ...
+    },
+    ScreenSpaceEventType.LEFT_CLICK
+)
+```
+
+请注意上述代码中，action 对应是 (mouse) => { ... }，在 VSCode 中此时 mouse的类型为 any，在函数内部 mouse.position也是 any。
+
+实际上我们都知道在 LEFT_CLICK 事件处理函数中，action 的参数 mouse类型为：
+
+```
+{
+    position: Cartesian2
+}
+```
+
+
+
+<br>
+
+别问我为什么知道，因为我认真阅读过 ScreenSpaceEventHandler.js 源码。
+
+
+
+<br>
+
+上面举例中，MOUSE_MOVE 事件对应的 action 中的参数类型为 { startPosition: Cartesian2, endPosition: Cartesian2 }，而 LEFT_CLICK 事件对应的 action 中参数类型为 { position: Cartesian2 }，类似的，其他不同事件中 action 的参数类型也都不相同。
+
+因此我们可以得出结论：不同的交互事件 type (setInputAction 的第 2 个参数) 对应的 action (setInputAction 的第 1 个参数) 中参数类型不相同。
+
+
+
+<br>
+
+通过查阅 ScreenSpaceEventHandler.js 源码，可以将不同事件类型对应的 action 参数进行总结。
+
+我们创建一个名为 ScreenSpaceEventParamsType.ts 的文件，内容：
+
+```
+import { Cartesian2 } from 'cesium'
+
+namespace ScreenSpaceEventParamsType {
+    export interface LEFT_DOWN { position: Cartesian2 }
+    export interface LEFT_UP { position: Cartesian2 }
+    export interface LEFT_CLICK { position: Cartesian2 }
+    export interface LEFT_DOUBLE_CLICK { position: Cartesian2 }
+    export interface RIGHT_DOWN { position: Cartesian2 }
+    export interface RIGHT_UP { position: Cartesian2 }
+    export interface RIGHT_CLICK { position: Cartesian2 }
+    export interface MIDDLE_DOWN { position: Cartesian2 }
+    export interface MIDDLE_UP { position: Cartesian2 }
+    export interface MIDDLE_CLICK { position: Cartesian2 }
+    export interface MOUSE_MOVE { startPosition: Cartesian2, endPosition: Cartesian2 }
+    export type WHEEL = "wheel" | "mousewheel" | "DOMMouseScroll"
+    export type PINCH_START = { position: Cartesian2 } | { position1: Cartesian2, position2: Cartesian2 }
+    export interface PINCH_END { position: Cartesian2 }
+    export type PINCH_MOVE = { startPosition: Cartesian2, endPosition: Cartesian2 } | {
+        distance: {
+            startPosition: Cartesian2,
+            endPosition: Cartesian2,
+        },
+        angleAndHeight: {
+            startPosition: Cartesian2,
+            endPosition: Cartesian2,
+        }
+    }
+}
+
+export default ScreenSpaceEventParamsType
+```
+
+**重点说明：以上参数类型的归纳，只是我通过阅读源码个人总结出来的，有些交互场景我自己也没完全用到，所以不敢保证上面的一定百分百正确。**
+
+
+
+<br>
+
+**实际使用：**
+
+我们再写 鼠标移动 事件交互时，可以认为得去给 action 参数添加类型，方便我们在 action 函数内部去调用参数对应的属性。
+
+> 假设 ScreenSpaceEventParamsType.ts 位于 src/typings/ 目录下
+
+```
+// 我们使用 import type ... 这种方式引入，强调我们引入的仅仅是一个定义好的 TypeScript 类型，不是真的一个类
+import type ScreenSpaceEventParamsType from 'typings/screen-space-event-params-type'
+
+const scene = viewer.scene
+const handler = new ScreenSpaceEventHandler(scene.canvas)
+
+handler.setInputAction(
+    (movement: ScreenSpaceEventParamsType.MOUSE_MOVE) => {
+        const feature = scene.pick(movement.endPosition)
+        ...
+    },
+    ScreenSpaceEventType.MOUSE_MOVE
+)
+```
+
+> 注意：我们人为得设置 movement 的类型为 ScreenSpaceEventParamsType.MOUSE_MOVE，这里的 "MOUSE_MOVE" 和 第 2 个参数进行呼应，我们就可以在 action 内部得到正确的 movement 类型，VSCode 也知道 movement.endPosition 的类型为 Cartesian2 了。
+
+
+
+<br>
+
+以上这种操作在开发过程中，并不是必须的，但是通过我们对于 action 的参数类型设定，可以比较方便得到较好的 语法提示。
+
+
+
+<br>
+
