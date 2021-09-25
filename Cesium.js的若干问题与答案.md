@@ -700,10 +700,10 @@ namespace ScreenSpaceEventParamsType {
     export interface MIDDLE_UP { position: Cartesian2 }
     export interface MIDDLE_CLICK { position: Cartesian2 }
     export interface MOUSE_MOVE { startPosition: Cartesian2, endPosition: Cartesian2 }
-    export type WHEEL = "wheel" | "mousewheel" | "DOMMouseScroll"
-    export type PINCH_START = { position: Cartesian2 } | { position1: Cartesian2, position2: Cartesian2 }
-    export interface PINCH_END { position: Cartesian2 }
-    export type PINCH_MOVE = { startPosition: Cartesian2, endPosition: Cartesian2 } | {
+    export type WHEEL = number
+    export interface PINCH_START { position1: Cartesian2, position2: Cartesian2 }
+    export type PINCH_END = undefined
+    export interface PINCH_MOVE {
         distance: {
             startPosition: Cartesian2,
             endPosition: Cartesian2,
@@ -718,9 +718,12 @@ namespace ScreenSpaceEventParamsType {
 export default ScreenSpaceEventParamsType
 ```
 
-**重点说明：以上参数类型的归纳，只是我通过阅读源码个人总结出来的，我也是初学者，有些交互场景我自己也没完全用到过，所以不敢保证上面的一定百分百正确。**
-
-
+> 强调说明：以上参数类型的归纳，是我通过阅读源码和实际本机测试得出的，我相信在其他设备上应该也是正确的。
+>
+> 特别强调 2 个事件：
+>
+> 1. 对于 WHEEL 事件来说，参数类型其实就是经过 cesium.js 处理过后的 delta 数值(数字)。
+> 2. 对于 PINCH_END 事件来说，实际上是没有 参数 的，所以在上述代码中将参数设置为了 undefined
 
 <br>
 
