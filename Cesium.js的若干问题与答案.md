@@ -761,3 +761,65 @@ handler.setInputAction(
 
 <br>
 
+## 如何循环遍历瓦片集中每一个特征要素(feature)，并让其执行某个函数？
+
+瓦片集(Cesium3DTileset) 遵循 3D-Tileset 规范，**每一个子瓦片的 .content 可能包含真实的特征要素(feature)，也可能是一个瓦片集。**
+
+**第1：**
+
+所谓 “循环遍历瓦片集中的每一个特征要素”，就是从根瓦片开始遍历，通过判断子瓦片是否有 .innerContents 属性来判断其是否仍然是一个瓦片集。
+
+若子瓦片仍然是瓦片集，则深入其内部，继续循环遍历特征要素。
+
+**第2：**
+
+所谓“让所有的特征要素都执行某个函数”，就是在循环遍历的过程中，将需要执行的函数通过参数形式传递进去。
+
+<br>
+
+**代码如下：**
+
+```
+type FeatureCallBack = (feature: Cesium3DTileFeature) => void
+const myFun: FeatureCallBack = (feature) => {
+    ...
+}
+
+const processContentFeature = (content: Cesium3DTileContent, callback: FeatureCallBack) => {
+    const length = content.featuresLength
+    for (let i = 0; i < length; i++) {
+        const feature = content.getFeature(i)
+        callback(feature)
+    }
+}
+
+const processTileFeature = (content: Cesium3DTileContent, callback: FeatureCallBack) => {
+    const innerContents = content.innerContents
+    if (defined(innerContents)) {
+        innerContents.forEach(item => processTileFeature(item, callback)) //若为瓦片集，则让其继续循环遍历直至最深处
+    } else {
+        processContentFeature(content, callback) //若为普通瓦片内容，则去遍历其内部的特征表
+    }
+}
+
+const tileset = new Cesium3DTileset({
+    url: IonResource.fromAssetId(8564)
+})
+const handleTileLoad = (tile: Cesium3DTile) =>{
+    processTileFeature(tile.content, myFun) //从根瓦片开始遍历
+}
+tileset.tileLoad.addEventListener(handleTileLoad)
+```
+
+
+
+<br>
+
+
+
+
+
+
+
+
+
