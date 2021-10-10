@@ -197,6 +197,14 @@ var app = new Vue({ ... })
 
 <br>
 
+> Vue实例究竟该叫做什么？
+>
+> 答：你可以使用 "app" 变量来对应 Vue 实例对象，也有很多人会使用 vm 来作为变量名，这里的 vm 实际上是 ViewModel 的缩写。
+
+
+
+<br>
+
 Vue 第一个配置项为 el，为要接管并控制的 div 的 id。
 
 > 请注意必须是 id，不可以是 class，因为只有 id 才是唯一标识符。
@@ -393,6 +401,12 @@ Vue 的生命周期和 React 几乎相同。
 
 <br>
 
+Vue 的其他配置项，例如 components，我们暂时不做过多阐述。
+
+
+
+<br>
+
 **配置项总结：**
 
 | 配置项                                  | 主要作用                        | 简单示例                                   |
@@ -403,6 +417,9 @@ Vue 的生命周期和 React 几乎相同。
 | computed                                | 通过 get 和 set 创建 衍生值     | computed:{ fullname:function{ return ...}} |
 | watch                                   | 添加对某自定义变量值改变的监控  | watch:{ name:function(new,old){ ... }}     |
 | 生命周期钩子函数，例如 created、updated | 添加各个生命周期钩子(hook)函数  | created:function(){ ... }                  |
+| 其他配置项，例如 components             | 添加局部组件                    | components:{ ... }                         |
+
+> 上面表格中出现的配置项仅为 Vue 最基础，最常见的配置项，还有其他配置项，我们以后再学习
 
 
 
@@ -981,7 +998,7 @@ Vue.component('todo-item',{
 
 2. 表示组件接收参数的 props 的值为一个数组，在上面代码中该数组仅包含一个元素 'todo'，请记得这个 'todo'   相当于该组件对外暴露的自定义参数(属性)名。
 
-   > 至于属性值是什么类型，目前 Vue 无法定义
+   > 我们目前将 props 设置为数组，在本文后面，我们还可以将 props 设置为对象，从而可以明确定义 props 的结构类型。
 
 3. template 的内容即该组件的实际内容的 字面量。在该字面量中遵循 Vue 基础语法，并且 在字面量中，可以将 todo 视为该组件内可访问使用的变量。
 
@@ -1113,4 +1130,146 @@ Vue.component('todo-item',{
 <br>
 
 #### 深入了解学习组件
+
+针对组件的细节，进一步深入学习。
+
+
+
+**组件名：**
+
+通常一个组件名字应该和实际用途有关联，让人通过名字即可大致了解组件的功能和用途。
+
+组件名有 2 种风格：
+
+1. 全小写+横杠(kebab-case)：例如 my-component-name
+2. 首字母大写(PascalCase)：例如 MyComponentName
+
+> 对于我个人而言，我偏爱使用第一种，全小写加横杠 的形式。
+
+
+
+<br>
+
+**全局组件与局部组件：**
+
+通过 Vue.component('xxx', { ... }) 这种形式创建的组件为全局组件，即在任何地方(哪怕是其他组件内部)都可以使用。
+
+同时在该组件内部也可以访问全局变量。
+
+全局组件的缺点：即使当前项目并未实际使用到该组件，但该组件的代码也会被打包进去。
+
+<br>
+
+这时我们就需要 局部组件。
+
+Vue 创建局部组件的方式，实际上就是将原本的 Vue.component() 进行了拆解和重组。
+
+1. 对外使用 JS 创建一个组件
+2. 将该组件添加的 Vue 实例的配置项 components 中
+
+举例：
+
+```
+//全局组件
+Vue.component('component-a', { ... })
+
+//局部组件
+var ComponentA = { ... }
+
+var app = new Vue({
+    el:'#app',
+    components:{
+        'component-a': ComponentA
+    }
+})
+```
+
+> 假设我们在 Vue 初始化时并没有引入 ComponentA，那么将来项目打包时也不会将 ComponentA 的代码打包进去。
+
+假设并不是 Vue 初始化是要引入 ComponentA，而是另外一个组件 Xxxx 要引入 ComponentA，那么引入方式和 Vue 初始化类似，也是通过 components 这个配置属性来引入的。
+
+举例：
+
+```
+var ComponentA = { ... }
+
+// import ComponentA from './xxx'
+
+var ComponentB = {
+    components:{
+        'component-a': ComponentA
+    }
+}
+```
+
+
+
+<br>
+
+**组件参数Props：**
+
+在 Vue 基础部分我们代码中演示的是 props 为一个数组，数组中的元素为 变量名。
+
+例如：props:['xxx']，这里要强调一点，变量名要遵循 驼峰命名原则，例如：props:['myName']。
+
+在使用该组件，设置其属性时，需要转成 小写加横杠的 标签名，即： `<my-component my-name="xxx" >`
+
+
+
+<br>
+
+实际上 props 也可以不是数组，而是对象，并且直接定义该 props 中各变量名和值类型。
+
+例如：
+
+```
+props:{
+    myName:String
+}
+```
+
+> 请注意，这里的类型定义采用的是该类型的构造函数，即首字母为大写风格和 JSDoc 类似。
+>
+> 这一点和 TypeScript 不同，假设类型为字符串即 String，而不是 TypeScript 中的 string。
+
+以此类推，我们还可以将 props 拓展为：
+
+```
+props:{
+    myName: String,
+    age: Number,
+    myFun: Function,
+    arr: Array,
+    arr2:[String, Number]
+    other: Ojbect
+}
+```
+
+> props 中属性值类型的定义，几乎和 JSDoc 相同
+
+请注意，props 属性值类型还支持你自定义的 JS 类，例如：
+
+```
+function Person(name,age){
+    this.name = name,
+    this.age = age
+}
+
+props:{
+   me:Person
+}
+```
+
+
+
+<br>
+
+Vue 组件嵌套组件会产生一个 属性叠加的 效果，如果不想让当前属性继承父类中的任何属性，则可以通过设置 `inheritAttrs: false` 的形式来明确拒绝。
+
+```
+Vue.component('base-input',{
+    inheritAttrs: false,
+    props:...
+})
+```
 
