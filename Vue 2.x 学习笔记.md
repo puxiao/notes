@@ -389,15 +389,28 @@ var app = new Vue({
 Vue 的生命周期和 React 几乎相同。
 
 1. 创建之前：beforeCreate
+
 2. 创建完成：created
+
 3. 挂载之前：beforeMount
+
 4. 挂载完成：mounted
+
 5. 更新之前：beforeUpdate
+
 6. 更新完成：updated
-7. 卸载之前：beforeDestroy
-8. 卸载完成：destroyed
 
+7. 重新激活：activated  (组件被 keep-alive 包括下才会存在该钩子函数)
 
+8. 重新失活：deactivated (组件被 keep-alive 包括下才会存在该钩子函数)
+
+   > 对于 activated 和 deactivated 这 2 个生命周期来说，在服务器端渲染是不会被调用的。
+
+9. 卸载之前：beforeDestroy
+
+10. 卸载完成：destroyed
+
+11. 组件捕获错误：errorCaptured
 
 <br>
 
@@ -1830,6 +1843,20 @@ var component = {
 例如：
 
 ```
+//xxx.vue
+
+<template>
+    ...
+<template>
+
+<script>
+    name:'puxiao'
+</scrpt>
+
+<style scoped>
+    ...
+<style>
+```
 
 
 
@@ -1887,7 +1914,9 @@ npm i @vue/cli -g
 
 ```
 vue --verison
+
 # or
+
 vue -V
 ```
 
@@ -1901,10 +1930,11 @@ vue -V
 
 ```
 vue -h
+
 # or
+
 vue --help
 ```
-
 
 
 <br>
@@ -1955,7 +1985,6 @@ vue serve
 ```
 
 
-
 <br>
 
 **通过图形化界面管理项目**
@@ -1963,7 +1992,6 @@ vue serve
 ```
 vue ui
 ```
-
 
 
 <br>
@@ -2031,12 +2059,4 @@ vue ui
 <br>
 
 至此，一个基本的 Vue 开发环境配置完成，接下来就可以开始写代码了。
-
-
-
-
-
-
-
-
 
