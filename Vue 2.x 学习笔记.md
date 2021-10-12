@@ -1890,7 +1890,7 @@ Vue 代码风格指南：https://cn.vuejs.org/v2/style-guide/
 
 <br>
 
-## vue/cli创建项目
+## 3、vue/cli创建项目
 
 Vue cli 相当于 React 的 Create-react-app，用于快速创建 Vue 项目工程的脚手架。
 
@@ -1983,6 +1983,28 @@ vue create my-project
    2. 创建 vue 3
    3. 手工选择特性 (可以选择包含 typescript、vuex、vue router 等)
 4. @vue/cli 官网上面的某些操作步骤界面已经和当前最新版本略微不同，不过这些不同都不是特别重要的，只要创建一次就明白了。
+
+
+
+<br>
+
+**关于手工选择安装特性的操作补充：**
+
+在创建项目时，若选择 手工选择安装特性 这种方式时，其中有一环节会让你选择究竟安装哪些内容。
+
+除了默认自动选中的几项外，你还可以额外去勾选其他几种，包括：
+
+1. typescript
+2. vuex
+3. vue router
+4. ...
+
+请注意，选择的操作方式为：
+
+1. 通过上`下箭头` 切换到当前选项
+2. 通过摁 `空格键` 来选中或取消当前项
+3. 摁 `i 键`可以对当前已选项进行 反选
+4. 最终摁 `回车键` 确认并进入下一环节
 
 
 
@@ -2337,7 +2359,83 @@ export default {
 
 <br>
 
-## Vue-Router路由
+## 4、Vue-Router路由
+
+Vue Router 官网地址：https://router.vuejs.org/zh/
+
+
+
+<br>
+
+#### Vue项目中安装router
+
+**第一种：原生html**
+
+直接通过标签引入最新的 router.js
+
+```
+<script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+```
+
+或者指定某个具体版本：
+
+```
+<script src="https://unpkg.com/vue-router@2.0.0/dist/vue-router.js"></script>
+```
+
+
+
+<br>
+
+**第二种：手动NPM安装**
+
+```
+yarn add vue-router
+```
+
+
+
+<br>
+
+**第三种：通过CLI额外追加**
+
+假设你的项目是通过 Vue CLI 已创建好的，那么在命令窗口中先切换到你的项目目录中，然后通过 CLI 追加安装 router。
+
+```
+vue add router
+```
+
+
+
+<br>
+
+**第四种：通过CLI创建包含router的项目**
+
+这是最简单，也最方便的方式，即直接使用 CLI 创建一个新的包含 router 功能和示例的 vue 项目。
+
+```
+vue create my-vue
+```
+
+然后在给出的选项中，选择 `Manually select features`。
+
+在列出的安装特性中，通过上下箭头切换到 Router 这一项，然后摁 空格键 选中 Router 这一项。
+
+接下来摁回车，进行后续步骤。
+
+...
+
+其中会有一个选项：Use history mode for router？(Y/n)
+
+建议选择 Y
+
+最终一路往下操作，即可创建出一个包含 router 简单示例的 Vue 项目。
+
+
+
+<br>
+
+#### Vue Router 基础用法
 
 
 
