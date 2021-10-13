@@ -2882,9 +2882,472 @@ path-to-regexp 实际上执行的是类似 伪静态 一样的路径规则。
 
 #### 通过JS控制路由切换
 
+**this.$router.push()**
+
 在上面的示例中，我们都是通过 `<router-link>` 标签来控制路由切换的。
 
 实际中，我们也可以通过 JS 来对路由进行切换、跳转。
+
+`<router-link :to="{ ... }">` 对应的是 `this.$router.push({...})`
+
+举例：
+
+```
+//点击 <router-link> 标签进行跳转到 /xxx
+<router-link to='/xxx'></router-link>
+
+//通过 JS 控制路由跳转同样的 url
+this.$router.push('xxx')
+```
+
+```
+//点击 <router-link> 标签进行跳转到 /xxx?id=2
+<router-link :to='{path:"xxx",query:{id:2}}'></router-link>
+
+//通过 JS 控制路由跳转同样的 url
+this.$router.push({
+    path:'xxx',
+    query:{
+        id:2
+    }
+})
+```
+
+```
+//点击 <router-link> 标签进行跳转到 /xxx/2
+<router-link :to='{name:"xxx",params:{id:2}}'></router-link>
+
+//通过 JS 控制路由跳转同样的 url
+this.$router.push({
+    name:'xxx',
+    params:{
+        id:2
+    }
+})
+```
+
+
+
+<br>
+
+请注意：上面示例中例如 name:'xxx'，实际上还可以使用模板字符串，例如 name:`/xxx/${xx}`
+
+由于可以使用模板字符串来拼接 name 或 path，那么无论 name 还是 path 都可以拼接处彼此对方的形态。
+
+例如 原本使用 name 其结果为伪静态类型的路径，但通过模板字符串可以改造成 动态类型，例如：
+
+```
+this.$router.push({
+    name:'/xxx?id=${xx}'
+})
+```
+
+
+
+<br>
+
+**this.$router.replace()**
+
+上面提到的 .push() 方法会向浏览器历史添加一条历史记录。
+
+而 .replace() 函数用法和 .push() 完全相同，只不过它并不会添加一条历史记录，而是替换当前这条历史记录。
+
+如果使用的是 `<router-link>` 标签，可通过添加 `replace` 属性来表明这条连接是用于替换当前历史记录，而不是新增。
+
+```
+<router-link to='/xxxx' replace>
+```
+
+
+
+<br>
+
+**this.$router.go(n)**
+
+这个 .go() 函数用于跳转到某个历史记录。
+
+```
+this.$router.go(1) //前进一个页面
+this.$router.go(-1) //后对一个页面
+this.$router.go(3)  //前进 3 个页面(前提是历史记录中存在这个记录)
+```
+
+如果历史记录并不够用，那么就会默默跳转失败。
+
+> 所谓 “默默”，意味着并不会收到报错信息
+
+想要获取浏览器历史记录可用长度，对应代码为：
+
+```
+window.history.length
+```
+
+
+
+<br>
+
+**关于路由 path/name 的补充：**
+
+在前面我们提到定义路由路径的 2 种方式：
+
+1. 使用 path + query
+2. 使用 name + params
+
+这实际上是站在 `<router-link>` 或 `this.$router.push()` 角度上来看待如何最终匹配的。
+
+但是如果站在 路由实例 router 的角度来看，path 和 name 是不冲突的。
+
+准确来说：name + params 实际上是 path 的另外一种定义方式。
+
+例如：
+
+```
+const router = new VueRouter=({
+    routes:[
+        {
+            path:'/user/:userid',
+            name:'user',
+            component:User
+        }
+    ]
+})
+```
+
+在上面代码中，我们在路由实例内部，定义了 `path:/user/:userid`，同时我们也定义了 `name:user`。
+
+因此在使用的过程中 (站在 `<router-link> 和 this.$router.push()`的角度)，我们可以通过 name + param 的组合形式来命中 `/user/:userid`。
+
+```
+//命中 /user/:userid
+this.$router.push({
+    name:user,
+    params:{
+        userid:2
+    }
+})
+```
+
+
+
+<br>
+
+#### `<router-view>`的name属性
+
+在上面讲解的路由例子中，无论 App.vue 还是页面，他们都只包含一个 `<router-view>` 标签。
+
+实际上它们是可以同时包含多个 `<router-view>` 标签的。
+
+> 在 Vue Router 官方文档中，将 `<router-view>` 称呼为 “视图”
+
+
+
+<br>
+
+试想一下这个应用场景：假设某个页面中存在 A、B、C 3 个模块。
+
+> 你可以把 A B C 想象成页面的 顶部、侧边栏 和 中间内容
+
+当命中某个路由路径时，希望分别将 A、B、C 3 块渲染成 3 个不同的组件内容。
+
+这个时候，我们就可以在这个页面中 添加 3 个 `<router-view>` 标签，并为其添加不同的 name 属性值。
+
+```
+<router-view name="a"></router-view>
+<router-view name="b"></router-view>
+<router-view name="c"></router-view>
+```
+
+> 你可以理解为  3 个 “占位符” 或 “插槽”
+
+然后我们将路由实例的配置由渲染单个的 `component` 修改为 `components`，并进行相关设置：
+
+```
+const router = new VueRouter({
+    routes: [
+        path:'/xx',
+        components:{
+            a:ComponentA,
+            b:ComponentB,
+            c:ComponentC
+        }
+    ]
+})
+```
+
+这样当路由命中 `/xx` 后，就会根据 components 中配置的多个 `name` 名字找到对应的 `<router-view>`，然后依次对他们进行渲染。 
+
+
+
+<br>
+
+实际上当我们使用 `<router-view />` 时，在没有向其添加 name 属性值时，默认 name 的值为 "default"。
+
+
+
+<br>
+
+上面的套路也可以应用在 嵌套式路由 中。
+
+
+
+<br>
+
+#### 重定向和别名
+
+**重定向：**
+
+假设当前命中了路由路径 '/aa'，但是由于某种原因我们需要跳转到 '/bb' 对应的路由路径上。
+
+这就叫做：路由重定向，可以通过 `redirect` 属性来实现。
+
+```
+const router = new VueRouter({
+    routes:[
+        { path:'/aa', redirect:'/bb'},
+        ...
+    ]
+})
+```
+
+在上面的代码中，重定向的目标路径我们写成了固定的 "/bb"，实际中还可以使用以下 2 种设定方法：
+
+1. 采用 对象 的形式，例如：
+
+   ```
+   const router = new VueRouter({
+       routes:[
+           { path:'/aa', redirect:{name:'bb'}
+           },
+           ...
+       ]
+   })
+   ```
+
+2. 采用箭头函数 返回值的形式，例如：
+
+   ```
+   const router = new VueRouter({
+       routes:[
+           { 
+               path:'/aa', 
+               redirect: to=>{
+                   return ...
+               }
+           },
+           ...
+       ]
+   })
+   ```
+
+
+
+<br>
+
+经过上面重定向后，当访问 "/aa" 时会自动变成(跳转) "/bb"。
+
+
+
+<br>
+
+**别名：**
+
+向路由规则中添加 `alias`  配置。
+
+举例：
+
+```
+const router = new VueRouter({
+    routes:[
+        { path:'/aa',component:ComponentA, alias:'/bb'}
+    ]
+})
+```
+
+上面代码中意味着当访问 "/aa" 和 "/bb" 是效果完全相同，并且浏览器地址也不会发生变化。
+
+> 如果是重定向则浏览器地址会发生变化。
+
+
+
+<br>
+
+#### 路由组件传参(解耦)
+
+假设我们有一个路由规则为 "/xxx/:id"，且此刻被命中，需要将组件 `CompA` 渲染到 `<router-view>` 中。
+
+如果组件 CompA 中需要获取参数 id，并且根据 id 的值来做一些内容显示。
+
+那么我们很容易想到在 CompA 组件中使用 `this.$router.param.id` 来获取并使用 id 这个参数值。
+
+问题来了，假设我们在别的地方也需要使用到 CompA 这个组件，但是 CompA 需要使用到的 id 并不是通过路由获取，而是通过设置设置属性值来传递的，例如：
+
+```
+<CompA v-bind:id="xxx"></CompA>
+```
+
+由于 CompA 内部使用的是 this.$router.params.id，那么很明显 CompA 无法同时适用以上 2 种场景。
+
+为了提高组件的复用性，我们可以通过给 路由组件传参 的形式来解决这个问题。
+
+
+
+<br>
+
+所谓 “路由组件传参” 就是在组件内部原本需要使用 `this.$router.params.xx` 获取参数的形式改为通过设置组件绑定属性的方式。
+
+
+
+<br>
+
+**操作流程为：**
+
+1. 将 “路由组件” 改成普通的组件，也就是说移除组件内部 this.$router.params 的相关代码，改为通过定义组件 props:[ ... ] 的形式来获得参数。
+
+2. 修改路由规则，添加 `props:true` 设置，将 this.$router.params 中的各个值键对(属性名和属性值)为 “组件属性” 传递给组件。
+
+   例如将 this.$router.params.id 以 id="xxx" 的形式设置于 CompA 上，从而 CompA 可以顺利得到参数 id 的值。
+
+```
+const router = new VueRouter({
+    routes:[
+        { path:'/xxx/:id', component:CompA, props:true }
+    ]
+})
+```
+
+假设路由规则中使用的是 components，那么 props 需要对各个 视图(`<router-view>`) 都做相应设置。
+
+```
+const router = new VueRouter({
+    routes:[
+        { 
+            path:'/xxx/:id', 
+            components: { default:CompDef, a:CompA, b:CompB },
+            props:{ default:true, a:true, b:false}
+        }
+    ]
+})
+```
+
+
+
+<br>
+
+**关于 Props 值的补充说明：**
+
+Props 可以有 2 种形态：
+
+1. 布尔值
+2. 对象
+3. 有返回值(对象)的箭头函数
+
+<br>
+
+第1种：布尔值
+
+1. 若为 true：向 Vue Router 表明，请将 this.$router.params 中的值键对以属性(参数)的形式传递给被渲染的组件中。
+2. 若为 false：也就是默认值，表明不需要将 this.$router.params 中的值键对传递给组件
+
+<br>
+
+第2种：对象
+
+若为对象，例如 props:{ name:'puxiao' }，包含 2 层含义：
+
+1. 无需将 this.$router.params 中的值键对传递给被渲染的组件
+2. 但是请将 props 定义的对象 { name:'puxiao' } 中的值键对作为属性传递给被渲染的组件
+
+<br>
+
+第3种：有返回值(对象)的箭头函数
+
+实际上这是 第2种 的变种形态。简单来说，例如：
+
+```
+props:()=>{ return { name:'puxiao' }}
+```
+
+实际中可以将 router 中的某些参数进行修改和调整，然后再传递给组件。
+
+举例：
+
+假设路由中的某个参数名为 id，但是组件中定义的变量名却为 useid，那么我们可以这样操作：
+
+```
+const router = new VueRouter({
+    routes:[
+        {
+            path:'/xx/:id',
+            component:CompA,
+            props: router => { useid: router.params.id }
+        }
+    ]
+})
+```
+
+> 在上面代码中，我们通过 props 对应的箭头函数，将当前路由 router 的参数 id 成功转化为另外一个对象，其中对应的属性名为 useid，然后将这个对象的值键对作为属性参数传递给组件。
+
+
+
+<br>
+
+#### 路由模式
+
+准确来说是 Vue 基于 HTML5 的路由模式。
+
+最常见的 2 种模式为：
+
+1. 哈希模式(hash)：相当于单页面模式，即跳转不通过路由后，网址也不发生任何变化，历史记录中也不存在前进后退。
+2. 历史记录模式(history)：相当于不同网址，有前进后退的历史记录，每次跳转网址会自动发生变化
+
+
+
+<br>
+
+实际中更多倾向于使用 历史记录模式(history)，因为这个更加符合用户操作体验。
+
+但问题是，我们知道 Vue 项目入口实际上就只有一个  index.html，所谓路由网址的变化都仅仅是 Vue Router 内部实现的，例如：/aa/bb，实际服务器上并不存在这个目录结构。
+
+当我们选择将构建好的 Vue 项目发布到服务器上时，还需要针对后端 Web 服务程序进行相应的路由设置，以避免出现 404 情况。
+
+
+
+<br>
+
+**后端 Web 服务程序相对应的路由配置**
+
+后端 Web 服务程序有非常多种，例如 Nginx、IIS、Apache、Nodejs 等等。
+
+如果是 Nginx ，那么需要在当前站点的配置文件中，做以下配置：
+
+```
+location / {
+  try_files $uri $uri/ /index.html;
+}
+```
+
+> 将当前站点下所有路径请求都返回 index.html
+
+
+
+<br>
+
+**Vue 对应的 404 设置：**
+
+对于 Vue 项目而言，最好要添加 404 处理，以给用户明确的提示。
+
+> 如果你不做 404 处理，那么客户请求不存在的网址则永远会显示 首页
+
+```
+const router = new VueRouter({
+    routes:[
+        ...,
+        { path:'*',component: NotFoundComponent }
+    ]
+})
+```
+
+> 上面代码中，假定我们有一个显示 404 内容的组件 NotFoundComponent
 
 
 
