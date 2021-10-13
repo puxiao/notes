@@ -1977,11 +1977,19 @@ vue create my-project
 **创建项目的 4 点说明：**
 
 1. 第一次创建项目时会询问 是否将当前 NPM 源修改为 cnpm。
+
 2. 创建过程中会询问你使用 npm 还是 yarn  命令，这个命令决定了将来你调试项目时使用的命令前缀。例如我选择 yarn，则当我调试项目时对应的命令为 yarn serve，至于其他命令都可查阅创建好项目文件中的 README.md。
+
 3. 创建过程中会显示 3 种创建内容方式：
+
    1. 创建 vue 2 (默认不包含 typescript)
+
    2. 创建 vue 3
-   3. 手工选择特性 (可以选择包含 typescript、vuex、vue router 等)
+
+   3. 手工选择特性(Manually select features)
+
+      > 可以选择是否包含 typescript、vuex、vue router 等
+
 4. @vue/cli 官网上面的某些操作步骤界面已经和当前最新版本略微不同，不过这些不同都不是特别重要的，只要创建一次就明白了。
 
 
@@ -1990,7 +1998,7 @@ vue create my-project
 
 **关于手工选择安装特性的操作补充：**
 
-在创建项目时，若选择 手工选择安装特性 这种方式时，其中有一环节会让你选择究竟安装哪些内容。
+在创建项目时，若选择 手工选择安装特性(`Manually select features`) 这种方式时，其中有一环节会让你选择究竟安装哪些内容。
 
 除了默认自动选中的几项外，你还可以额外去勾选其他几种，包括：
 
@@ -2436,6 +2444,447 @@ vue create my-vue
 <br>
 
 #### Vue Router 基础用法
+
+在 Vue 项目中使用 路由(router) 的基本流程为：
+
+1. 先以组件的形式创建不同页面内容(路由对应的渲染内容)，例如 PageA、PageB
+
+   ```
+   //这里创建 2 个最简单基础的 组件
+   const PageA = { template: '<div>This is PageA</div>'}
+   const PageB = { template: '<div>This is PageB</div>'}
+   ```
+
+2. 在 JS 中创建一个路由(router)实例，并设置其路由匹配规则 routes 的值，routes 为数组类型，其中每一个元素拥有 2 个属性：
+
+   1. path：路由对应的路径(url)，例如 "/page-a"、"/page-b"
+   2. component：路由命中后对应要渲染的组件，例如 PageA、PageB
+
+   ```
+   const router = new VueRouter({
+       routes: [
+           {path:'/pagea', component:PageA},
+           {path:'/pageb', component:PageB}
+       ]
+   })
+   ```
+
+3. 实例化一个 Vue，并将刚才创建好的 router 实例作为配置参数传递给这个 Vue 实例
+
+   ```
+   new Vue({
+       router,
+       render:h =>h(App)
+   }).#mount('#app')
+   ```
+
+4. 在入口页面(App.vue)中，创建 2 个内容：
+
+   1. 使用 `<router-link>` 标签，添加 N 组 路由跳转的菜单
+
+   2. 添加 `<router-view>` 标签用来作为承载 路由命中后对应需要渲染的组件
+
+      > 你甚至可以简单把 `<router-view>` 标签理解为 “临时占位符” 或 “插槽”
+
+   ```
+   <p>
+       <router-link to="/pagea">Go to PageA</router-link>
+       <router-link to="/pageb">Go to PageB</router-link>
+   </p>
+   <router-view />
+   ```
+
+
+
+<br>
+
+**关于 `<router-link>` 中 to 值的补充说明：**
+
+在日常 `<router-link>` 的使用中，关于 to 的值有 2 种设置方式：
+
+1. `to="/xxx"``
+
+2. ``:to="{ ... }"`
+
+   > 请注意 to 前面是有一个 冒号 的
+
+第1种：`to="/xxx"`
+
+这种方式中 to 的值也就是该 路由路径 的字面值。
+
+第2种：`:to="{ ... }"`
+
+这种方式中 to 的值为一个对象，该对象有存在互斥的 2 种属性结构：
+
+1. path 搭配 query：{ path: 'xxx', query?:{ ... } }
+
+   > 如果 to 的值中出现了 path 属性，即使出现 params 也会被忽略
+
+2. name 搭配 params：{ name:'xxx, params?:{ ... }}
+
+   > 如果 to 的值中出现了 name 属性，即使出现 query 也会被忽略
+
+<br>
+
+举例说明：
+
+下面 3 种对 to 的值设定方式，其最终结果是相同的：
+
+```
+<router-view to="/xxx"></router-view>
+<router-view :to="{path:'xxx'}"></router-view>
+<router-view :to="{name:'xxx'}"></router-view>
+```
+
+若使用 `:to` 这种形式，且出现了 query 或 params，那么他们分别对应的结果为：
+
+```
+<router-view to="/xxx?id=2"></router-view>
+<router-view :to="{path:'xxx',query:{id=2}}"></router-view>
+```
+
+```
+<router-view to="/xxx/2"></router-view>
+<router-view :to="{name:'xxx',params:{id=2}}"></router-view>
+```
+
+> 与这部分知识对应的是后面我们将要讲解的 “通过 JS 编程控制路由切换”。
+
+
+
+<br>
+
+**路由没有匹配到会怎样？**
+
+例如上面示例中，假设我们不小心手抖，把路由跳转连接写错了：
+
+```
+//正确的
+<router-link to="/pageb">Go to PageB</router-link>
+
+//不小心手抖写错了
+<router-link to="/pagebb">Go to PageB</router-link>
+```
+
+当我们给 `<router-link>` 的 to 属性值设置错了，而  router 中并没有配置 pagebb 对应的页面组件，那会发生什么事情呢？
+
+答：
+
+1. 并不会有任何警告、报错 或 提示
+2. `<router-view>` 会被渲染为 空
+
+所以，为了避免这种情况，通常我们会在路由配置中，添加一条可以匹配到 404 的路由规则，具体如何配置稍后讲解。
+
+
+
+<br>
+
+**组件与“页面”的目录结构：**
+
+我们知道普通组件为 xxx.vue，而路由跳转对应的页面实际上也是一个组件，形式也是 xxx.vue。
+
+在实际的 Vue 工程化项目中，通常遵循以下目录结构：
+
+1. components 目录用于存放所有组件
+
+2. views  目录用于存放所有页面
+
+   > 当然某些项目可能会将该目录命名为 pages
+
+3. router 目录用于存放定义 router 的 js
+
+
+
+<br>
+
+**组件内部获取当前路由信息：**
+
+在组件内部，可以通过 `this.$router` 获取当前路由实例，也就是下面代码中的 router 对象。
+
+```
+const router = new VueRouter(...)
+```
+
+当使用 `this.$router` 获取到路由实例后，可针对该路由进行一些属性值的获取，或者是执行一些路由跳转的方法。
+
+1. 例如，获取路由中的某些参数
+
+   ```
+   this.$router.params.username
+   ```
+
+2. 例如，让路由后退到上一个页面
+
+   ```
+   this.$router.go(-1)
+   ```
+
+
+
+<br>
+
+#### 动态路由匹配
+
+在前面例子中，我们设置的路由匹配规则中，命中路由的路径是写死、固定的，即：
+
+```
+const router = new VueRouter({
+    routes: [
+        {path:'/pagea', component:PageA},
+        {path:'/pageb', component:PageB}
+    ]
+})
+```
+
+但是在实际项目中，我们需要面临很多种复杂的、动态的路由路径。
+
+不可能使用写死的方式来把所有路由路径都写进去，因此需要路由具备 `动态匹配`。
+
+
+
+<br>
+
+请注意：Vue Router 路由匹配使用的是第三方NPM包 `path-to-regexp` 作为路由引擎。
+
+path-to-regexp：https://github.com/pillarjs/path-to-regexp/tree/v1.7.0
+
+也就是说，凡是 path-to-regexp 支持的动态匹配规则 Vue Router 也都支持。
+
+> 这是一句废话
+
+
+
+<br>
+
+**优先级规则**
+
+在学习 path-to-regexp 之前，我们先说一下 Vue Router 的优先级规则：路由命中的优先级是按照路由规则定义的先后顺序决定的。
+
+不同于 Nginx 这类专业的服务器后端程序，Vue Router 目前无法做到按照匹配精确度来实现优先级。因此在定义 Vue Router 路由规则时，一定把精准的放在靠前位置，而通用(模糊)类的规则(例如 path:* )放到靠后位置。
+
+<br>
+
+恰恰以为 Vue Router 路由规则优先级的规定，所以通常会将 `path:*` 放在最后，让它作为匹配 404 的路由路径。
+
+
+
+<br>
+
+#### path-to-regexp的动态匹配规则
+
+**第1条规则：使用斜杠(/)来作为路径的默认分割符**
+
+例如：/page 和 /page/a 就是 2 个不同的路径
+
+> 注意：斜杠为 默认分隔符，实际 Vue Router 已经封装好了这个分隔符，因此你也无法修改
+
+
+
+<br>
+
+**第2条规则：使用冒号(:)来匹配一个动态参数**
+
+假设我们将匹配规则设置为：/page/:id
+
+那么 /page/2、/page/a、/page/b、/page/abc 这些路径都将被命中。
+
+同时路由参数中 `this.$router.params.id` 的值分别对应 2、a、b、abc
+
+<br>
+
+假设匹配规则设置为：/:foo/:bar，哪又对应什么路由呢？
+
+1. this.$router.params.foo
+2. this.$router.params.bar
+
+
+
+<br>
+
+**第3条规则：路径中只能正常解析以下字符**
+
+1. 大写字母：A-Z
+2. 小写字母：a-z
+3. 数字：0-9
+4. 下划线：_
+
+请记得：不支持中划线(-)
+
+
+
+<br>
+
+**第4条规则：在参数后面加上问号(?)来表达这个参数为可选项**
+
+假设我们的路由规则为：/foo/:bar?
+
+那么 bar 即为可选项，也就是说无论 bar 是否存在都符合(命中)该条路由规则。
+
+例如：/foo、/foo/aa、/foo/0
+
+
+
+<br>
+
+**第5条规则：使用加号(+)来表明参数必须至少出现一次**
+
+假设我们的路由规则为：/:foo+
+
+由于参数 foo 后面有 + ，所以 foo 必须至少出现一次才会命中该路由。
+
+例如：
+
+1. /：由于参数 foo  一次也没出现，所以该路径不会被命中
+2. /aa：由于参数 foo 出现了一次，值为 aaa，所以该条路径会被命中
+3. /aa/bb：由于参数  foo 出现了不止一次，此时 foo 对应的值为 aa/bb，所以该条路径会被命中
+
+
+
+<br>
+
+**第5条规则：使用括号+正则表达式来限定参数的字符格式**
+
+假设我们的路由规则为：`/:foo(\\d+)`
+
+从括号里的正则表达式可以看出必须要求出现 1 次以上的数字。
+
+> 请注意 正则表达式 `d+` 中 d 表示数字，+ 表示至少出现 1 次
+>
+> `d+`并不要求必须全部是数字
+
+那么：
+
+1. /aaa：由于没有出现任何数字，所以这个路径不会被命中
+2. /123：由于出现了至少 1 个数字，所以这个路径会被命中
+
+补充：
+
+当我们书写规则为 /:foo 的时候，没有使用任何正则表达式，实际上 path-to-regexp 默认 /:foo 对应的正则表达式为 `[^\/]+`
+
+> `[^\/]+` 表达的意思为：以 / 为开头，且至少出现一次
+
+提醒：在括号中书写正则表达式时，切记要使用 双斜杠，例如 `\\d`。
+
+
+
+<br>
+
+**第7条规则：使用(.*)来匹配剩余所有未命名参数**
+
+假设我们的路由规则为：/:foo/(.*)
+
+我们要匹配的路由路径为：/aa/bb
+
+那么：
+
+1. 路由中有一个参数为 foo，值为 aa
+2. 路由中剩余所有的参数为一个对象，该对象属性中数字索引 0 对应的值为 bb
+3. 假设路由路径为 /aa/bb/cc，那么对象属性中数字索引 0 对应的值为 bb，数字索引 1 对应的值为 cc，以此类推
+
+
+
+<br>
+
+**第8条规则：使用星号(*)来匹配任意多个字符**
+
+假设我们的路由规则为：/*
+
+那么由于 * 可以匹配到任意的字符，所以下面的路径都可以被匹配到：
+
+1. /
+2. /aaa
+3. /aaa/bb
+
+所以通常会将 /* 作为路由最后一条规则，用于匹配 404 。
+
+
+
+<br>
+
+**补充说明 1：**
+
+path-to-regexp 实际上执行的是类似 伪静态 一样的路径规则。
+
+与之对应的像：/aa?id=2&name=ypx 这种路径并不在它考虑和解析的范围内。
+
+
+
+<br>
+
+**补充说明 2：**
+
+无论第 7 条 还是第 8 条规则，都使用到了 通配符 * ，对于 Vue Router 而言，他会将所有通配符匹配到的参数存放在路由(router)参数(this.$router.params)的 `.pathMatch` 变量中。
+
+
+
+<br>
+
+**补充说明 3：**
+
+在 Vue Router 中除了 * 号可以匹配任意路径，实际上使用 空白字符('') 也可以启到匹配任何未匹配到参数的效果。
+
+
+
+<br>
+
+#### 嵌套式路由
+
+在我们上面提到的路由例子中，采用的是下面这样的流程逻辑：
+
+1. 定义组件 ComponentA、ComponentB
+
+2. 定义页面 PangeA、PageB
+
+   > 页面中可能会使用到 ComponentA 或 ComponentB
+
+3. 定义路由实例 router，并且添加路由规则
+
+4. 在 App.vue 中添加 `<router-link>` 和 `<router-view>`
+
+这里面存在一个简单的 “上下级渲染” 关系，即 router 根据命中的路由规则确定哪个页面内容被渲染到 `<router-view>` 中。
+
+至于该页面的内容是什么，实际上 router 并不知道，也无权决定。
+
+
+
+<br>
+
+但是在实际的项目中，页面渲染什么内容的逻辑可能比较复杂，这时候就需要使用到 **嵌套式路由**，赋予 router 更多权利，用于管理和配置被渲染页面里的内容。
+
+具体的操作流程为：
+
+1. 除了 App.vue 添加 `<router-view>` 标签外，还在页面组件的模板中也添加该标签，例如在 PageA 和 PageB 的模板中也添加 `<router-view>`。
+
+   > 请注意，对于 PageA 和 PageB 而言，他们可以把 `<router-view>` 看作是某个 “占位符” 或 “插槽”，至于 `<router-view>` 将来究竟要被渲染成什么内容，不由他们自己决定。
+
+2. 在配置 router 时，每一条路由规则中除了原本需要设置的 2 个属性 `path` 和 `component` 外，新增一个 `children`的属性。该属性的值和 VueRouter 中 routes 的值定义方式完全相同。
+
+   > children.routes 也是一个数组，数组每个元素也是需要设置 2 个属性 `path` 和 `component`
+
+3. 当某个页面被命中后，会再次根据路径中的某些参数去匹配 children 中 routes 的规则，当再次匹配到内容后则会将对应的 component 组件内容渲染到该页面中 `<router-view>`。
+
+经过上面的流程，实际上存在  2 个层级的路由：
+
+1. App.vue 中的 `<router-view>` 为第 1 层路由，负责承载被渲染的那个页面
+2. 被渲染页面中的 `<router-view>` 为第 2 层路由，负责承载由 router.routes[x].children.routes[y] 中的规则来决定渲染的那个组件
+
+而所有的最终决定权，都由  router 来决定。
+
+
+
+<br>
+
+路由虽然看上去简单，但是整个应用程序的核心入口。
+
+
+
+<br>
+
+#### 通过JS控制路由切换
+
+在上面的示例中，我们都是通过 `<router-link>` 标签来控制路由切换的。
+
+实际中，我们也可以通过 JS 来对路由进行切换、跳转。
 
 
 
