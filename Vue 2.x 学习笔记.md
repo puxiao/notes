@@ -2367,7 +2367,7 @@ export default {
 
 <br>
 
-## 4、Vue-Router路由
+## 4、Vue Router路由
 
 Vue Router 官网地址：https://router.vuejs.org/zh/
 
@@ -2438,6 +2438,22 @@ vue create my-vue
 建议选择 Y
 
 最终一路往下操作，即可创建出一个包含 router 简单示例的 Vue 项目。
+
+
+
+<br>
+
+**关于Router版本的补充说明：**
+
+假设我们是基于 vue 2.x 的项目，那么 CLI 默认会使用 Router 3.x 版本。
+
+假设我们是基于 vue 3.x 的项目，那么 CLI 默认会使用 Router 4.x 版本。
+
+
+
+<br>
+
+本文下面讲解的都是基于 Router 3.x 版本。
 
 
 
@@ -2557,9 +2573,36 @@ vue create my-vue
 补充说明：
 
 1. 对于 path + query 创建的路由，其访问 query 参数为：this.$router.guery.xx
+
 2. 对于 name + params 创建的路由，其访问 params 参数为：this.$router.params.xx
 
+3. 如果在 router-link 标签中出现 replace 则表明此次跳转不产生新的 浏览器历史记录，而是替换当前历史记录
 
+   ```
+   <router-link to="/b" replace ></router-link>
+   ```
+
+4. 如果在 router-link 标签中出现 append 则表示标签中的 to 的值是对当前路由地址的追加
+
+   ```
+   //假设当前路由路径为 /a
+   <router-link to="/b" append ></router-link>
+   //由于使用了 append ，所以最终跳转的实际路径为 /a/b
+   ```
+
+5. 默认情况下 `<router-link>` 最终会被渲染成 `<a>` 标签，如果想修改渲染成 `<li>` 标签，则需要添加 tag="li" 即可
+
+   ```
+   <router-link to='/xxx' tag="li"><router-link>
+   ```
+
+6. 默认情况下 `<router-link>` 在 click 后会被触发，但是也可以通过 event 修改成其他事件
+
+   ```
+   <router-link to='/xxx' event="mousedown"><router-link>
+   ```
+
+   
 
 <br>
 
@@ -2814,7 +2857,9 @@ path-to-regexp：https://github.com/pillarjs/path-to-regexp/tree/v1.7.0
 
 path-to-regexp 实际上执行的是类似 伪静态 一样的路径规则。
 
-与之对应的像：/aa?id=2&name=ypx 这种路径并不在它考虑和解析的范围内。
+与之对应的像：/aa?id=2&name=ypx 这种路径实际上也在它考虑和解析的范围内。
+
+> 这类请求变量值存储在 this.$router.query 中
 
 
 
@@ -2990,6 +3035,54 @@ this.$router.go(3)  //前进 3 个页面(前提是历史记录中存在这个记
 ```
 window.history.length
 ```
+
+
+
+<br>
+
+**this.$router.back()**
+
+后退一步
+
+
+
+<br>
+
+**this.$router.forward()**
+
+前进一步
+
+
+
+<br>
+
+**this.$router.fullPath**
+
+读取该属性，可以获取完整的路径
+
+
+
+<br>
+
+**this.$router.matched**
+
+读取该属性，返回一个数组，包含所有命中的路由对象
+
+
+
+<br>
+
+**this.$router.name**
+
+读取该属性，返回当前路由对应的 name 值
+
+
+
+<br>
+
+**this.$router.redirectedFrom**
+
+如果存在重定向，则返回重定向来源的路由的名字
 
 
 
@@ -3180,6 +3273,25 @@ const router = new VueRouter({
 
 <br>
 
+#### 是否大小写敏感
+
+默认情况下，路由路径是对大小写不敏感的。
+
+如果希望大小写敏感，则通过下面方式进行配置：
+
+```
+count router = new VueRouter({
+    routes:[ ... ],
+    caseSensitive:true
+})
+```
+
+> 默认为 caseSensitive 为 false
+
+
+
+<br>
+
 #### 路由组件传参(解耦)
 
 假设我们有一个路由规则为 "/xxx/:id"，且此刻被命中，需要将组件 `CompA` 渲染到 `<router-view>` 中。
@@ -3302,10 +3414,17 @@ const router = new VueRouter({
 
 准确来说是 Vue 基于 HTML5 的路由模式。
 
-最常见的 2 种模式为：
+路由模式分为 3 种：
 
-1. 哈希模式(hash)：相当于单页面模式，即跳转不通过路由后，网址也不发生任何变化，历史记录中也不存在前进后退。
+1. 哈希模式(hash)：相当于单页面模式，并且使用 # 模式，即跳转不通过路由后，网址仅发生 # 后面的变化，历史记录中不存在前进后退。
+
 2. 历史记录模式(history)：相当于不同网址，有前进后退的历史记录，每次跳转网址会自动发生变化
+
+   > 前提是浏览器支持这种模式，当然绝大多数浏览器都是支持的
+
+3. 抽象模式(abstrct)：只要支持 JS 的环境即可，例如 浏览器或 Nodejs 。
+
+   假设 Vue Router 发现当前并不是处于浏览器模式，而是处于 Nodejs 服务器模式，那么就会强制转成 抽象模式。
 
 
 
@@ -3516,9 +3635,9 @@ const User = {
 
 
 
-<br>
+<bt>
 
-**组件内的守卫：**
+**组件内的守卫**
 
 在组件内部，通过添加一些路由钩子函数，来对路由的变化进行一些操作。
 
@@ -3565,4 +3684,381 @@ const User = {
 <br>
 
 **总结：完整路由跳转的整个流程**
+
+1. 导航被触发
+2. 在失活的组件里调用 beforeRouteLeave 守卫
+3. 调用全局的 beforeEach 守卫
+4. 在重用的组件里调用 beforeRouteUpdate 守卫
+5. 在路由配置里调用 beforeEnter
+6. 解析异步路由组件
+7. 在被激活的组件里调用 beforeRouteEnter
+8. 调用全局的 beforeResolve 守卫
+9. 导航被确认
+10. 调用全局的 afterEach 钩子函数
+11. 触发 DOM 更新
+12. 调用 beforeRouteEnter 守卫中传给 next 的回调函数，创建好的组件实例会作为回调函数的参数传入
+
+
+
+<br>
+
+#### 路由元信息
+
+> 之所以叫 “元信息” 是因为对应的英文单词 meta 直译过来就叫 元信息
+
+在每一条路由配置规则中，除了 path，component 以外，还可以添加一个 `meta` 的字段，meta 的值为一个对象，用于传递一些元信息(额外信息)。
+
+> 之所以称呼为 额外信息、元信息 是因为这些信息并不是给 组件使用的
+
+使用代码如下：
+
+```
+const router = new VueRouter({
+    routes:[
+        { path:'/xx', component:CompXxx, meta:{ ... }}
+    ]
+})
+```
+
+可以将 meta 的值设置为值键对形式的对象，这些值键对对应的信息可传递给组件内的 路由守卫 来使用。
+
+由于可能存在 嵌套路由，所以对于全局而言，命中的路由记录作为数组存储在 路由实例的 .mateched 中，那么我们需要做的就是遍历这个数组，针对每一个元素(路由实例)进行相关设置，即读取该路由实例中获得到的 meta 信息。
+
+**举例说明：**
+
+假设我们需要对视图增加一个 “只有在登录下才可以被使用”的功能，那么我们可以在路由规则中，对某些路由配置添加一个 元信息(meta)，该元信息包含 requiresAuth 的字段，用于表明是否需要验证已登录。
+
+假设我们路由规则中不添加 meta 信息，那么就意味着这个组件无需接收用户是否已登录检查。
+
+实现步骤为：
+
+1. 通过调用全局路由实例的 beforeEach() 函数添加一个路由守卫
+
+2. 检查该视图所有的路由中是否至少有一个需要登录验证
+
+   > 也就是说，假设当前视图中有一个组件需要必须登录后才可使用，那么就不渲染当前视图
+
+3. 具体方法为：遍历 to.mateched ，检查每一个元素 .meta 中存在 requiresAuth 字段，且值为 ture 的路由
+
+   > 若全部都不需验证，则执行 next() 跳过
+
+4. 验证用户是否已登录，若未登录则通过 next() 将路由跳转到登录页
+
+   > 若已登录则执行 next() 跳过
+
+```
+// meta:{requiresAuth:true}
+
+//以全局导航守卫为例，检查元信息
+router.beforeEach((to,from,next)=>{
+    if(to.matched.some(record => record.meta.requiresAuth)){
+        if(!auth.loggedIn()){
+            next({path:'/login',query:{redirect:to.fullPath}})
+        }else{
+            next()
+        }
+    }else{
+        next()
+    }
+})
+```
+
+> Array 的 .some() 函数用于检查数组是否至少有一个元素与之匹配，并返回 布尔结果。
+
+
+
+<br>
+
+**路由元信息的作用：**
+
+在上面那个示例场景中，假设组件需要用户登录才可以使用，那么通过给路由添加元信息，并在全局路由守卫中进行检查，相当于把原本需要写在组件内的登录判断抽出，移动到全局路由守卫中。
+
+这样相当于降低了组件本身的逻辑，提高了整个视图的性能。
+
+
+
+<br>
+
+#### 数据获取
+
+假设路由获取了一个参数 id，组件或视图需要根据这个 id 来进行网络数据请求，并将结果显示出来。
+
+那通常只有 2 种方案：
+
+1. 先请求数据，后显示组件(完成导航)：
+
+   在组件路由守卫中，例如 router.beforeRouteEnter() 去发起网络数据请求，等得到结果后再通过调用 next() 来进行组件渲染。 
+
+2. 先显示组件(完成导航)，后请求数据：
+
+   先正常显示(渲染)组件，在组件内部创建 loading 变量 和 请求 id 变量。并默认先显示 loading 界面，然后根据请求 id 变量来发起网络数据请求，在得到结果后更新对应内容。
+
+   请注意，所谓 “根据请求 id 变量” 包含 2 层含义：
+
+   1. 组件第一次挂载完成后，根据 id 立即发起请求
+   2. 组件通过 watch 监控 id 的变化，当发现 id 更新后则重新发起网络请求
+
+无论哪种方案，都需要考虑 网络请求错误 的情况。
+
+
+
+<br>
+
+**先请求数据，后完成导航**
+
+假设当前页面为 PageA，需要跳转到 PageB。
+
+那么我们需要做的事情是：
+
+1. 在当前页面 PageA 上叠加一层显示加载的内容
+2. 在路由守卫函数中发起网络请求
+3. 当得到请求结果后，执行 next()，此时 PageA 和 PageA 上的 loading 内容消失，页面跳转(视图渲染) 为 PageB
+
+```
+//组件内可能的JS
+export default{
+    data:{post:null,error:null},
+    beforeRouteEnter(to,from,next){
+        getPost(to.params.id,(err,post)=>{
+            next(vm => vm.setData(err,post))
+        })
+    },
+    beforeRouteUpdate(to,from,next){
+        this.post = null
+        getPost(to.params.id,(err,post)=>{
+            this.setData(err,post)
+            next()
+        })
+    },
+    methods:{
+        setData(err,post){
+           ...
+        }
+    }
+}
+```
+
+> 既要考虑 beforeRouteEnter，有需要考虑 beforeRouteUpdate
+
+
+
+<br>
+
+**先完成导航，再请求数据**
+
+假设当前页面为 PageA，需要跳转到 PageB。
+
+那么我们需要做的事情是：
+
+1. 将当前视图渲染 PageB
+2. 默认视图中一部分区域显示 loading 内容
+3. 组件监控 id 并开始发起网络请求，并将结果渲染到当前视图中
+
+```
+//组件可能的结构
+<template>
+    <div>
+        <div v-if="loading" ></div>
+        <div v-if="error" ></div>
+        <div v-if="post" ></div>
+    </div>
+</template>
+
+//组件可能的JS逻辑
+export default{
+    data：{loading:false, error:null, post:null},
+    created:function{ this.fetchData() },
+    watch:{ '$route': 'fetchData'}，
+    methods:{
+        fetchData(){
+            ...
+        }
+    }
+}
+```
+
+> 既要考虑 created，又要考虑 watch 去监控路由的改变
+
+
+
+<br>
+
+#### 页面视图滚动定位
+
+我们可以设置当一个视图被显示后，页面滚动条显示到哪个位置。
+
+通过给路由实例添加 `scrollBehavior` 的方法来实现。
+
+```
+const router = new VueRouter({
+    routes:[...],
+    scrollBehavior(to,from,savedPosition){
+        //将期望的位置通过 return 形式返回
+        return ...
+    }
+})
+```
+
+例如：
+
+```
+scrollBehavior(to,from,savedPosition){
+    return { x:number, y:number }
+}
+```
+
+或
+
+```
+scrollBehavior(to,from,savedPosition){
+    return {
+        selector:string,
+        offset?:{x:number, y:number}
+    }
+}
+```
+
+> 请注意上面代码中的 "x:number" 表示 x 的值为一个数字，例如 “x:24”
+
+如果返回的是 虚值(falsy) 或 空，则不做任何滚动。
+
+> 所谓 虚值(falsy) 是指假设把这个值转换为 Boolean 类型其结果为 false 的值。
+
+
+
+<br>
+
+关于 scrollBehavior 的更多复杂用法，可参考 Vue Router 官网 API。
+
+
+
+<br>
+
+#### 路由懒加载
+
+简单来说就是原本组件应该是整体打包成一个 .js 文件，现在为了考虑拆分文件大小，将一些组件的内容先不打包到整体中，只有当使用到该组件时才进行加载。
+
+**实现方式：**
+
+加载我们原本定义组件的方式为：
+
+```
+const Foo = { ... }
+```
+
+修改成：
+
+```
+const Foo = () => import('./Foo.vue')
+```
+
+> 这样 webpack 就不会将 Foo.vue 的内容打包到整体中，但是独立拆分成一个文件。
+>
+> 当 Foo 组件真正被调用时才会真正加载这个文件
+
+无论组件是否采用懒加载的形式定义，对于路由而言是没有区别的。
+
+> 路由只知道当命中某个 url 时需要将一个名为 Foo 的组件渲染到 route-view 中，但至于 Foo 组件究竟是否使用了懒加载，路由是不关心的。
+
+
+
+<br>
+
+**将多个组件打包到一个文件中**
+
+假设现在有 3 个组件，都希望不打包到整体中，但是这 3 个组件又不想各自独立被打包成 3 个文件，而是希望将他们 3 个打包在一个文件中。那么这个时候就需要使用 webpack 的 魔法注释 了。
+
+<br>
+
+这个魔法注释就是：`/* webpackChunkName:"group-foo" */`
+
+> 关于 webpack 其他类型的魔法注释，请查阅相关文档
+
+```
+const Foo = () => import(/* webpackChunkName: "group-foo" */ './Foo.vue')
+const Bar = () => import(/* webpackChunkName: "group-foo" */ './Bar.vue')
+const Baz = () => import(/* webpackChunkName: "group-foo" */ './Baz.vue')
+```
+
+这样 3 个组件 Foo、Bar、Baz 就会都被打包到一个 group-foo 的文件模块中。
+
+
+
+<br>
+
+#### 监控导航(路由)跳转出错
+
+通常情况下，我们是无需监控路由跳转失败或发生错误的。
+
+1. 因为即使路由跳转到一个不存在的地址，即 404，路由也不会报错
+2. 通常情况下路由都会按照我们的预期进行发生
+
+但是假设某些异常，或者是我们在某些路由守卫中
+
+1. 使用 next(error) 人为得抛出一些错误
+
+2. 使用 next(false) 中断此次路由跳转
+
+   > 由于跳转被中断，实际上相当于路由没有按照预期进行跳转，因此也被视为 异常情况
+
+对于这些特殊情况，是可以通过在路由跳转时添加 catch 来捕获的。
+
+```
+router.push('/admin').catch(failure =>{
+    ...
+})
+```
+
+
+
+<br>
+
+**判断是哪种类型的错误异常**
+
+在 catch 的回调函数中，Vue 为我们提供了一个 `isNavigationFailure()` 的函数，用于检测发生错误的原因。
+
+这个函数接受 2 个参数：
+
+1. failure：发生错误对应的此次错误，实际上就是将 catch 捕获到的 failure 传递给 isNavigationFailure() 函数
+2. string(常量，可选参数)：用于判断是否是以下哪种原因造成的异常
+   1. NavigationFailureType.redirected：导航守卫将路由进行重定向
+   2. NavigationFailureType.aborted：导航守卫中断了本次导航
+   3. NavigationFailureType.cancelled：在当前导航还未顺利完成前，在其他某些地方又调用了新的导航跳转
+   4. NavigationFailureType.duplicated：导航被阻止，例如我们此刻本身就处在这个目标导航中
+
+假设不传递第 2 个参数，只是认定这是一次导航故障，则不做过多原因的细分和检测。
+
+
+
+<br>
+
+**获取失败的具体对象细节**
+
+在 failure 回到函数内部，我们可以根据 failure 来作出相应的代码。
+
+其中：
+
+1. failure.to 表示要跳转的目标路由
+
+   > failure.to.path 即我们最开始希望跳转的目录路径
+
+2. failure.from 表示跳转前的路由
+
+
+
+<br>
+
+#### Vue Router 的 API 细则
+
+在上面我们只是讲解了 Vue Router 最基础，常见的用法。
+
+更多 API 需要去查看官方文档。
+
+https://router.vuejs.org/zh/api/
+
+
+
+<br>
+
+## 5、Vuex状态管理
 
