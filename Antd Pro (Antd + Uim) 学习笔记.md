@@ -108,7 +108,7 @@ Antd Pro：https://pro.ant.design/zh-CN
 
 > 换句话说，假设想学习 Antd Pro，那么先要去学习 Umi。
 >
-> Antd Pro 实际上就是 Umi 的一种更高级别的应用示例。
+> Antd Pro 实际上就是 Umi 的一种更高级别的应用实例(场景)。
 
 
 
@@ -116,7 +116,7 @@ Antd Pro：https://pro.ant.design/zh-CN
 
 #### 使用 Antd Pro 的 2 点补充
 
-第1点：Antd Pro 默认 Prettier 来自动格式化代码，所以需要在 VScode 中安装并开启 Prettier 这个插件。
+第1点：Antd Pro 默认使用 Prettier 来自动格式化代码，因此需要在 VScode 中安装并开启 Prettier 这个插件。
 
 第2点：由于目前 Antd 并不提供 富文本框 这个组件，而后台文章管理中肯定需要富文本框，这里推荐使用 `wangEditor` 
 
@@ -126,7 +126,7 @@ Antd Pro：https://pro.ant.design/zh-CN
 
 <br>
 
-**Hello World!**
+**开始吧，Hello World!**
 
 初始化一个 Umi 项目：https://umijs.org/zh-CN/docs/getting-started
 
