@@ -640,7 +640,7 @@ module.exports = {
 
 配置方法和使用 react-app-rewire-alias 相同：
 
-1. 项目根目录创建 tsconfig.pahts.json
+1. 项目根目录创建 tsconfig.paths.json
 
    ```
    {
