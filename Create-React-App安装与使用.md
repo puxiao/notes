@@ -131,6 +131,14 @@ yarn add node-sass@5.0.0 --dev
 //如果你的 create-react-app 版本不是最新的，那么你只能安装 node-sass@4.14.1
 ```
 
+特别强调：
+
+在安装 node-sass 之前，需要提前在电脑上安装 Python 3，否则会提示 node-sass 安装失败。
+
+Python下载地址：https://www.python.org/downloads/
+
+> 目前最新版本为 python 3.10
+
 
 
 <br>
@@ -280,10 +288,10 @@ Parsing error: Unexpected token, expected ","
 >
 > ```
 > "eslintConfig": {
->  "extends": [
->      "react-app",
->      "react-app/jest"
->  ]
+> "extends": [
+>   "react-app",
+>   "react-app/jest"
+> ]
 > },
 > ```
 >
@@ -809,4 +817,3 @@ module.exports = {
     ]
 };
 ```
-
