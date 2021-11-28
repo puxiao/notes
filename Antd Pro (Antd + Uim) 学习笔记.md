@@ -114,6 +114,92 @@ Antd Pro：https://pro.ant.design/zh-CN
 
 <br>
 
+#### Umi(Antd Pro)最迷惑人(难易理解)的地方：默认的 dva 数据状态管理
+
+Umi 默认使用 dva 来管理整个项目的全局数据状态。
+
+> 相关介绍：https://umijs.org/zh-CN/plugins/plugin-dva
+
+假设你不熟悉 dva，那简直是一种 “难易理解、绕圈山路十八弯” 的一种数据状态管理方式。
+
+**dva 的心智负担特别重。**
+
+> dva 算是一种比较 旧，传统的数据状态管理思想，相对于比较新的 Recoil 而言我们真的不应该花费时间去学习这样的知识，简直浪费生命。
+>
+> 补充：如果对 Recoil 感兴趣，可以查看我写的关于数据状态 Recoil 的教程
+>
+> https://github.com/puxiao/recoil-tutorial
+
+但是实际工作中，我们还应该了解一下 dva 这种管理套路——因为我们可能需要维护老的项目，不得已你也得懂。
+
+<br>
+
+假设我们现在要创建一个 “朋友名单” 的管理模块，我们姑且使用 “friendsList” 这个来命名。
+
+那么 Umi(Antd Pro) 的 dva 大致工作套路是：
+
+1. 在 src/models/ 下面创建一个名为 `friendsList.js` 的文件，大致内容为：
+
+   ```
+   const friendsList = { 
+       namespace: 'friendsList'
+   };
+   
+   // 或者更加简单一些写成下面的
+   
+   export default { 
+       namespace: 'friendsList'
+   }
+   ```
+
+   请注意，一定需要定义 `namespace: 'friendsList'`
+
+2. 配置页面组件的初始化数据，假设我们使用的是 React 类组件，那么我们将在 src/pages/ 下面创建一个 friendsList 的目录，在里面创建 index.js 用于创建这个组件，可能需要下面的一些数据状态，例如 是否有朋友、旧朋友列表、新朋友 等等：
+
+   ```
+   export default {
+     dva: {
+       haveFriend: true,
+       oldList: [],
+       newFriend: {}
+     },
+   };
+   ```
+
+3. 在 umi 中创建符合 dva 的组件，需要用到 umi 中的 connect
+
+   ```
+   import { IndexModelState, ConnectRC, Loading, connect } from 'umi';
+   
+   const friendsList = ({ index, dispatch }) => {
+      ...
+   }
+   
+   export default connect(
+     ({ index, loading }: { index: IndexModelState; loading: Loading }) => ({
+       index,
+       loading: loading.models.index,
+     }),
+   )(friendsList);
+   ```
+
+   > 特别提醒：按照正常情况下，我们通常应该将 React 组件 首字母为大写，但是这里为了匹配第1步中 `namespace: 'friendsList'`，所以上面代码中组件名字使用了小写开头。
+
+4. **最终，我们通过两个名字都为 "friendsList" 的字面意思，经过 connect 将 二者进行关联**。
+
+   1. src/models/friendsList.js
+   2. src/pages/friendsList/index.js
+
+   这简直是一种玄学！隔空对接、匹配。
+
+我都无力吐槽了，具体细节可查阅官方文档：https://umijs.org/zh-CN/plugins/plugin-dva
+
+我的结论是：无果非必要(例如需要维护老项目)，千万不要轻易使用 Umi 默认的 dva 这种数据管理。
+
+
+
+<br>
+
 #### 使用 Antd Pro 的 2 点补充
 
 第1点：Antd Pro 默认使用 Prettier 来自动格式化代码，因此需要在 VScode 中安装并开启 Prettier 这个插件。
