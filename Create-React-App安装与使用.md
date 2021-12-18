@@ -4,6 +4,32 @@
 
 
 
+> 以下更新于 2021.12.18
+
+**关于 Create-react-app 最新版本 5.0 的更新说明**
+
+在写本文的时候，当时 create-react-app 版本还是 4.x，前几日(2021.12.15) create-react-app 发布了新版本 5.0。
+
+从官方的更新日志中可以知道，create-react-app 5.0 的变动内容为：
+
+1. 改用 webpack5 来编译
+
+   > 终于可以使用 webpack5 了，这样很多 webpack4 遗留的一些编译问题都可以得到解决，尤其是对 swc 的支持度会更高。
+
+2. 开始支持 Tailwind
+
+3. 其他插件更新到最新版本，例如 Jest 27、ESlint 8、PostCSS 8
+
+4. 编译速度、代码压缩 得到了提升
+
+5. 不再支持 Node 12 以下版本
+
+但是，尽管版本由 4.x 升级为 5.0，本文下面所讲解的知识点几乎没有任何需要修改调整的地方。
+
+> 以上更新于 2021.12.18
+
+
+
 <br>
 
 ## 全局安装Create-React-App
@@ -289,8 +315,8 @@ Parsing error: Unexpected token, expected ","
 > ```
 > "eslintConfig": {
 > "extends": [
->   "react-app",
->   "react-app/jest"
+> "react-app",
+> "react-app/jest"
 > ]
 > },
 > ```
@@ -702,6 +728,8 @@ module.exports = {
 <br>
 
 **使用 craco 忽略 cesium.js 的报错：**
+
+> 特别强调：这个问题只会出现在 create-react-app 4.x 创建的项目中，若使用目前最新的 create-react-app 5.0 则不会遇到下面的问题。
 
 ```
 module.exports = {
