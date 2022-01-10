@@ -19,7 +19,6 @@ function throttle(fun,wait){
 //用法示例
 
 ```
-
 function myFun(str) {
     console.log(str + 123)
 }
@@ -30,7 +29,6 @@ youFun('aa') // aa123
 youFun('bb') // ---
 
 ```
-
 
 
 
