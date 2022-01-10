@@ -15,6 +15,23 @@ function throttle(fun,wait){
 }
 
 
+
+//用法示例
+
+```
+function myFun(str) {
+    console.log(str + 123)
+}
+
+const youFun = throttle(myFun)
+
+youFun('aa') // aa123
+youFun('bb') // ---
+
+```
+
+
+
 //以下为 TypeScript 中的写法
 export type Fun = (...args: any) => any
 const throttle = (fun: Fun, wait: number) => {
