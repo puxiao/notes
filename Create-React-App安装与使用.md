@@ -145,6 +145,40 @@ React 发布后，将项目上传到服务器，默认必须是网站根目录�
 > 默认 package.json 中是没有 homepage 字段的，默认采用的是 "/"，即根目录。
 
 
+## 构建并移动文件夹
+
+假设在 react 项目中，当执行构建后希望将结果文件移动到其他地方，可以修改 package.json 中的配置：
+
+> 例如将编译后的文件移动到 上级目录 xxx/xx 中
+
+```
+"scripts": {
+    "build": "react-scripts build && (if exist \"../xxx/xx\" rd /s/q \"../xxx/xx\") && move ./build ../xxx/xx"
+ }
+```
+
+1. `(if exist \"../xxx/xx\" rd /s/q \"../xxx/xx\")`：判断 xxx/xx 是否存在，若存在则执行删除。
+
+   注意：一定要用括号包裹住。
+
+   补充：`rd` 是 windows cmd 中的删除命令。
+
+2. `move ./build ../xxx/xx"`：将刚才构建好的 ./build 目录移动并重命名到 ../xxx/xx
+
+
+
+<br>
+
+假设你十分确定上级目录中一定存在 xxx/xx 目录，那么你可以省略相关判断，直接将上述代码修改为：
+
+```
+"scripts": {
+    "build": "react-scripts build && rd /s/q \"../xxx/xx\" && move ./build ../xxx/xx"
+ }
+```
+
+> 此时不再需要括号了
+
 
 <br>
 
