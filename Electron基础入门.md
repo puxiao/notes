@@ -94,6 +94,58 @@ https://github.com/sindresorhus/awesome-electron
 
 <br>
 
+## 运行Electron
+
+假设我们希望使用 Electron  运行某个 js 文件，命令为：
+
+```
+electron xxx.js
+```
+
+
+
+<br>
+
+#### 解决中文字符串乱码问题
+
+假设我们在 xxx.js 中添加有输出 console.log(xxx)。
+
+如果输出内容中有中文，由于 windows 的 CMD 环境中 默认编码为 936(GBK编码)，而我们的 xxx.js 中采用的是 65001(UTF-8) 编码。
+
+所以我们需要先将当前命令环境的编码进行修改：
+
+```
+chcp 65001
+```
+
+这样再去执行 `electron xxx.js` 中文就不会出现乱码了。
+
+
+
+<br>
+
+为了方便，我们可以直接给 package.json 中添加命令：
+
+```
+"scripts": {
+    "electron": "chcp 65001 && electron xxx.js"
+}
+```
+
+
+
+<br>
+
+补充：查看当前 CMD 环境中的字符编码命令为：
+
+```
+chcp
+```
+
+
+
+<br>
+
 ## Electron帮助文档
 
 
@@ -101,6 +153,3 @@ https://github.com/sindresorhus/awesome-electron
 详细的 API 和官方使用指南，请查阅：
 
 https://www.electronjs.org/docs
-
-
-
