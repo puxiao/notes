@@ -111,7 +111,7 @@ npm i --save-dev nodemon
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
     "start": "tsc && node dist/app.js",
-    "dev": "nodemon --watch 'src/**/*' -e ts --exec 'ts-node' ./src/app.ts"
+    "dev": "nodemon --watch 'src/**/*' -e ts --exec ts-node ./src/app.ts"
   },
 ````
 
@@ -230,7 +230,7 @@ npx tsc --init
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
     "start": "tsc && node dist/app.js",
-    "dev": "nodemon --watch 'src/**/*' -e ts --exec 'ts-node' ./src/app.ts"
+    "dev": "nodemon --watch 'src/**/*' -e ts --exec ts-node ./src/app.ts"
   },
 ````
 
