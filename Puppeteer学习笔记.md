@@ -81,6 +81,14 @@ https://pptr.dev/#?product=Puppeteer&version=v13.5.1&show=api-class-page
 
    > 它会默认使用你当前系统中已安装的 谷歌浏览器
 
+他们两个的区别仅仅提现在引入 puppeteer 的方式不同，其他代码都相同：
+
+```
+const puppeteer = require('puppeteer-core')
+或
+const puppeteer = require('puppeteer')
+```
+
 
 
 <br>
@@ -118,6 +126,7 @@ yarn add puppeteer
 这是官方的一个示例：引入 puppeteer，以无视窗模型 打开某个网页，并进行网页截图与保存
 
 ```
+// const puppeteer = require('puppeteer-core')
 const puppeteer = require('puppeteer');
 
 (async () => {
@@ -185,4 +194,125 @@ const puppeteer = require('puppeteer');
 > 当然如果想获取全部的某个元素，则使用 `.$$eval()`
 
 
+
+<br>
+
+#### Electron项目打包成asar文件后无法找到并启动浏览器的解决方式
+
+当我们开发好 Electron 并打包成 asar 文件后，由于默认 asar 采用了加密方式，导致实际运行时 puppeteer 无法找到谷歌浏览器，自然也无法启动。
+
+> 尽管此时在开发环境中是可以正常运行的
+
+
+
+<br>
+
+**最初的解决方案：**
+
+puppeteer 官方仓库上针对这个问题有对应的解释，按照官方的说法这是 node 版本的问题，需要 node v14 以上就可以解决。
+
+这就需要你使用最新的 Electron 版本，才可能内置 node v14 版本。
+
+不过经过我实际的测试，发现并不能解决这个问题，所以暂时可以忽略这种解决方案。
+
+
+
+<br>
+
+**第1种解决方案：将 electron 配置成 asar 不加密**
+
+> 具体如何配置自行百度
+
+
+
+<br>
+
+**第2种解决方案：人工定位谷歌浏览器位置**
+
+> 我非常不建议将自己电脑上安装的谷歌浏览器文件直接拷贝到 electron 项目中
+>
+> 推荐以下方式，尽管这个方式看上去似乎有点绕
+
+1. 通过 `yarn add puppeteer` 安装 puppeteer
+
+2. 在 node_modules 中找到 puppeteer 目录，拷贝其中的 `.local-chromium` 目录(该目录里就是谷歌浏览器)，拷贝到和 resources 评级的目录中
+
+3. 通过第 2 步 我们已经拿到了 谷歌浏览器，此时可以移除  puppeteer 包，改为安装 puppeteer-core，因为我们已经不再需要 puppeteer 了
+
+   ```diff
+   yarn remove puppeteer
+   yarn add puppeteer-core
+   
+   //修改引入方式
+   - const puppeteer = require('puppeteer')
+   + const puppeteer = require('puppeteer-core')
+   ```
+
+4. 在创建浏览器的代码中，通过添加 `executablePath` 配置项，明确指定浏览器 exe 的文件位置
+
+   ```
+   const browser = await puppeteer.launch({executablePath: path.join(__dirname, '../xx/xx/.local-chromium/win64-970485/chrome-win/chrome.exe')})
+   ```
+
+5. 至此，完成
+
+
+
+
+
+<br>
+
+#### 附一个示例：
+
+说明：我使用的是 Koa + TypeScript，所以我引入的方式是 import 而不是 require。
+
+
+
+<br>
+
+整个过程：
+
+1. 使用 puppeteer 创建浏览器，访问 `https://xx.xx.xx/xx` ，并拿到网页中的表格元素
+
+   > 为了避免不必要的纠纷，我隐去了实际的抓取网页地址
+
+2. 通过 page.$$eval() 获取、分析、转化 表格中的数据内容
+
+3. 将最终得到的数据通过 fs 写入到本地的 xx.json 文件中
+
+
+
+<br>
+
+```
+import puppeteer from 'puppeteer'
+
+export const getPage = async () => {
+    const browser = await puppeteer.launch()
+    const page = await browser.newPage()
+    await page.goto('https://xx.xx.xx/xx')
+    await page.waitForTimeout(3000)
+    const resArr = await page.$$eval(
+        '#cib_fund_setionlist > table > tbody > tr', 
+        list => list.slice(2).map(item => {
+            const tds = item.querySelectorAll('td')
+            return {
+                id : tds[0].innerText,
+                name : tds[1].innerText,
+                unitNet : tds[2].innerText,
+                accumulatedNet : tds[3].innerText,
+                day : tds[4].innerText,
+                month : tds[5].innerText,
+                halfYear : tds[6].innerText,
+                year : tds[7].innerText,
+                twoYear : tds[8].innerText,
+                threeYear : tds[9].innerText,
+                sinceCreation : tds[10].innerText
+            }
+        })
+    )
+    await fs.writeFileSync('../xxx/xx.json', JSON.stringify(resArr))
+    await browser.close()
+}
+```
 
