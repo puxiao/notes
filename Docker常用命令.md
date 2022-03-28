@@ -729,6 +729,8 @@ unable to prepare context: unable to evaluate symlinks in Dockerfile path: lstat
 
 > 注意：导出镜像文件使用 > ，导入镜像文件使用 <
 
+> 特别注意：如果使用的是 Docker Desktop 桌面版，则导入镜像命令为：docker load --input /xx/xxx.tar.gz
+
 删除镜像：docker image rm xxx  或者 docker rmi xxx
 
 > 这里的 xxx 既可以是镜像名，也可以是镜像ID
