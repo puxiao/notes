@@ -703,11 +703,24 @@ module.exports = {
 
 > 提醒：不要在 别名 的名称结尾添加 斜杆 `/`，例如不要写成  "@/src/"，这样最终会找不到对应文件的。
 
+
+
 <br>
 
 **TypeScript对应的 path 配置**
 
 假设你项目使用 TypeScript，记得也要针对 TS 进行 path 配置。
+
+一共有 2 种形式：
+
+1. 在 tsconfig.json 中引入 tsconfig.paths.json
+2. 直接修改 tsconfig.json
+
+
+
+<br>
+
+第1种方式：引入
 
 配置方法和使用 react-app-rewire-alias 相同：
 
@@ -740,25 +753,33 @@ module.exports = {
 
 <br>
 
-**问题遗留：**
+第2种方式：
 
-我尝试将上述 TS 的配置文件进行合并，即：
+直接将 "paths" 标签添加到 tsconfig.json 中：
 
-```
+````
 {
-    "extends": "./tsconfig.paths.json",
     "compilerOptions": {
-        "baseUrl": ".",
         "paths": {
             "@/src/*": ["./src/*"],
             "@/components/*": ["./src/components/*"]
-        },
-        ...
+        }
     }
 }
-```
+````
 
-但是不清楚为什么每次执行 yarn start 后，都会自动将 tsconfig.json 中的 paths 字段删除，导致找不到对应的文件，从而引发报错。
+
+
+<br>
+
+**webpack4问题遗留：**
+
+若使用 webpack4，只能选择第 1 种引入方式。因为若使用第 2 种方式，不清楚为什么每次执行 yarn start 后，都会自动将 tsconfig.json 中的 paths 字段删除，导致找不到对应的文件，从而引发报错。不过这个问题在 webpack5 中并未出现。
+
+也就是说：
+
+1. 若使用 webpack4 则推荐使用 第 1 种引入的方式
+2. 若使用 webpack5 则推荐使用 第 2 种直接修改的方式
 
 
 
