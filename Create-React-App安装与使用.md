@@ -768,6 +768,8 @@ module.exports = {
 }
 ````
 
+> 不需要添加 `"baseUrl": "."`
+
 
 
 <br>
