@@ -611,7 +611,11 @@ yarn add @craco/craco
 
 > 请注意：craco 配置的规则 和 webpack 近似 但也有不同的地方。
 
-请注意：你也可以把 craco.config.js 文件命名为：.cracorc.js 或 .cracorc，但是请不要在一个项目中同时出现 2 个配置文件。
+请注意：**你可以把 craco.config.js 文件命名为：craco.config.ts、.cracorc.js 或 .cracorc，但是请不要在一个项目中同时出现 2 个配置文件**。
+
+> 如果你使用的是 craco.config.ts，那么记得 遵循 typescript 语法规范，引入模块时使用 import 而不是 require。
+>
+> 按照 craco 官方的说法，craco.config.ts 的优先级要高于 craco.config.js。也就是说假设 2 个文件同时存在则会选择使用 craco.config.ts，而不是 craco.config.js。
 
 
 
@@ -668,9 +672,11 @@ yarn add @craco/craco
 
 <br> 之前我们为了在项目中使用 alias，采取安装 react-app-rewired、react-app-rewire-alias，那么现在可以忘掉它俩，改用 webpack 所支持的 alias 配置项。
 
+
+
 <br>
 
-**使用 Craco 配置 alias**
+#### 使用 Craco 配置 alias
 
 请注意，对于 webpack 的 alias 而言，alias 是写在 resolve 下面的：
 
@@ -787,6 +793,146 @@ module.exports = {
 
 <br>
 
+#### 使用 Craco 配置 webpack
+
+若想使用 craco 修改 webpack 的配置项，**需要将原本在 webpack.config.js 中定义的各项 移动到：webpack.configure 中。**
+
+如下图所示：
+
+```
+module.exports = {
+    webpack: {
+        configure: {
+           ...
+        }
+    }
+}
+```
+
+
+
+<br>
+
+**举例：添加对 .txt 文件资源的加载**
+
+我们知道对于自定义加载文件资源，对于 原生 webpack.config.js 来说，是修改其 module.rules 配置项，与之对应在 craco 中就应该是 webpack.configure.module.rules。
+
+<br>
+
+如果是 webpack4，那么首先需要先安装 raw-loader，然后配置如下：
+
+```
+module.exports = {
+    webpack: {
+        configure: {
+            module: {
+                rules: [
+                    { test: /\.txt$/, use: "raw-loader" }
+                ],
+            }
+        }
+    }
+}
+```
+
+如果是 webpack5，那么无需额外安装 raw-loader，因为它默认已经内置了 raw-loader。
+
+它的配置方式采用 asset/source 来表明以源码内容形式来加载该文件资源。
+
+```
+module.exports = {
+    webpack: {
+        configure: {
+            module: {
+                rules: [
+                    { test: /\.txt$/, type: "asset/source" }
+                ],
+            }
+        }
+    }
+}
+```
+
+> 注：webpack5 种一共内置了 4 种文件资源加载解析方式
+>
+> 1. asset/resource：发送一个单独的文件并导出 URL。之前通过使用 `file-loader` 实现。
+> 2. asset/inline：导出一个资源的 data URI。之前通过使用 `url-loader` 实现。
+> 3. asset/source：导出资源的源代码。之前通过使用 `raw-loader` 实现。
+> 4. asset：在导出一个 data URI 和发送一个单独的文件之间自动选择。之前通过使用 `url-loader`，并且配置资源体积限制实现。
+>
+> 更加详细介绍可查阅：https://webpack.docschina.org/guides/asset-modules/#root
+
+
+
+<br>
+
+关于 webpack 的其他配置项，和上面这个类似。
+
+**切记这些 webpack 配置项都是放在 configure 内，除了 alias 以外，因为 alias 是一个特例。**
+
+
+
+<br>
+
+**另外一种，更加高级复杂配置 webpack 的方式：使用回调函数来配置**
+
+如果你需要对 webpack 进行很复杂的配置，上面那种简单直白的配置方式 `configure:{...}`已经满足不了你。那么你可以采用 `configure: (webpackConfig, { env, paths }) => { return webpackConfig; }` 这种形式。
+
+简单举例：
+
+```
+const path = require('path');
+module.exports = {
+    webpack: {
+        configure: (webpackConfig, { env, paths }) => {
+            webpackConfig.module.rules.push({
+                    test: /\.js$/,
+                    type: 'asset/source'
+            })
+            return webpackConfig
+        }
+    }
+}
+```
+
+> 你可以在 configure 对应的回调函数中做更多逻辑判断、其他自定义配置。
+
+
+
+<br>
+
+**回顾一下 alias 和 webpack 配置**
+
+他们在 craco 的配置结构如下：
+
+```
+const path = require('path');
+module.exports = {
+    webpack: {
+        alias: {
+            "@/src": path.resolve(__dirname, "src/")
+        },
+        configure: {
+            module: {
+                rules: [
+                    { test: /\.txt$/, type: "asset/source" }
+                ],
+            }
+        }
+    }
+}
+```
+
+
+
+<br>
+
+**特别提醒：当你每次修改 craco.config.js 后，一定要重启 VSCode，以便确保配置生效。**
+
+
+
+<br>
+
 **使用 craco 忽略 cesium.js 的报错：**
 
 > 特别强调：这个问题只会出现在 create-react-app 4.x 创建的项目中，若使用目前最新的 create-react-app 5.0 则不会遇到下面的问题。
@@ -810,13 +956,7 @@ module.exports = {
 
 ...
 
-你还可以使用  craco 去设置更多其他配置项。
-
-
-
-<br>
-
-**特别提醒：当你每次修改 craco.config.js 后，一定要重启 VSCode，以便确保配置生效。**
+你还可以使用  craco 去设置更多其他模块(例如 babel、eslint ...)的配置项。
 
 
 
