@@ -799,6 +799,8 @@ module.exports = {
 
 如下图所示：
 
+> craco.config.js
+
 ```
 module.exports = {
     webpack: {
