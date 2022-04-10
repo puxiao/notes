@@ -795,7 +795,7 @@ module.exports = {
 
 #### 使用 Craco 配置 webpack
 
-若想使用 craco 修改 webpack 的配置项，**需要将原本在 webpack.config.js 中定义的各项 移动到：webpack.configure 中。**
+若想使用 craco 修改 webpack 的配置项，**需要将原本在 webpack.config.js 中定义的各项 移动到：craco.config.js 的 webpack.configure 中。**
 
 如下图所示：
 
