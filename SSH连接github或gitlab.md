@@ -36,7 +36,7 @@ https://docs.github.com/cn/authentication/connecting-to-github-with-ssh/checking
 
    > 上述命令中的 ed25519 会作为将来秘钥的文件名中的一部分
 
-5. 敲回车后，会有询问，大致为询问你是否确定，以及是否要设置密码，这里无需理会，直接摁回车即可
+5. 敲回车后，会有询问，大致为询问你是否确定继续，以及是否要设置密码，这里无需理会，直接摁回车即可
 
    > 应该一共需要摁 3 次回车
 
@@ -46,7 +46,7 @@ https://docs.github.com/cn/authentication/connecting-to-github-with-ssh/checking
 
 7. 使用记事本打开 id_ed25519.pub 这个文件，复制里面的内容
 
-8. 浏览器打开 https://github.com/settings/keys，点击页面中的 “New SSH key” 按钮
+8. 浏览器打开 https://github.com/settings/keys ，点击页面中的 “New SSH key” 按钮
 
 9. 在新页面中，在 `Title` 中输入当前准备生成的 SSH key 的标题(最好是英文)
 
@@ -80,7 +80,7 @@ https://docs.github.com/cn/authentication/connecting-to-github-with-ssh/checking
 
    > 注意，上述命令中 `-t rsa` 也就意味着本次生成的文件名中会有 "rsa" 字符，与上面 github 中的 `-t ed25519` 刚好有所区分
 
-3. 敲回车后，会有询问，大致为询问你是否确定，以及是否要设置密码，这里无需理会，直接摁回车即可
+3. 敲回车后，会有询问，大致为询问你是否确定继续，以及是否要设置密码，这里无需理会，直接摁回车即可
 
    > 应该一共需要摁 3 次回车，这一步和 上面设置 github 是一模一样的
 
@@ -92,7 +92,7 @@ https://docs.github.com/cn/authentication/connecting-to-github-with-ssh/checking
 
 6. 浏览器打开 http://git.xxx.com/profile/keys
 
-7. 将 id_rsa.pub 复制到的内容粘贴到 `Key` 输入框中，同时也填写一些 “标题”
+7. 将 id_rsa.pub 复制到的内容粘贴到 `Key` 输入框中，同时也填写 “标题”
 
 8. 点击 “添加秘钥”，当提示创建成功后，至此完成了全部的步骤
 
