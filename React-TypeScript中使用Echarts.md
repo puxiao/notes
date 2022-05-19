@@ -212,6 +212,7 @@ const Echart: React.FC<EchartProp> = ({ option }) => {
 
     //监听依赖变化，并根据需要更新图表数据
     useEffect(() => {
+        echartsInstance?.clear() //清除之前的数据缓存
         echartsInstance?.setOption(option)
     }, [echartsInstance, option])
 
