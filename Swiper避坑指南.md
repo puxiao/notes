@@ -245,3 +245,28 @@ const swiper = new Swiper(".swiper-container", {
 </div>
 ```
 
+
+
+___
+
+
+
+<br>
+
+以下内容更新于 2022.06.11
+
+#### 第5个坑：appendSlide()、removeSlide()、prependSlide()、removeSlide()、removeAllSlides() 这些函数无法在 React/Vue/Svelte/Angular 框架下使用
+
+官方文档给出的解释原文：
+
+```
+Only for Core version (in React, Svelte, Vue & Angular it should be done by modifying slides array/data/source)
+```
+
+https://swiperjs.com/swiper-api#method-swiper-virtual-removeSlide
+
+
+
+<br>
+
+Swiper 官方认为在 React/Vue/... 这些框架中，应该通过修改源数据的形式来更新(添加或删除) slide。
