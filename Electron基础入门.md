@@ -200,7 +200,7 @@ RequestError: connect ETIMEDOUT
 
    当执行若干秒后，会收到刚才提到的报错 `RequestError: connect ETIMEDOUT`，但是请注意，此时 node_modules/electron 中是有内容的。
 
-2. 访问 https://github.com/electron/electron/releases/tag/v13.0.0，找到 `electron-v13.0.0-win32-x64.zip` 并下载该文件
+2. 访问 https://github.com/electron/electron/releases/tag/v13.0.0 ，找到 `electron-v13.0.0-win32-x64.zip` 并下载该文件
 
 3. 将手工下载得到的 `electron-v13.0.0-win32-x64.zip` 文件拷贝到 node_modules/electron 中
 
