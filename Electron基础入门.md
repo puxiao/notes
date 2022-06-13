@@ -153,3 +153,63 @@ chcp
 详细的 API 和官方使用指南，请查阅：
 
 https://www.electronjs.org/docs
+
+
+
+<br>
+
+## Electron代码提示
+
+由于 electron NPM 包中自带 electron.d.ts，所以只要执行：yarn add --dev electron 即可获取 typescript 代码提示。
+
+特别说明：由于安装命令中包含 --dev 参数，所以正式构建项目代码时 electron NPM 包中的代码并不会被打包进去。
+
+
+
+<br>
+
+## Electron安装失败的解决方式
+
+在执行 `yarn add --dev electron@xx.x.x` 时，可能会遇到下面报错信息：
+
+```
+Output:
+RequestError: connect ETIMEDOUT
+...
+```
+
+这是因为 electron 那个 壳(二进制运行文件) 没有下载成功。
+
+
+
+<br>
+
+你可以尝试将 npm 源修改为 国内的淘宝 npm，但是我个人实际使用时，发现即使修改成 淘宝NPM源，也会存在安装失败的情况。
+
+这里，我教大家一个 “手工安装” 的方式，来解决这个问题。
+
+
+
+<br>
+
+**纯手工安装electron的步骤：**
+
+> 这里我们假定要安装的是 64 位操作系统下的 electron 13.0.0
+
+1. 先按照正常流程安装：`yarn add --dev electron@13.0.0`
+
+   当执行若干秒后，会收到刚才提到的报错 `RequestError: connect ETIMEDOUT`，但是请注意，此时 node_modules/electron 中是有内容的。
+
+2. 访问 https://github.com/electron/electron/releases/tag/v13.0.0，找到 `electron-v13.0.0-win32-x64.zip` 并下载该文件
+
+3. 将手工下载得到的 `electron-v13.0.0-win32-x64.zip` 文件拷贝到 node_modules/electron 中
+
+4. 编辑 node_modules/electron/install.js 文件，将其中 `downloadArtifact` 相关代码都注释掉，因为此时我们不需要走下载流程了
+
+5. 同时找到 `extractFile` 这个函数，在它下面添加一行代码：`extractFile('./electron-v13.0.0-win32-x64.zip')`
+
+6. 在命令窗口，切换到 node_modules/electron 中，然后执行：`node install.js`
+
+   > 注意：当执行完该命令后，并不会有任何信息输出
+
+7. 至此，就完成了手工安装 electron 了
