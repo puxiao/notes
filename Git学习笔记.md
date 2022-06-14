@@ -598,6 +598,25 @@ git add .
 
 <br>
 
+## 忽略某些已被追踪(添加过)的文件
+
+假设有一个文件，例如 `data/config.ini` 已经被添加过，也就是说它已经处于被追踪状态，此时再在 .gitignore 文件中添加对此文件的忽略是不会生效的。
+
+如果想忽略它，那么只能按照以下方式操作：
+
+> 注意：该方法有一定的危险性，应谨慎操作
+
+```
+git rm -r --cached .
+git add .
+git commit -m 'update .gitignore'
+git push
+```
+
+
+
+<br>
+
 ## 查看已暂存或未暂存文件的修改
 
 我们可以使用 git status 或 git status -s 来查看文件当前的状态(是否已暂存、是否已修改、是否已暂存后又修改)，打印信息中只是列出了文件的状态但是并未列出文件具体修改的地方。
@@ -655,6 +674,10 @@ git diff --staged  或  git diff --cached
 在正式提交之前，建议先执行 git status ，检查一下当前工作区，暂存区的文件状态，确保正确无误，没有遗漏。
 
 > 那些工作区中修改，但未保存到暂存区的改动，不会被提交到版本库中，仅仅保存在本机中。
+
+
+
+<br>
 
 ### 将暂存区内容正式提交
 
@@ -2461,4 +2484,3 @@ git pull --rebase xxx
 | IIRC：if i recall correctly             | 如果我没有记错                         |
 | ACK：acknowledgement                    | 我确认了、我接受了，我承认了           |
 | NACK/NAK：negative acknowledgement      | 我不同意                               |
-
