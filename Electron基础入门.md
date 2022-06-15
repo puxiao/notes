@@ -213,3 +213,33 @@ RequestError: connect ETIMEDOUT
    > 注意：当执行完该命令后，并不会有任何信息输出
 
 7. 至此，就完成了手工安装 electron 了
+
+
+
+<br>
+
+**但是，上面那种操作会有一个潜在问题：**
+
+当执行 asar pack ... 去打包项目时，会将 node_modules/electron 这个目录也一并打包进去，造成文件体积增大 180M 左右。
+
+解决方式为：通过给 asar pack 添加 --unpack-dir 参数来忽略这个目录，同时还需要将额外产生的 app.asar.unpacked 目录删除。
+
+```
+asar pack . app.asar --unpack-dir "node_modules/electron" && rd /s/q "app.asar.unpacked"
+```
+
+
+
+<br>
+
+假设你是在 package.json 的 scripts 中添加上述命令，一定要将上面命令中的每一个引号 " 前面增加一个斜杠 \
+
+```
+{
+    "scripts": {
+        "asar":"asar pack . app.asar --unpack-dir \"node_modules/electron\" && rd /s/q \"app.asar.unpacked\""
+    }
+}
+```
+
+
