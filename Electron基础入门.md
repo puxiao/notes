@@ -243,3 +243,43 @@ asar pack . app.asar --unpack-dir "node_modules/electron" && rd /s/q "app.asar.u
 ```
 
 
+
+<br>
+
+## 如何参与翻译Electron中文文档？
+
+
+
+Electron 的官方简体中文文档地址为：https://www.electronjs.org/zh/docs/latest/
+
+
+
+ 假设你发现某些简体中文文档有错误、歧义、未翻译的地方，如果你也想贡献自己的翻译，那么 Electron 提供了以下 2 种途径。
+
+
+
+<br>
+
+**第1种：向 electron/i18n 仓库提交合并申请**
+
+electron/i18n 仓库地址：https://github.com/electron/i18n/tree/master/content/zh-CN
+
+
+
+<br>
+
+**第2种：通过 crowdin.com 提交自己的翻译**
+
+crowdin.com 是一个专门用于大型、多人在线翻译的平台。
+
+其中 Electron 项目翻译地址为： https://crowdin.com/project/electron/zh-CN#/docs/latest/tutorial
+
+你可以注册一个账户，然后参与其中。
+
+
+
+<br>
+
+**补充：**
+
+Electron 项目的仓库地址：https://github.com/electron/electron/ 中，只接受英文文档的合并申请。
