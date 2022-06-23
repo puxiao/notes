@@ -264,6 +264,8 @@ Electron 的官方简体中文文档地址为：https://www.electronjs.org/zh/do
 
 electron/i18n 仓库地址：https://github.com/electron/i18n/tree/master/content/zh-CN
 
+> 补充说明：
+> i18n 实际上是单词 internationalization(国际化) 的一种特殊简写，即 开头字母 i + 中间18个字母 + 结尾字母n
 
 
 <br>
