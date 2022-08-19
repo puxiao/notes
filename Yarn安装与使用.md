@@ -6,6 +6,7 @@
 * **[yarn安装](#yarn%E7%AE%80%E4%BB%8B)**
 * **[yarn命令](#yarn%E7%AE%80%E4%BB%8B)**
 * **[yarn创建软连接](#yarn%E5%88%9B%E5%BB%BA%E8%BD%AF%E8%BF%9E%E6%8E%A5)**
+* **[通过.yarnrc修改默认的node_modules目录](#通过.yarnrc修改默认的node_modules目录)**
 
 
 
@@ -905,3 +906,60 @@ success Using linked package for "react-dom".
 **6、删除软连接**
 
 不再过多叙述，就是将 link 改为 unlink，反向执行一遍。
+
+
+
+<br>
+
+## 通过.yarnrc修改默认的node_modules目录
+
+默认情况下，无论 npm、cnpm、yarn、pnpm，当安装 npm 包时都会默认安装到 node_modules 目录中。
+
+某些特殊情况下，你想把项目中 npm 包安装到别的目录，那么可以通过下面方式操作。
+
+
+
+<br>
+
+假设我们希望将 npm 包安装到 `path-to-you-folder` 目录中，那么操作如下：
+
+第1步：在项目根目录创建一个 `.yarnrc` 的文件
+
+第2步：在该文件中输入以下内容：
+
+```
+--modules-folder path-to-your-folder
+```
+
+
+
+<br>
+
+从此，以后再执行 `yarn addd xxx` ，xxx 都会被安装到 `paht-to-your-folder` 目录中。
+
+
+
+<br>
+
+补充说明：
+
+这种方式本身只适用于 yarn，不适用于 npm。
+
+如果是 npm 也想实现这种方式，那么有 2 种方案：
+
+1. 安装npm包时添加参数：
+
+   ```
+   npm i --prefix ./path-to-you-folder xxx
+   ```
+
+   > 缺点：每一次安装 npm 包都需要添加 `--prefix` 参数，并且安装的 npm 包不会出现在 package.json 文件中
+
+2. 配置环境变量：
+
+   ```
+   export NODE_PATH='path-to-you-folder'/node_modules
+   ```
+
+   > 这个方式我没试验过，有可能会遇到一些问题。
+
