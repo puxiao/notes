@@ -935,7 +935,7 @@ success Using linked package for "react-dom".
 
 <br>
 
-从此，以后再执行 `yarn addd xxx` ，xxx 都会被安装到 `paht-to-your-folder` 目录中。
+从此，以后再执行 `yarn add xxx` ，xxx 都会被安装到 `paht-to-your-folder` 目录中。
 
 
 
