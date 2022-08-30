@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>获取某URL参数</title>
+    <script>
+        window.onload = function () {
+            var strArr = window.location.href.split('?')
+            var params = {}
+            if (strArr.length > 1) {
+                var paramList = strArr[1].split('&')
+                paramList.forEach(item => {
+                    const arr = item.split('=')
+                    params[arr[0]] = arr[1]
+                })
+            }
+
+            const idValue = params.id
+            const ele = document.querySelector('#id')
+            ele.innerHTML = `Id: ${idValue}`
+
+        }
+    </script>
+</head>
+
+<body>
+    <h2 id="id"></h2>
+</body>
+
+</html>
