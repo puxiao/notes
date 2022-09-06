@@ -8,16 +8,19 @@
     <title>获取某URL参数</title>
     <script>
         window.onload = function () {
-            var strArr = window.location.href.split('?')
-            var params = {}
-            if (strArr.length > 1) {
-                var paramList = strArr[1].split('&')
-                paramList.forEach(item => {
-                    const arr = item.split('=')
-                    params[arr[0]] = arr[1]
-                })
-            }
-
+//             var strArr = window.location.href.split('?')
+//             var params = {}
+//             if (strArr.length > 1) {
+//                 var paramList = strArr[1].split('&')
+//                 paramList.forEach(item => {
+//                     const arr = item.split('=')
+//                     params[arr[0]] = arr[1]
+//                 })
+//             }
+            
+            const url = new URL(window.location.href)
+            const params = url.searchParams
+            
             const idValue = params.id
             const ele = document.querySelector('#id')
             ele.innerHTML = `Id: ${idValue}`
