@@ -1,6 +1,6 @@
 /** 
  * Dom元素快捷键管理
- * 功能：给Dom元素添加并管理键盘侦听，并管理相应快捷键
+ * 功能：给Dom元素添加键盘事件，管理相应快捷键
  * 代码修改自：https://gist.github.com/abuduba/c41d40a1b45990c086de6d3b24bdd85a#file-hotkeys-js
  * 备注：该代码无任何第三方依赖
  * 
