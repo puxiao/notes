@@ -8,6 +8,10 @@
  * const shortcut = createShortcut()
  * shortcut.register( 'atl+t', ()=>{ console.log('alt+t') } )
  * 
+ * 特别说明：
+ * 当前代码中并没有添加键盘适配(Windows键盘或Mac键盘)
+ * (未将 ctrl键 自动转换成  meta键)
+ * 
 */
 
 //深度克隆
