@@ -26,14 +26,14 @@
 
 图片资源存放在 腾讯云 上，且管理员 “宣称” 已经添加了 CORS 规则，该规则设定如下：
 
-1. 来源 Origin：*
+1. 来源 Origin：`*`
 2. 被允许的请求方法：PUT、GET、POST、DELETE、HEAD
-3. Allow-Headers：*
+3. Allow-Headers：`*`
 4. Expose-Headers：ETag、Content-Length、x-cos-request-id
 5. 超时 Max-Age：0
 6. 返回 Vary:Origin：已勾选
 
-**从上面的配置项来看，这已经是最大自由度的 CORS 规则了，Origin 都已经设置为 * 了，那真的是任何限制都没有，不应该出现跨域问题了。**
+**从上面的配置项来看，这已经是最大自由度的 CORS 规则了，Origin 都已经设置为 `*` 了，那真的是任何限制都没有，不应该出现跨域问题了。**
 
 
 
@@ -176,7 +176,7 @@ https://developer.mozilla.org/zh-CN/docs/Web/HTTP/CORS
 
 <br>
 
-**原因找到了：之前腾讯云配置的 CORS 规则中 Origin 为 *，这就导致：**
+**原因找到了：之前腾讯云配置的 CORS 规则中 Origin 为 `*`，这就导致：**
 
 1. 对于 简单请求 而言，是符合这条规则的，因此第一次加载某图片是没有问题的。
 2. **但对于 预检请求 而言，由于预检请求不支持 模糊匹配，所以 预检请求 无法通过该规则，所以就会出现跨域情况了**。
@@ -187,7 +187,7 @@ https://developer.mozilla.org/zh-CN/docs/Web/HTTP/CORS
 
 于是乎，只需要在腾讯云 CORS 规则中新增一条
 
-1. Origin 不再设为为 *，而是具体的 协议 + IP + 端口
+1. Origin 不再设为为 `*`，而是具体的 协议 + IP + 端口
 2. 超时 Max-Age 也不设置 0，而是给他一些超时时间，例如 60 秒
 
 经过这样设置之后，纹理加载器加载图片就再也没有跨域报错了。
