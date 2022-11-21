@@ -540,6 +540,7 @@ yarn-error.log
     "editor.detectIndentation": false,
     "editor.tabSize": 4,
     "javascript.format.insertSpaceBeforeFunctionParenthesis": true,
+    "vscode-edge-devtools.webhint": false
 }
 ```
 
