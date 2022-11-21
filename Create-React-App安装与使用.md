@@ -1,6 +1,23 @@
 # Create-React-App安装与使用
 
-> 上面注释的代码为 npm 安装，实际使用的使用 yarn 安装
+#### 本文目录：
+
+* 全局安装Create-React-App
+* 初始化普通React项目
+* 初始化React+TypeScript项目
+* 修改tsconfig.json配置
+* 修改发布后项目根目录
+* 构建并移动文件夹
+* 添加Scss/Sass支持
+* 配置alias路径映射
+* 配置代码检查：ESLint
+* 配置代码格式化：prettier
+* 配置VSCode设置
+* 配置worker-loader
+* 安装jsdoc或typedoc
+* 使用Craco修改webpack配置
+
+
 
 
 
@@ -181,6 +198,8 @@ React 发布后，将项目上传到服务器，默认必须是网站根目录�
 > 此时不再需要括号了
 
 
+
+
 <br>
 
 ## 添加Scss/Sass支持
@@ -318,7 +337,7 @@ declare module 'react-app-rewire-alias';
 
 <br>
 
-## 配置ESLint
+## 配置代码检查：ESLint
 
 默认情况下，create-react-app 已经安装有 ESLint 和 ESLint 一些常见插件。
 
@@ -328,6 +347,20 @@ declare module 'react-app-rewire-alias';
 2. 在项目根目录创建 `.eslintignore` 的文件，并编写 ESLint 可以忽略的文件
 
 关于 ESLint 的用法，请参考：[ESLint学习笔记.md](https://github.com/puxiao/notes/blob/master/ESLint%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.md)
+
+
+
+<br>
+
+**通过命令工具创建 eslint 配置文件**
+
+执行下面命令，然后根据提示定制自己特有的配置项：
+
+```
+npm init @eslint/config
+```
+
+> 注意：不能使用 yarn init @eslint/config
 
 
 
@@ -359,6 +392,181 @@ Parsing error: Unexpected token, expected ","
 > ```
 >
 > 但是依然需要我们再在 .eslintrc 中添加一次，这点究竟原因是为什么，暂时还没理解。
+
+
+
+<br>
+
+**安装：eslint-plugin-html**
+
+默认情况下 eslint 针对的是 .js、.jsx、.ts ...，但是 React 项目中 pulic/index.html 文件 eslint 就无法正确作出判断了。
+
+例如 `<!DOCTYPE html>` 这个就会被 eslint 误报：`parsing error unexpected token`
+
+为了解决这个问题，你有 2 种选择：
+
+1、第1种：在 `.eslintignore` 中增加对 .html 文件的忽略检查，但是并不建议这样做。
+
+2、第2种：安装 `eslint-plugin-html`，并在 `.eslintrc` 的 `plugins` 中增加 `html`，即
+
+```
+"plugins": [
+    "react",
+    "html"
+],
+```
+
+
+
+> 以下更新于 2022.11.21
+
+<br>
+
+## 配置代码格式化：prettier
+
+**安装：prettier**
+
+```
+yarn add prettier --dev
+```
+
+
+
+<br>
+
+**配置文件：**
+
+`.prettierrc`
+
+> 下面配置项只是我个人的偏好，具体每一项的含义可查看：https://prettier.io/docs/en/options.html
+
+```
+{
+    "singleQuote": true,
+    "trailingComma": "none",
+    "bracketSpacing": true,
+    "useTabs": false,
+    "tabWidth": 4,
+    "tabSize": 4,
+    "printWidth": 100,
+    "semi": false,
+    "proseWrap": "never",
+    "overrides": [
+        {
+            "files": ".prettierrc",
+            "options": {
+                "parser": "json"
+            }
+        }
+    ]
+}
+```
+
+> bracketSpacing 是指函数的参数前后是否增加 1 个空格，例如 `function do( num )`
+>
+> semi 是指是否强制在代码结尾处增加 分号
+>
+> printWidth 是指一行代码超过多少字符后自动换行
+>
+> tabWidth、tabSize 是指按照  4 个空格来进行代码缩进
+
+
+
+<br>
+
+**配置可以忽略的文件**
+
+`.prettierignore`
+
+```
+**/*.png
+**/*.svg
+CODEOWNERS
+.dockerignore
+Dockerfile.ui-test
+package.json
+AUTHORS.txt
+lib/
+es/
+dist/
+build/
+_site/
+CNAME
+LICENSE
+yarn.lock
+netlify.toml
+yarn-error.log
+*.sh
+*.snap
+.gitignore
+.npmignore
+.prettierignore
+.DS_Store
+.editorconfig
+.eslintignore
+.history
+**/*.yml
+```
+
+
+
+> 以下更新于 2022.11.21
+
+<br>
+
+## 配置VSCode设置
+
+假设我们对于 React 项目添加了 Eslint 和 Prettier，我们希望每次保存代码文件都会自动执行一遍检查和代码格式化，并且我们希望将当前项目的 VSCode 设置项独立出来，方便其他人也遵循这套设置，那么我们可以如下操作。
+
+在项目根目录创建  .vscode/settings.json 文件，内容大体如下：
+
+```
+{
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    },
+    "eslint.validate": [
+        "javascript",
+        "html"
+    ],
+    "eslint.options": {
+        "extensions": [
+            ".js",
+            ".js",
+            ".jsx"
+        ]
+    },
+    "editor.detectIndentation": false,
+    "editor.tabSize": 4,
+    "javascript.format.insertSpaceBeforeFunctionParenthesis": true,
+}
+```
+
+
+
+<br>
+
+上述代码中的：
+
+```
+"editor.formatOnSave": true,
+"editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+},
+```
+
+可以确保每次保存代码时，自动进行代码检查和格式化。
+
+
+
+<br>
+
+**补充说明：**
+
+实际上针对不同平台，例如 github、codesandbox 等，都可以按照上面的套路，添加符合他们规则的一些设置项。
+
+例如 github，那就是在项目根目录创建 `.github/`目录，然后根据 github 平台提供支持的配置项或配置文件进行相关设置。
 
 
 
