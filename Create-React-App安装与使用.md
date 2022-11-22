@@ -989,6 +989,14 @@ module.exports = {
 
 <br>
 
+**使用JS的React项目对应的 path 配置**
+
+上面的 path 配置说明是针对在 React 中使用 TypeScript 的，假设你不使用 TS，使用的是 JS，那么你需要做的就是把 `tsconfig.json` 改为 `jsconfig.json` 即可。
+
+
+
+<br>
+
 **webpack4问题遗留：**
 
 若使用 webpack4，只能选择第 1 种引入方式。因为若使用第 2 种方式，不清楚为什么每次执行 yarn start 后，都会自动将 tsconfig.json 中的 paths 字段删除，导致找不到对应的文件，从而引发报错。不过这个问题在 webpack5 中并未出现。
