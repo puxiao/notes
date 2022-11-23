@@ -168,6 +168,144 @@ https://developer.mozilla.org/zh-CN/docs/Web/HTTP/CORS
 
 <br>
 
+> 以下内容更新于 2022.11.23
+
+**特别强调一点：预检请求是不会携带任何请求参数的**
+
+今天在 React 中使用 umi-request 以 POST 方式请求接口，就出现了新的 “跨域” 问题。
+
+请注意，上面说的 跨域问题 是加引号的，具体为什么加引号马上讲解。
+
+
+
+<br>
+
+**场景复现：**
+
+我在原生的 React 中使用 umi-request (fetch方式，非 xhr 方式) ，以 POST 方式请求一个接口。
+
+> 请注意我说的是基于 create-react-app  创建的 React 项目，而非 umi 或 antd-pro。
+
+假设我想发起 post 请求，umi-request 是有 2 种写法的：
+
+```
+import request from 'umi-request'
+
+const url = 'http://xxx.xx/xx'
+const data = { bid: 20221123 }
+
+//第1种：
+request.post(url, data)
+
+//第2种：
+request(url, { method: 'post', data })
+```
+
+>第1种写法是明确通过 `reqeust.post` 来表明发起的是 POST 请求
+>
+>第2种写法是通过添加 request 的配置项 `{method:'post'}` 来表明发起的是 POST 请求
+>
+>以上 2 种写法都是 umi-request 所支持的
+>
+>实际查看 umi-request 源码，你会发现 第1种写法只是第2种写法的一种 语法糖
+
+
+
+<br>
+
+实际运行结果是：
+
+1. 使用第1种方式，没有任何问题，可以正确接收到服务端返回数据
+2. 使用第2种方式，竟然报跨域错误
+
+
+
+<br>
+
+为什么会这样？
+
+经过网上多方文章查询，大概理清楚这中间的过程了。
+
+
+
+<br>
+
+**第2种请求遭遇跨域错误的过程梳理：**
+
+1. 前端 JS 中通过 `request(url,{method:'post', data})` 尝试发起一个跨域 POST 请求
+
+2. 浏览器网络以 fetch 方式先发起一个预检请求，但这次预检请求中不携带请求参数
+
+   > 请注意，上面发起的请求配置相中，并没有 crossOrigin 配置项
+
+3. 后端收到了一个 “请求”，但是并没有发现这个请求中的 crossOrigin 标志
+
+4. 于是后端就没有考虑对这个请求做出 预检请求和简单请求 区分，**后端用 简单请求 的逻辑去执行 这次预检请求**
+
+   > 这里要补充一下，对于绝大多数后端框架来说，它都包含对 crossOrigin 标识的判断，这不需要后端程序员自己去写
+
+5. 后端由于没有 “读取” 到预期的请求参数，于是就拒绝或不回应的方式处理了这次请求
+
+6. 浏览器端这时发现自己发起的预检请求得到的是空的回应，浏览器因此误判以为是服务器拒绝当前请求，所以就报了 跨域错误
+
+
+
+<br>
+
+**等一下，既然都是 POST 请求不携带参数，那为什么第1种请求方式正确执行了，而第2种方式却遭遇跨域错误？**
+
+额~，第1种写法确实仅仅是第2种写法的语法糖，但为什么会出现这种情况，我暂时真的不知道怎么解释。
+
+
+
+<br>
+
+**还是说一下怎么解决刚才那个问题吧。**
+
+> 实际上 umi-request 只是对 fetch/xhr 请求进行了简单封装，所以对于 request 中的配置项，除了 umi-request 自己设计的配置项外，还支持原本 fectch/xhr 本身的配置项。
+
+我们需要做的事情就增加上 `crossOrigin` 配置项即可。
+
+这样每次请求，后端服务 都能通过 crossOrigin 标识来作出正确判断，就能够正确回应 预检请求和简单请求了，前面遇到的跨域问题就解决了。
+
+```diff
+- request(url,{method:'post', data})
++ request(url,{method:'post', crossOrigin:'anonymous' ,data})
+```
+
+> 网上有些文章中，将 crossOrigin 的值设置为 true，也能正常运行。
+>
+> 额~ 我们前面讲过，crossOrigin 的标准值为 'anonymous'  或 'use-credentials'，你可以理解为只要你设置非 null 的值，只要值不是 'use-credentials'，那么无论设置为 空字符串 或是 true 都会被理解 等价于 'anonymous'。
+
+
+
+<br>
+
+**简单总结一下：**
+
+1. 预检请求不会携带请求参数
+2. 如果使用 umi-request 记得要添加上 `crossOrigin:'anonymous'`，否则服务端无法区分 预检请求和简单请求，加过该请求又需要参数就会导致误判。
+
+
+
+<br>
+
+**还有一个问题：为什么 antd-pro 中的 umi-request 请求就不需要我们添加 crossOrigin ？**
+
+这是因为这类框架中，本身都会包含一些 “网络请求代理配置”，即 `/config/proxy.js` 中通常会有一个 `changeOrigin:true` 的配置项，这个配置项起到了相应的作用。
+
+
+
+<br>
+
+>以上内容更新于 2022.11.23
+
+
+
+
+
+<br>
+
 我们直接提炼出以上 2 篇文章的几个关键点：
 
 1. 若缓存可用，例如 极短时间内连续访问同一个资源 可能触发 预检请求
@@ -230,4 +368,3 @@ https://developer.mozilla.org/zh-CN/docs/Web/HTTP/CORS
 > 简单来说，不要以为把 Max-Age 设置为 0 就一定不会出现缓存了。
 
 总之，在某些情况下确实发生了 缓存，触发了 预检请求，进而出现跨域问题。
-
