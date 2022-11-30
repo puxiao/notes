@@ -96,15 +96,31 @@ const validateType = (value, name, type) => {
 }
 
 //标准化快键键
-const normalizeHotkey = (hotkey) => hotkey.split(/ +/g).map(
-    (part) => {
-        const arr = part.split('+').filter(Boolean)
-        const result = arrayToObject(arr)
-        validate(Object.keys(result).length >= arr.length, `Hotkey combination has duplicates "${hotkey}"`)
-        validate(isHotkeyValid(result), `Invalid hotkey combination: "${hotkey}"`)
-        return result
-    }
-)
+const normalizeHotkey = (hotkey) => {
+    let resArr = hotkey.split(/ +/g)
+    resArr = Array.from(new Set(resArr)) //去重
+    return resArr.map(
+        (part) => {
+
+            let arr = []
+            let result = null
+
+            if (part === '') {
+                //针对空格键的特殊处理
+                arr = ['space']
+                result = { space: true }
+            } else {
+                arr = part.split('+').filter(Boolean)
+                result = arrayToObject(arr)
+            }
+
+            validate(Object.keys(result).length >= arr.length, `Hotkey combination has duplicates "${hotkey}"`)
+            validate(isHotkeyValid(result), `Invalid hotkey combination: "${hotkey}"`)
+
+            return result
+        }
+    )
+}
 
 //校验参数正确性
 const validateListenerArgs = (hotkey, callback) => {
