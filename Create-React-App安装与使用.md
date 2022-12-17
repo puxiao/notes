@@ -204,6 +204,10 @@ React 发布后，将项目上传到服务器，默认必须是网站根目录�
 
 ## 添加Scss/Sass支持
 
+
+
+**安装node-sass(不再推荐)：**
+
 ```
 //npm i node-sass --save-dev
 
@@ -220,6 +224,42 @@ yarn add node-sass@5.0.0 --dev
 Python下载地址：https://www.python.org/downloads/
 
 > 目前最新版本为 python 3.10
+
+
+
+<br>
+
+**注意：node-sass 已经过时，并且安装过程中会遇到各种奇怪的问题，因此不再推荐安装，现在推荐安装 sass。**
+
+
+
+<br>
+
+**安装sass(推荐)：**
+
+```
+yarn add sass --dev
+```
+
+> 对于前端项目而言，实际上不添加 --dev 也可以，因为前端项目最终都会被编译打包，sass 这个 NPM 包是不会被打包到生产代码中的。
+
+
+
+<br>
+
+补充说明1：
+
+1. 默认由 create-react-app 创建的项目本身就添加有 .scss 加载器，所以直接使用就可以了
+2. 但是假设你的 react 项目发生过 webpack 配置修改，那么你可能需要手工安装 `sass-loader`，并进行相关配置
+
+
+
+<br>
+
+补充说明2：
+
+1. `.scss` 与 `.sass` 格式不同，其 CSS 代码风格也不同，主要区别在 .sass 的 CSS 代码无需添加大括号和分号。
+2. 我个人偏向于使用 .scss，毕竟看着和传统 .css 结构更接近
 
 
 
