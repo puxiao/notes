@@ -77,7 +77,7 @@ zustand 来了，如果使用 zustand 就比较容易解决上面这些问题。
 
 * Recoil、jotai 有的优点 zustand 都有
 * zustand 消费对象(使用者)类似于钩子(hooks)函数
-* 但 zustand 不仅可以在函数组件中使用，还可以在类组件、甚至普通 JS 中都可以共用执行
+* 但 zustand 不仅可以在函数组件中使用，还可以在类组件、甚至普通 JS (非 React) 中都可以共用执行
 * zustand 对于数据状态管理的颗粒度非常只有，甚至是可以无限任你发挥
 
 
@@ -551,6 +551,36 @@ updateTodoData: (id, newData) => {
 
 <br>
 
+**关于自定义函数的特别说明：异步函数**
+
+zustand 的修改函数中，是支持异步函数的。
+
+> 在本文上面中，我们所展示的示例函数 都不是异步的。
+
+假设有一个数据为从服务器上根据用户id 获取他的 文章列表，那么我们的网络请求都可以直接写在 状态对象中。
+
+例如：
+
+> 下面是伪代码
+
+```
+const useArticleList = create((set) => ({
+    list: [],
+    fetch: async (id:string) =>{
+        const response = await fetch( ... ) //发起网络请求
+        set({list: response....}) //将网络请求结果处理并通过 set 赋值给 list
+    }
+}))
+```
+
+> 实际上我个人并不建议将网络请求相关代码也放到 useXxxxData 中，还是应该将网络请求和返回结果数据处理的代码抽离出来。
+
+
+
+<br>
+
+好，让我们暂时忘掉 异步函数，回到 增删改查 中。
+
 接下来重点说一下 "查"。
 
 
@@ -683,7 +713,7 @@ const userData = useUserData.getState()
 
 <br>
 
-这种形式特别适用于 类组件 和 普通 JS 代码模块中。
+这种形式特别适用于 类组件 。
 
 
 
@@ -730,7 +760,7 @@ useUserData.subscribe((state) => {
 
 **.subscribe((state) => { ... }) 适用的 2 个场景：**
 
-* 适用于 类组件 或 纯 JS 模块
+* 适用于 类组件 
 * 适用于 瞬时更新 场景
 
 
@@ -797,39 +827,37 @@ export default UserInfo
 
 **场景2：瞬时更新**
 
-这个场景我们经常会用到。
+这个场景我们可能经常会用到。
 
 
 
 <br>
 
-先说一下什么是 “瞬时更新” ？
+**先说一下什么是 “瞬时更新” ？**
 
 我们知道 zustand 消费端使用的方式类似于 钩子函数，那么也就意味着：
 
 1. zustand 的更新方式并不是实时的，是异步的
 
-2. react18 的并发模式，也会导致 我们在某一瞬间 A组件中 设置修改了 数据状态，但与此同时 B组件 内获取到的数据未必是最新的
-
-3. 假定我们定义了 2 个不同的数据状态，且某组件都需要用到这 2 个数据状态，而这 2 个数据状态都有可能会发生变化
+2. react18 的并发模式，也会导致 我们在某一瞬间 A组件中 设置修改了 数据状态，但与此同时 B组件中的某函数 获取到的数据未必是最新的
 
    > 这个场景在实际开发中会经常遇到
 
-假定 B 组件中无论任何情况下都需要第一时间获取最新的数据状态，那么 .subscribe() 就派上用场了。
+假定 B组件中的某函数  中无论任何情况下都需要第一时间获取最新的数据状态，这种情况下，就需要使用 瞬时更新 的代码套路了。
+
+具体代码套路如下：
+
+* 我们在组件内通过 useRef 勾住数据状态中的某个值
+* 我们在 useEffect() 中通过 .subscribe() 添加对该值的监控和更新
+* 这样就可以保证 B组件中某函数始终可以获取最新的值，并且该函数内部由于使用的是 useRef 产生的对象，该函数不需要其他任何变量依赖
 
 
 
 <br>
 
-**举个例子：**
+**举个代码例子：**
 
-1. 我们现在定义了一个当前用户的数据状态
-2. 我们再定义一个 当前展示第几个 todoList 事项的数据状态
-3. 假定我们希望对外封装一个自定义钩子函数 useCurrentTodoData.ts 用来专门获取当前展示 todoData
-
-
-
-<br>
+假定我们新定义个 数据状态，表示当前显示项索引：
 
 > src/store/useCurrentIndex.ts
 
@@ -853,25 +881,51 @@ export default useCurrentIndex
 
 <br>
 
-假定我们有一个组件，该组件只展示当前某 1 条 todoData 信息。
+在组件某函数中使用 瞬时更新：
 
-那么该组件同时需要使用：
+```
+import { useEffect, useRef } from "react"
+import useCurrentIndex from "../store/useCurrentIndex"
 
-* useUserData 中的 todoList
-* useCurrentIndex 中的 index
+const useSomeFun = () => {
+    const indexRef = useRef<number>(useCurrentIndex.getState().index)
 
-而此时 todoList、index 都可能在某个时刻发生变化，且某些时候这些变化并不是在一瞬间同步更新的。
+    const someFunc = () => {
+        //...
+        console.log(indexRef.current)
+    }
+
+    useEffect(() => {
+        useCurrentIndex.subscribe(state => {
+            indexRef.current = state.index
+        })
+    }, [])
+}
+
+export default useSomeFun
+```
+
+> 这里需要强调一下 useRef 声明的变量 .current 的值发生变化后并不会触发组件重新渲染，因此假定 useSomeFun 不发生重新渲染的情况下，其内部的 someFun() 函数是稳定的、不会重新声明的。
 
 
 
 <br>
 
-这种情况下，就需要使用 瞬时更新 的代码套路了。
+我们可以看到所谓 “瞬时更新” 更像是 “勾住某数据”。
 
-具体代码套路如下：
 
-* 我们在组件内通过 useRef 勾住数据状态中的某个值
-* 我们在 useEffect() 中通过 .subscribe() 添加对该值的监控和更新
+
+<br>
+
+**数据的另外一种派生：**
+
+1. 我们现在定义了一个当前用户的数据状态
+
+2. 我们再定义一个 当前展示第几个 todoList 事项的数据状态
+
+   > 假定 todoData 内容是一片文章，那么我们可能需要针对 todoList 做一个分页，展示第几个事项相当于切换分页
+
+3. 我们希望对外封装一个自定义钩子函数 useCurrentTodoData.ts 用来专门对外提供当前展示 todoData 数据
 
 
 
@@ -879,12 +933,241 @@ export default useCurrentIndex
 
 我们直接看代码：
 
-```
+> src/hooks/useCurrentTodoData.ts
 
 ```
+import { useEffect, useState } from "react"
+import useCurrentIndex from "../store/useCurrentIndex"
+import useUserData from "../store/useUserData"
+import { TodoData } from "../types"
+
+const useCurrentTodoData = () => {
+
+    const [currentTodoData, setCurTodoData] = useState<TodoData | undefined>(undefined)
+
+    const curIndex = useCurrentIndex(state => state.index)
+    const todoList = useUserData(state => state.todoList)
+
+    useEffect(() => {
+        setCurTodoData(todoList[curIndex])
+
+    }, [todoList, curIndex])
+
+    return currentTodoData
+}
+
+export default useCurrentTodoData
+```
 
 
 
+<br>
+
+定义一个只展示当前选中项的组件：
+
+> src/components/current-todo/index.tsx
+
+```
+import useCurrentTodoData from "../../hooks/useCurrentTodoData"
+
+const CurrentTodo = () => {
+
+    const todoData = useCurrentTodoData()
+
+    return (
+        <div>
+            {
+                todoData === undefined ? <span>暂无当前选中事项</span> : (
+                    <span>{
+                        `${todoData.id} - ${todoData.title} - 
+                                        ${todoData.state === 0
+                            ? `未完成 - 创建时间：${new Date(todoData.createTime).toLocaleString()}`
+                            : `已完成 - 完成时间：${new Date(todoData.completeTime).toLocaleString()}`
+                        }`
+                    }</span>
+                )
+            }
+
+        </div>
+    )
+}
+
+export default CurrentTodo
+```
+
+对于 CurrentTodo 组件而言，它通过 useCurrentTodoData 即可获取到当前展示项的数据值，而它自己是不知道 useUserData 和 useCurrentIndex 的存在的。
+
+所以这是数据的另外一种派生形式。
 
 
- 
+
+<br>
+
+## zustand的性能优化
+
+
+
+<br>
+
+**性能优化之：shallow**
+
+```
+import shallow from 'zustand/shallow'
+```
+
+`shallow` 这个单词的含义为：肤浅的
+
+`shallow` 是 zustand 为我们提供的一个函数，用于对 2 个对象值的 "浅对比"。
+
+
+
+<br>
+
+我们知道 React 中的 Diff 函数是索引加值对比，例如 {} 与 {} 虽然字面值相同，但是依然会被判定为 2 个不同的值(因为它们 2 个不属于同一个对象的引用)，而 浅对比 值判断字面值是否相同，若字面值相同即认为没有发生数据变化，因此也不需要重新渲染组件。
+
+
+
+<br>
+
+**举个例子：**
+
+假定 useXxxData 数据状态包含 .a、.b、.c 3 个数据字段，那么就会存在下面这种情况：
+
+* 假定 A组件中只用到了 .a 数据字段
+
+* 假定 B组件中只用到了 .b 数据字段
+
+* 假定 C组件中可以修改 .c 的数据字段
+
+* 当 C组件 修改了 数据状态 .c 的值后，引发了 useXxxData 的更新，此时会牵连到 A组件和 B组件也同步更新
+
+  尽管 A 组件和 B组件中 并没有使用到 .c 字段
+
+
+
+<br>
+
+为了减少 A组件 和 B组件 无谓的重新渲染，我们可以使用 zustand 为我们提供的 shallow 函数了。
+
+ 假定 A组件中之前获取 .a 数据字段的代码为：
+
+```
+const a = useXxxData(state => state.a)
+```
+
+那么修改成下面的即可：
+
+```
+import shallow from 'zustand/shallow'
+
+...
+
+const a = useXxxData(state => state.a, shallow)
+```
+
+也就是说将 shallow 作为 useXxxData() 的第2个参数即可。
+
+* 只有当 state.a 的值发生变化后才会重新渲染该组件
+* 当 .b、.c 的值发生变化并不会重新渲染该组件
+
+
+
+<br>
+
+这算是 zustand 最简单有效的一种性能优化方式。
+
+
+
+<br>
+
+**自定义shallow：自己定义更新时机**
+
+我们可以看到 shallow 本身的定义为一个函数：
+
+```
+declare function shallow<T>(objA: T, objB: T): boolean;
+```
+
+* 该函数有  2 个参数：objA(之前的值)、objB(新的值)
+* 该函数返回一个比较结果 boolean：
+  * 当为 ture 则认定数据没有发生变化，不需要重新渲染组件
+  * 当为 false 则认定数据发生了变化，需要重新渲染组件
+
+
+
+<br>
+
+**举一个特殊例子：**
+
+假定现在有一个特殊组件 ShowTodoList.ts
+
+* 当用户的 todoList.length < 3 时不认为需要更新组件，也就是显示默认的数组长度  0
+* 也就是只有当 todoList.length >=3 时才会真正显示 todoList 的真实 .length 的值
+
+
+
+> 我只是为了演示 自定义 shallow 函数才举得这个例子，不必过分思考为什么会有这样的组件需求。
+
+
+
+<br>
+
+对应代码：
+
+> src/components/show-todo-list/index.tsx
+
+```
+import useUserData from "../../store/useUserData"
+import { TodoData } from "../../types"
+
+const customShallow = (objA: TodoData[], objB: TodoData[]): boolean => {
+    return objB.length < 3
+}
+
+const ShowTodoList = () => {
+
+    const todoList = useUserData(state => state.todoList, customShallow)
+
+    return (
+        <span>
+            {todoList.length}
+        </span>
+    )
+
+}
+
+export default ShowTodoList
+```
+
+
+
+<br>
+
+## 总结：
+
+
+
+总结：
+
+* 到目前为止，我们已经学习掌握了 zustand 的基础用法
+* 如何在 类组件中 使用 zustand
+* 衍生(派生)数据 的使用方法
+* 使用 shallow 和自定义 shallow 函数来做一些基础的性能优化
+
+已经算是对 zustand 有了足够的认知，可以满足绝大多数 数据状态管理场景 需求了。
+
+
+
+<br>
+
+但是，关于 zustand 还有 3 部分没有学习：
+
+* 在普通 js (非 react 框架) 下如何使用 zustand
+* 如何将 zustand 的全局作用域限定为某局部作用域
+* zustand 的一些中间件用法
+  * 例如利用中间件 devtools 浏览器中实时查看 zustand 数据状态
+
+<br>
+
+这些知识点由于我在实际项目中也没有使用过，所以暂时就先讲到这里，等以后用到了再补充。
+
