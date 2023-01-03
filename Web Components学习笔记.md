@@ -527,6 +527,31 @@ customElements.define('color-button', ColorButton)
 
 <br>
 
+**补充：添加定义自定义组件之前先检查是否有重名**
+
+上面的示例中我们都是通过 `customElements.define('color-button', ColorButton)` 将 `color-button` 添加定义到网页中的。
+
+但是假定网页本身已引入了其他人写的自定义 web components 组件库，并且你不清楚自己的组件是否跟别人重名，换句话说就是同名组件已经被定义添加过了。
+
+那么为了严谨，我们可以通过 `customElements.whenDefined()` 来提前检查一下。
+
+`.whenDefined()` 本身是一个 Promise 函数，具体代码套路如下：
+
+```
+customElements.whenDefined('class-container').then(() => {
+    customElements.define('class-container', ClassContainer)
+}).catch((err) => {
+    console.log(err)
+})
+```
+
+> * 如果名为 `class-container` 的组件已经被定义过了，则会进入 `catch( (err)=>{ ... } )`
+> * 否则就会正常执行 `.then(() =>{ ... })`
+
+
+
+<br>
+
 我们继续往下学习。
 
 
@@ -869,4 +894,3 @@ attributeChangedCallback(activeName, oldValue, newValue) {
 **以上就是我在学习和使用 Web Components 的一些心得。**
 
 如果想深入学习，我建议是去查看 `Quark` https://github.com/hellof2e/quark-design 组件库的源码，看一下他们是怎么使用 Web Components 开发的。
-
