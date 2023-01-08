@@ -1505,10 +1505,10 @@ export interface PersistOptions<S, PersistedState = S> {
 
 > 在 4.2.0 版本中，之前存在的以下 3 项都已废弃
 >
-> * getStorage?: () => StateStorage;
-> * serialize?: (state: StorageValue<S>) => string | Promise<string>;
-> * deserialize?: (str: string) => StorageValue<PersistedState> | Promise<StorageValue<PersistedState>>;
-> * 以上 3 个由 storage 和 createJSONStorage 所替代
+> * `getStorage?: () => StateStorage;`
+> * `serialize?: (state: StorageValue<S>) => string | Promise<string>;`
+> * `deserialize?: (str: string) => StorageValue<PersistedState> | Promise<StorageValue<PersistedState>>;`
+> * 以上 3 个由 `storage` 和 `createJSONStorage` 所替代
 
 
 
