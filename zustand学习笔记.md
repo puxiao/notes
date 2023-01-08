@@ -92,7 +92,17 @@ zustand 来了，如果使用 zustand 就比较容易解决上面这些问题。
 
 zustand 的官方使用介绍：https://github.com/pmndrs/zustand
 
-本文只是在该介绍页的基础上，加上自己实际项目中的经验，若有理解有误欢迎指正。
+官方的使用指南：https://github.com/pmndrs/zustand/tree/main/docs/guides
+
+如果你使用 TypeScript，一定要看一下：
+
+https://github.com/pmndrs/zustand/blob/main/docs/guides/typescript.md
+
+
+
+<br>
+
+本文只是在官网的介绍页的基础上，加上自己实际项目中的经验写出来的，若有理解有误欢迎指正。
 
 
 
@@ -182,6 +192,66 @@ export default useUserData
 * 特别说明 `setData: (newData) => set(newData)` 是箭头函数 `setData: (newData) => { set(newData) }` 的一种简写
 * setData 的参数类型为 `Partial<UserData>`，也就是说其值可以是部分的 UserData，不需要包含全部
 * 随着未来功能的增加，我们还可以继续添加别的、拥有特定功能(例如针对 todoList 增删改查)的其他函数
+
+
+
+<br>
+
+**特别强调：在 TS 项目中，zustand 官方推荐的另外一种写法**
+
+> 这里我强调一下只有在 TypeScript 中才需要看下面的讲解。
+
+在上面示例中，我们是这样定义的：
+
+```
+const useUserData = create<UseUserData>((set, get) => ({ ... }))
+```
+
+但是官方更建议在 TS 项目中改成下面的写法：
+
+```
+const useUserData = create<UseUserData>()((set, get, api) => ({ ... }))
+```
+
+你没看错，就是 `create<UseXxx>()(...)` 这种代码写法。
+
+如果你去查看 `create` 函数的 TS 类型定义，你会发现 create 确实支持 `()` 这种形式：
+
+```
+type Create = {
+    <T, Mos extends [StoreMutatorIdentifier, unknown][] = []>(initializer: StateCreator<T, [], Mos>): UseBoundStore<Mutate<StoreApi<T>, Mos>>;
+    <T>(): <Mos extends [StoreMutatorIdentifier, unknown][] = []>(initializer: StateCreator<T, [], Mos>) => UseBoundStore<Mutate<StoreApi<T>, Mos>>;
+    <S extends StoreApi<unknown>>(store: S): UseBoundStore<S>;
+};
+```
+
+既然两种写法都没有问题，那为什么官方建议我们使用 `create<UseXxx>()(...)` 而不是 `create<UseXxx>(...)` 呢？
+
+理由很简单： `create<UseXxx>()(...)` 这种方式更利于 TypeScript 进行类型推论，尤其是当你使用一些 中间件 时一定要加上这个。
+
+但是有一个中间件例外：combine
+
+>中间件？combine？本文后面就会讲到。
+
+
+
+<br>
+
+**这个重要的事情我再重复一遍：**
+
+* `create<UseXxx>()(...)` 和 `create<UseXxx>(...)` 在性能方面并没有任何区别
+* 只不过是如果使用 `create<UseXxx>()(...)` 在某些时候更加利于 TS 的类型推论
+* 假设你不使用 TypeScript 那么你无需考虑这 2 两种写法的区别
+* 假设你使用 TypeScript 但是你不使用中间件，那也无所谓，两种方式都行
+* 但是，**假设你使用 TypeScript 并且使用了 中间件，那么你可能需要使用 `create<UseXxx>()(...)` 这种形式**
+
+
+
+<br>
+
+在本文的后半部分会介绍 zusatand 的中间件，到时候你就会明白。
+
+关于这个话题就先聊到这里，接着后面的学习。
 
 
 
@@ -438,7 +508,7 @@ setData: (newData) => {
 
 <br>
 
-**特别补充：**
+**特别补充：create()中的第3个参数 api**
 
 实际上 create() 函数中除了 set, get 外还有第 3 个参数：api
 
@@ -448,7 +518,20 @@ setData: (newData) => {
 const useUserData = create<UseUserData>((set, get, api) => ({ ... }))
 ```
 
-第 3 个参数 api 我们暂时用不到，所以也先不讲了。
+**第 3 个参数 api 实际上是对当前数据状态操作的引用，在上面示例中相当于对 useUserData 的引用。**
+
+看一下第三个参数 api 的 TypeScript 定义：
+
+```
+export interface StoreApi<T> {
+    setState: SetStateInternal<T>;
+    getState: () => T;
+    subscribe: (listener: (state: T, prevState: T) => void) => () => void;
+    destroy: () => void;
+}
+```
+
+我们可以看到第 3 个参数 api 拥有的方法和 useUserData 本身是相同的。
 
 
 
@@ -668,6 +751,93 @@ export default unTodoListSelector
 
 1. 在面对复杂筛选条件时，这种自定义 selector 衍生查询的方式可以将查询提取出来
 2. 由于是一个函数，特别适用于 自动测试脚本
+
+
+
+<br>
+
+**在非 React 项目中使用 zustand：**
+
+在非 React 的 JS 中想使用 zustand，则不再使用 set、get 的方式来定义、修改、获取 数据状态。
+
+而是改用 api 中提供的方法来获取或修改数据。
+
+```
+import create from 'zustand/vanilla'
+
+const store = create(() => ({ ... }))
+const { getState, setState, subscribe, destroy } = store
+```
+
+> 实际中我也没有使用过，所以不做过多讲解
+
+
+
+<br>
+
+**销毁数据状态：**
+
+假定我们想销毁 useUserData 时，可以通过：
+
+```
+useUserData.destroy()
+```
+
+或者是：
+
+```
+const useUserData = create<UseUserData>((set,get,api)=>({
+   ...
+   destroy: () =>{ api.destroy() }
+}))
+```
+
+
+
+<br>
+
+**重置数据状态：**
+
+既然有销毁，那么可能就需要有重置。
+
+不过重置数据状态的方式很简单，例如我们可以声明一个常量对象 initialState 用为作初始化的值，然后当想重置数据时即通过 set(initialState) 即实现重置数据。
+
+但是有一点需要注意的是，假设使用 TypeScript，那么为了代码的简洁，我们可能需要将原本一块定义的 某数据状态类型拆分成 2 部分：State 和 Actions
+
+还是拿  useUserData 来举例：
+
+```diff
+- export interface UseUserData extends UserData {
+-     setData: (newData: Partial<UserData>) => void
+-     addTodoData: (todoData: TodoData) => void
+-     updateTodoData: (id: string, nowData: Partial<TodoData>) => void
+- }
+
++ interface Actions {
++     setData: (newData: Partial<UserData>) => void
++     addTodoData: (todoData: TodoData) => void
++     updateTodoData: (id: string, nowData: Partial<TodoData>) => void
++ }
+
++ const initialState: UserData {
++     id: '---',
++     userName: '未知',
++     todoList: [],
++ }
+
+- const useUserData = create<UseUserData>()( 
+-     (set,get, api) => ({ id:'---', ... })
+- )
+
++ const useUserData = create<UserData & Actions>()( 
++     (set,get, api) => (
++         ...initialState,
++         setData: (newData) => set((state) => {})
++         ...
++         reset: () => set(initialState) //重置数据
++     )
++ )
+```
 
 
 
@@ -1152,6 +1322,380 @@ export default ShowTodoList
 
 <br>
 
+## zustand中间件的用法
+
+
+
+<br>
+
+**什么是中间件？**
+
+中间件的本意为装饰者模式，即在不改变原来对象(属性、方法、运行结果)的使用前提下去新增一些额外功能。
+
+像 Koa、koa-router 这类 NPM 包一样，zustand 也支持中间件 。
+
+但是请注意 zustand 的中间件 和 Koa 的略微不同。
+
+* Koa 的中间件采用的是 洋葱型 模式，即通过迭代器 一步一步、一层一层往下处理，每执行完一个中间件则调用 next() 继续下一步
+* 而 zustand 的中间件仅仅是普通的装饰者模式，没有也不需要调用 next()
+
+
+
+<br>
+
+**zustand的中间件作用是：在修改或获取数据状态时可以额外增加一些其他操作**
+
+
+
+<br>
+
+请注意，再次重复一遍：
+
+**假设你使用 TypeScript 并且使用了某些 中间件，那么你可能需要将 `create<UseXxx>(...)` 修改为 `create<UseXxx>()(...)`**
+
+但是中间件 combine 除外。
+
+
+
+<br>
+
+**举一个例子：每当修改数据状态时都需要console.log()打印出修改的值**
+
+上面示例中我们分别定义了 2 个状态：useCurrentIndex.ts 和 useUserData.ts
+
+在这 2 个状态中，我们分别定义了一些修改状态的函数，在这些修改状态的函数中都通过调用 `set()` 方法来修改数据状态。
+
+假设我们现在有这样一个需求：
+
+* 当任何一个数据状态发生修改前，需要先通过 console.log() 打印出要修改的值
+* 当数据修改完成后，打印出修改后的数据状态值
+
+
+
+<br>
+
+> 你可能会有疑惑，为什么会有这样的需求？别较真，我们只是拿 console.log() 来举例而已。
+>
+> 并且 zustand 官方在讲解中间件时就是拿这个需求举例的。
+
+
+
+<br>
+
+上面这个需求最简单的办法就是：
+
+* 在所有使用 set(newValue) 的代码前都增加上 console.log(newValue)
+* 在所有调用过 set() 的代码后都增加上 console.log(get())
+
+当然你要这么做没有一点问题，只不过是每一个数据状态里都要增加，有点繁琐。
+
+如果使用中间件，则可以非常省事。
+
+
+
+<br>
+
+**实现中间件 Log 的代码：**
+
+我们在 src/middleware/ 目录下创建一个名为 log.js 的文件。
+
+> src/middleware/log.js
+
+```
+const log = (config) => (set, get, api) => {
+    config(
+        (...args) => {
+            console.log('修改之处：', args)
+            set(...args)
+            console.log('修改之后：', get())
+        }, get, api
+    )
+}
+```
+
+抱歉，由于我的 TypeScript 类型体操 实在有点弱，所以我真的没有看懂如何去定义 中间件的 TypeScript 类型声明。所以这里就先贴上 .js 的代码，而不是 .ts 的。
+
+
+
+<br>
+
+**假定，我说的是假定 我们已经定义好了 log.ts**，那么具体用法比较简单，我们只需在原本 `create()` 中使用 `log()` 包裹住之前的内容即可：
+
+```
+import log from '../middleware/log'
+
+const useCurrentIndex = create<UseCurrentIndex>()(
+    log((set) => ({
+        index: 0,
+        setData: (newIndex) => set({ index: newIndex })
+    }))
+)
+```
+
+> 我已在论坛发了询问帖子：https://github.com/pmndrs/zustand/discussions/1515
+>
+> 虽然 zustand 的作者进行了回复，不过以前没看懂如何定义，所以此处先大体这样理解即可。
+
+
+
+<br>
+
+**zustand自带有一些常用的中间件：**
+
+* persist：数据持久化，即将最新的数据状态写入到浏览器本地储存中
+
+  > 例如写入到 localStorage(默认)、sessionStorage、IndexedDB 等，具体用法我们稍后讲解
+
+* devtools：将数据状态呈现在浏览器的 redux devtools 工具插件中
+
+* redux：模拟 redux 命令式的更新数据状态
+
+* immer：针对 `immer` NPM 包的中间件
+
+  > immer NPM 仓库地址：https://github.com/immerjs/immer
+  >
+  > immer 主要作用是处理 "不可变数据结构"，是针对 React 性能优化的一种方式，不过由于我自己并没有实际使用过 immer，所以这里不做过多讲解。
+
+* combine：单词字面意思为 "结合"，也就是说它可以将 2 个对象 "结合" 成一个对象。
+
+  > 具体用法我们稍后讲解
+
+
+
+<br>
+
+**中间件 persist 的用法：**
+
+persist 单词本意为 持久化，persist 有可能是我们会使用最多的中间件。
+
+它的具体用法非常简单：
+
+* 引入 persist 并使用：create(persist( ... ))
+* 将之前的数据状态初始化代码 (set,get,api) => {} 作为 persist() 的第 1 个参数
+* 第 2 个参数为写入本地的配置项 PersistOptions
+
+
+
+<br>
+
+PersistOptions 配置项：
+
+```
+type StorageValue<S> = {
+    state: S;
+    version?: number;
+};
+
+export interface PersistStorage<S> {
+    getItem: (name: string) => StorageValue<S> | null | Promise<StorageValue<S> | null>;
+    setItem: (name: string, value: StorageValue<S>) => void | Promise<void>;
+    removeItem: (name: string) => void | Promise<void>;
+}
+
+export interface PersistOptions<S, PersistedState = S> {
+    name: string;
+    storage?: PersistStorage<S> | undefined;
+    partialize?: (state: S) => PersistedState;
+    onRehydrateStorage?: (state: S) => ((state?: S, error?: unknown) => void) | void;
+    version?: number;
+    migrate?: (persistedState: unknown, version: number) => S | Promise<S>;
+    merge?: (persistedState: unknown, currentState: S) => S;
+}
+```
+
+> 在 4.2.0 版本中，之前存在的以下 3 项都已废弃
+>
+> * getStorage?: () => StateStorage;
+> * serialize?: (state: StorageValue<S>) => string | Promise<string>;
+> * deserialize?: (str: string) => StorageValue<PersistedState> | Promise<StorageValue<PersistedState>>;
+> * 以上 3 个由 storage 和 createJSONStorage 所替代
+
+
+
+<br>
+
+关于配置项的简要说明：
+
+* name：即本地存储的唯一索引值，相当于 key
+
+* storage：用来配置将输出存储到哪里，如果不设置这默认存储到 localStorage 中，你可以修改为 sessionStorage 或 IndexedDB 中，同时你可以额外配置 version 的值。
+
+  * version 的值对于 IndexedDB 来说是比较重要的一个配置项
+  * 如果你希望存储的数据中包含图片或视频，则推荐存储到 IndexedDB 中
+
+* version：本地存储的数据的版本号
+
+* ......
+
+  > 后面几个配置项我实际中也没使用到，所以暂时先不做讲解，不过通过名字大概也能猜测出它的作用
+
+
+
+<br>
+
+我们以 useUserData.ts 为例：
+
+> 注意：
+>
+> * 最新版的 zustand 4.2.0 中 persist 的用法和之前的版本不同，本示例代码使用的是最新版 4.2.0 的写法
+> * persist 需要 `create<UseXxx>()(...)` 这种形式
+
+```
+import create from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
+import { TodoData, UserData } from '../types'
+
+export interface UseUserData extends UserData {
+    setData: (newData: Partial<UserData>) => void
+    addTodoData: (todoData: TodoData) => void
+    updateTodoData: (id: string, nowData: Partial<TodoData>) => void
+}
+
+const useUserData = create<UseUserData>()(
+    persist(
+        (set, get, api) => ({
+            id: '---',
+            userName: '未知',
+            todoList: [],
+            setData: (newData) => set((state) => {
+                return {
+                    ...state,
+                    ...newData
+                }
+            }),
+            updateTodoData: (id, newData) => {
+                const todoList = get().todoList
+                const index = todoList.findIndex(item => item.id === id)
+                if (index !== -1) {
+                    const curItem = todoList[index]
+                    todoList[index] = { ...curItem, ...newData }
+                    set({
+                        todoList
+                    })
+                }
+            },
+            addTodoData: (todoData) => set((state) => {
+                return {
+                    todoList: [...state.todoList, todoData]
+                }
+            })
+        }),
+        {
+            name: 'userData',
+            storage: createJSONStorage(() => sessionStorage)
+        }
+    )
+)
+
+export default useUserData
+```
+
+
+
+<br>
+
+**persist 这个中间件特别适用于以下场景：**
+
+* 建立数据状态的快照
+* 命令模式下记录存储每一条命令(command)，适用于提供 撤销/重做 的功能
+
+关于 persist 的更多用法，可查阅：https://github.com/pmndrs/zustand/blob/main/docs/integrations/persisting-store-data.md
+
+
+
+<br>
+
+**中间件 combine 的用法：**
+
+我们已经讲过 combine 的作用是将两个对象进行 "结合"，那么在 TS 项目中，它的另外一个作用是帮我们进行 数据状态 的 TS 类型推导。
+
+以我们前面定义的 useCurrentIndex.ts 为例，我们之前代码如下：
+
+```
+import create from 'zustand'
+
+export interface UseCurrentIndex {
+    index: number
+    setData: (newIndex: number) => void
+}
+
+const useCurrentIndex = create<UseCurrentIndex>(
+    (set) => ({
+        index: 0,
+        setData: (newIndex) => set({ index: newIndex })
+    })
+)
+
+export default useCurrentIndex
+```
+
+在上面的代码中，我们需要先定义 UseCurrentIndex，这样才能获得好的 类型提示。
+
+但如果你就是想省事，那么可以使用 combine 中间件，来帮我们省略掉一些类型定义。
+
+我们想一下，任何一个 zustand 数据状态 通常都是由  2 部分组成的：
+
+1. 数据本身 (State)，例如上面中的 index
+2. 修改数据的方法 (Actions)，例如上面的 setData
+
+所以 combine 的作用就是将上面 2 部分分别定义并进行 "结合"，自动推论出 数据本身 的那部分类型。
+
+
+
+<br>
+
+useCurrentIndex.ts 的代码可以修改为：
+
+> 请注意 combine 不需要 `create<UseXxx>()(...)` 这种形式
+
+```
+import create from 'zustand'
+import { combine } from 'zustand/middleware'
+
+const useCurrentIndex = create(
+    combine(
+        { index: 0 },
+        (set) => ({
+            setData: (newIndex: number) => set({ index: newIndex })
+        })
+    )
+)
+
+export default useCurrentIndex
+```
+
+> 代码解读：
+>
+> * combine() 接收 2 个参数：{ index: 0 } 和 (set) => { ... }
+> * combine 对第1个参数 { index: 0 } 进行类型推论
+> * 并将这 2 个参数进行 "结合"，然后将合并过后的结果传递给 create()
+> * 这样我们就只需对第 2 个参数编写 TS 类型即可，省掉了一些 TS 代码
+
+但是，这种 "省事偷懒" 的方式，我个人并不建议。
+
+
+
+<br>
+
+此外，不同的中间件之间是可以相互嵌套的，也就是说当你希望同时使用多个中间件是，用一个中间件 套着  另外一个中间件。
+
+> 例如 
+>
+> ```
+>  devtools(
+>     persist(
+> ```
+
+
+
+<br>
+
+> 如果你写出了一个有用的中间件，可以向 zustand 提交 PR 的。
+
+
+
+<br>
+
 ## 总结：
 
 
@@ -1162,6 +1706,7 @@ export default ShowTodoList
 * 如何在 类组件中 使用 zustand
 * 衍生(派生)数据 的使用方法
 * 使用 shallow 和自定义 shallow 函数来做一些基础的性能优化
+* zustand 的一些中间件用法
 
 已经算是对 zustand 有了足够的认知，可以满足绝大多数 数据状态管理场景 需求了。
 
@@ -1169,13 +1714,5 @@ export default ShowTodoList
 
 <br>
 
-但是，关于 zustand 还有 3 部分没有学习：
+暂时就先讲到这里，等以后项目用的多了再补充。
 
-* 在普通 js (非 react 框架) 下如何使用 zustand
-* 如何将 zustand 的全局作用域限定为某局部作用域
-* zustand 的一些中间件用法
-  * 例如利用中间件 devtools 浏览器中实时查看 zustand 数据状态
-
-<br>
-
-这些知识点由于我在实际项目中也没有使用过，所以暂时就先讲到这里，等以后用到了再补充。
