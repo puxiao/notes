@@ -1466,8 +1466,8 @@ class MyClass{
 >
 > ```
 > class MyClass{
->     #name = 'aaa'
->     #doSomting(){ ... }
+>  #name = 'aaa'
+>  #doSomting(){ ... }
 > }
 > ```
 
@@ -1670,4 +1670,50 @@ type StrType = `${ColorType | NumType} flower`
 
 
 <br>
+
+## (31)自定义泛型Override用于继承/覆盖/合并两个对象
+
+假设想继承某类型的同时，有可以对原有类型进行修改或新增，那么可以通过下面这个自定义泛型来快速实现。
+
+```
+type Overrride<T1, T2> = Omit<T1, keyof T2> & T2
+```
+
+
+
+<br>
+
+使用示例：
+
+```
+type Overrride<T1, T2> = Omit<T1, keyof T2> & T2
+
+interface BaseUserData {
+    labelData: {
+        code: number
+        label: string
+    }
+}
+
+interface IMark {
+    type: 'box' | 'rect'
+    userData: BaseUserData
+}
+
+interface BoxMark extends IMark {
+    type: 'box'
+    userData: Overrride<BaseUserData, {
+        matrix: number[]
+    }>
+}
+
+interface RectMark extends IMark {
+    type: 'rect'
+    userData: Overrride<BaseUserData, {
+        faceto: string
+    }>
+}
+
+type Mark = BoxMark | RectMark
+```
 
