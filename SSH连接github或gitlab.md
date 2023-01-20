@@ -1,12 +1,8 @@
 # SSH连接github或gitlab
 
-
-
 以下是基于 win10 系统的操作配置步骤。
 
 
-
-<br>
 
 首先说一下，SSH 连接 github 或 gitlab 的步骤几乎是完全相同的，所以本文只以 github 为例。
 
@@ -16,11 +12,9 @@ https://docs.github.com/cn/authentication/connecting-to-github-with-ssh/checking
 
 
 
-<br>
-
 #### SSH连接github
 
-1. 打开本机当前用户的目录 `C:\Users\your-name\.ssh\` 
+1. 打开本机当前用户的目录 `C:\Users\your-name\.ssh\`
 
    > 如果没有 .ssh 这个目录，那么你手工创建一下
 
@@ -70,33 +64,49 @@ https://docs.github.com/cn/authentication/connecting-to-github-with-ssh/checking
 
 
 
-<br>
-
 拉取 github.com 上的仓库，使用 ssh 方式，不再使用 https 方式。
 
 以后在 VSCode 中向 github.com 仓库提交代码，则它默认就会先去读取 .ssh/ 目录中的 key，无需再做其他 git 账户密码配置，即可完成账户认证，可以顺利提交代码了。
 
 
 
-<br>
-
 **这样，就实现了在 VSCode 中以向 github 提交代码。**
 
 
 
-<br>
-
 注：SSH 验证，你无需配置修改本机的 git config user.name 和 git config user.email
 
 
-
-<br>
 
 **特别说明：腾讯云 coading.net 平台**
 
 coading.net 平台也支持这种方式，但是按照官方文档的介绍，默认配置好的 SSH 秘钥只有拉取代码的权限，如果想有推送代码的权限，还需要在后台设置出对应勾选推送权限。
 
 具体可查看：https://coding.net/help/docs/repo/ssh/config.html
+
+
+
+<br>
+
+#### Windows凭据管理器
+
+有些时候，虽然我们按照上述步骤，配置了 SSH，可是去拉取代码时依然不成功，失败信息中出现了 "请确定你是否拥有该仓库权限" 。
+
+再或者我们不使用 SSH 拉取代码，而是采用 HTTPS 方式，也是提示你 权限认证失败。
+
+假设你的系统是 Windows，那么你可以尝试下面解决方式：
+
+1. 打开 Windows 设置面板，在搜索框中输入 "凭据管理器"
+2. 在打开的 凭据管理器 面板中，点击 "Windows凭据"
+3. 在列出的凭据列表中，找到对应的平台，例如 `git:https://github.com` 或 `git:https://e.coding.net`， 然后删除该平台的凭证
+
+经过上面的操作后，再重新尝试 SSH 或 HTTPS 拉取代码。
+
+
+
+<br>
+
+如果你选择 HTTPS 方式，第一次拉取则会弹出 "Git Credential Manager for Windows" 对话框，输入正确的邮箱和密码后即可拉取该平台上的代码。 
 
 
 
