@@ -8,7 +8,17 @@
 
 我们学习并会使用 OpenAI 的接口调用后，可以将其应用到我们自己的项目中。
 
-**国内众多 chatgpt 收费小程序实际上都是中间商，背后都是通过调用官方提供的接口来实现的。**
+我们可以将 "ChatGPT" 引入到自己的项目中。
+
+
+
+<br>
+
+国内众多 "ChatGPT" 收费小程序实际上都是中间商，背后都是通过调用官方提供的接口来实现的。
+
+> 为什么要给 ChatGPT 加引号 ？？？
+>
+> 由于 ChatGPT 目前并未开放接口，国内中间商调用的其实是 openai 中近似于 chatgpt 一些接口，得到的回复和真正 ChatGPT 也是有差距的。
 
 
 
@@ -375,7 +385,13 @@ https://platform.openai.com/docs/models
 
 <br>
 
-**最后特别说一点：假设我们希望 openai 能够帮我们写编程代码，使用的就是 "text-davinci-003" 模型。**
+**ChatGPT 实际是集成了上述各个模型，所以它才可以理解并生成对话、编写修改代码等。**
+
+
+
+<br>
+
+**最后特别说一点：假设我们希望 openai 能够帮我们写编程代码，就可以使用 "text-davinci-003" 模型。**
 
 我们需要做的就是把参数 `prompt` 设定好编程相关的话术。
 
@@ -383,13 +399,7 @@ https://platform.openai.com/docs/models
 
 <br>
 
-**ChatGPT 实际上也是该模型。**
-
-
-
-<br>
-
-**GPT-3 实际上一共有 4 种模型：**
+**补充：GPT-3 实际上一共有 4 种模型**
 
 * text-devinci-003：最新、最"聪明"、模型训练数据更新至 2021年6月
 * text-curie-001：
@@ -397,6 +407,8 @@ https://platform.openai.com/docs/models
 * text-ada-001：
 
 我们只需知道、使用 text-devinci-003 即可，其他 3 个模型相对较老、模型训练数据更新至 2019年10月。
+
+> 对于更老的，还有 "text-devinci-002"等。
 
 
 
