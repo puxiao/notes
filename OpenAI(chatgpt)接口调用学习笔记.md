@@ -20,6 +20,10 @@
 >
 > 由于 ChatGPT 目前并未开放接口，国内中间商调用的其实是 openai 中近似于 chatgpt 一些接口，得到的回复和真正 ChatGPT 也是有差距的。
 
+> 还有通过 GPT3 模型自己训练的，打着 ChatGPT 旗号但实际跟 OpenAI 并没有关系的。
+
+> NPM 上面就有一个名为 "chatgpt" 的包，并不是 openai 官方的，这个 "chatgpt" 包内部又使用了另外一个NPM包 "gpt3-tokenizer"，而这个包的介绍中说的很清楚，它内部提供了几种模式，其中有一种就是基于 GPT3 模型自己训练的。
+
 
 
 <br>
@@ -49,7 +53,11 @@ chatgpt 目前非常火，但 chatgpt 仅仅是 openai 旗下的一款产品。
 
 #### 官方文档：
 
-文档地址：https://platform.openai.com/docs/api-reference/introduction
+接口文档：https://platform.openai.com/docs/api-reference/introduction
+
+官方示例：https://platform.openai.com/examples
+
+> 包含同一接口中传入不同参数值的效果对比
 
 
 
@@ -69,7 +77,13 @@ chatgpt 目前非常火，但 chatgpt 仅仅是 openai 旗下的一款产品。
 
 #### 编程接口：
 
-目前 openai 提供 2 种编程语言的接口库。
+目前 openai 提供 2 种编程语言的接口库(Python 和 JS )，里面封装了很多接口调用函数，让我们比较方便调用接口。
+
+**假设你不使用以上编程语言，或者你不想使用官方封装好的，那么你可以直接通过请求官方接口(API地址)的方式来进行调用，即发起 POST 请求的方式。**
+
+> openai 官方接口示例代码中，默认就展示的是使用 curl 命令请求的方式。
+
+
 
 **python：**
 
@@ -293,6 +307,31 @@ try {
 
 以上就是一个简单调用请求 openai  api 的代码示例。
 
+如果你不想使用官方提供的，那么你可以直接通过 POST 请求 URL 的方式来进行接口调用。
+
+**使用POST请求接口示例：**
+
+> 以 fetch 请求为例：
+
+```diff
+- await openai.createCompletion({ ... })
+
++ fetch('https://api.openai.com/v1/completions', {
++      method: 'POST',
++      headers: {
++        'Content-Type': 'application/json',
++        'Authoriaztion': 'Bearer xxx-your-key-xxx'
++      },
++      body: {
++        model:'text-davinci-003',
++        prompt: 'xxxxxxxx',
++        //...
++      }
++ }).then( ... )
+```
+
+
+
 
 
 <br>
@@ -368,6 +407,20 @@ const response = await openai.createImage({
 <br>
 
 ....
+
+
+
+<br>
+
+> 每一个被封装好的调用函数都对应一个真实接口地址。
+>
+> 例如：
+>
+> * openai.createCompletion() 对应 `https://api.openai.com/v1/completions`
+> * openai.createEdit() 对应 `https://api.openai.com/v1/edits`
+> * ...
+
+
 
 更多模型请以及每个模型的函数、参数、返回值 请执行查阅官方文档。
 
