@@ -1,5 +1,38 @@
 # OpenAI(chatgpt)接口调用学习笔记
 
+> 以下更新于 2023.03.02
+
+**号外号外！OpenAI 官方刚刚终于正式对外放开了 chatgpt 的接口：**
+
+https://platform.openai.com/docs/api-reference/chat/create?lang=node.js
+
+对应的是 `.createChatCompletion()` 方法
+
+实际请求的接口地址为：`https://api.openai.com/v1/chat/completions`
+
+示例代码：
+
+```
+const { Configuration, OpenAIApi } = require("openai");
+
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(configuration);
+
+const completion = await openai.createChatCompletion({
+  model: "gpt-3.5-turbo",
+  messages: [{role: "user", content: "Hello world"}],
+});
+console.log(completion.data.choices[0].message);
+```
+
+
+
+> 以上更新于 2023.03.02
+
+
+
 
 
 <br>
