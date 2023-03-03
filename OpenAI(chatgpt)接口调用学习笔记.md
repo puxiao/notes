@@ -27,6 +27,22 @@ const completion = await openai.createChatCompletion({
 console.log(completion.data.choices[0].message);
 ```
 
+<br>
+
+```
+fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': "application/json",
+          'Authorization': 'Bearer sk-zGmRz-your-api-key-xxx-xxx-xxx'
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo',
+          messages: [{ "role": "user", "content": "Hello!" }],
+        })
+      }).then(res => res.json().then(json => console.log(json)));
+```
+
 
 
 > 以上更新于 2023.03.02
@@ -353,7 +369,7 @@ try {
 +      method: 'POST',
 +      headers: {
 +        'Content-Type': 'application/json',
-+        'Authoriaztion': 'Bearer xxx-your-key-xxx'
++        'Authorization': 'Bearer xxx-your-key-xxx'
 +      },
 +      body: {
 +        model:'text-davinci-003',
