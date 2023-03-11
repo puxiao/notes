@@ -89,17 +89,11 @@ const puppeteer = require('puppeteer-core')
 const puppeteer = require('puppeteer')
 ```
 
-
-
-<br>
-
-下面，本文以安装 puppeteer 为例。
+> 使用 puppeteer-core 还需要额外配置本机谷歌浏览器的文件路径
 
 
 
 <br>
-
-
 
 **安装：**
 
@@ -107,9 +101,11 @@ const puppeteer = require('puppeteer')
 yarn add puppeteer
 ```
 
-> 默认自带有 index.d.ts，方便我们在 TypeScript 中使用。
->
-> 当前最新版本为 13.5.1。
+```
+yarn add puppeteer-core
+```
+
+> 它们默认自带有 index.d.ts，方便我们在 TypeScript 中使用。
 
 
 
@@ -126,7 +122,6 @@ yarn add puppeteer
 这是官方的一个示例：引入 puppeteer，以无视窗模型 打开某个网页，并进行网页截图与保存
 
 ```
-// const puppeteer = require('puppeteer-core')
 const puppeteer = require('puppeteer');
 
 (async () => {
@@ -138,6 +133,29 @@ const puppeteer = require('puppeteer');
   await browser.close();
 })();
 ```
+
+
+
+<br>
+
+**如果使用 puppeteer-core，还需指明本机chrome.exe的路径。**
+
+> 由于 puppeteer-core 本身不包含谷歌浏览器，需做如下配置
+
+```diff
+- const puppeteer = require('puppeteer');
++ const puppeteer = require('puppeteer-core')
+
+
+const path = require('path')
+
+const chromePath = path.join('C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe')
+
+- const browser = await puppeteer.launch();
++ const browser = await puppeteer.launch({ executablePath: chromePath })
+```
+
+
 
 
 
@@ -315,4 +333,3 @@ export const getPage = async () => {
     await browser.close()
 }
 ```
-
