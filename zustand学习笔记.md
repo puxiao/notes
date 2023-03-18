@@ -1012,7 +1012,11 @@ export default UserInfo
 
 1. zustand 的更新方式并不是实时的，是异步的
 
-2. react18 的并发模式，也会导致 我们在某一瞬间 A组件中 设置修改了 数据状态，但与此同时 B组件中的某函数 获取到的数据未必是最新的
+2. 普通函数中的闭包陷阱
+
+   > 即普通函数在定义时内部引用了某个数据状态，但当该数据状态发生变化后该函数内的 “数据状态值” 依然为之前的值，这个情况我自己都遭遇过好几回，切记切记。
+
+3. react18 的并发模式，也会导致 我们在某一瞬间 A组件中 设置修改了 数据状态，但与此同时 B组件中的某函数 获取到的数据未必是最新的
 
    > 这个场景在实际开发中会经常遇到
 
@@ -1091,6 +1095,18 @@ export default useSomeFun
 我们可以看到所谓 “瞬时更新” 更像是 “勾住某数据”，将原本某个需要依赖的函数变成一个不需要依赖的函数。
 
 > 没错，这么重要的话要说三遍，因为在实际项目中会经常使用这种形式。
+
+
+
+<br>
+
+**请注意：上面的方式使用到了 useRef，但假设你的代码并不是 React 组件，无法使用 useRef 时，那么最简单的方式就是在函数内部每次都重新获取一遍该值。**
+
+```
+useCurentIndex.getState().index
+```
+
+
 
 
 
@@ -1677,18 +1693,65 @@ export default useCurrentIndex
 
 <br>
 
-此外，不同的中间件之间是可以相互嵌套的，也就是说当你希望同时使用多个中间件是，用一个中间件 套着  另外一个中间件。
+**中间件 devtools 的用法：**
+
+对于比较复杂的数据状态管理项目，我们希望可以时时知道(观察到) 数据状态的变化，那么可以在项目开发调试阶段在浏览器中安装 `redux-devtools` 插件，用来查看数据状态中的值。
+
+> 安装方式参见官方文档：https://github.com/reduxjs/redux-devtools/tree/main/extension#installation
+
+而 devtools 中间件的作用就是帮我们将数据状态时时反应在 redux-devtools 中的。
+
+它的用法很简单，假设我们是在 TypeScript 项目，我们定义的数据状态结构类型为 UseXxx，那么代码套路为：
+
+```diff
+- const useXxx = create<UseXxx>((set,get)=>{ ... })
++ const useXxx = create<UseXxx>()(devtools((set,get)=>{ ... }),{name:'useXxx'}))
+```
+
+> 代码解读：
+>
+> * 我们将原本的 create<UseXxx> 修改为 create<UseXxx>()
+> * 我们使用 devtools() 包裹住之前的 (set,get)=>{ ... }
+> * 我们添加了在浏览器 redux 中该数据状态的一些基础配置项 {name:'useXxx'}，我们在这里只是添加了它对应的名称而已，在 redux 中通过下拉列表可以找到 useXxx 对应的数据状态值
+
+
+
+<br>
+
+**特别注意：假设你的数据状态中包含 Map、Set、Symbol、Function 类型，你还需要额外添加 serialize: true 这个配置项，因为默认这些类型无法在 redux 中显示，添加过后就可以显示了。**
+
+> { name:'useXxx', serialize: true }
+
+
+
+<br>
+
+除了上面提到的 name、serialize 之外，还有其他可配置选项，具体可查阅：
+
+https://github.com/reduxjs/redux-devtools/blob/main/extension/docs/API/Arguments.md
+
+
+
+<br>
+
+**同时使用多个中间件：**
+
+不同的中间件之间是可以相互嵌套的，也就是说当你希望同时使用多个中间件时，用一个中间件 套着  另外一个中间件。
 
 > 例如 
 >
 > ```
->  devtools(
->     persist(
+> devtools(
+>   persist(
 > ```
 
 
 
 <br>
+
+还有一个名为 `immer` 的中间件我目前还没用到过，所以暂时先不讲它了。
+
+关于中间件，就暂时讲到这里。
 
 > 如果你写出了一个有用的中间件，可以向 zustand 提交 PR 的。
 
@@ -1715,4 +1778,3 @@ export default useCurrentIndex
 <br>
 
 暂时就先讲到这里，等以后项目用的多了再补充。
-
