@@ -117,11 +117,13 @@ find ./ -type d -print|xargs chmod 755;
 
 
 
-## 网络相关
+## 网络端口相关
 
-列出网络配置：netstat
+列出正在活动的网络端口信息：netstat
 
-列出简要的网络配置：netstat -netlp  
+列出网络端口配置(占用)信息：netstat -netlp  
+
+查看某特定端口的占用信息：netstat -netlp | grep 9008  
 
 查看网址响应速度：ping www.xxx.com
 
