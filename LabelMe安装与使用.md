@@ -96,6 +96,43 @@ labelme
 
 <br>
 
+**直接通过.exe方式启动 LabelMe：**
+
+在完成上面第 3 步 labelme 的安装后，我们也可以不通过第 4 步 命令方式启动 labelme，而是直接去通过 labelme.exe 去启动。
+
+使用 anaconda 安装的程序或脚本都存放在 `./Scripts/` 下，我们只需在这个目录下找到 `labelme.exe` 双击运行即可。
+
+例如我本机对应的目录：
+
+```
+D:\ProgramData\anaconda3\Scripts\labelme.exe
+```
+
+
+
+<br>
+
+**特别补充说明：**
+
+除了 labelme.exe 之外，在 `./Scripts/` 目录里我们还能看到其他几个相关 .exe 程序：
+
+* labelme_draw_json.exe
+* labelme_draw_label_png.exe
+* labelme_json_to_dataset.exe
+* labelme_on_docker.exe
+* labelme-studio.exe
+* ...
+
+这几个程序都对应 labelme 一些相关的命令，每一个都有自己的一些特殊用途。
+
+对于我们而言，前 3 个是比较重要的，它们具有 "数据转换" 功能，稍后在本文的 "labelme基础用法"中简单讲解一下。
+
+至于后面其他的 .exe，看到它们的一些名称，也几乎能猜出来它们的作用。
+
+
+
+<br>
+
 ### 启动LabelMe时的配置参数：
 
 在 `Anaconda Prompt` 命令窗口中输入 `labelme` 即可启动 LabelMe 客户端，这相当于不带任何配置项的启动。
@@ -163,7 +200,112 @@ usage: labelme [-h] [--version] [--reset-config] [--logger-level {debug,info,war
 
 <br>
 
-**不同工具的保存结果规范：**
+**预览保存结果的比对：**
+
+> 对应的是 ./Scripts/labelme_draw_json.exe 程序
+
+假设我们已经保存并得到了 `xxx.json`，那么在 `Anaconda Prompt` 命令窗口中执行：
+
+```
+labelme_draw_json xxx.json
+```
+
+执行上述命令后大约 1 ~ 2 秒，就会弹出一个窗口，里面会左右显示 2 张图片：
+
+* 左侧图片：被标注的原始图片
+* 右侧图片：灰色的原始图片作为底图 + 添加的标注结果对应的色块
+
+
+
+<br>
+
+**将.json结果转化为数据集：**
+
+> 对应的是 ./Scripts/labelme_json_to_dataset.exe 程序
+
+我们前面保存得到的 xxx.json 仅仅是我们使用 labelme 软件标注的结果，并不是供 AI 训练的数据集。数据集的英文单词为：dataset
+
+xxx.json 文件转数据集(dataset) 的步骤为，在 `Anaconda Prompt` 命令窗口中执行：
+
+```
+labelme_json_to_dataset xxx.json
+```
+
+上述命令执行成功后，会在 xxx.json 相同目录下生成一个同名文件夹，里面包含：
+
+* img.png：被标注的原始图片
+* label.png：标注的填充色块，未被标注的部分为纯黑色背景
+* label_name.txt：一些信息
+* label_viz.png：被标注图片与标注填充色块的叠加图
+
+
+
+<br>
+
+如果你想将转的数据集存放到指定目录，假定该目录为 `./your-dir/`，则添加参数即可：
+
+```
+labelme_json_to_dataset xxx.json --out ./your-dir
+```
+
+
+
+<br>
+
+请注意：上述命令仅为执行单条 .json 文件转数据集，官方并未提供批量转换的命令。
+
+那如果我想批量转该怎么办？
+
+
+
+<br>
+
+先插入一个话题：
+
+**为什么需要在 Anaconda Prompt 命令窗口中执行 labelme 各种命令？**
+
+因为我们是通过 anaconda 安装的 labelme 程序，所以 labelme 启动的环境路径变量只有 anaconda 知道，这就是为什么在别的命令窗口中执行 `labelme` 或 `labelme_json_to_dataset` 会提示找不到对应程序的原因。
+
+而解决这个问题很简单：我们只要把 labelme.exe 或 labelme_json_to.dataset.exe 路径添加到系统环境变量中即可。
+
+**当然为了更省事，我们可以直接将 anaconda 安装目录中的 `Scripts` 目录添加到系统环境变量 Path 中。**
+
+这样，我们就可以在普通的命令窗口中去执行  `labelme` 或 `labelme_json_to_dataset` 等命令了。
+
+
+
+<br>
+
+再回到批量转化数据的这个事情上。
+
+
+
+**批量转换数据集：**
+
+如果你想批量转，则需要手工写一个 bat 脚本，扫描指定目录下的所有 .json 文件然后逐一执行 `labelme_json_to_dataset xxxxx.json` 即可。
+
+```
+@echo off
+for %%i in (*.json) do 
+labelme_json_to_dataset "%%i"
+pause
+```
+
+> 当然不使用 bat，使用 node.js 也都可以。
+
+
+
+<br>
+
+**另外一个命令：labelme_draw_label_png  xxx.jpg**
+
+这个命令我暂时也不清楚具体是做什么用途的，以后用到了再说。
+
+
+
+<br>
+
+### 保存结果.json文件字段说明
 
 LabelMe 的保存 JSON 规范中， "shapes": [] 用于保存所有的标注对象列表。
 
@@ -197,7 +339,7 @@ LabelMe 的保存 JSON 规范中， "shapes": [] 用于保存所有的标注对�
 
 * "imagePath"：当前 .json 文件对应的图片路径
 
-* "imageData"：以 base64 形式保存的图片数据，可以设置为 null
+* "imageData"：以 base64 形式保存的图片数据，可以设置为 null 或不存在该字段
 
 * "imageWidth"：对应图片的宽度
 
@@ -212,4 +354,3 @@ LabelMe 的保存 JSON 规范中， "shapes": [] 用于保存所有的标注对�
 **坦白来说，作为图片标注工具，LabelMe 并不算强大，毕竟它所包含的标注工具种类比较少。**
 
 只不过由于 LabelMe 是开源免费的，在不处理复杂标注时是不错选择。
-
