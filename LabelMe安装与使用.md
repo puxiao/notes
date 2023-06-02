@@ -307,7 +307,7 @@ let inputPath = join(__dirname, '.')
 const toDataset = () => {
     if (index < jsonList.length) {
         const file = jsonList[index]
-        const infoStr = `${index}/${jsonList.length}`
+        const infoStr = `${index+1}/${jsonList.length}`
         console.log(`${infoStr}: ${file} 开始处理`)
         exec(`labelme_json_to_dataset ${file}`, (err, stdout, stderr) => {
             if (err) {
