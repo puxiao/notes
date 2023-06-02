@@ -291,25 +291,32 @@ labelme_json_to_dataset "%%i"
 pause
 ```
 
-当然也可以不使用 bat 命令，使用 node.js 也可以：
+
+
+<br>
+
+也可以使用 node.js 实现，并且加入很多逻辑细节：
 
 ```
 const { readdir } = require('node:fs')
-const { join } = require('node:path')
+const { basename, join, isAbsolute } = require('node:path')
 const { exec } = require('node:child_process')
+const { argv } = require('node:process')
 
 let index = 0
 let jsonList = []
 let failList = []
 
-let inputPath = join(__dirname, '.')
+const dicPath = isAbsolute(String(argv[2])) ? argv[2] : join(__dirname, argv[2] || '.')
+const savePath = isAbsolute(String(argv[3])) ? argv[3] : (argv[3] ? join(__dirname, argv[3]) : dicPath)
 
 const toDataset = () => {
     if (index < jsonList.length) {
         const file = jsonList[index]
-        const infoStr = `${index+1}/${jsonList.length}`
+        const infoStr = `${index + 1}/${jsonList.length}`
         console.log(`${infoStr}: ${file} 开始处理`)
-        exec(`labelme_json_to_dataset ${file}`, (err, stdout, stderr) => {
+        const outValue = join(savePath, basename(file).split('.').join('_'))
+        exec(`labelme_json_to_dataset ${file} --out ${outValue}`, (err, stdout, stderr) => {
             if (err) {
                 failList.push(file)
                 console.log(`${infoStr}: ${file} 处理失败`)
@@ -326,27 +333,59 @@ const toDataset = () => {
     }
 }
 
-const startAnalysis = (dicPath) => {
-    readdir(dicPath, (err, files) => {
+const startAnalysis = () => {
+
+    readdir(savePath, (err, files) => {
         if (err) {
-            console.log(`扫描目录失败: ${dicPath}`)
-            console.log(err)
+            console.log(`保存目录不存在，无法继续: ${savePath}`)
             return
+        } else {
+            if (files.length) {
+                console.log(`保存目录当前已存在 ${files.length} 个文件，接下来的操作中若出现相同名称则会覆盖已有的文件！`)
+            }
+            readdir(dicPath, (err, files) => {
+                if (err) {
+                    console.log(`扫描目录失败: ${dicPath}`)
+                    console.log(err)
+                    return
+                }
+                index = 0
+                failList = []
+                jsonList = files.filter(file => file.endsWith('.json')).map(item => join(dicPath, item))
+                console.log(`扫描到当前目录下一共有 ${jsonList.length} 个JSON文件`)
+
+                toDataset()
+
+            })
         }
-        index = 0
-        failList = []
-        jsonList = files.filter(file => file.endsWith('.json'))
-        console.log(`扫描到当前目录下一共有 ${jsonList.length} 个JSON文件`)
-
-        toDataset()
-
     })
+
 }
 
-startAnalysis(inputPath)
+startAnalysis()
 ```
 
+假定我们的代码文件为 dataset.js、包含 .json 文件的目录为 myjson，那么：
 
+* 可以把 dataset.js 放到包含 .json 文件的目录中，然后执行
+
+  ```
+  node dataset.js
+  ```
+
+* 也可以把 dataset.js 文件放到其他目录，把要包含 .json 文件的目录路径作为命令参数传入
+
+  ```
+  node dataset.js ./xx/myjson
+  ```
+
+* 如果想至指定数据集的输出目录，可以继续添加命令参数
+
+  ```
+  node dataset.js ./xx/myjson ./yy/mydataset
+  ```
+
+  > 上面命令中的目录路径，可以写相对路径，也可以写本机的绝对路径
 
 
 
