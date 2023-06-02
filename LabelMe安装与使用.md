@@ -282,7 +282,7 @@ labelme_json_to_dataset xxx.json --out ./your-dir
 
 **批量转换数据集：**
 
-如果你想批量转，则需要手工写一个 bat 脚本，扫描指定目录下的所有 .json 文件然后逐一执行 `labelme_json_to_dataset xxxxx.json` 即可。
+如果你想批量转，则需要手工写一个 bat 脚本，扫描当前目录下的所有 .json 文件然后逐一执行 `labelme_json_to_dataset xxxxx.json` 即可。
 
 ```
 for %%i in (*.json) do (
