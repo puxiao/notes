@@ -285,13 +285,68 @@ labelme_json_to_dataset xxx.json --out ./your-dir
 如果你想批量转，则需要手工写一个 bat 脚本，扫描指定目录下的所有 .json 文件然后逐一执行 `labelme_json_to_dataset xxxxx.json` 即可。
 
 ```
-@echo off
-for %%i in (*.json) do 
+for %%i in (*.json) do (
 labelme_json_to_dataset "%%i"
+)
 pause
 ```
 
-> 当然不使用 bat，使用 node.js 也都可以。
+当然也可以不使用 bat 命令，使用 node.js 也可以：
+
+```
+const { readdir } = require('node:fs')
+const { join } = require('node:path')
+const { exec } = require('node:child_process')
+
+let index = 0
+let jsonList = []
+let failList = []
+
+let inputPath = join(__dirname, '.')
+
+const toDataset = () => {
+    if (index < jsonList.length) {
+        const file = jsonList[index]
+        const infoStr = `${index}/${jsonList.length}`
+        console.log(`${infoStr}: ${file} 开始处理`)
+        exec(`labelme_json_to_dataset ${file}`, (err, stdout, stderr) => {
+            if (err) {
+                failList.push(file)
+                console.log(`${infoStr}: ${file} 处理失败`)
+            } else {
+                console.log(`${infoStr}: ${file} 处理完成`)
+            }
+            index++
+            toDataset()
+        })
+    } else {
+        const failLength = failList.length
+        const successLength = jsonList.length - failLength
+        console.log(`全部处理完毕: ${successLength} 个完成、${failLength} 个失败`)
+    }
+}
+
+const startAnalysis = (dicPath) => {
+    readdir(dicPath, (err, files) => {
+        if (err) {
+            console.log(`扫描目录失败: ${dicPath}`)
+            console.log(err)
+            return
+        }
+        index = 0
+        failList = []
+        jsonList = files.filter(file => file.endsWith('.json'))
+        console.log(`扫描到当前目录下一共有 ${jsonList.length} 个JSON文件`)
+
+        toDataset()
+
+    })
+}
+
+startAnalysis(inputPath)
+```
+
+
 
 
 
