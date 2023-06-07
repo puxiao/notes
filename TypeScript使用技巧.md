@@ -693,6 +693,39 @@ const LoginFailMsg2: Record<keyof typeof LoginFailCode, string> = {
 
 
 
+<br>
+
+**key in 的另外一种用法：根据 type 定义 Object 对象属性名**
+
+假定我们现在 TypeScript 中有下面的定义：
+
+```
+type MsgType = 'add' | 'edit' | 'del'
+```
+
+如果我们想定义一个 msgColor 对象，该对象属性名为 MsgType 中的值，如果写成下面的代码：
+
+```
+const msgColor: { [ key: MsgType ]: string } = { ... }
+```
+
+会收到这样的错误信息：
+
+```
+An index signature parameter type cannot be a literal type or generic type. Consider using a mapped object type instead.
+```
+
+正确的写法是：
+
+```diff
+- const msgColor: { [ key: MsgType ]: string } = { ... }
++ const msgColor: { [ key in MsgType ]: string } = { ... }
+```
+
+
+
+<br>
+
 ## (18)const Xxx={} as const——将对象所有键值组成联合类型
 
 在上面小节中，可以通过 keyof typeof 获取 枚举对象的所有键名，并将键名组成联合类型，但是目前来说是没有办法将枚举对象键值组成联合类型。
@@ -1466,8 +1499,8 @@ class MyClass{
 >
 > ```
 > class MyClass{
->  #name = 'aaa'
->  #doSomting(){ ... }
+> #name = 'aaa'
+> #doSomting(){ ... }
 > }
 > ```
 
@@ -1716,4 +1749,3 @@ interface RectMark extends IMark {
 
 type Mark = BoxMark | RectMark
 ```
-
