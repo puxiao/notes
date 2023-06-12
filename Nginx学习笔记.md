@@ -3,11 +3,21 @@
 ## 安装
 
 #### 安装方式 一：通过yum安装
+
 CentOS安装Nginx：yum install nginx -y
 
+
+
+<br>
+
 #### 请注意：  
+
 Nginx默认配置文件位置：/etc/nginx/nginx.conf  
 配置文件中，默认网站文件目录：/usr/share/nginx/html
+
+
+
+<br>
 
 #### 安装方式 二：手工下载，编译，配置，安装
 
@@ -73,6 +83,9 @@ Nginx默认配置文件位置：/etc/nginx/nginx.conf
     2、无法使用systemctl xxx nginx 命令来操作  
 
 
+
+<br>
+
 ## 卸载
 
 卸载默认yum安装的Nginx：
@@ -86,6 +99,9 @@ Nginx默认配置文件位置：/etc/nginx/nginx.conf
 
 如果是自己手工编译安装的，需要找到对应的目录进行删除。
 
+
+
+<br>
 
 ## 系统控制
 
@@ -101,6 +117,9 @@ Nginx默认配置文件位置：/etc/nginx/nginx.conf
 终止nginx某个进程：kill -9 pid   pid为该进程在运行ps -ef 中对应的pid  
 终止nginx全部进程：killall -9 nginx  
 
+
+
+<br>
 
 ## Nginx命令
 
@@ -122,9 +141,14 @@ Nginx默认配置文件位置：/etc/nginx/nginx.conf
 查看编译信息(配置)：-V  
 
 
+
+<br>
+
 ## 配置
 
 特别提醒：在设置属性值时，结尾处一定要添加英文分号 “;”。 如果某处结尾没有添加 ; 在 nginx -t 时会报错误：nginx: [emerg] unexpected "}" in /software/nginx/conf/nginx.conf  
+
+<br>
 
 ### 全局配置
 
@@ -150,6 +174,8 @@ events {
 ````
 
 
+
+<br>
 
 ### http配置
 
@@ -190,9 +216,15 @@ http {
 
 
 
+<br>
+
 ### server配置
 
 打开配置文件(nginx/conf/nginx.conf)，在http {} 中添加多份server来创建多个站点服务，每一个server配置对应一个站点服务。  
+
+
+
+<br>
 
 #### 添加server的2种方式
 
@@ -217,12 +249,16 @@ http {
 
 “一个站点”即一个完整域名(二级域名+主域名)，例如 `www.xxx.com` 和 `api.xxx.com` 相当于2个站点。  
 由于服务器上可能存在多个站点，为了避免配置文件存放混乱，给以下几条建议：  
+
 1. 每一个站点对应一个自定义配置文件，建议将配置文件命名为：“二级域名 + 主域名 + nginx.conf”，例如`www.xxx.com.nginx.conf` ，方便直观区分。
+
 >    补充：如果某主域名下对应的二级域名不多，也可以把该主域名下所有需要解析的二级域名都放在同一个配置文件中，nginx并没有要求限定一个配置文件中server的数量，具体如何创建全看个人习惯。
 
 2. 在 nginx/conf/ 中创建一个目录，专门用来存放所有自定义配置文件，例如 `nginx/conf/myconf/`，那么此时 nginx.conf 中导入该配置文件的代码对应为 `include ./myconf/www.xxx.com.nginx.conf;`
 
 
+
+<br>
 
 #### 通过listen来配置监听端口和服务
 
@@ -242,6 +278,8 @@ http {
 
 
 
+<br>
+
 #### 通过server_name来配置域名
 
 1. 若只有一个域名，对应代码：
@@ -258,6 +296,8 @@ http {
 
 
 
+<br>
+
 #### 通过charset设置字符编码
 
 Nginx默认字符编码为 utf-8，如果不需要更改字符编码，则无需添加此项。若想更改，对应代码：
@@ -269,6 +309,8 @@ charset utf-8;
 将上述代码中 utf-8 修改为你需要的其他编码。
 
 
+
+<br>
 
 #### 通过root来配置网站root目录
 
@@ -288,28 +330,34 @@ root /xxx/xxx;
 
 
 
+<br>
+
 #### 通过location来匹配客户端请求的路径
 
 location相当于Nginx的路由，常见的 "路由命中" 有以下语法规则：
 
 | 参数                    | 匹配类型 | 命中规则                                                     | 命中示例                                           |
-| ----------------------- | ------------- | ------------------------------------------------------- | -------------------------------------------------- |
+| ----------------------- | -------- | ------------------------------------------------------------ | -------------------------------------------------- |
 | location /              | 普通匹配 | / 代表任意请求路径，即命中任意请求                           |                                                    |
-| location /xxx/          | 普通匹配 | /xxx/ 为某具体请求路径，<br>只要包含该目录前缀即可命中           | www.xxx.com/admin/ ✔<br/>www.xxx.com/admin/user/ ✔ |
+| location /xxx/          | 普通匹配 | /xxx/ 为某具体请求路径，<br>只要包含该目录前缀即可命中       | www.xxx.com/admin/ ✔<br/>www.xxx.com/admin/user/ ✔ |
 | location = /xxx/        | 精准匹配 | 严格精准命中该请求路径                                       | www.xxx.com/admin/ ✔<br/>www.xxx.com/admin/user/ ❌ |
 | location ~ 正则表达式   | 正则匹配 | 区分大小写的方式进行正则匹配<br>注意：正则表达式开头和结尾处不需要写 / |                                                    |
 | location ~* 正则表达式/ | 正则匹配 | 不区分大小写的方式进行正则匹配                               |                                                    |
 | location ^~             | 普通匹配 | 不要继续匹配正则 (只进行精准匹配或普通匹配)                  |                                                    |
 | location @              | 普通匹配 | 内部重新定向                                                 |                                                    |
 
+
+
 <br>
 location 路由命中 规则，遵循以下选择原则：
 
 | 匹配阶段 | 匹配类型 | 命中过程及结果                                               |
-| -------- | ------------ | -------------------------------------------------------- |
+| -------- | -------- | ------------------------------------------------------------ |
 | 第1阶段  | 精准匹配 | 若命中即可返回结果，并取消后续其他阶段匹配                   |
 | 第2阶段  | 普通匹配 | 不分先后顺序得进行普通匹配，若多条命中，记录下相对最精准的那条结果，<br>并开始进行第3阶段匹配 |
 | 第3阶段  | 正则匹配 | 按照正则匹配定义的先后顺序进行匹配，若命中一条，则立即返回结果，停止后面的正则匹配<br>若没有命中任何正则，则返回第2阶段中相对精准的那条结果 |
+
+
 
 <br>
 location xx {} 中的属性值，具体设置说明：
@@ -325,6 +373,8 @@ location xx {} 中的属性值，具体设置说明：
 | autoindex\_localtime   | off or on | 若打开目录浏览功能，显示文件的时间<br>默认值为off，显示文件时间为本地GMT时间<br>若值为on，显示文件时间为服务器上的时间 | 不建议添加开启该项                                           |
 
 
+
+<br>
 
 #### 通过error_page来配置错误展示页
 
@@ -346,6 +396,8 @@ location = /40x.html {
 
 
 
+<br>
+
 配置 服务端 错误页，对应代码：
 
 ````
@@ -362,11 +414,15 @@ location = /50x.html {
 
 
 
+<br>
+
 补充说明：
 
 error_page 中分别配置了 `location = /40x.html {}` 和 `location = /50x.html {}`，根据本文之前关于 location 中的讲解，使用了 ”=“ 来做精准路由匹配，防止 “错误页面” 混入到 “正常的站点处理程序中”。
 
 
+
+<br>
 
 #### 一个完整的server示例
 
@@ -396,6 +452,8 @@ server {
 
 
 
+<br>
+
 PHP是世上最伟大的语言！
 
 对于php程序来说，需要添加 命中 .php 文件的路由请求，因此他们需要再在上述配置文件中，增加：
@@ -407,6 +465,8 @@ location ~ \.php$ {
 ````
 
 
+
+<br>
 
 #### 创建https服务
 
@@ -422,6 +482,10 @@ location ~ \.php$ {
 > 下面的nginx server配置中，假设2个文件已上传至 nginx/conf/ssl/ 中
 
 关于如何添加 server，请回顾本文上面的文章。
+
+
+
+<br>
 
 在 server 中添加 若干属性，具体代码如下：
 
@@ -467,6 +531,50 @@ server {
 
 
 
+<br>
+
+#### 局域网内创建https证书的工具：mkcert
+
+上面讲的是针对公网域名，向腾讯云或阿里云申请 https 证书，但是实际开发过程中，有可能我们需要在局域网内创建 https 服务。
+
+例如我们希望将 localhost 也使用 https，或者将局域网 IP 192.168.1.10、127.0.0.1、::1 等 设置为 https。
+
+那这种情况下我们可以通过 `mkcert` 这个工具来生成局域网内生效的 https 证书。
+
+**mkcert 官网：https://github.com/FiloSottile/mkcert**
+
+
+
+<br>
+
+**Windows系统：**
+
+mkcert 安装和使用非常简单，2 步即可完成，我们在 Powershell 中通过 choco 来安装。
+
+> choco 是 windows 上的包管理工具，如果你系统上没有 choco 网上搜一下安装教程
+
+```
+# 安装 mkcert
+choco install mkcert
+
+# 生成 https证书 的命令格式为 mkcert + IP 或 域名
+mkcert 192.168.1.10
+# 或者
+mkcert localhost
+```
+
+> mkcert xxxx 命令执行过后，会自动生成 2 个文件：xxxx.pem(公钥)、xxxx-key.pem(私钥)，这两个文件就是我们需要的证书。
+
+
+
+<br>
+
+**Linux 或 macOS 系统安装 mkcert 安装命令可参考其官方文档。**
+
+
+
+<br>
+
 #### http强制跳转至https
 
 http 和 https 分别对应2个 server，如果想让 http 强制跳转至 https，则做如下配置：
@@ -484,12 +592,14 @@ server {
 
 
 
+<br>
+
 #### Nodejs与Nginx的搭配使用
 
 理论上 Nodejs 可以独立创建 http 或 https 服务，但是从性能角度来讲，还是把一部分工作交给 Nginx 比较合适。
 
 | 分配对象            | 承担功能                                                     |
-| ------------------- | --------------------------------------------------------------------- |
+| ------------------- | ------------------------------------------------------------ |
 | Nginx               | 1. 负载均衡<br>2. 所有静态资源的请求处理<br>3. 创建 Https 服务 |
 | Nodejs(Express/Koa) | 1. 核心动态业务处理                                          |
 
@@ -523,6 +633,8 @@ server {
 
 
 
+<br>
+
 一个常见的Nodejs对应的 nginx server 代码：
 
 ````
@@ -547,6 +659,8 @@ server {
 ````
 
 
+
+<br>
 
 ### 一个完整的配置文件示例
 
@@ -676,6 +790,8 @@ http {
 
 
 
+<br>
+
 > 每次修改配置文件后，记得一定要执行：测试配置文件：nginx -t
 >
 > 配置文件测试没有问题后，再执行 重载配置文件：nginx -s reload
@@ -683,6 +799,8 @@ http {
 > 如果重启时，报错误：nginx: [error] open() "/software/nginx/logs/nginx.pid" failed ... 这应该是 Nginx 服务已经停止，无法执行 nginx -s reload，此时应该 执行：nginx -c /software/nginx/conf/nginx.conf
 
 
+
+<br>
 
 
 ## 权限设置
@@ -700,9 +818,10 @@ find ./ -type d -print|xargs chmod 755;
 
 
 
+<br>
+
 ## 感谢
 
 极客时间：Nginx核心知识100讲：[https://time.geekbang.org/course/intro/138](https://time.geekbang.org/course/intro/138)  
 动力节点：2020最新Nginx详细教程(nginx快速上手)：[https://www.bilibili.com/video/BV1zE411N7m9](https://www.bilibili.com/video/BV1zE411N7m9)  
 腾讯云：Nginx 服务器证书安装：https://cloud.tencent.com/document/product/400/35244
-
