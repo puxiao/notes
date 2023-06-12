@@ -537,7 +537,7 @@ server {
 
 上面讲的是针对公网域名，向腾讯云或阿里云申请 https 证书，但是实际开发过程中，有可能我们需要在局域网内创建 https 服务。
 
-例如我们希望将 localhost 也使用 https，或者将局域网 IP 192.168.1.10、127.0.0.1、::1 等 设置为 https。
+例如我们希望将 localhost 也使用 https，或者将局域网 IP 127.0.0.1、::1 等 设置为 https。
 
 那这种情况下我们可以通过 `mkcert` 这个工具来生成局域网内生效的 https 证书。
 
@@ -558,7 +558,7 @@ mkcert 安装和使用非常简单，2 步即可完成，我们在 Powershell �
 choco install mkcert
 
 # 生成 https证书 的命令格式为 mkcert + IP 或 域名
-mkcert 192.168.1.10
+mkcert 127.0.0.1
 # 或者
 mkcert localhost
 ```
