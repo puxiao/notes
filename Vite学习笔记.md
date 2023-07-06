@@ -2,7 +2,7 @@
 
 <br>
 
-本文实在 vite 官方文档教程：https://cn.vitejs.dev/ 基础上，学习整理而来。
+本文是在 vite 官方文档教程：https://cn.vitejs.dev/ 基础上，学习整理而来。
 
 
 
