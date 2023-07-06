@@ -561,13 +561,13 @@ vite build [参数]
 
 但是，更推荐另外一种做法：
 
-去修改 vite.config.ts 的 `base` 字段，将其修改成其他值，例如相对路径 '.' 或 具体路径 '/xx/'
+去修改 vite.config.ts 的 `base` 字段，将其修改成其他值，例如相对路径 './' 或 具体路径 '/xx/'
 
 ```
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-  base:'.', //注意此处
+  base:'./', //注意此处
   ...
 })
 ```
@@ -781,7 +781,7 @@ export default defineConfig({
   import { defineConfig } from 'vite'
   
   export default defineConfig({
-    base:'.', //注意此处
+    base:'./', //注意此处
     ...
   })
   ```
