@@ -74,6 +74,28 @@ yarn
 
 <br>
 
+**关于public目录：**
+
+`public` 目录用于存放一些站点静态文件，例如：favicon.ico 、robots.txt 等
+
+在 `/index.html` 中可以直接使用这些静态文件：
+
+```
+<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+```
+
+
+
+<br>
+
+**是否创建git：**
+
+对于 vite 创建的项目来说，默认是不包含 git 的。
+
+
+
+<br>
+
 ## 使用TypeScript
 
 
@@ -477,7 +499,10 @@ const myWorker = new Worker(new URL('./xx.js', import.meta.url), { type:'module'
 
 <br>
 
-**参数名与参数值采用 --xxx=xx 这种形式。**
+**参数名与参数值支持以下 2 种方式：**
+
+* 使用 等号 相连：--xxx=xx
+* 使用 空格 相连：--xxx xx
 
 
 
@@ -489,7 +514,7 @@ const myWorker = new Worker(new URL('./xx.js', import.meta.url), { type:'module'
 vite [参数]
 ```
 
-* --host [host]：指定主机名称
+* --host [host]：指定主机名称，默认仅为 'http://localhost' (不含局域网IP)，若设置为 true 或 '0.0.0.0' 表示本机全部网络 IP (含公网IP)
 * --port <port>：指点启用端口
 * --strictPort：明确若端口已被占用则直接退出，并不会尝试下一个可用端口
 * --open [path]：启动时自动打开浏览器，[path] 为指定打开的路径
@@ -506,6 +531,12 @@ vite [参数]
 * -f、--filter <filter>：过滤某些调试日志
 * -l、--logLevel <level>：显示哪种日志级别，info/warn/error/silent，默认值为 'info'
 * --clearScreen：允许或禁止清除日志屏幕
+
+
+
+<br>
+
+> 特别提醒：修改上述配置文件后，无需重新执行 `yarn dev`，调试网页就立马生效，vite 非常强！
 
 
 
@@ -592,14 +623,20 @@ vite preview [参数]
 
 <br>
 
-**上面所有的命令参数实际上都可以通过修改配置 vite.config.ts 文件来实现。**
+**上面所有的命令参数实际上都可以通过修改配置 vite.config.ts 文件来实现，包括一些没有提及到的。**
 
 他们大致划分为：
 
 * 共享选项(开发过程、构建、其他 都可以使用到的)：https://cn.vitejs.dev/config/shared-options.html
+
 * 服务器选项(开发过程)：https://cn.vitejs.dev/config/server-options.html
+
+  > 例如 `proxy` 网络请求代理配置项，就只能通过 vite.config.ts 来配置
+
 * 构建选项(构建)：https://cn.vitejs.dev/config/build-options.html
+
 * 预览选项：https://cn.vitejs.dev/config/preview-options.html
+
 * 依赖优化选项：https://cn.vitejs.dev/config/dep-optimization-options.html
 
 此外还有上述命令参数中不存在的配置项：
@@ -845,3 +882,216 @@ export default defineConfig({
 vite 还支持将不同文件存放在不同的路径中，这样做的目的是为了在部署时可以有更大的自由度，例如有些目录需要启用 CDN 加速，而有些不需要。
 
 具体配置方式：https://cn.vitejs.dev/guide/build.html#advanced-base-options
+
+
+
+<br>
+
+## 项目常见配置
+
+
+
+<br>
+
+#### 配置vscode
+
+在项目根目录创建：`.vscode/setting.json`
+
+```
+{
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    },
+    "editor.detectIndentation": false,
+    "editor.tabSize": 4,
+    "javascript.format.insertSpaceBeforeFunctionParenthesis": true
+}
+```
+
+上面是最基础的配置项：
+
+* 修改默认以 4 个空格对齐代码
+* 保存文件时自动格式化代码
+
+
+
+<br>
+
+### 配置调试IP和端口
+
+默认情况下当启动调试后，仅 'http://localhost' 可访问，局域网 IP 是无法访问的。
+
+
+
+<br>
+
+**方法1：通过配置文件方式：**
+
+想修改启动 IP 和 端口，可如下配置：
+
+> vite.config.ts
+
+```
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+    base: './',
+    server: {
+        host: '0.0.0.0',
+        port: 3000,
+        strictPort: true，
+        open: true
+    },
+    plugins: [react()],
+})
+```
+
+> 上述配置中 `host: '0.0.0.0'` 等同于 `host: true`
+>
+> 上述其他建议配置：
+>
+> * 把 base 设置为 './'
+> * strictPort(端口被占用则退出)
+> * open(启动后自动打开浏览器调试页面) 也都设置为 true
+
+
+
+<br>
+
+**方法2：通过命令方式来配置**：
+
+> package.json 中的 "scripts"
+
+参数名与参数值中间使用 等号 连接
+
+```
+"scripts": {
+    "dev": "vite --host=0.0.0.0 --port=3002",
+}
+```
+
+参数名和参数值之间也可以使用 空格 连接：
+
+```
+"scripts": {
+    "dev": "vite --host 0.0.0.0 --port 3002",
+}
+```
+
+
+
+**特别说明：**
+
+* 若修改 vite.config.ts 则无需重新执行 `yarn dev`，自动立即生效
+* 若修改 package.json 则需要重新执行 `yarn dev` 后才会生效
+* 若 vite.config.ts 和 package.json 命令中同时配置了不同的 IP 和端口，命令方式的优先级更高
+
+
+
+### 使用sass
+
+vite 内置 sass 的加载起，因此只需安装 sass 即可直接使用。
+
+```
+yarn add sass --dev
+```
+
+
+
+<br>
+
+### 配置路径映射alias
+
+无需安装任何插件，只需要直接在 vite.config.ts 中配置即可。
+
+假定我们现在一共要添加 2 条路径映射：'@'、'utils'
+
+resolve.alias 的值一共有 2 种写法。
+
+
+
+<br>
+
+**方式1：对象**
+
+属性名就是映射后的路径缩写、属性值是原始路径
+
+```
+import path from 'path'
+
+export default defineConfig({
+    resolve: {
+        alias: {
+            '@': path.resolve(__dirname, './src'),
+            'utils':  path.resolve(__dirname, './src/utils')
+        }
+    },
+    ...
+})
+```
+
+
+
+<br>
+
+**方式2：数组**
+
+数组中的每个元素结构为 { find: 'xx', replacement: 'xxxxx'}
+
+```
+import path from 'path'
+
+export default defineConfig({
+    resolve: {
+        alias: [
+            {
+                find: '@',
+                replacement: path.resolve(__dirname, './src')
+            },
+            {
+                find: 'utils',
+                replacement: path.resolve(__dirname, './src/utils')
+            }
+        ]
+    },
+    ...
+})
+```
+
+
+
+<br>
+
+**修改配置tsconfig.json**
+
+增加 alias 相关配置：
+
+```1
+"compilerOptions": {
+    ...
+    /* alias */
+    "baseUrl": "./",
+    "paths": {
+        "@/*": ["src/*"]
+    },
+}
+```
+
+
+
+<br>
+
+**特别说明：静态资源对应的类型定义**
+
+如果使用 create-react-app，我们还需要去定义 global.d.ts，但是在 vite 中，它已经默认帮我们定义好了。
+
+对应的就是 vite-env.d.ts 中的三斜杠注释代码。
+
+```
+/// <reference types="vite/client" />
+```
+
+> "vite/client" 泛指各类客户端静态资源文件，例如 .svg、.jpg 等
