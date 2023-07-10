@@ -991,9 +991,11 @@ export default defineConfig({
 
 
 
+<br>
+
 ### 使用sass
 
-vite 内置 sass 的加载起，因此只需安装 sass 即可直接使用。
+vite 内置 sass 的加载器，只需安装 sass 即可直接使用。
 
 ```
 yarn add sass --dev
@@ -1095,3 +1097,10 @@ export default defineConfig({
 ```
 
 > "vite/client" 泛指各类客户端静态资源文件，例如 .svg、.jpg 等
+
+
+
+<br>
+
+**总体来说 vite 相对于 webpack 配置起来极其简单。**
+
