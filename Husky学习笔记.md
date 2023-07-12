@@ -2,8 +2,6 @@
 
 
 
-<br>
-
 ### Husky简介与作用
 
 Husky 通过与 git 的 hooks 钩子挂钩，实现代码 git 提交前进行相关检查。
@@ -356,5 +354,94 @@ git pre-commit 钩子关联执行的 "yarn test" 的前提是我们在 package.j
 <br>
 
 ### 实际示例
+
+
+
+<br>
+
+**需求描述：提交代码前，必须先经过 lint 检查，确保代码无误后才能提交。**
+
+
+
+<br>
+
+> package.json
+
+```
+"scripts": {
+    ...
+    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+}
+```
+
+
+
+<br>
+
+> .huskye/pre-commit
+
+```
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+yarn lint
+```
+
+
+
+<br>
+
+当去执行提交前，都会自动运行一下 `yarn lint`，若未通过则跳过本次提交，并输出原因。
+
+
+
+<br>
+
+### husky配套工具：lint-staged
+
+
+
+<br>
+
+**lint-staged 是什么？**
+
+答：lint-staged 是针对 git 暂存区中文件代码格式化的一个 NPM 包。
+
+
+
+<br>
+
+**husky不够用吗？为什么还要安装lint-staged ？**
+
+在前面讲解中，我们已经学会了 husky 的用法，我们知道  husky 可以在提交前触发 `yarn lint` 用于代码检查。
+
+虽然这看上去已经够用了，但是还是存在一些缺点的：
+
+* `yarn lint` 是针对所有的代码进行代码检查，但很多时候我们仅需要针对我们本次修改的代码检查即可，而不是全部
+
+  > 换句话说，我们只需保证自己提交的代码没有问题即可，若之前其他人提交的代码不通过 lint 检查，我们难道还有义务必须去替他们全部修改好吗？
+
+* `yarn lint` 无法提供更加细颗粒度的检查区分，例如我们不光要检查代码文件(例如 .jsx、.ts)，还要检查文档文件(例如 .md)，此时单单一条 `yarn lint` 就无法满足要求了
+
+
+
+<br>
+
+**所以使用 lint-staged 就显得非常有必要了：**
+
+* 我们只需在提交前检查本次自己修改的代码，即 git 暂存区 中的代码
+* lint-staged 可以提供更加细颗粒度(针对不同文件类型)的代码检查配置
+
+
+
+<br>
+
+好了，我们决定 huskye 要搭配 lint-staged 了，开始学习 lint-staged 吧。
+
+
+
+<br>
+
+### 安装lint-staged
 
 未完待续...
