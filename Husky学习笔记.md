@@ -421,6 +421,8 @@ yarn lint
 
   > 换句话说，我们只需保证自己提交的代码没有问题即可，若之前其他人提交的代码不通过 lint 检查，我们难道还有义务必须去替他们全部修改好吗？
 
+  > 此外对于复杂项目，全局执行一遍检查所需要的时间是比较久的。
+
 * `yarn lint` 无法提供更加细颗粒度的检查区分，例如我们不光要检查代码文件(例如 .jsx、.ts)，还要检查文档文件(例如 .md)，此时单单一条 `yarn lint` 就无法满足要求了
 
 
@@ -444,4 +446,116 @@ yarn lint
 
 ### 安装lint-staged
 
-未完待续...
+
+
+<br>
+
+**1、安装：**
+
+```
+yarn add lint-staged --dev
+```
+
+
+
+<br>
+
+**2、向 package.json 的 scripts 添加一行命令：**
+
+```diff
+"scripts": {
+    ...
++   "lint-staged": "lint-staged",
+}
+```
+
+
+
+<br>
+
+**3、修改pre-commit中的命令：**
+
+```diff
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+- yarn lint
++ yarn lint-staged
+```
+
+
+
+<br>
+
+**4、向 package.json 中添加 lint-staged 详细的规则：**
+
+> 注意：新添加的 "lint-staged" 标签与 "scripts" 同一级别
+
+```
+"scripts": {
+    ...
+},
+"lint-staged": {
+    "*.{js,ts,jsx,tsx}": ["lint"],
+    "*.md": "prettier --list-different"
+}
+```
+
+
+
+<br>
+
+**详细规则配置说明：**
+
+配置规则就是：文件匹配规则 + 触发的命令
+
+* 文件匹配规则：
+  * 对于某一种文件可以使用 `*.xx` 来表示，例如 `"*.ts"` 或  `"*.md"`
+  * 想一次定义多种文件格式，则规范为：`*.{ts,tsx,...}`
+  * 文件名前还可以增加路径作为文件过滤条件，例如 `src/xx/*.ts`、`src/**/*.ts`
+  * 也支持排除方式，例如 `!(*test).js` 其匹配结果为：除 xx.test.js 以外的其他全部 .js 文件
+* 对应命令：
+  * 如果只有一条命令，可以直接使用字符串形式
+  * 如果对应多条命令，可以使用 数组，数组每一个元素为一条命令，数组中命令执行顺序从左至右
+  * 温馨提醒：命令不必须是 package.json 中 "scripts" 定义的，而是任何可执行的命令，例如 `git add`、"yarn add ..."
+
+
+
+<br>
+
+**详细规则配置的另外一种方式：**
+
+上面我们讲解配置 lint-staged 规则时，是通过向 package.json 中新增 "lint-staged" 元素来完成的。
+
+还有另外一种配置方式：创建 lint-staged 配置文件
+
+
+
+<br>
+
+**lint-staged 的配置文件形式可以有非常多中：**
+
+* .lintstagedrc
+* .lintstagedrc.json
+* .lintstagedrc.yaml
+* .lintstagedrc.yml
+* .lintstagedrc.mjs 或 lint-stage.config.mjs
+* .lintstagedrc.cjs 或 lint-stage.config.cjs
+* .lintstagedrc.js
+
+**我们只需要明白 lint-staged 配置规则为一个对象，那么只要是其内容或返回结果是一个对象即可。**
+
+
+
+<br>
+
+### 总结
+
+经过上面的学习，我们已经会安装和配置 husky 和 lint-staged。
+
+* husky 用来关联 git commit 钩子函数
+* lint-staged 用来强调只针对 git 暂存区 中的文件进行各种检查
+
+
+
+<br>
