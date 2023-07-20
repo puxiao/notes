@@ -6,7 +6,27 @@
 
 
 
+<br>
+
 接下来我将通过对比 create-react-app 或 webpack 的形式来学习 vite。
+
+### 本文目录：
+
+* vite与webpack 的目标不同之处
+* 创建初始化项目
+* 使用TypeScript
+* 关于CSS、sass样式
+* 引入静态文件资源
+* 命令参数
+* 使用插件
+* 构建生产版本
+* 项目常见配置
+  * 配置调试IP和端口
+  * 使用husky
+  * 配置vscode
+  * 使用prettier
+  * 使用sass
+  * 配置路径映射alias
 
 
 
@@ -893,31 +913,6 @@ vite 还支持将不同文件存放在不同的路径中，这样做的目的是
 
 <br>
 
-#### 配置vscode
-
-在项目根目录创建：`.vscode/setting.json`
-
-```
-{
-    "editor.formatOnSave": true,
-    "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": true
-    },
-    "editor.detectIndentation": false,
-    "editor.tabSize": 4,
-    "javascript.format.insertSpaceBeforeFunctionParenthesis": true
-}
-```
-
-上面是最基础的配置项：
-
-* 修改默认以 4 个空格对齐代码
-* 保存文件时自动格式化代码
-
-
-
-<br>
-
 ### 配置调试IP和端口
 
 默认情况下当启动调试后，仅 'http://localhost' 可访问，局域网 IP 是无法访问的。
@@ -988,6 +983,125 @@ export default defineConfig({
 * 若修改 vite.config.ts 则无需重新执行 `yarn dev`，自动立即生效
 * 若修改 package.json 则需要重新执行 `yarn dev` 后才会生效
 * 若 vite.config.ts 和 package.json 命令中同时配置了不同的 IP 和端口，命令方式的优先级更高
+
+
+
+<br>
+
+### 使用husky
+
+husky 是专门用来做代码 git 提交前的事件触发，可以在这个契机中进行代码相关检查或格式化，通过检查后才可以进行 git 代码提交，否则将拦截本次提交。
+
+具体用法可参考另外一篇文章：[Husky学习笔记.md](https://github.com/puxiao/notes/blob/master/Husky%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.md)
+
+
+
+<br>
+
+### 配置vscode
+
+在项目根目录创建：`.vscode/setting.json`
+
+```
+{
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    },
+    "editor.detectIndentation": false,
+    "editor.tabSize": 4,
+    "javascript.format.insertSpaceBeforeFunctionParenthesis": true
+}
+```
+
+上面是最基础的配置项：
+
+* 修改默认以 4 个空格对齐代码
+* 保存文件时自动格式化代码
+
+
+
+<br>
+
+### 使用prettier
+
+上面是通过 vscode 配置方式来实现代码格式化，但是假设编辑器不是 VSCode，或者我们希望有更加丰富的代码格式化，那么可以安装使用 prettier 以及它的相关插件。
+
+* prettier：代码格式化、美化
+* prettier-plugin-packagejson：针对 package.json 的格式化插件
+* prettier-plugin-sort-imports：针对顶部中 import 引入代码部分的格式化插件
+
+
+
+<br>
+
+**安装：**
+
+```
+yarn add --dev prettier@2.8.8 prettier-plugin-packagejson prettier-plugin-sort-imports
+```
+
+> 由于目前 prettier 3.0.0 版本在 windows 系统上会报错，所以我们此处暂时安装 2.8.8 版
+
+
+
+<br>
+
+**修改插件配置文件：**
+
+打开 .prettierrc 文件，修改其中的 "plugins" 属性值：
+
+```
+"plugins": [
+    "./node_modules/prettier-plugin-sort-imports",
+    "./node_modules/prettier-plugin-packagejson"
+]
+```
+
+
+
+<br>
+
+**新增命令：**
+
+> package.json
+
+```
+"scripts": {
+    ...
+    "format": "prettier --write --ignore-unknown .",
+    "format-check": "prettier --check --ignore-unknown .",
+},
+```
+
+
+
+<br>
+
+**git提交前格式化代码：**
+
+> package.json
+
+```
+"lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+        "yarn lint",
+        "prettier --write --ignore-unknown"
+    ]
+},
+```
+
+> 特别说明：配置 "lint-staged" 的前提是你已安装使用 husky
+
+
+
+<br>
+
+**关于报错：ESLint was configured to run on `<tsconfigRootDir>/vite.config.ts` using `parserOptions.project` ...**
+
+这是目前已知的一个 bug，解决方法是：
+
+打开 `.eslintrc.cjs` 文件，将 parserOptions.project 的值由默认的 `true` 修改为 `['./tsconfig.json', './tsconfig.node.json']` 即可。
 
 
 
@@ -1103,4 +1217,3 @@ export default defineConfig({
 <br>
 
 **总体来说 vite 相对于 webpack 配置起来极其简单。**
-
