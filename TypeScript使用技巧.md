@@ -715,13 +715,27 @@ const msgColor: { [ key: MsgType ]: string } = { ... }
 An index signature parameter type cannot be a literal type or generic type. Consider using a mapped object type instead.
 ```
 
-正确的写法是：
+
+
+<br>
+正确的写法是
+
+```
+type MsgType = 'add' | 'edit' | 'del'
+type MsgColor = {
+    [ key in MsgType ]: string
+}
+
+const msgColor: MsgColor = { ... } 
+```
+
+<br>
+或者是：
 
 ```diff
 - const msgColor: { [ key: MsgType ]: string } = { ... }
 + const msgColor: { [ key in MsgType ]: string } = { ... }
 ```
-
 
 
 <br>
