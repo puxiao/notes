@@ -1541,6 +1541,18 @@ export interface PersistOptions<S, PersistedState = S> {
 
 * version：本地存储的数据的版本号
 
+* partialize：筛选过滤或者新增要持久化的最终数据状态，从它的函数定义 `partialize?: (state: S) => PersistedState;` 上就可以看出，函数参数为当前数据状态，而函数输出值即要本地持久化的最终数据结果，前后两者可以不一样。
+
+  > partialize 单词本意为 偏好，在本场景中是 "个性化自定义" 的意思
+
+  举个最简单的例子：假设原本数据状态为 { name:'puxiao', age:36 }，而我们实际只想把 name 存到本地，那么就可以利用 partialize 函数来过滤掉不需要的字段。
+
+  ```
+  partialize: (stage) => {name: stage.name}
+  ```
+
+  > 经过上面的转换，最终我们本地持久化的数据为 { name: 'puxiao' }，没有包含 age 字段，同理你也可以变更或增加一些字段。
+
 * ......
 
   > 后面几个配置项我实际中也没使用到，所以暂时先不做讲解，不过通过名字大概也能猜测出它的作用
@@ -1742,7 +1754,7 @@ https://github.com/reduxjs/redux-devtools/blob/main/extension/docs/API/Arguments
 >
 > ```
 > devtools(
->   persist(
+> persist(
 > ```
 
 
