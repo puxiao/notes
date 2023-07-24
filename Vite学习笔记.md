@@ -543,7 +543,7 @@ vite [参数]
 
 * --https：启用 TLS + HTTP/2
 * --cors：启用 CORS
-* --force：忽略缓存，强制重新构建
+* --force：忽略 node_modules/.vite 中的缓存，强制不使用缓存情况下重新构建
 * -c、--config <file>：使用指定的配置文件
 * -m、--mode <mode>：设置环境模式
 * -v、--version：显式版本号
@@ -1236,6 +1236,12 @@ export default defineConfig({
 代价是 vite 不会监控 node_modules 中文件的变动，例如你手工修改了 node_modules 下的某个包的代码，当你再次执行调试时 vite 继续使用之前的缓存，你刚手工修改的代码是不会生效的。
 
 解决办法非常简单：**手工删除 node_modules/.vite 目录，然后重新执行调试**，此时就能看到变更后的代码了。
+
+<br>
+
+假定你每一次都不想使用 node_modules 中的 NPM 包缓存，可以调用执行 `vite --force`。
+
+<br>
 
 
 
