@@ -27,6 +27,7 @@
   * 使用prettier
   * 使用sass
   * 配置路径映射alias
+* 清除 node_modules/.vite 缓存
 
 
 
@@ -1217,3 +1218,24 @@ export default defineConfig({
 <br>
 
 **总体来说 vite 相对于 webpack 配置起来极其简单。**
+
+
+
+<br>
+
+## 清除 node_modules/.vite 缓存
+
+
+
+<br>
+
+**清除 NPM 包缓存：**
+
+假定你的项目执行过调试，那么 vite 会把当前项目所用到的 node_modules 中的各个包文件缓存下来，以便提高热更新性能。
+
+代价是 vite 不会监控 node_modules 中文件的变动，例如你手工修改了 node_modules 下的某个包的代码，当你再次执行调试时 vite 继续使用之前的缓存，你刚手工修改的代码是不会生效的。
+
+解决办法非常简单：**手工删除 node_modules/.vite 目录，然后重新执行调试**，此时就能看到变更后的代码了。
+
+
+
