@@ -166,7 +166,7 @@ yarn
 
 <br>
 
-他们的关系是：
+他们的继承关系是：
 
 * tsconfig.json 中引入了 tsconfig.node.json
 
@@ -189,6 +189,58 @@ tsconfig.json 中 几个非常重要的配置项：
 * skipLibCheck：默认值为 true
 
 * useDefineForClassFields：默认值为 true
+
+
+
+<br>
+
+**关于增加非 src/ 目录下的文件 lint 检查：**
+
+首先我们看一下默认 Vite 中都检查哪些文件或目录：
+
+* tsconfig.json 文件中的 `"include": ["src"]`
+
+* tsconfig.node.json 文件中的 `"include": ["vite.config.ts"]`
+
+  > vite.config.ts 文件位于项目根目录，并不在 src/ 目录下
+
+也就是说默认 Vite 配置 lint 检查的文件或目录分别是：`src/` 和 `vite.config.ts`
+
+**假设我们出于某种目的，在项目根目录创建了一个名为 xxx.js 的文件，当我们执行 yarn lint 时可能会收到这样的错误：**
+
+```
+Parsing error: ESLint was configured to run on `<tsconfigRootDir>/xxx.js` using `parserOptions.project`: ...
+```
+
+这是 ESLint 在警告我们：没有正确配置 xxx.js 文件！
+
+
+
+<br>
+
+> 你可能会想那我直接将 xxx.js 添加到 `.eslintignore` 中不就行了？
+>
+> 答案是：不行！你会收到这样的错误：
+>
+> ```
+> File ignored because of a matching ignore pattern. Use "--no-ignore" to override
+> ```
+>
+> 原因很简单：因为 `.eslintignore` 是针对 "检查范围内" 的文件，可此时 xxx.js 根本不在检查范围内，所以也谈不上忽略它！
+
+
+
+<br>
+
+**正确的解决办法是：将 xxx.js 添加到检查范围内即可**
+
+> tsconfig.node.json
+
+```
+"include": ["vite.config.ts", "xxx.js"]
+```
+
+> 提醒：既然 xxx.js 已添加到检查范围内了，若此时再在 `.eslintignore` 中添加忽略 xxx.js 才会生效，当然你没必要这样做，还是检查一下比较好。
 
 
 
@@ -1316,4 +1368,3 @@ Vite 创建的 package.json 中是这样配置的：
 const jsonPath = path.join(__dirname, './public/version.json')
 console.log(jsonPath)
 ```
-
