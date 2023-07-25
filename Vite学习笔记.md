@@ -13,23 +13,36 @@
 ### 本文目录：
 
 * vite与webpack 的目标不同之处
+
 * 创建初始化项目
+
 * 使用TypeScript
+
 * 关于CSS、sass样式
+
 * 引入静态文件资源
+
 * 命令参数
+
 * 使用插件
+
 * 构建生产版本
+
 * 项目常见配置
+
   * 配置调试IP和端口
   * 使用husky
   * 配置vscode
   * 使用prettier
   * 使用sass
   * 配置路径映射alias
-* 清除 node_modules/.vite 缓存
 
+* 使用过程中的一些常见问题
 
+  * 清除 node_modules/.vite 缓存
+  * 执行 node.js 文件所需要的改动
+
+  
 
 <br>
 
@@ -1223,13 +1236,13 @@ export default defineConfig({
 
 <br>
 
-## 清除 node_modules/.vite 缓存
+## 使用过程中的一些常见问题
 
 
 
 <br>
 
-**清除 NPM 包缓存：**
+### 清除 node_modules/.vite 缓存
 
 假定你的项目执行过调试，那么 vite 会把当前项目所用到的 node_modules 中的各个包文件缓存下来，以便提高热更新性能。
 
@@ -1241,7 +1254,66 @@ export default defineConfig({
 
 假定你每一次都不想使用 node_modules 中的 NPM 包缓存，可以调用执行 `vite --force`。
 
+
+
 <br>
 
+### 执行 node.js 文件所需要的改动
 
+<br>
+
+**Vite 环境下无法直接执行 node.js 文件？**
+
+Vite 创建的 package.json 中是这样配置的：
+
+```
+"type": "module"
+```
+
+由于 node.js 默认采用的是 CommonJS 模块，而 Vite 默认的是 ESM 模块，所以在 Vite 项目中默认是无法执行 node.js 编写的相关代码的。
+
+
+
+<br>
+
+**在 Vite 项目中想执行 node.js 文件需要改动的地方：**
+
+* 首先为了有 node.js 语法提示，我们先推荐安装 node.js 的类型提示
+
+  ```
+  yarn @types/node --dev
+  ```
+
+  > 上面代码默认安装的是最新版 node.js 的类型包，你可根据自己的 node.js 版本有选择性的安装对应版本
+
+* 修改 node.js 编写的文件中的引入方式
+
+  ```diff
+  - const xx = require('xx')
+  + import xx from 'xx'
+  ```
+
+* 额外增加一些 "原本 node.js 中默认可用的环境变量"，例如最常用的 `__dirname`
+
+  对于 node.js 编写的代码，假定想获取当前文件目录的路径，那么是可以直接使用 `__dirname` 来得到的。可是这个变量在 ESM 中是默认不存在的，需要我们自己计算出来。
+
+  > 具体改动参见下面的代码
+
+
+
+<br>
+
+**node.js 文件代码改造示例：**
+
+```diff
+- const path = require("path")
++ import path from 'path'
+
++ import { fileURLToPath } from 'url'
++ const __filename = fileURLToPath(import.meta.url)
++ const __dirname = path.dirname(__filename)
+
+const jsonPath = path.join(__dirname, './public/version.json')
+console.log(jsonPath)
+```
 
