@@ -473,7 +473,7 @@ https://mui.com/material-ui/api/svg-icon/
 
     请注意：这里的 1 并不是指 1px，而是有其特殊的含义，具体 1 的指是多少像素是由样式模板中的 spacing 决定的，假定模板中定义 spacing 的值为 8px，那么此时 mr:1 中的 1 即 8px，同理 mr:0.5 中的 0.5 即 (0.5*8px) = 4px
 
-  *  `verticalAlign: 'middle'`：垂直对齐方式
+  * `verticalAlign: 'middle'`：垂直对齐方式
 
   * 关于 sx 中的样式语法以及其他缩写可查阅：https://mui.com/system/getting-started/the-sx-prop/
 
@@ -623,33 +623,33 @@ yarn add @mui/material @mui/styled-engine-sc styled-components
 
 * Inputs 输入相关组件：
 
-  * Autocomplete：可自动填充的值的 input 输入框，涉及组件有 <Autocomplete>、<Popper>、<TextField>
+  * Autocomplete：可自动填充的值的 input 输入框，涉及组件有 `<Autocomplete>、<Popper>、<TextField>`
 
-  * Button：按钮，涉及组件有 <Button>、<ButtonBase>、<IconButton>、<LoadingButton>
+  * Button：按钮，涉及组件有 `<Button>、<ButtonBase>、<IconButton>、<LoadingButton>`
 
-  * Button Group：一组按钮，涉及组件有 <ButtonGroup>
+  * Button Group：一组按钮，涉及组件有 `<ButtonGroup>`
 
   * Checkbox：多选框
 
-  * Floating Action Button：浮动按钮，使用场景例如 网页右侧的 "返回顶部"，涉及组件 <Fab>
+  * Floating Action Button：浮动按钮，使用场景例如 网页右侧的 "返回顶部"，涉及组件 `<Fab>`
 
   * Radio Group：单选框
 
-  * Rating：等级评价组件，使用场景例如 给评价打几颗星，涉及组件 <Rating>
+  * Rating：等级评价组件，使用场景例如 给评价打几颗星，涉及组件 `<Rating>`
 
-  * Select：下拉选择框，涉及组件 <Select>、<NativeSelect>
+  * Select：下拉选择框，涉及组件 `<Select>、<NativeSelect>`
 
-    > <NativeSelect> 组件是指同时有多项下拉选项可见的那种组件
+    > `<NativeSelect>` 组件是指同时有多项下拉选项可见的那种组件
 
-  * Silder：滚动滑条，涉及组件 <Slider>
+  * Silder：滚动滑条，涉及组件 `<Slider>`
 
-  * Switch：开关组件，涉及组件 <Switch> ...
+  * Switch：开关组件，涉及组件 `<Switch> ...`
 
   * Text Field：文本输入框
 
-  * Transfer List：左右两侧列表数据互相转移，涉及组件 <List>、<ListItem>
+  * Transfer List：左右两侧列表数据互相转移，涉及组件 `<List>、<ListItem>`
 
-  * Toggle Button：按钮组成的系列单选多选菜单选项，涉及组件<ToggleButton>、<ToggleButtonGroup>
+  * Toggle Button：按钮组成的系列单选多选菜单选项，涉及组件 `<ToggleButton>、<ToggleButtonGroup>`
 
 * Data Display 数据展示组件：
 
@@ -685,7 +685,7 @@ yarn add @mui/material @mui/styled-engine-sc styled-components
   * Bottom Navigation：APP 底部按钮导航
   * Breadcrumbs 面包屑导航
   * Drawer 侧边栏菜单面板：平时隐藏不可见，当需要时从侧边滑出显示
-  * Link 链接：相当于 <a> 标签
+  * Link 链接：相当于 `<a>` 标签
   * Menu 菜单：各式各样的菜单，例如 三个点 的、点击显示选项的 等
   * Pagination 分页：分页组件
   * Speed Dial 一列动效菜单：默认就一个圆圈按钮，鼠标放上去带有动效的展示处一列子菜单
@@ -706,7 +706,7 @@ yarn add @mui/material @mui/styled-engine-sc styled-components
 
   * Click-Away Listener：检测点击事件发生在子项之外
   * CSS Baseline：控制 CSS 基线相关
-  * Modal：对话弹窗，涉及组件有 <Dialog>、<Drawer>、<Menu>、<Popover>
+  * Modal：对话弹窗，涉及组件有 `<Dialog>、<Drawer>、<Menu>、<Popover>`
   * No SSR：该组件文档已被移动到 https://mui.com/base-ui/react-no-ssr/
   * Popover：鼠标点击按钮旁边的小弹出内容
   * Popper：和 Popover 类似
