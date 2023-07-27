@@ -744,7 +744,13 @@ yarn add @mui/material @mui/styled-engine-sc styled-components
 
 答：可以，但有弊端。
 
-**弊端就是：你的前端项目有可能需要 明暗模式(light/drak) 切换，这个时候你自己写的 div 可能就无法做出响应了**(或者说你去要自己去处理明暗模式的响应)，而上面这些组件本身是携带有 明暗模式 切换所需要的样式的。
+**弊端就是：你的前端项目有可能需要 明暗模式(light/drak) 切换，这个时候你自己写的 div 可能就无法做出响应了**
+
+或者说你去要自己去处理明暗模式的响应，而上面这些布局组件则可以通过设置 `<Xxx sx={{backgroundColor: 'primary.contrastText}} />` 很轻松来实现切换背景颜色。
+
+> primary.contrastText 是主题样式中的一个变量配置项。
+>
+> 我们这里只是举例使用了 primary.contrastText，还可以设置成主题样式中的其他颜色变量。
 
 
 
@@ -858,11 +864,37 @@ MUI 默认主题中定义了一些 CSS 相关的变量配置项，我们可以�
 
 * .components：组件配置
 
+  > 注意对于 MUI 的各个组件都需要增加一个 `Mui` 的前缀，假设我们想统一配置 `<Container>` 组件，那么在此处应该写成 `MuiContainer`：
+  >
+  > ```
+  > const themeOptions: ThemeOptions = {
+  >     components: {
+  >         MuiContainer: {
+  >             defaultProps: {
+  >                 disableGutters: true,
+  >                 maxWidth: false
+  >             }，
+  >             styleOverrides：{
+  >                 ...
+  >             }
+  >         }
+  >     }
+  > }
+  > ```
+  >
+  > 上面配置中：
+  >
+  > `disableGutters: true` 意思是：禁止(取消) Container 两侧的 pading 空隙，默认 Container 两侧的空隙是 24px
+  >
+  > `maxWidth: false` 意思是：取消最大宽度限制，默认 maxWidth 为 1536px，设置为 false 后意味着相当于设置宽度为 100%
+  >
+  > 关于每个组件的更多配置项，可自行查阅文档，这里就不逐一举例了。
+
 
 
 <br>
 
-**.palette：调色板(主题色)配置**
+**palette：调色板(主题色)配置**
 
 `.palette` 是我们最常用、最复杂的主题变量，从它的 .d.ts 可以看出 `.palette` 有非常多的子配置项。 
 
@@ -897,12 +929,13 @@ export interface PaletteOptions {
 
 * primary(主要)、secondary(次要)、error(错误)、warning(警告)、info(信息)、success(成功)
 
-  这几个都是和颜色有关的配置，他们需要配置以下 3 个属性
+  这几个都是和颜色有关的配置，他们需要配置以下 4 个属性
 
   ```
   light?: string; //亮模式下的颜色
   main: string; //主体颜色
   dark?: string; //暗模式下的颜色
+  contrastText?:string; //当前模式下内容(对比)文字的颜色，例如背景色为蓝色，则蓝色背景上的文字颜色可以是白色
   ```
 
 * mode：当前处于哪个模式，默认为 "light"
