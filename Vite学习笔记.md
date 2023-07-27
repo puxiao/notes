@@ -1165,9 +1165,19 @@ yarn add --dev prettier@2.8.8 prettier-plugin-packagejson prettier-plugin-sort-i
 
 **关于报错：ESLint was configured to run on `<tsconfigRootDir>/vite.config.ts` using `parserOptions.project` ...**
 
-这是目前已知的一个 bug，解决方法是：
+这是目前已知的一个 bug，第1种解决方法是：
 
 打开 `.eslintrc.cjs` 文件，将 parserOptions.project 的值由默认的 `true` 修改为 `['./tsconfig.json', './tsconfig.node.json']` 即可。
+
+<br>
+
+第2种解决方案是：
+`tsconfig.node.json`
+
+```diff
+- "include": ["vite.config.ts"]
++ "include": ["vite.config.ts", ".eslintrc.cjs"]
+```
 
 
 
