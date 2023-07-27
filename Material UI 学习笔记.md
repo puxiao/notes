@@ -1069,6 +1069,12 @@ export interface PaletteOptions {
 
 <br>
 
+**注意：`vars` 这个变量是 MUI 内部已使用的变量，你自定义变量中不允许使用该字段。**
+
+
+
+<br>
+
 关于主题配置项的各个详细用法，去查阅官方文档即可。
 
 
@@ -1223,11 +1229,11 @@ export default useThemeData
 >
 > ```
 > theme: createTheme({
->     ...themeOptions,
->     palette: {
->         ...themeOptions.palette,
->         mode: newMode
->     }
+>  ...themeOptions,
+>  palette: {
+>      ...themeOptions.palette,
+>      mode: newMode
+>  }
 > })
 > ```
 
