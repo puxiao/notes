@@ -756,6 +756,35 @@ yarn add @mui/material @mui/styled-engine-sc styled-components
 
 <br>
 
+**同理，对于一些文本元素，也牵扯到 亮/暗 模式切换后文字颜色变化，所以推荐使用 `<Typography>` 组件，而不是自己去写 `<span>`。**
+
+```
+const themeOptions: ThemeOptions = {
+    palette: {
+        mode: 'dark'
+    },
+    components: {
+        MuiTypography: {
+            defaultProps: {
+                color: 'textPrimary'
+            }
+        }
+    }
+}
+```
+
+```
+<Typography>footer</Typography>
+```
+
+在上面代码中我们将 文本组件 文字颜色设置为主题中的 'textPrimary'。
+
+对于新手而言需要大量的实际操作才能够逐渐熟悉 主题 中的各个颜色变量名称。
+
+
+
+<br>
+
 ## 自定义主题样式
 
 在上面初探 MUI 时我们只是简单提了一下使用 `<ThemeProvider theme={theme}>` 修改按钮不同状态下的颜色，下面我们将详细讲解如何自定义主题样式。
