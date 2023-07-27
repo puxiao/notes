@@ -8,6 +8,8 @@
 * 安装 MUI
 * 初探 MUI
 * 文档与组件速览
+* 自定义主题样式
+* 亮/暗模式切换
 
 
 
@@ -732,3 +734,591 @@ yarn add @mui/material @mui/styled-engine-sc styled-components
 
 **当你需要使用到哪个组件时自己去对应官方文档上查看示例和 API 就好。**
 
+
+
+<br>
+
+**思考题：对于 Layout 布局类的组件，我可以不可以不用？**
+
+例如：Box、Container、Grid 等这些布局容器类的组件，我不用它们，而是自己直接使用 div 行不行？
+
+答：可以，但有弊端。
+
+**弊端就是：你的前端项目有可能需要 明暗模式(light/drak) 切换，这个时候你自己写的 div 可能就无法做出响应了**(或者说你去要自己去处理明暗模式的响应)，而上面这些组件本身是携带有 明暗模式 切换所需要的样式的。
+
+
+
+<br>
+
+## 自定义主题样式
+
+在上面初探 MUI 时我们只是简单提了一下使用 `<ThemeProvider theme={theme}>` 修改按钮不同状态下的颜色，下面我们将详细讲解如何自定义主题样式。
+
+> theme 这个单词的翻译就是 主题
+
+
+
+<br>
+
+### 创建自定义主题样式的套路
+
+1. 项目根目录创建 `theme.tsx`
+
+   > src/theme.tsx
+
+   ```
+   import { createTheme } from "@mui/material";
+   
+   const theme = createTheme({
+   
+   })
+   
+   export default theme
+   ```
+
+   > 尽管我们知道它就是返回一个对象而已，但MUI 官方示例写的就是 .tsx 而不是 .ts
+
+2. 在整个项目的顶级组件 main.tsx 中使用 `<ThemeProvider>` 包裹住 `<App>`
+
+   > src/main.tsx
+
+   ```
+   import { ThemeProvider } from '@mui/material'
+   import ReactDOM from 'react-dom/client'
+   import theme from './theme.tsx'
+   import App from './App.tsx'
+   import React from 'react'
+   import './index.scss'
+   
+   ReactDOM.createRoot(document.getElementById('root')!).render(
+       <React.StrictMode>
+           <ThemeProvider theme={theme}>
+               <App />
+           </ThemeProvider>
+       </React.StrictMode>
+   )
+   ```
+
+好了，只此一个最基础，实际啥也没做的 自定义主题样式 已经完成了。
+
+那么接下来我们就要开始去深入学习了解自定义主题，并完善 theme.tsx。
+
+
+
+<br>
+
+**关于`<ThemeProvider>`的嵌套说明：**
+
+在上面示例中我们使用了一个 `<ThemeProvider>` 包裹住了 `<App>` 组件，那么就意味着整个项目中的组件都将受到影响。
+
+但 `<ThemeProvider>` 是允许多层嵌套的，和 CSS 一样，也是按照最近原则生效。
+
+```
+<ThemeProvider theme={outerTheme}>
+  <Checkbox defaultChecked />
+  <ThemeProvider theme={innerTheme}>
+    <Checkbox defaultChecked />
+  </ThemeProvider>
+</ThemeProvider>
+```
+
+
+
+<br>
+
+### 自定义主题样式
+
+MUI 默认主题中定义了一些 CSS 相关的变量配置项，我们可以通过修改这些变量配置项来整体修改主题样式。
+
+**最常用的变量配置：**
+
+* .palette：调色板(主题色)配置
+
+* .typography：版式配置
+
+* .spacing：单位间距
+
+  > 默认值为 8，即 8px
+
+* .breakpoints：断点(媒体查询)
+
+  > 这些断点对应有简写，默认值如下：
+  >
+  > * xs：0px
+  > * sm：600px
+  > * md：900px
+  > * lg：1200px
+  > * xl：1536px
+
+* .zIndex：z-index 属性配置
+
+  > 分别定义不同组件(例如 fab、modal 等) 他们的 z-index 的值
+
+* .transitions：过渡动画配置
+
+* .components：组件配置
+
+
+
+<br>
+
+**.palette：调色板(主题色)配置**
+
+`.palette` 是我们最常用、最复杂的主题变量，从它的 .d.ts 可以看出 `.palette` 有非常多的子配置项。 
+
+```
+export interface PaletteOptions {
+  primary?: PaletteColorOptions;
+  secondary?: PaletteColorOptions;
+  error?: PaletteColorOptions;
+  warning?: PaletteColorOptions;
+  info?: PaletteColorOptions;
+  success?: PaletteColorOptions;
+  mode?: PaletteMode;
+  tonalOffset?: PaletteTonalOffset;
+  contrastThreshold?: number;
+  common?: Partial<CommonColors>;
+  grey?: ColorPartial;
+  text?: Partial<TypeText>;
+  divider?: string;
+  action?: Partial<TypeAction>;
+  background?: Partial<TypeBackground>;
+  getContrastText?: (background: string) => string;
+}
+```
+
+> 完整的文档：https://mui.com/material-ui/customization/palette/
+
+
+
+<br>
+
+**.palette 配置项说明：**
+
+* primary(主要)、secondary(次要)、error(错误)、warning(警告)、info(信息)、success(成功)
+
+  这几个都是和颜色有关的配置，他们需要配置以下 3 个属性
+
+  ```
+  light?: string; //亮模式下的颜色
+  main: string; //主体颜色
+  dark?: string; //暗模式下的颜色
+  ```
+
+* mode：当前处于哪个模式，默认为 "light"
+
+  ```
+  PaletteMode = 'light' | 'dark'
+  ```
+
+* tonalOffset：色调偏移，仅对自定义主题颜色生效，对默认主题颜色不生效
+
+  ```
+  export type PaletteTonalOffset = number | {
+    light: number;
+    dark: number;
+  };
+  ```
+
+  tonalOffset 的值是一个 0 ~ 1 的数字，它是指主题颜色从 亮(light) 到 主色(main) 再到 暗(drak)  的亮度过渡比例。该值可以是一个数值，也可以分别设置不同模式对应的数值。
+
+  假定该值为 0.2，表达的含义是：
+
+  * 亮模式的颜色亮度相对主颜色亮度 偏差(增加) 0.2(较亮较浅)
+  * 暗模式的颜色两对相对主颜色亮度 偏差(减少) 0.2(较暗较深)
+
+  > 假定亮度足够高时，最终呈现的是 白色
+  >
+  > 假定亮度足够低时，最终呈现的是 黑色
+
+* contrastThreshold：对比度阈值，用来表示 背景色与文字的对比度阈值(强烈程度)，默认值为 3
+
+  ```
+  contrastThreshold?: number;
+  ```
+
+  > 你想象一下：一个警告按钮，背景色是橙黄色，按钮上的文字应该什么颜色？
+  >
+  > 默认值为 3 即 文字为白色，如果改成 4.5 则文字变成偏暗色
+
+  > 假定你要修改 contrastThreshold 的值，一定要考虑到 色弱 的人，如果背景色和文字颜色对比度不够明显，可能这部分人就不容易看清楚按钮上的文字。
+
+* common：定义所谓的 黑与白 的颜色值
+
+  ```
+  export interface CommonColors {
+    black: string;
+    white: string;
+  }
+  
+  common?: Partial<CommonColors>;
+  ```
+
+* grey：灰色，这里实际指某个颜色中不同灰度( 从 50 ~ 900 )的颜色
+
+  > 你把它想象成 字体粗细 中的 50 ~ 900 那个概念，即用数字来表达 灰 的程度
+
+* text：
+
+  ```
+  export interface TypeText {
+    primary: string;
+    secondary: string;
+    disabled: string;
+  }
+  text?: Partial<TypeText>;
+  ```
+
+* divider：
+
+  ```
+  divider?: string;
+  ```
+
+* action：
+
+  ```
+  export interface TypeAction {
+    active: string;
+    hover: string;
+    hoverOpacity: number;
+    selected: string;
+    selectedOpacity: number;
+    disabled: string;
+    disabledOpacity: number;
+    disabledBackground: string;
+    focus: string;
+    focusOpacity: number;
+    activatedOpacity: number;
+  }
+  action?: Partial<TypeAction>;
+  ```
+
+* background：
+
+  ```
+  export interface TypeBackground {
+    default: string;
+    paper: string;
+  }
+  background?: Partial<TypeBackground>;
+  ```
+
+* getContrastText：
+
+  ```
+  getContrastText?: (background: string) => string;
+  ```
+
+> 后面几个属性暂时没用到，所以就先空着，以后用到知道是什么了再来完善。
+
+
+
+<br>
+
+上面讲的仅仅是 `.palette`，剩下的其他配置项，每个也都有非常多的子配置项，具体太多就不逐一说明了，可以自己查阅文档。
+
+
+
+<br>
+
+**自定义变量：**
+
+上面提到的 palette、spacing 等都是 MUI 定义好的变量配置项，如果你想增加自定义的变量配置项也是可以的，当前前提是你真的需要。
+
+这里举一个例子来说明如何添加自定义变量。
+
+假定我们要添加一个名为 `puxiao` 的变量配置项，那么我们需要做下面 2 件事情：
+
+* 向 Theme、ThemeOptions 中增加关于 puxiao 的类型定义
+
+  ```
+  declare module '@mui/material/styles' {
+    interface Theme {
+      puxiao: {
+        xx: string;
+      };
+    }
+    // allow configuration using `createTheme`
+    interface ThemeOptions {
+      puxiao?: {
+        xx?: string;
+      };
+    }
+  }
+  ```
+
+  > 请注意：
+  >
+  > * puxiao 在 Theme 中为必填属性
+  > * puxiao 在 ThemeOptions 中为非必填属性
+
+* 然后就可在 createTheme() 中添加 puxiao 变量配置项了
+
+  ```
+  createTheme({
+      puxiao:{
+          xx: ...
+      }
+  })
+  ```
+
+特别说明：我暂时也没遇到过这种需要增加自定义变量的场景需求，那实际中会遇到什么问题暂时还不清楚。
+
+
+
+<br>
+
+关于主题配置项的各个详细用法，去查阅官方文档即可。
+
+
+
+<br>
+
+**线上可视化主题配置：**
+
+MUI 还为我们提供了一个在线可视化配置主题的网站：
+
+https://zenoo.github.io/mui-theme-creator/
+
+你可以直接在这个网站上配置自定义主题，然后将配置结果复制到自己的项目中使用。
+
+
+
+<br>
+
+**获取当前主题配置：useTheme()**
+
+MUI 提供了一个 hook 函数用来获取当前主题配置：useTheme()
+
+```
+import { useTheme } from '@mui/material'
+
+const theme = useTheme()
+console.log(theme.palette.mode)
+```
+
+**特别注意：此方法仅为获取主题，但不能直接修改主题**
+
+(你直接修改 ttheme.palette.mode 的值并不会触发主题模式生效变更)
+
+
+
+<br>
+
+## 亮/暗模式切换
+
+假定我们已经在 `palette` 中对 亮暗 模式中的颜色进行了设置。
+
+默认MUI 采用的是 亮(light)模式，想切换到暗模式修改配置：
+
+```
+const theme = createTheme({
+    palette: {
+        mode: 'dark'
+    },
+})
+```
+
+
+
+<br>
+
+但是上面存在问题：我们希望明暗模式是可以用户通过按钮切换，而不是写死到 palette 中。
+
+那么我们接下来将改造一下代码。
+
+
+
+<br>
+
+**实现 点击按钮进行 亮/暗模式 切换 的实现思路：**
+
+* 先定义好 主题配置项
+* 使用 zustand 做来状态管理，创建一个名为 useThemeData 的状态管理对象，其内部包含 模式(mode) + 主题(theme)
+* 使用 `<IconButton>` 来创建可切换的 模式图标按钮
+* 修改 `<ThemeProvider>` 组件的位置，由 main.tsx 改到 App.tsx，以便于监听 useThemeData 的变换并重新触发 `<App>` 重新渲染
+
+
+
+<br>
+
+**具体代码：**
+
+> src/common/theme-options.ts
+
+```
+import { ThemeOptions } from '@mui/material'
+
+const themeOptions: ThemeOptions = {
+    palette: {
+        mode: 'light',
+    }
+}
+
+export default themeOptions
+```
+
+> 在上面配置项中，我们只是为了演示效果，仅仅配置了 platte.mode 的值，实际中应该把自定义主题的其他配置项也都添加上。
+
+
+
+<br>
+
+> src/store/useThemeData.ts
+
+```
+import { PaletteMode, Theme, createTheme } from '@mui/material'
+import { deepmerge } from '@mui/utils'
+import { create } from 'zustand'
+import { themeOptions } from '@/common'
+
+interface UseThemeData {
+    mode: PaletteMode
+    theme: Theme
+    toggleMode: () => void
+    setData: (newMode: PaletteMode) => void
+}
+
+const useThemeData = create<UseThemeData>()((set, get) => ({
+    mode: themeOptions.palette?.mode || 'light',
+    theme: createTheme(themeOptions),
+    toggleMode: () => {
+        const newMode = get().mode === 'light' ? 'dark' : 'light'
+        get().setData(newMode)
+    },
+    setData: (newMode) => set({
+        mode: newMode,
+        theme: createTheme(deepmerge(themeOptions, { palette: { mode: newMode } }))
+    })
+}))
+
+export default useThemeData
+```
+
+
+
+<br>
+
+**关于 useThemeData.ts 的说明：**
+
+* 首先引入之前定义好的 主题配置项
+* 然后通过 zustand 创建了一个数据状态，其包含：
+  * mode：当前处于哪种模式(light/dark)
+  * theme：主题实例
+  * toggleMode：切换当前模式的调用函数
+  * setData：根据 newMode 来更新 mode 和 theme
+* 关于 setData 补充 2 点：
+  * 我们使用了 MUI 为我们提供的一个 deepmerge 函数，用来深度合并 2 个对象
+  * 这 2 个对象分别是：
+    * 我们之前定义好的 主题配置项
+    * 仅包含当前 处于哪个模式的 配置项
+  * 最终合并之后就得到了切换过模式后的主题配置项，然后通过 createTheme() 重新生成得到一份 主题对象
+
+
+
+<br>
+
+> 如果不使用 deepmerge 函数，我们可以通过 JS 本身的解构方式来实现合并，代码为：
+>
+> ```
+> theme: createTheme({
+>     ...themeOptions,
+>     palette: {
+>         ...themeOptions.palette,
+>         mode: newMode
+>     }
+> })
+> ```
+
+
+
+<br>
+
+在我们的计划里，最终：
+
+* mode、toggleMode() 给 负责点击切换模式的 图标按钮 使用
+* theme 给 `<ThemeProvider>` 使用
+
+那么接下来编写 模式图标切换按钮(`<ThemeModeSet>`) 和 App.tsx。
+
+
+
+<br>
+
+> src/components/theme-mode-set/index.tsx
+
+```
+import { useThemeData } from "@/store"
+import { Brightness4, Brightness7 } from "@mui/icons-material"
+import { IconButton } from "@mui/material"
+
+const ThemeModeSet = () => {
+
+    const { mode, toggleMode } = useThemeData(state => ({
+        mode: state.mode,
+        toggleMode: state.toggleMode
+    }))
+
+    return (
+        <IconButton onClick={toggleMode}>
+            {mode === 'light' ? <Brightness4 /> : < Brightness7 />}
+        </IconButton>
+    )
+}
+
+export default ThemeModeSet
+```
+
+
+
+<br>
+
+> App.tsx，下面是伪代码
+
+```
+import { ThemeProvider } from '@mui/material'
+import { useThemeData } from './store'
+import { ThemeModeSet } from  '@/components'
+
+function App() {
+    const theme = useThemeData(state => state.theme)
+
+    return (
+        <ThemeProvider theme={theme}>
+            <ThemeModeSet />
+            { ... }
+        </ThemeProvider>
+    )
+}
+
+export default App
+```
+
+
+
+<br>
+
+至此，亮/暗 模式切换效果完成。
+
+
+
+<br>
+
+虽然我们上面讲的是如何动态修改 亮/暗 模式，但是**按照这个思路(套路) 我们可以修改任何 主题样式 中的配置项，甚至是一个全新的主题。**
+
+
+
+<br>
+
+目前为止，我们已经掌握了 Material UI 的基础知识：
+
+* Material UI 简介，与 Antd 的区别
+* Material 安装、组件基础用法
+* Material 自定义主题，亮/暗 模式切换
+
+那么接下来就可以在实际项目中使用 Material UI 了。
+
+由于 Material UI 组件特别强调 "组合与自定义"，所以实践过程中还会遇到一些问题。
+
+再来慢慢更新本文。
