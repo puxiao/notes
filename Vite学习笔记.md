@@ -569,15 +569,7 @@ yarn add @mui/material @mui/styled-engine-sc styled-components
 
 <br>
 
-组件样式：
-
-1. 组件如同普通的 React 组件一样，也支持 `style` 属性，可以添加自定义样式
-
-
-
-<br>
-
-图标样式：
+**图标样式：**
 
 1. 对于 MUI 官方图标 和 自定义 SVG 图标，他们都支持一些基础的外观样式属性，例如 fontSize
 
@@ -586,6 +578,20 @@ yarn add @mui/material @mui/styled-engine-sc styled-components
    > 注意 sx={{ ... }} 中的 样式写法并不是传统的 style={{ ... }} 中的写法，而是 MUI 官方自定义的一种内置 CSS 语法，具体可查看：
    >
    > https://mui.com/system/getting-started/the-sx-prop/
+
+
+
+<br>
+
+**特别说明：关于单个组件的样式——CSS in JS**
+
+尽管 MUI 的组件和 Antd 组件相似，也支持 `className、style` 这些属性，但是请注意 MUI 组件更推荐的做法是采用 `CSS in JS` 这种方法去定义组件样式。
+
+**MUI 的每一个组件都有 sx={{ ... }} 这个属性，强烈推荐使用此方式来修改当前组件样式。**
+
+**非常不推荐使用 clasName、style、.scss 这种方式来定义 MUI 组件。**
+
+可能你习惯于使用 `import ./index.scss + className` 这种方式，但是既然使用 MUI，就可以尝试 `CSS in JS` (sx={{ ... }}) 这种方式，当你习惯后会觉得非常方便，再也不用考虑样式命名这个事情了。 
 
 
 
@@ -1443,7 +1449,7 @@ export default App
 目前为止，我们已经掌握了 Material UI 的基础知识：
 
 * Material UI 简介，与 Antd 的区别
-* Material 安装、组件基础用法
+* Material 安装、组件基础用法、自定义组件样式
 * Material 自定义主题，亮/暗 模式切换
 
 那么接下来就可以在实际项目中使用 Material UI 了。
@@ -1451,3 +1457,4 @@ export default App
 由于 Material UI 组件特别强调 "组合与自定义"，所以实践过程中还会遇到一些问题。
 
 再来慢慢更新本文。
+
