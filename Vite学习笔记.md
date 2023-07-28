@@ -483,6 +483,24 @@ https://mui.com/material-ui/api/svg-icon/
 
 <br>
 
+**如何旋转、翻转图标？**
+
+首先 MUI 提供的图标本身完全遵循 CSS 元素，因此我们可以通过向其添加 CSS 中的 `transform` 样式来实现旋转或翻转图标。
+
+```
+//旋转 180度
+<SpaceDashboard sx={{ transform: 'rotate(180deg)' }} />
+
+//沿 Y 轴翻转
+<ViewComfy sx={{ transform: 'scaleY(-1)' }} />
+```
+
+> 在 MUI 组件中推荐使用 sx={{ ... }} 属性来设置样式，而不是 style={{ ... }}
+
+
+
+<br>
+
 **如何获取纯图标圆形按钮？**
 
 在 Antd 中设置  `<Button shape="circle">` 就可以获取圆形的纯图标按钮，在 MUI 中则采用的是 `<IconButton>` 组件来实现：
@@ -1370,7 +1388,7 @@ export default useThemeData
 
 <br>
 
-在我们的计划里，最终：
+**在我们的计划里，最终：**
 
 * mode、toggleMode() 给 负责点击切换模式的 图标按钮 使用
 * theme 给 `<ThemeProvider>` 使用
@@ -1446,7 +1464,7 @@ export default App
 
 <br>
 
-目前为止，我们已经掌握了 Material UI 的基础知识：
+**目前为止，我们已经掌握了 Material UI 的基础知识：**
 
 * Material UI 简介，与 Antd 的区别
 * Material 安装、组件基础用法、自定义组件样式
