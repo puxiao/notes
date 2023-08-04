@@ -483,6 +483,24 @@ https://mui.com/material-ui/api/svg-icon/
 
 <br>
 
+**如何旋转、翻转图标？**
+
+首先 MUI 提供的图标本身完全遵循 CSS 元素，因此我们可以通过向其添加 CSS 中的 `transform` 样式来实现旋转或翻转图标。
+
+```
+//旋转 180度
+<SpaceDashboard sx={{ transform: 'rotate(180deg)' }} />
+
+//沿 Y 轴翻转
+<ViewComfy sx={{ transform: 'scaleY(-1)' }} />
+```
+
+> 在 MUI 组件中推荐使用 sx={{ ... }} 属性来设置样式，而不是 style={{ ... }}
+
+
+
+<br>
+
 **如何获取纯图标圆形按钮？**
 
 在 Antd 中设置  `<Button shape="circle">` 就可以获取圆形的纯图标按钮，在 MUI 中则采用的是 `<IconButton>` 组件来实现：
@@ -569,15 +587,7 @@ yarn add @mui/material @mui/styled-engine-sc styled-components
 
 <br>
 
-组件样式：
-
-1. 组件如同普通的 React 组件一样，也支持 `style` 属性，可以添加自定义样式
-
-
-
-<br>
-
-图标样式：
+**图标样式：**
 
 1. 对于 MUI 官方图标 和 自定义 SVG 图标，他们都支持一些基础的外观样式属性，例如 fontSize
 
@@ -586,6 +596,20 @@ yarn add @mui/material @mui/styled-engine-sc styled-components
    > 注意 sx={{ ... }} 中的 样式写法并不是传统的 style={{ ... }} 中的写法，而是 MUI 官方自定义的一种内置 CSS 语法，具体可查看：
    >
    > https://mui.com/system/getting-started/the-sx-prop/
+
+
+
+<br>
+
+**特别说明：关于单个组件的样式——CSS in JS**
+
+尽管 MUI 的组件和 Antd 组件相似，也支持 `className、style` 这些属性，但是请注意 MUI 组件更推荐的做法是采用 `CSS in JS` 这种方法去定义组件样式。
+
+**MUI 的每一个组件都有 sx={{ ... }} 这个属性，强烈推荐使用此方式来修改当前组件样式。**
+
+**非常不推荐使用 clasName、style、.scss 这种方式来定义 MUI 组件。**
+
+可能你习惯于使用 `import ./index.scss + className` 这种方式，但是既然使用 MUI，就可以尝试 `CSS in JS` (sx={{ ... }}) 这种方式，当你习惯后会觉得非常方便，再也不用考虑样式命名这个事情了。 
 
 
 
@@ -785,6 +809,67 @@ const themeOptions: ThemeOptions = {
 
 <br>
 
+**补充：聊一聊那些相似的 "弹窗、弹层" 组件**
+
+在 MUI 中有几个 "弹窗、弹层" 组件无论从名称还是用法来说都比较相似。
+
+它们是：
+
+* Dialog：对话窗，它强调的是 "询问用户下一步该如何继续？"
+
+  使用场景例如：
+
+  * 询问用户是否同意 某某 条款
+  * 让用户输入一个某个值，例如输入一个邮箱地址，以便继续下一步
+
+* Modal：模态框，没错 Modal 准确的翻译就是 "模态框"，尽管我们日常习惯称呼它为 "对话框"
+
+  你可以使用 Modal 自己组建很复杂的 "弹窗、对话框"
+
+* Popover：弹出窗口，不包含半透明背景层，但依然会阻止用户操作其他元素
+
+  使用场景：
+
+  * 展示某些待用户选择的隐藏选项或菜单
+
+* Popper：弹出层
+
+  使用场景：
+
+  * 显示用户刚才操作有关的弹出层内容，但不阻止用户去做其他事情，例如 "点击按钮显示某个链接地址，可以让用户去复制这个链接地址文字"
+
+* Backdrop：弹出的半透明覆盖层，至于中间核心区域的内容则是由用户自己添加组件决定
+
+  使用场景：
+
+  * 使用 Backdrop 作为背景，中间内容可以是一个进度条组件
+
+
+
+<br>
+
+**区别1：阻止用户操作其他元素、阻止用户滚动页面**
+
+* Dialog、Modal、Popover 这 3 个组件都会阻止
+* Popper 都不会阻止
+* Backdrop：会阻止用户操作其他元素，但不阻止用户滚动页面
+
+**区别2：出现的位置**
+
+* Dialog、Modal 都显示在网页中间位置
+* Popover、Popper 显示在操作的元素位置旁边
+* Backdrop：覆盖整个网页
+
+
+
+<br>
+
+**你需要做的事情就是根据每个组件的不同特征，结合自己的实际场景需求，来选择使用哪个组件。**
+
+
+
+<br>
+
 ## 自定义主题样式
 
 在上面初探 MUI 时我们只是简单提了一下使用 `<ThemeProvider theme={theme}>` 修改按钮不同状态下的颜色，下面我们将详细讲解如何自定义主题样式。
@@ -897,17 +982,17 @@ MUI 默认主题中定义了一些 CSS 相关的变量配置项，我们可以�
   >
   > ```
   > const themeOptions: ThemeOptions = {
-  >     components: {
-  >         MuiContainer: {
-  >             defaultProps: {
-  >                 disableGutters: true,
-  >                 maxWidth: false
-  >             }，
-  >             styleOverrides：{
-  >                 ...
-  >             }
-  >         }
-  >     }
+  >  components: {
+  >      MuiContainer: {
+  >          defaultProps: {
+  >              disableGutters: true,
+  >              maxWidth: false
+  >          }，
+  >          styleOverrides：{
+  >              ...
+  >          }
+  >      }
+  >  }
   > }
   > ```
   >
@@ -1303,7 +1388,7 @@ export default useThemeData
 
 <br>
 
-在我们的计划里，最终：
+**在我们的计划里，最终：**
 
 * mode、toggleMode() 给 负责点击切换模式的 图标按钮 使用
 * theme 给 `<ThemeProvider>` 使用
@@ -1379,10 +1464,10 @@ export default App
 
 <br>
 
-目前为止，我们已经掌握了 Material UI 的基础知识：
+**目前为止，我们已经掌握了 Material UI 的基础知识：**
 
 * Material UI 简介，与 Antd 的区别
-* Material 安装、组件基础用法
+* Material 安装、组件基础用法、自定义组件样式
 * Material 自定义主题，亮/暗 模式切换
 
 那么接下来就可以在实际项目中使用 Material UI 了。
@@ -1390,3 +1475,4 @@ export default App
 由于 Material UI 组件特别强调 "组合与自定义"，所以实践过程中还会遇到一些问题。
 
 再来慢慢更新本文。
+
