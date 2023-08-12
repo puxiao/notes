@@ -138,6 +138,149 @@ const puppeteer = require('puppeteer');
 
 <br>
 
+**截图函数 screenshot() 的补充：**
+
+关于 page.screenshot() 的更多配置项可查阅：https://pptr.dev/api/puppeteer.page.screenshot
+
+其中比较常用的是：
+
+* path：若存在则会自动将截图保存到该路径上，注意这里说的路径包含最终截图文件名称
+
+  > 这里说的保存是指 直接自动保存，无需手工点击确定保存
+
+* type：截图图片文件格式，.jpeg、.png、.webp，默认为 .png
+
+* quality：若为 .jpeg 或 .webp 那么截图压缩质量为多少，取值范围 0 ~100
+
+* clip：用来设定截图的具体位置，这个文昌重要，假定你只想截取某个元素而不是整个网页，那么你可以设置 clip 的值
+
+  ```
+  await page.screenshot({ 
+      path: 'example.png',
+      clip:{ x: 100, y:200, width: 600, height: 700}
+  })
+  ```
+
+  > 将从页面 (x:100, y:200) 的位置截图一个尺寸为 600x700 的图片
+
+
+
+<br>
+
+**设置是否打开浏览器(是否是无头浏览器)，以及限定浏览器的展示内容区域尺寸：**
+
+```
+browser = await puppeteer.launch({
+        headless: false, //false:会打开浏览器(本机打开测试版谷歌浏览器)、true:不会打开浏览器(无头浏览器)
+        defaultViewport: {
+            width: imgWidth,
+            height: imgHeight
+        }
+    })
+```
+
+> 特别说明：
+>
+> * 假设没有设置 defaultViewport 尺寸，那么打开浏览器默认为 800x600
+> * 嘉定设置了 defaultViewport 尺寸，那么该浏览器可用内容区域一定是你设置的那个尺寸，假定你修改调试对应的谷歌浏览器窗口大小也不会影响它的区域。
+
+
+
+<br>
+
+**node.js 中使用 puppeteer：**
+
+* 首先建议你修改 node.js 项目中的 package.json，将 type 修改为 module 这样就可以使用 import 方式引入任何 NPM 包，而不再使用 require 了
+
+* 如果你真这样做了，记得要在顶部添加下面代码：
+
+  ```diff
+  - const path = require("path")
+  + import path from 'path'
+  
+  + import { fileURLToPath } from 'url'
+  + const __filename = fileURLToPath(import.meta.url)
+  + const __dirname = path.dirname(__filename)
+  ```
+
+  > 你需要自己定义 `__dirname` 和 `__filename`
+
+* 然后剩下的代码该怎么写就怎么写，可以自由使用 puppeteer 了
+
+
+
+<br>
+
+#### node.js 中如何与pupeteer打开的网页 数据交互
+
+**第1种：最原始简单的方式——通过地址栏 url 来传递**
+
+```
+await page.goto(`http://localhost:8899?width=${imgWidth}&height=${imgHeight}`)
+```
+
+**第2种：通过 page.evaluate() 函数**
+
+> 该函数具体用法可查看文档：https://pptr.dev/api/puppeteer.page.evaluate
+
+假定打开的网页中，我们定义一个 frameInit( list ) 的函数，为了省事我们可以直接将其挂在到 window 下，即：window.frameInit()，其中参数为 list。
+
+那么我们在 node.js 中可以通过 page.evaluate() 来调用它，并传递我们的参数给该函数。
+
+```
+await page.evaluate((list) => {
+    window.frameInit(list)
+}, markList)
+```
+
+* page.evaluate() 本身为异步函数
+* 第1个参数为一个箭头函数，第2个参数为第1个箭头函数所需的参数
+* 在这个箭头函数的内部，是我们假定要在该页面中执行的代码，其中包含我们要调用的 window.frameInit(list)
+* 再强调一下：你把箭头函数内部的代码执行上下文 想象成 就好像在该页面内部执行的一样，而不是 node.js 中的上下文
+
+
+
+<br>
+
+**页面 frameInit() 如果有返回值该，node.js 该如何获取？**
+
+这个时候可以将页面中的 frameInit() 修改成异步函数，将 frameInit 中的执行结果让异步中的 resove() 传递返回出来。
+
+> xxx.html 中的 js
+
+```
+const frameInit = async (list) => {
+  return new Promies((resove,reject)=>{
+      //...
+      console.log(list)
+      ...
+      resove( xx )
+  })
+}
+window.frameInit = frameInit
+```
+
+
+
+<br>
+
+> node.js
+
+```
+const res = await page.evaluate((list) => {
+    const xx = await window.frameInit(list)
+    return xx
+}, myList)
+console.log(res)
+```
+
+* 上述代码中 evaluate() 第 2 个参数 myList 就是 frameInit() 接受到的参数  list
+* 而此时 node.js 中的 res 就是 page.evaluate() 执行返回的 xx
+
+
+
+<br>
+
 **如果使用 puppeteer-core，还需指明本机chrome.exe的路径。**
 
 > 由于 puppeteer-core 本身不包含谷歌浏览器，需做如下配置
@@ -154,8 +297,6 @@ const chromePath = path.join('C:\\Program Files (x86)\\Google\\Chrome\\Applicati
 - const browser = await puppeteer.launch();
 + const browser = await puppeteer.launch({ executablePath: chromePath })
 ```
-
-
 
 
 
