@@ -271,7 +271,7 @@ window.frameInit = frameInit
 > node.js
 
 ```
-const res = await page.evaluate((list) => {
+const res = await page.evaluate(async (list) => {
     const xx = await window.frameInit(list)
     return xx
 }, myList)
