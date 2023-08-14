@@ -251,10 +251,14 @@ await page.evaluate((list) => {
 ```
 const frameInit = async (list) => {
   return new Promies((resove,reject)=>{
-      //...
-      console.log(list)
-      ...
-      resove( xx )
+      try{
+          //...
+          console.log(list)
+          ...
+          resove( xx )
+      }catch(err){
+          reject(err)
+      }
   })
 }
 window.frameInit = frameInit
