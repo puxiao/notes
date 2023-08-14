@@ -454,7 +454,8 @@ export const getPage = async () => {
     const browser = await puppeteer.launch()
     const page = await browser.newPage()
     await page.goto('https://xx.xx.xx/xx')
-    await page.waitForTimeout(3000)
+    //await page.waitForTimeout(3000) //注意：waitForTimeout() 函数已被废弃
+    await new Promise(r => setTimeout(r, 3000)) //可使用这种方式代替之前的 waitForTimeout()
     const resArr = await page.$$eval(
         '#cib_fund_setionlist > table > tbody > tr', 
         list => list.slice(2).map(item => {
