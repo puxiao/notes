@@ -410,5 +410,45 @@ FRC6902标准详细规范：https://datatracker.ietf.org/doc/html/rfc6902
 
 ### immer.js 具体是靠什么实现的？
 
-未完待续
+
+
+<br>
+
+**先学习几个相关单词：**
+
+immer：总是
+
+draft：草稿
+
+mutations：突变、变动
+
+produce：生产
+
+producer：生产者
+
+patch：补丁
+
+patches：补丁的复数
+
+oriiginal：原始的、原来的
+
+cast：投掷、投射、转换
+
+immutable：不可变的
+
+freeze：冻结
+
+freezing：冷冻中
+
+strict：严格的
+
+Map：在 JS 中 Map 应该翻译为 图
+
+Set：在 JS 中 Set 应该翻译为 集
+
+
+
+<br>
+
+**immer 运行基本流程：**
 
