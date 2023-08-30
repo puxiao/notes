@@ -8,6 +8,8 @@
 
 
 
+### 简介
+
 <br>
 
 官方教程与文档：https://immerjs.github.io/immer/zh-CN/
@@ -70,7 +72,7 @@ immer 用于编写可持久化和不可变数据结构。
 
 <br>
 
-**对于 JS 编程而言 不可变数据结构 思想有什么好处？或者说它用于解决哪些困境？**
+### 对于 JS 编程而言 不可变数据结构 思想有什么好处？或者说它用于解决哪些困境？
 
 假定我有一个 待做事项(toduList) 的数据状态：
 
@@ -177,14 +179,236 @@ const todoList: TodoItem[] = [
 
 关于 immer 最核心的思想 "不可变数据结构" 在上一节已经讲解过了，本小节重点讲一下：
 
-* immer.js 在 JS 中具体是靠什么实现的
 * immer.js 背后知识点涉及的 2 个 JSON 规范：JSON指针、JSON 补丁
+* immer.js 在 JS 中具体是靠什么实现的
 
 
 
 <br>
 
-**immer.js 具体是靠什么实现的？**
+### 名词解释：JSON指针、JSON补丁
+
+
+
+<br>
+
+**JSON指针 英文为 JSON Pointer，它遵循 RFC6901规范，使用字符串形式去查找定位 JSON 中某个节点属性值。**
+
+FRC6901标准详细规范：https://datatracker.ietf.org/doc/html/rfc6901
+
+
+
+<br>
+
+**简单示例：**
+
+假定我们有一个 JSON：
+
+```
+{
+    "me": [ "yang", "info":{ "age": 37, "name":"puxiao"} ]
+}
+```
+
+那么按照 JSON 指针 规范，我们可以使用下面的 字符串 来定位到某个具体节点的值：
+
+```
+"/me" -> 属性名为 me 的值 [ "yang", "info":{ "age": 37, "name":"puxiao"} ]
+"/me/0" -> me 的第0个元素(假定我们知道 me 为数组)，即 "yang"
+"/me/1/age" -> me 的第1个元素的 age 属性值，即 37
+```
+
+
+
+**特别补充：`/`不是指整个 JSON 内容**
+
+从上面示例 `/me`、`/me/0` 你可能以为 `/` 是不是值整个 JSON 的内容 `me:[...]`，答案是否。
+
+`/`并不指整个 JSON 根目录，`/`是指 "空字符串"：
+
+```
+{
+    "me": [ "yang", "info":{ "age": 37, "name":"puxiao"} ],
+    "": "hello",
+    " ": "immer"
+}
+```
+
+```
+"/" -> 会得到 "" 对应的值，即 "hello"
+"/ " -> 会得到 " "对应的值，即 "immer"
+```
+
+**而真正指 JSON 整个根属性值的字符是 `""`**
+
+```
+"" -> 空格字符可以定位整个 JSON 值，即 { "me": [ ...], "": "hello" }
+```
+
+
+
+<br>
+
+**另外由于 `~` 和 `/` 本身在 JSON 中有特殊含义，所以它们可以由以下字符代替：**
+
+* ~  由 "~0" 代替
+* / 由 "~1" 代替
+
+
+
+<br>
+
+关于 JSON 指针更加详细的规范用法，暂时也用不到，也无需学习，只需知道上面最简单的基础概念用法即可。
+
+
+
+<br>
+
+**JSON补丁 英文为 JSON Patch，它遵循 RFC6902 标准，通过一个 JSON 文档来记录另外一个 JSON 文档中的数据修改描述。**
+
+FRC6902标准详细规范：https://datatracker.ietf.org/doc/html/rfc6902
+
+
+
+<br>
+
+**你需要知道的是：**
+
+* JSON 补丁中通过 JSON 指针 来对修改内容进行定位，即它内部也使用到了 RFC9601 标准。
+
+* JSON 补丁在网络传输时有特定的内容类型(Content-Type)：`application/json-patch+json`
+
+  > 你没看错是 `json-patch+json` 不是 `json-patch-json`
+
+
+
+<br>
+
+**JSON补丁中的操作关键词：**
+
+* "test"：测试某个值是否符合预期
+* "add"：增加
+* "remove"：删除
+* "replace"：替换，即修改
+* "move"：移动，实际上相当于 属性重命名
+* "copy"：复制
+
+
+
+<br>
+
+**JSON补丁的文档结构：**
+
+* JSON 补丁的内容为一个数组，数据包含若干条操作描述
+
+* 每一个操作描述的格式都是固定的，都由 `op、path、value、from` 属性组合而成
+
+  > 无论什么操作 "op"、"path" 这 2 个属性一定是存在的
+
+
+
+<br>
+
+**JSON补丁示例：**
+
+假定我们目前的 JSON 内容为：
+
+```
+{
+    "skill": [ "js","ts"],
+    "info":{ "age": 37, "name":"puxiao" }
+}
+```
+
+增加某个属性值：
+
+```
+[
+  { "op": "add", "path":"/me/info/gender", "value": "male"}
+]
+```
+
+
+
+<br>
+
+**代码释义：**
+
+* "op"：本次要进行的操作类型："test"、"add"、"remove"、"replace"、"move"、"copy"
+
+  > op 是单词 operation 的简写，operation 单词意思为 "操作、活动、运算"
+
+* "path"：定位，即本次要操作的属性节点
+
+  > `/me/info/gender` 向 "/me/info" 增加 "gender" 属性名
+
+* "value"：对应的值
+
+
+
+<br>
+
+**以此类推，大概也能看懂下面的操作含义了：**
+
+```
+[
+  { "op": "test", "path": "/me/skill/0", "value": "js" },
+  { "op": "remove", "path": "/me/skill/1" },
+  { "op": "add", "path":"/me/info/gender", "value": "male"}
+  { "op": "replace", "path": "/me/info/age", "value": 18 },
+  { "op": "move", "from": "/me/info", "path":"/me/about"},
+  { "op": "copy", "from": "/me/about", "path": "/me/aboutme"}
+]
+```
+
+上面操作命令依次为：
+
+1. 验证 "/me/skill" 第 0 项的值是否为 "js"，如果不是则直接抛出错误，并终止后续操作，并将本次补丁视为整体操作失败。
+2. 删除 "/me/skill" 第 1 项的值
+3. 向 "/me/info" 增加属性 "gender"，值为 "male"
+4. 将 "/me/info/age" 的值修改为 18
+5. 将之前的 "/me/info" 属性名 "info" 修改为 "about"，即 "/me/about"
+6. 将 "/me/about" 拷贝一份并命名为 "/me/aboutme"
+
+最终得到的 json 内容为：
+
+```
+{
+    "skill": [ "js" ],
+    "about": { "age": 18, "name":"puxiao", "gender":"male" },
+    "aboutme": { "age": 18, "name":"puxiao", "gender":"male" }
+}
+```
+
+
+
+<br>
+
+**补充说明：**
+
+"test" 通常用来验证 JSON 补丁是否符合预期规范。
+
+举个例子，假定 JSON 中存在一个属性：version(版本号) ，那么就可以通过 test 来判断版本号是否符合预期，不符合则不执行后续的补丁操作。
+
+
+
+<br>
+
+关于 JSON 指针 (JSON Pointer)、JSON 补丁(JSON Patch) 我们有一个基础了解就行。
+
+它俩仅仅是 immer 的一个背景知识，在 immer 内部已经帮我们做了相应处理，我们在实际使用 immer.js 时是无需过多关心它们的。
+
+
+
+<br>
+
+关于它俩的学习到此为止。
+
+
+
+<br>
+
+### immer.js 具体是靠什么实现的？
 
 未完待续
 
