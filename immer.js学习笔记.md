@@ -192,7 +192,7 @@ const todoList: TodoItem[] = [
 
 <br>
 
-**JSON指针 英文为 JSON Pointer，它遵循 RFC6901规范，使用字符串形式去查找定位 JSON 中某个节点属性值。**
+**JSON指针 英文为 JSON Pointer，它遵循 RFC6901 标准，使用字符串形式去查找定位 JSON 中某个节点属性值。**
 
 FRC6901标准详细规范：https://datatracker.ietf.org/doc/html/rfc6901
 
@@ -334,7 +334,7 @@ FRC6902标准详细规范：https://datatracker.ietf.org/doc/html/rfc6902
 
 **代码释义：**
 
-* "op"：本次要进行的操作类型："test"、"add"、"remove"、"replace"、"move"、"copy"
+* "op"：本次要进行的操作类型为 "add"(添加) ，除此该值还可是："test"、"remove"、"replace"、"move"、"copy"
 
   > op 是单词 operation 的简写，operation 单词意思为 "操作、活动、运算"
 
