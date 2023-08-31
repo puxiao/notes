@@ -1254,7 +1254,7 @@ const useLushStore = create((set,get)=>({
 
 <br>
 
-如果使用 immer 则代码可以改成：
+如果使用 immer.js 则代码可以改成：
 
 ```
 yarn add immer
