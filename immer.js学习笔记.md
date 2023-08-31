@@ -12,7 +12,9 @@
   * 柯里化
   * 在 react hooks 中使用 immer
 * immer.js 其他 API 用法
-* zustand 中间件 immer 用法
+* zustand 中使用 immer
+  * 使用原生的 immer.js
+  * 使用中间件 immer
 
 
 
@@ -1201,6 +1203,147 @@ applyPatches() 执行完后会返回 撤销或重做 后的数据状态结果。
 
 <br>
 
-## zustand 中间件 immer 用法
+## zustand 中使用 immer
 
-未完待续...
+
+
+<br>
+
+终于来到了最终的环节，在 zustand 中使用 immer 了。
+
+关于 zustand 可查阅我写的：[zustand学习笔记.md](https://github.com/puxiao/notes/blob/master/zustand%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.md)
+
+
+
+<br>
+
+在 zustand 中一共有 2 种使用 immer 的方法：
+
+1. 使用原生的 immer.js
+2. 使用 zustand 中间件 immer
+
+
+
+<br>
+
+### 使用原生的 immer.js
+
+<br>
+
+**我们利用原生 immer.js 中的 produce 来帮我们减少对象深层操作。**
+
+假设我们有这样一个数据状态：
+
+* 管理一个多层级数据状态：lush.forest.contains.a = 'bear'
+* 包含有一个 clearForest() 函数用于将 lush.forest.contains 设置为 null
+
+我们的代码可能如下：
+
+```
+const useLushStore = create((set,get)=>({
+    lush: { forest: { contains: { a: 'bear' } } },
+    clearForest: () => {
+        const lush = get().lush
+        lush.forest.contains = null
+        set(lush)
+    }
+}))
+```
+
+
+
+<br>
+
+如果使用 immer 则代码可以改成：
+
+```
+yarn add immer
+```
+
+```
+import { create } from 'zustand'
+import { produce } from 'immer'
+
+const useLushStore = create((set,get)=> ({
+    lush: { forest: { contains: { a: 'bear' } } },
+    clearForest: () => set( produce((state) => {
+        state.lush.forest.contains = null
+    }))
+}))
+```
+
+
+
+<br>
+
+可能这个例子似乎也没有特别体现出 immer.js 的好处。
+
+
+
+<br>
+
+### 使用中间件 immer
+
+上面讲了 zustand 使用原生 immer.js ，需要安装 immer.js、需要引入 produce、需要使用 set + produce 函数 来修改数据状态。
+
+为了精简上述代码，于是有了 zustand 中间件 immer。
+
+**没错 zustand 的中间件 immer 就是为了简化 zustand 使用原生 immer.js。**
+
+
+
+<br>
+
+**具体如何精简？**
+
+和 zustand 其他中间件一样，只需让中间件 immer 包裹住原本要定义的 (set)=>({ ... }) 即可。
+
+举个例子：
+
+```
+import { create } from 'zustand'
+import { immer } from 'zustand/middleware/immer'
+
+const useLushStore = create(immer((set,get)=> ({
+    lush: { forest: { contains: { a: 'bear' } } },
+    clearForest: () => set( (state) => {
+        state.lush.forest.contains = null
+    })
+})))
+```
+
+
+
+<br>
+
+**使用原生 immer.js  与 中间件 immer 的代码比较：**
+
+* 使用原生 immer.js 我们需要对每一次 set() 的内容使用 produce 进行包裹
+
+  > 上面示例中我们只有一个函数 clearForest()，实际中会有很多个修改函数，每一个修改函数我们都需要用到 set，都需要用到 produce 进行包裹
+
+* 而使用中间件 immer 只需在最外层对 (set) => ({ ... }) 进行包裹，至于内部每一次使用 set() 就和平常普通的没有任何区别
+
+  > 原理是中间件 immer 会对每一次使用 set() 进行劫持并使用 produce 函数
+
+
+
+<br>
+
+以上就是在 zustand 使用 immer 的用法。
+
+
+
+<br>
+
+**使用 immer.js 可能遭遇的陷阱：**
+
+实际中我们可能会遇到一些奇怪的问题，一些不符合你预期的事情，那么你就需要去看一下这篇文章。
+
+使用 immer 需要注意的陷阱问题：https://immerjs.github.io/immer/zh-CN/pitfalls/
+
+
+
+<br>
+
+本文到此结束。
