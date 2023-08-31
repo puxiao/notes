@@ -1470,7 +1470,9 @@ const useCurrentIndex = create<UseCurrentIndex>()(
 
   > immer NPM 仓库地址：https://github.com/immerjs/immer
   >
-  > immer 主要作用是处理 "不可变数据结构"，是针对 React 性能优化的一种方式，不过由于我自己并没有实际使用过 immer，所以这里不做过多讲解。
+  > immer 主要作用是处理 "不可变数据结构"，是针对复杂对象，属性层级比较深的对象修改的性能优化的一种方式
+  >
+  > 关于 immer 可查阅我写的： [immer.js学习笔记.md](https://github.com/puxiao/notes/blob/master/immer.js%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.md) ，讲解了 immer 背景知识、相关函数用法、以及 zustand 中如何使用 immer 中间件。
 
 * combine：单词字面意思为 "结合"，也就是说它可以将 2 个对象 "结合" 成一个对象。
 
@@ -1761,7 +1763,6 @@ https://github.com/reduxjs/redux-devtools/blob/main/extension/docs/API/Arguments
 
 <br>
 
-还有一个名为 `immer` 的中间件我目前还没用到过，所以暂时先不讲它了。
 
 关于中间件，就暂时讲到这里。
 
