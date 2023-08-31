@@ -140,6 +140,8 @@ const todoList: TodoItem[] = [
 
 上面那些面临的困境，则可以通过 immer "不可变数据结构" 思想来解决。
 
+特别说明：immer 也仅仅适用于一些简单的数据场景上的 撤销/重做，对于复杂的还依然需要靠 命令模式。
+
 
 
 <br>
@@ -404,6 +406,10 @@ FRC6902标准详细规范：https://datatracker.ietf.org/doc/html/rfc6902
 
 关于它俩的学习到此为止。
 
+**强调一点：JSON 补丁 仅仅是 immer.js 的一个背景知识，immer.js 所产生的补丁与 JSON 补丁还是有差异的！**
+
+主要体现在 path 值的具体形上，具体差异我们会在后面讲解 applyPatches 函数时提及。
+
 
 
 <br>
@@ -418,15 +424,15 @@ FRC6902标准详细规范：https://datatracker.ietf.org/doc/html/rfc6902
 
 immer：总是
 
-draft：草稿
+**draft**：草稿
 
-mutations：突变、变动
+**mutations**：突变、变动
 
-produce：生产
+**produce**：生产
 
 producer：生产者
 
-patch：补丁
+**patch**：补丁
 
 patches：补丁的复数
 
@@ -434,13 +440,17 @@ oriiginal：原始的、原来的
 
 cast：投掷、投射、转换
 
-immutable：不可变的
+**immutable**：不可变的
 
-freeze：冻结
+**freeze**：冻结
 
 freezing：冷冻中
 
+recipe：配方，在 immer 语境中是指 "具体的修改操作"
+
 strict：严格的
+
+**inverse**：相反的
 
 Map：在 JS 中 Map 应该翻译为 图
 
@@ -452,3 +462,731 @@ Set：在 JS 中 Set 应该翻译为 集
 
 **immer 运行基本流程：**
 
+* 先知道当前状态 currentState
+* 创建一份当前状态的代理者，准备充当草稿(draft)
+* 将所有的变更(mutations)应用在这份草稿(draft)中，得到 nextState
+* 至此，在保留之前状态 currentState 的前提下还得到了修改后的状态 nextState
+* 另外那个代理还有另外一个功能：禁止绕过 immer 直接修改状态属性，对数据状态进行一些保护
+
+简单来说就是：当前状态 -> 代理 + 草稿 -> 新状态
+
+你可以把 immer 想象成一个助理，他来帮你完成上述过程中的 记录当前状态、记录所有修改、草稿修订、重新誊抄 等实际细节工作。并且该助理还有文件保护意思，只听你的话，禁止其他人不通过你来偷偷修改手中的文件。
+
+
+
+<br>
+
+**immer.js 核心点就是：Object 的 freeze() 方法**
+
+因为上面的讲述中，保证 immer 可以按照预期工作的一个核心点是充当一个代理：
+
+* 保证数据状态不能被其他人私自修改，必须通过 immer 修改才可以
+* 将每一次修改(一次修改实际包含多条修改命令)通过代理应用到草稿之上
+
+而代理的核心 JS 实现方式就是 Object 的 freeze() 方法。
+
+freeze() 用法细节：
+
+https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze
+
+
+
+<br>
+
+我们也无需阅读 immer.js 源码，反正你只需知道大体实现技术点即可：补丁 + Object.freeze
+
+接下来开始学习 immer.js 的具体使用。
+
+
+
+<br>
+
+## immer.js 的基础用法
+
+
+
+<br>
+
+前面提过 immer.js 实际分为：
+
+* 针对原生 JS 的 immer.js
+* 针对 React hooks 的 use-immer
+* 针对 zustand 的中间件 immer
+
+我们先从 immer.js 开始讲起。
+
+
+
+### 安装immer.js
+
+<br>
+
+**NPM包安装：**
+
+```
+yarn add immer
+```
+
+> 当前 immer 最新版本为 10.0.2
+
+
+
+<br>
+
+或 CDN 引入方式：
+
+```
+<script src="https://unpkg.com/immer"></script>
+```
+
+
+
+<br>
+
+**有选择性得引入启用某些功能：**
+
+由于 immer.js 希望本身足够小，所以一些功能需要我们自己根据情况来决定是否引入并启用，这些功能分为：
+
+* 是否引入对 ES5 支持
+
+  > 这一项可以忽略，毕竟现在开发都只考虑现代浏览器，不需要考虑老旧版浏览器
+
+* 是否引入支持 Map 和 Set
+
+  > 如果你确定你的数据状态中使用了 Map 或 Set，那你就需要引入该项
+
+* 是否引入对 补丁的支持
+
+  > 如果你的数据状态可能需要做 历史记录/撤销/还原，那么你需要引入该项
+
+  > 注意：这里说的 补丁 是指 immer.js 的数据补丁，其思想和 JSON 补丁相同，但又略微有一点差异。
+
+
+
+<br>
+
+**引入启用代码：**
+
+首先我们需要知道：
+
+* 启用 ES5 对应的是：enableES5
+* 启用 Map 和 Set 对应的是：enableMapSet
+* 启用 补丁对应的是：enablePatches
+
+想要启用哪一项，就在 **整个项目的入口程序 js** 中 引入并执行相应函数。
+
+例如启用 Map 和 Set：
+
+```
+import { enableMapSet } from "immer"
+enableMapSet()
+```
+
+然后就可以在具体的 **子模块 js** 中的 immer 使用 Map 或 Set 了。
+
+在 immer.js 中操作的 Map 和 Set 会被天然视为外部不可操作、变更。
+
+假定不通过 immer 来去尝试 set()、clear() 等改变方法时会报错，抛出异常。 
+
+
+
+<br>
+
+**补充说明：**
+
+按照官方文档的说法，immer.js 本身才 3K，每启用一项体积增加 1K。
+
+换句话说就算把上述 3 项都启用也无非 5K 而已，作为前端项目几乎可以忽略的。
+
+
+
+<br>
+
+安装 immer.js 和启用某些功能模块已经知道了，那么接下来就开始真正学习用法。
+
+
+
+<br>
+
+### 最基础关键的函数：produce
+
+
+
+<br>
+
+**引入produce函数：**
+
+由于 immer 内部引入了 produce 函数，同时也将其作为 default 导出，所以下面 2 种引入方式都是可以的。
+
+```
+import produce from 'immer'
+```
+
+或者：
+
+```
+import { produce } from 'immer'
+```
+
+> 我个人更偏向使用这种形式
+
+
+
+<br>
+
+**使用produce函数：**
+
+```
+produce(
+    currentState, 
+    recipe: (draftState) => void, 
+    callback?: (patches, inversePatches)=> void
+): nextState
+```
+
+> 回顾一下之前学习的单词：
+>
+> produce(生产)、recipe(配方)、draft(草稿)
+
+
+
+<br>
+
+**produce函数释义：**
+
+* 第1个参数为 当前数据状态
+
+* 第2个参数为 recipe，直译是 配方，即本次 "修改的操作细节"，是一个箭头函数
+
+* 该箭头函数参数为 draftState(还未修改前的草稿)
+
+* 在该箭头函数内部可以将各种修改操作应用在 draftState 之上
+
+* 第3个参数为一个可选的回调参数，该回调参数中有 2 个回调参数
+
+  * patches：本次操作所对应的 补丁
+  * inversePatches：本次操作的恢复补丁，本次操作的相反操作
+
+  > 使用第 3 个参数的前提是你需要先启用 补丁
+  >
+  > 如果有需要，你可以在外部定义 2 个数组，用来存放每一次操作产生的补丁(patches)和恢复补丁(inversePatches)，以备将来 撤销/重做 使用。
+
+  > 关于第 3 个参数的详细用法，我们会在后面讲解 applyPatches 函数时演示，我们暂时先忽略第 3 个参数。
+
+* 最终 produce 函数最终返回一个修改过后的，新的 数据状态 nextState
+
+<br>
+
+
+
+<br>
+
+**关于draftState命名说明：**
+
+在上面的 produce 使用套路中我们将 recipe 的箭头函数参数名定义为 draftState，它只是一个参数名而已，你可以使用任何自己喜欢的变量名，例如直接写成 draft。
+
+但！我个人强烈不建议你使用 oldValue  或 oldState 这类词语作为变量名。
+
+因为该参数在箭头函数体内部，不仅仅表达 "之前的数据状态中已存在的属性操作"，它还可以表示 "那些原本不存在的属性"，所以如果使用 oldValue 或 oldState 会容易产生歧义。
+
+draft 所对应的 "草稿、草案" 含义更加贴切。
+
+> 在本文后面的代码中将继续使用 draft 或 draftState 来作为参数名
+
+
+
+<br>
+
+**但是在与 React 的 useState 结合使用时，draft 又与 oldState 确实含义很像。**
+
+
+
+<br>
+
+**produce基础示例：**
+
+```
+import { produce } from 'immer'
+
+const baseState = [
+    { id:1, title: 'learn js', done: true},
+    { id:2, title: 'learn immer', done: false }
+]
+
+const nextState = produce(baseState, draft => {
+    draft[1].done = true
+    draft.push( { id:3, title:'learn ts', done: false } )
+})
+```
+
+
+
+<br>
+
+### 使用柯里化来简化代码
+
+
+
+<br>
+
+**柯里化简介：**
+
+柯里化(currying) 是一种函数式编程技术，将一个带有多个参数的函数转化成一系列接受单一参数的函数。
+
+简单来说就是函数内部返回另外一个函数，作为下一次要执行的函数，去结合下一个参数，依次执行。
+
+这算是 JS 的一个基础知识，不做过多讲解。
+
+
+
+<br>
+
+**produce 柯里化示例：**
+
+还是之前的示例代码，假定我们定义一个专门用来将某个 id 的 done 设置相反的开关函数 toggleDone。
+
+```
+import { produce } from 'immer'
+
+const baseState = [
+    { id:1, title: 'learn js', done: true},
+    { id:2, title: 'learn immer', done: false }
+]
+
+const toggleDone = (state, id) => {
+    return produce(state, draft => {
+        const item = draft.find(item => item.id === id)
+        if(item){
+            item.done = !item.done
+        }
+    })
+}
+
+const nextState = toggleDone(baseState, 2)
+```
+
+> * toggleDone 接收 2 个参数：baseState 和 要修改的 id
+> * 在 toggleDone 内部会将这 2 个参数传递给 produce()
+> * 并将 produce() 的返回值作为作为自己的返回值返回出去
+> * 对外界而言，只需调用 toggleDone() 即可，简化了一些代码
+
+
+
+<br>
+
+上面中柯里化简化代码的形式，特别适用于仅执行某些特定(固定)操作。
+
+相当于是对 produce() 的一些封装。
+
+
+
+<br>
+
+### 在React hooks中使用 immer
+
+假定我们在 React  hooks 中使用 useState 来定义数据状态，结合 immer 的 produce 可以简化一些复杂对象的深度更新。
+
+举一个简单例子：
+
+```
+import { useState } from 'react'
+import { produce } from 'immer'
+
+const [todos, setTodos] = useState([
+    { id:1, title: 'learn js', done: true},
+    { id:2, title: 'learn immer', done: false }
+])
+
+...
+
+const handleXxx = () => {
+    setTodos( produce( draft => {
+        ...
+    }))
+}
+```
+
+
+
+<br>
+
+上面这样写没有一点问题，但是 immer 官方为我们提供了更加简化的写法：useImmer
+
+
+
+<br>
+
+**安装针对 react hooks 的 use-immer 包：**
+
+```
+yarn add use-immer
+```
+
+我们可以使用 useImmer 来替代 useState 以简化上述代码：
+
+```diff
+import { useState } from 'react'
+- import { produce } from 'immer'
++ import { useImmer } from 'use-immer'
+
+- const [todos, setTodos] = useState([
++ const [todos, setTodos] = useImmer([
+    { id:1, title: 'learn js', done: true},
+    { id:2, title: 'learn immer', done: false }
+])
+
+...
+
+const handleXxx = () => {
+-    setTodos( produce( draft => {
++    setTodos( draft => {
+        ...
+    }))
+}
+```
+
+
+
+<br>
+
+**我们可以看到：**
+
+* 直接使用 useImmer 代替 useState
+
+* 简化后的代码 setTodos 用法和之前使用 useState 回调函数那种更新方式颇有几分相似，只不过不需要在函数内部 return newState
+
+  > useState 回调函数方式更新的用法套路：setTodos( (oldValue) => { return newState } )
+
+
+
+<br>
+
+**另外一个平替函数：useImmerReducer**
+
+上面示例我们使用了 useImmer 去代替  useState，在 react hooks 中还有另外一个钩子函数 useReducer，它对应的 immer 代替函数是 useImmerReducer。
+
+useImmerReducer 实际上也只不过是 useReducer + produce 的一种简化函数。
+
+由于我个人实际项目中 useReducer 本身用的就不多，所以这里也不举例了。
+
+
+
+<br>
+
+好了，至此，我们已经对 immer.js 和 use-immer 已经有了最基础用法的学习。
+
+
+
+<br>
+
+## immer.js 其他API用法
+
+
+
+<br>
+
+前面虽然讲了很多，但实际就是一个简单的 produce()  函数用法。
+
+接下来开始学习 immer.js 中其他一些 API 的用法。
+
+
+
+<br>
+
+**immerable：用在自定义类(Class)中，用于标记该类的属性仅 immer 可操作变更**
+
+对于普通 Object对象、数组、Map 和 Set 天然就会被 immer 标记(视作) "杜绝外部直接修改，仅自己可操作"。
+
+> 提醒：对于 Map 和 Set 需要先在入口文件中引入并启用 enableMapSet
+
+<br>
+
+而对于自定义类(Class) 则需要我们手工去添加 immerable 属性作为标记。
+
+```
+import { immerable } from "immer"
+
+class Foo {
+    [immerable] = true //方式 1
+    
+    constructor(){
+        this[immerable] = true //方式 2
+    }
+}
+
+Foo[immerable] = true //方式 3
+```
+
+> 以上 3 种方式任选其一即可
+
+
+
+<br>
+
+**isDarft 与 isDraftable：**
+
+* isDarft：用于判断给定对象是否是 draft 对象
+* isDarftable：用于判断 immer.js 是否能将该对象变成 draft
+
+
+
+<br>
+
+**freeze(obj,deep?)：**
+
+immer.js 提供的冻结函数，用于冻结 darft 对象。
+
+默认情况下为浅冻结，即只冻结最外层属性，若第 2 个参数 为 true 则执行深层冻结。
+
+
+
+<br>
+
+**setAutoFreeze( boo:boolean )**
+
+上面我们说了 immer 会自动冻结一些对象，让外部不可以修改其属性值。
+
+但是假定你不想自动冻结，那么你可以通过 setAutoFreeze() 函数来显示控制是否可以自动冻结。
+
+```
+import { setAutoFreeze } frome 'immer'
+
+setAutoFreeze(false) //显示控制以后不再自动冻结了
+```
+
+
+
+<br>
+
+**nothing：一个特殊 undefine 的标记**
+
+我们先看下面的代码：
+
+```
+let state = { ... }
+prodcue(state, draft => { })
+```
+
+* 我们声明了一个变量 state，并且给他设置一些属性值
+* 正常情况下我们都使用 draft => {} 来对其进行一些修改操作
+
+我们知道在 draft => { } 函数中是不需要写返回值的，同时我们也知道 JS 中一个函数没有明确写返回值意味着默认会自动返回 undefine。
+
+上述本身是没有任何问题的，但是假定有一个特殊情况：我希望将 state 设置为 undefind 又该怎么实现呢？
+
+你当然不可以直接去设置 state = undefind，因为 state 已经被 immer 保护起来了，外部直接修改会报错误。
+
+在面对这种情况时，就用到了 nothing 了。
+
+```
+import { produce, nothing } from 'immer'
+
+let state = { ... }
+prodcue(state, draft => { return nothing })
+```
+
+由于 nothing 可以看做是 immer 一个 undefind 的特殊平替，那么 state 就被设置为 undefind 了。
+
+> 不过说实话暂时想不出什么场景需要这样搞。
+
+
+
+<br>
+
+**original 与 current**
+
+```
+import { current, original, produce } from 'immer'
+```
+
+正常情况下，我们的代码可能是这样的：
+
+```
+const newState = produce(draft => {
+    //各种针对 draft 的操作
+    ...
+})
+```
+
+假定上面代码中会对 draft 有 10 个操作，那么在某些场景，例如调试场景，我希望在执行完第 5 个操作后：
+
+* 我想得到在未做任何修改前的数据状态
+* 我想针对当前已修改 5 条操作后的数据状态做一个快照(备份)
+
+那么上面 2 个需求刚好对应 original 和 current 这 2 个函数：
+
+```
+const newState = produce(draft => {
+    //针对 draft 的前 5 个操作
+    ...
+    
+    const orig = original(draft) //未修改前的数据状态
+    const copy = current(draft) //当前已修改的数据状态的快照(备份)
+    
+    //继续后面针对 draft 的剩下 5 个操作
+    ...
+})
+```
+
+> 注意：上面定义的变量 orig 和 copy 都仅存在于箭头函数内部，他会随着垃圾回收而消亡。
+
+
+
+<br>
+
+**applyPatches：应用补丁**
+
+在之前讲解 produce() 函数时只是简单提了一下它的第 3 个参数。
+
+那么我们现在编写一个简单示例：
+
+```
+//首先需要在入口文件中启用 补丁
+import { enablePatches } from 'immer'
+enablePatches()
+
+
+//具体模块
+import { produce } from 'immer'
+
+...
+
+const changes = [] //定义一个数组，用来记录修改记录
+const inverseChanges = [] //定义一个数组，用来记录逆向的修改记录
+
+...
+
+let nowState = produce(
+    currentState, 
+    draft => { ... },
+    (patches, inversePatches) => {
+        changes.push(...patches)
+        inverseChanges.push(...inversePatches)
+    }
+)
+```
+
+> 注意我们在上面代码中使用的是 let，并且将新状态命名为 nowState，为什么这样做后面会看明白用意的。
+
+
+
+<br>
+
+**特别补充：**
+
+* patches 和 inversePatches 都是一个数组，每个元素都是一条修改描述
+* 上面的代码实际相当于把每一次修改涉及的 N 条修改描述展开后存放到对应数组里
+* 如果你强调 "每一次修改" 而不是 "每一条修改描述" ，那么你也可以不使用 ... 将其展开，而是直接将 patches 和 inversePatches存放起来，只不过你将来使用 applyPatches 时需要将其数组展开。
+
+
+
+<br>
+
+假定经过若干次数据状态修改，我们已经得到了 changes 和 inverseChanges 记录，那如何使用这些记录呢？
+
+答：就需要用到我们要学习的 applyPatches 函数了。
+
+
+
+<br>
+
+**applyPatches 函数的用法：**
+
+> 撤销：将之前记录的 inverseChanges 作为参数，以便恢复数据状态
+
+```
+nowState = applyPatches(nowState, inverseChanges)
+```
+
+
+
+<br>
+
+> 重做：根据之前记录的 changes 将数据状态重新执行一遍修改
+
+```
+nowState = applyPatches(nowState, changes)
+```
+
+
+
+<br>
+
+applyPatches() 执行完后会返回 撤销或重做 后的数据状态结果。
+
+这就是 applyPatches() 函数的用法。
+
+
+
+<br>
+
+**immer.js 在 produce 函数中第 3 个参数所返回的 补丁 不保证是最优的(最精简优化后的)。**
+
+
+
+<br>
+
+**关于 immer.js 所产生的 数据补丁 与 JSON 补丁的差异说明：**
+
+* immer.js 每一条补丁的 path 值并不像  JSON 补丁那样是字符串，而是一个数组，数组每一个元素对应一个关键节点名
+
+* 如果你想将 immer.js 中补丁的 path 转化成 JSON 补丁中的 path，直接用 "/" 符号拼接数组即可
+
+  ```
+  patch.path = patch.path.join("/")
+  ```
+
+差异仅此而已。
+
+
+
+<br>
+
+**produceWithPatches：针对 produce 和 获取补丁的简化函数**
+
+在上面讲解中，我们从 produce 函数的第 3 个参数中获取本次操作的补丁，immer.js 为我们提供了简化版。
+
+* 使用 produceWithPatches 函数来替代 produce 函数
+* produceWithPatches  函数的返回值为一个数组：[ nextState, patches, inversePatches ]
+
+额~ 实际上 produceWithPatches 函数只不过将原本 prodcue 的第 3 个参数中的值作为 返回值直接返回了。
+
+
+
+<br>
+
+**setUseStrictShallowCopy：**
+
+可用于启用严格的浅拷贝。 如果启用，immer 会尽可能多地拷贝不可枚举属性。
+
+具体这个函数也没使用过，所以暂时先忽略掉它。
+
+
+
+<br>
+
+**createDraft、finishDraft：**
+
+这是 2 个底层函数，它俩是给那些基于 immer.js 的第三方类库使用的。
+
+日常中我们使用不到，也不学习了。
+
+
+
+<br>
+
+至此，关于 immer.js 绝大多数 API 我们都学习了解了。
+
+就目前而言，对我们真正可能频繁使用到的无非以下几个：
+
+* 启用相关：enableES5、enableMapSet、enablePatches
+* 核心：produce、produceWithPatches、applyPatches
+* React hooks 相关的：useImmer、useImmerReduex
+
+
+
+<br>
+
+## zustand中间件immer
+
+未完待续...
