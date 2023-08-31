@@ -1,6 +1,7 @@
 ## 我的学习笔记
-前端技术栈：React/Electron/Next.js/Taro/Webpack/Vite/Husky/ESLint/TypeScript/Zustand  
+前端技术栈：React/Electron/Next.js/Taro/Webpack/Vite/Husky/ESLint/TypeScript  
 前端组件库：Echarts/Antd/Antd-Pro/Web Components/Material-UI  
+数据状态：Zustand/immer.js  
 3D相关：图形学、Three.js、GIS、Cesium.js、Blender  
 数据库：Mysql/MongoDB/IndexedDB  
 后端技术栈：Nodejs/Koa/Middleware/Redis/Nginx/Npm/Yarn/fnm  
