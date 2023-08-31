@@ -1,5 +1,19 @@
 # immer.js学习笔记
 
+**目录：**
+
+* immer.js 简介
+* immer 核心思想与背景知识
+  * JSON指针、JSON补丁
+  * immer.js 在 JS 中具体靠什么实现的
+* immer.js 的基本用法
+  * 安装、启用
+  * produce 函数
+  * 柯里化
+  * 在 react hooks 中使用 immer
+* immer.js 其他 API 用法
+* zustand 中间件 immer 用法
+
 
 
 <br>
@@ -1187,6 +1201,6 @@ applyPatches() 执行完后会返回 撤销或重做 后的数据状态结果。
 
 <br>
 
-## zustand中间件immer
+## zustand 中间件 immer 用法
 
 未完待续...
