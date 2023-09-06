@@ -623,21 +623,37 @@ vite [参数]
 ```
 
 * --host [host]：指定主机名称，默认仅为 'http://localhost' (不含局域网IP)，若设置为 true 或 '0.0.0.0' 表示本机全部网络 IP (含公网IP)
+
 * --port <port>：指点启用端口
+
 * --strictPort：明确若端口已被占用则直接退出，并不会尝试下一个可用端口
+
 * --open [path]：启动时自动打开浏览器，[path] 为指定打开的路径
+
 * --base <path>：公共基础路径，默认值为 '/'
 
-* --https：启用 TLS + HTTP/2
+* --https：启用 TLS + HTTP/2，注意：除添加 --https 参数外还需要配置 https 证书或者安装使用 `@vitejs/plugin-basic-ssl`
+
+  > 会在本文后面 "项目常见配置" 中讲解如何启用 https
+
 * --cors：启用 CORS
+
 * --force：忽略 node_modules/.vite 中的缓存，强制不使用缓存情况下重新构建
+
 * -c、--config <file>：使用指定的配置文件
+
 * -m、--mode <mode>：设置环境模式
+
 * -v、--version：显式版本号
+
 * -h、--help：显式可用的 CLI 选项
+
 * -d、--debug [feat]：现实调试日志
+
 * -f、--filter <filter>：过滤某些调试日志
+
 * -l、--logLevel <level>：显示哪种日志级别，info/warn/error/silent，默认值为 'info'
+
 * --clearScreen：允许或禁止清除日志屏幕
 
 
@@ -1076,6 +1092,41 @@ export default defineConfig({
 
 <br>
 
+### 启用https
+
+以下仅适用开发阶段的本地调试中启用  https：
+
+* 安装 `@vitejs/plugin-basic-ssl`，它会自动为我们生成调试阶段的 https 证书
+
+* 修改 vite.config.ts
+
+  ```diff
+  import { defineConfig } from 'vite'
+  import react from '@vitejs/plugin-react'
+  + import basicSsl from '@vitejs/plugin-basic-ssl'
+  
+  // https://vitejs.dev/config/
+  export default defineConfig({
+  -  plugins: [react()],
+  +  plugins: [react(), basicSsl()],
+  })
+  ```
+
+* 修改 package.json 中 "scripts"
+
+  ```diff
+  - "dev": "vite",
+  + "dev": "vite --https --host",
+  ```
+
+这样就可以在 react + vite 项目调试中启用 https 了。
+
+若等到正式发布，再配置正规的 https 证书。
+
+
+
+<br>
+
 ### 使用husky
 
 husky 是专门用来做代码 git 提交前的事件触发，可以在这个契机中进行代码相关检查或格式化，通过检查后才可以进行 git 代码提交，否则将拦截本次提交。
@@ -1400,4 +1451,3 @@ Vite 创建的 package.json 中是这样配置的：
 const jsonPath = path.join(__dirname, './public/version.json')
 console.log(jsonPath)
 ```
-
