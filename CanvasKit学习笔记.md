@@ -169,32 +169,76 @@ yarn add canvaskit-wasm
 
 <br>
 
-> 下面是基于 React 来 演示的
+> 下面是基于 React + Vite 来 演示的
 
 ```
 import { useEffect } from 'react'
-import InitCanvaskit from 'canvaskit-wasm'
+import CanvasKitInit from 'canvaskit-wasm'
+import './App.css'
 
 function App() {
 
     useEffect(() => {
-        InitCanvaskit({
-            locateFile: (file) => 'node_modules/canvaskit-wasm/bin' + file
+        CanvasKitInit({
+            locateFile: (file) => 'node_modules/canvaskit-wasm/bin/' + file,
         }).then((CanvasKit) => {
-            console.log(CanvasKit) //获取到了 CanvasKit
+            console.log(CanvasKit)
             //此处可以开始编写你的代码
         })
     }, [])
 
     return (
-        <div>
-
-        </div>
+        <div>hello</div>
     )
 }
 
 export default App
 ```
+
+
+
+<br>
+
+**特别提醒：.wasm 必须运行在 https 中**
+
+由于 .wasm 必须运行在 https 中，所以我们直接在 react + vite 本地调试时，一定启用要 https 才可以。
+
+以下仅适用开发阶段的本地调试：
+
+* 安装 `@vitejs/plugin-basic-ssl`，它会自动为我们生成调试阶段的 https 证书
+
+* 修改 vite.config.ts
+
+  ```diff
+  import { defineConfig } from 'vite'
+  import react from '@vitejs/plugin-react'
+  + import basicSsl from '@vitejs/plugin-basic-ssl'
+  
+  // https://vitejs.dev/config/
+  export default defineConfig({
+  -  plugins: [react()],
+  +  plugins: [react(), basicSsl()],
+  })
+  ```
+
+* 修改 package.json 中 "scripts"
+
+  ```diff
+  - "dev": "vite",
+  + "dev": "vite --https --host",
+  ```
+
+这样就可以在 react + vite 项目调试中启用 https，运行 CanvasKit 了。
+
+若等到正式发布，再配置正规的 https 证书。
+
+
+
+<br>
+
+以上是以  React + Vite 来说如何启用 https 的，若是其他框架则自行查找启动 https 调试方式。
+
+> 当你用过 Vite 后就再也不想用 Webpack 了。
 
 
 
