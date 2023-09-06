@@ -1433,7 +1433,7 @@ Vite 创建的 package.json 中是这样配置的：
 * 首先为了有 node.js 语法提示，我们先推荐安装 node.js 的类型提示
 
   ```
-  yarn @types/node --dev
+  yarn add @types/node --dev
   ```
 
   > 上面代码默认安装的是最新版 node.js 的类型包，你可根据自己的 node.js 版本有选择性的安装对应版本
