@@ -28,7 +28,7 @@ wasm 是 WebAssembly 的简称，可以将高级语言 例如 C/C++/Rust... 编�
 
 <br>
 
-**于是当 Skia 与 wasm 结合，就产生了 CanvasKit。**
+**当 Skia 与 wasm 结合，就产生了 CanvasKit。**
 
 
 
@@ -116,7 +116,7 @@ CanvasKit 是由以下 2 个文件构成的：
 
 <br>
 
-本文中所说的 "CanvasKit" 暗指：canvaskit.wasm 和 canvaskit.js  这 2 个文件
+本文中所说的 "安装和引入CanvasKit" 暗指：canvaskit.wasm 和 canvaskit.js  这 2 个文件
 
 
 
