@@ -1094,7 +1094,9 @@ export default defineConfig({
 
 ### 启用https
 
-以下仅适用开发阶段的本地调试中启用  https：
+以下仅适用开发阶段的本地调试中启用  https。
+
+**第1种方式：使用第三方插件生成 https 证书：**
 
 * 安装 `@vitejs/plugin-basic-ssl`，它会自动为我们生成调试阶段的 https 证书
 
@@ -1122,6 +1124,21 @@ export default defineConfig({
 这样就可以在 react + vite 项目调试中启用 https 了。
 
 若等到正式发布，再配置正规的 https 证书。
+
+
+
+<br>
+
+**第2种方式：使用自有的 https 证书**
+
+假设我们自己通过某些程序(例如 `mkcert` )自己生成得到了 https 证书，那么我们可以不是用上面第三方插件 `@vitejs/plugin-basic-ssl`，而是通过配置 node.js 创建 https 服务的配置项，通过 fs 加载自己的证书文件。
+
+> https.createServer：https://nodejs.org/api/https.html#https_https_createserver_options_requestlistener
+
+这里要说明的是：
+
+* 对于 vite 项目开发调试过程而言，是没有必要在意是不是正规 https 证书的，因此推荐使用第 1 种方式使用第三方插件生成即可
+* 如果使用自有证书，涉及 fs 文件读取，我们先不讲如何实现，等到本文后面提到 "执行 node.js 文件所需要的改动" 后再说
 
 
 
@@ -1451,3 +1468,42 @@ Vite 创建的 package.json 中是这样配置的：
 const jsonPath = path.join(__dirname, './public/version.json')
 console.log(jsonPath)
 ```
+
+
+
+<br>
+
+### 使用自有的 https 证书
+
+我们开发调试阶段想启用 https 直接用第三方插件 `@vitejs/plugin-basic-ssl` 是最简单的方式了。
+
+如果你真的想使用自有 https 证书，那么可以按照下面方式配置。
+
+> 首先假定我们已经按照上面了解了如何在 vite 中改造使用 node.js
+
+修改 vite.config.ts，我们不再只是简单得把 server.https 设置为 true，而是给他设置成 node.js 中 https.createServer 的配置项 ：
+
+```diff
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
++ import fs from 'fs'
++ import path from 'path'
++ import { fileURLToPath } from 'url'
++ const __filename = fileURLToPath(import.meta.url)
++ const __dirname = path.dirname(__filename)
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [react()],
++  server: {
++    https: {
++      key: fs.readFileSync(path.join(__dirname, '/xx/key.pem')),
++      cert: fs.readFileSync(path.join(__dirname, '/xx/cert.pem'))
++    }
+  }
+})
+```
+
+> 补充：可以使用 `mkcert` 工具来生成本地 https 证书
+
