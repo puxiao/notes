@@ -16,6 +16,8 @@
 
 想学 Rust 个人推荐去看：https://course.rs/ (目前我认为最好的中文 Rust 教程)
 
+当然这个教程毕竟有点年头了，所有一些地方讲述的有点过时，但是你可以先看看每一篇下面的评论，因为过时或者补充的内容都在评论里。
+
 
 
 <br>
@@ -45,7 +47,7 @@
 * 工作负荷：仅勾选 `使用 c++ 的桌面开发` 即可
 
   > 联网需下载 1.7G 安装包( Visual Studio 生成工具 2022)
-  
+
 * 安装完成后，重启电脑
 
 **添加系统环境变量：将 msvc 路径添加到系统环境变量的 PATH 中**
@@ -58,7 +60,7 @@ D:\program files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.
 
 <br>
 
-**特别强调：在 rust 1.25.0 之前确实需要上面的第1步，用户先自己安装 C++ 环境，但是当 rust 1.25.0 版本以后如果你电脑上没有安装 C++ 环境，那么你可以选择忽略跳过上面的第1步，在 rust 安装过程中程序会自动下载安装 Visual Studio 2022。**
+**特别强调：在 rust 1.25.0 之前确实需要上面的第 1 步，用户先自己安装 C++ 环境，但是当 rust 1.25.0 版本以后如果你电脑上没有安装 C++ 环境，那么你可以选择忽略跳过上面的第1步，在 rust 安装过程中程序会自动下载安装 Visual Studio 2022。**
 
 **但我个人建议还是我们自己手工安装比较好。**
 
@@ -75,14 +77,14 @@ D:\program files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.
 ```
 The Cargo home directory is located at:
 
-  C:\Users\晓\.cargo
+  C:\Users\xxx-your-name\.cargo
 
 This can be modified with the CARGO_HOME environment variable.
 
 The cargo, rustc, rustup and other commands will be added to
 Cargo's bin directory, located at:
 
-  C:\Users\晓\.cargo\bin
+  C:\Users\xxx-your-name\.cargo\bin
 
 This path will then be added to your PATH environment variable by
 modifying the HKEY_CURRENT_USER/Environment/PATH registry key.
