@@ -8,7 +8,7 @@
 
 作为一名前端开发者，我学习 Rust 主要是为了将来可以学习、编写 WASM。
 
-**本学习笔记将不于以往的某某学习笔记，不会讲得连贯细致**，因为本笔记纯粹是自己在学习 Rust 时为了加深记忆所额外写的碎片化知识点。
+本笔记是自己在学习 Rust 时为了加深记忆所写的碎片化知识点。
 
 
 
@@ -267,6 +267,24 @@ rustup self uninstall
 
 <br>
 
+如果你不使用 `rustup-init.exe` 安装 Rust，那可以从上面第 2 步开始可以直接改为下面方式安装。
+
+**修改安装请求下载地址并使用命令方式安装 Rust：**
+
+具体直接查看：https://rsproxy.cn/#getStarted 即可
+
+> rsproxy.cn 是字节跳动创建的 Rust 国内镜像安装源，提供 Rust 和 Cargo 依赖包 镜像下载服务。
+
+
+
+<br>
+
+至此，无论你采用 `rustup-init.exe` 还是 rsproxy.cn 上推荐的命令安装，Rust 开发环境安装完成。
+
+
+
+<br>
+
 ### 配置 VSCode
 
 **在 VSCode 中安装插件：rust-analyzer**
@@ -282,9 +300,14 @@ rustup self uninstall
 下面这几个插件并不是必须的，也不是 rust 专属的，而是日常我们开发中(包括前端项目)都非常有用的。
 
 * Error Lens：错图信息提示相关
+
 * One Dark Pro：主题相关
+
 * CodeLLDB：调试相关
-* Even Better TOML：Rust .toml 文件相关
+
+* Even Better TOML：Cargo.toml 文件相关
+
+  > Rust 项目中的 Cargo.toml 文件相当前端项目中的 package.json 文件
 
 
 
@@ -296,6 +319,657 @@ rustup self uninstall
 
 <br>
 
-### 编写第一个 rust 程序：hello world
+### Rust项目常用命令：新建(new)、运行(run)、构建(build)、检查(check)
+
+**Cargo：Rust 包管理工具，相当于前端项目中的 Yarn**
+
+
+
+<br>
+
+**cargo 与 rustc 的关系**
+
+rustc 即 rustc.exe，它是 rust 原始方式编译 .rs 文件为可执行的二进制文件。
+
+但实际中我们一个 Rust 项目会包含多个我们自己编写的 .rs 文件，并且还有安装别人写好的依赖包，那么如果开发者直接使用 rustc 进行逐个编译会非常复杂。
+
+而 cargo，即 cargo.exe 则可以承担 Rust 项目整体代码 (自己写的 .rs 代码 + 第三方依赖包 rust 代码) 的编译。
+
+cargo 内部会调用 rustc 来编译各个 .rs 文件，对于我们开发者而言省事省心。
+
+
+
+<br>
+
+所以，我们接下来的所有命令都是基于 cargo 开头的。
+
+
+
+<br>
+
+**新建Rust项目：**
+
+假设我们要创建一个 hello_world 的项目，则命令如下：
+
+```
+cargo new hello_world
+```
+
+项目创建完成，我们得到下面的目录结构：
+
+```
+src/
+  main.rs
+target
+  debug/
+  .rustc_inof.json
+  CACHEDIR.TAG
+.gitignore
+Cargo.lock
+Cargo.toml
+```
+
+
+
+<br>
+
+**Rust目录结构**：
+
+* 默认源码存放在 src 目录下，当前仅默认入口文件 main.rs
+
+  > main.rs 中默认存在一个 main 的入口函数
+
+  ```
+  fn main() {
+      println!("Hello, world!");
+  }
+  ```
+
+* target 目录相当于前端项目中的 build 或 dist 目录
+
+* 自动会创建 git，并且 .gitignore 文件中会忽略 target 目录
+
+* 项目根目录下的 Cargo.toml 相当于前端项目中的 package.json，用来描述项目信息，以及将来可能需要的依赖包
+
+  * [package]：项目描述信息，项目名、默认版本号、编译包版本号(edition)
+  * [dependencies]：项目依赖信息
+
+* Cargo.lock 自然相当于 yarn.lock 这样的文件，相当于锁定依赖包版本
+
+
+
+<br>
+
+**编译包版本号(edition)的说明：**
+
+首先说明一下 Rust 版本大约每 6 周发布一次，但是 Rust 编译包是 2 - 3 年发布一次。
+
+目前 Rust 编译包版本号分别是：2015、2018、2021
+
+所以在 Cargo.toml 中目前默认使用的 edition 值为最新的 2021。
+
+
+
+<br>
+
+**运行Rust项目：**
+
+由于我们默认创建的项目入口代码 main.rs 中的入口函数 main() 已经自动被创建好，所以我们可以直接在命令中输入：
+
+```
+cargo run
+```
+
+运行结果：
+
+```
+   Compiling hello_world v0.1.0 (F:\rust\hello_world)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.98s
+     Running `target\debug\hello_world.exe`
+Hello, world!
+```
+
+上面 4 行输入结果信息依次表达的信息是：
+
+* 开始编译(compiling) hello_world
+* 完成 dev [unoptimized + debuginfo] 目标编译，用时 0.98s
+* 运行 `target\debug\hello_world.exe`
+* 输出执行结果：Hello, world!
+
+
+
+<br>
+
+**关于 dev [unoptimized + debuginfo] 的说明：**
+
+在我们通过 `cargo run` 运行 rust 项目时，输出信息中包含 `dev [unoptimized + debuginfo]` 信息。
+
+它的意思是说：当前编译运行的是 dev 开发调试版本：
+
+* unoptimized：未做编译优化
+* debuginfo：包含 debug 信息
+
+并且最终编译产物存放位置：target\debug\hello_world.exe
+
+
+
+<br>
+
+**参数 --release：**
+
+如果我们把运行命令中添加 `--release` 参数：
+
+```
+cargo run --release
+```
+
+那么这次运行得到的信息与之前不同之处：
+
+```diff
+   Compiling hello_world v0.1.0 (F:\rust\hello_world)
+-    Finished dev [unoptimized + debuginfo] target(s) in 0.98s
++    Finished release [optimized] target(s) in 1.31s
+
+-    Running `target\debug\hello_world.exe`
++    Running `target\release\hello_world.exe` 
+
+Hello, world!
+```
+
+
+
+<br>
+
+**区别之处：**
+
+```diff
+-    Finished dev [unoptimized + debuginfo] target(s) in 0.98s
++    Finished release [optimized] target(s) in 1.31s
+```
+
+* 完成的结果不同，之前是 dev，而这次是 release
+* 之前 dev 时是 [unoptimized + debuginfo]，即 `未做编译优化 + debug调试信息`，而现在的是 [optimized] 即 `已做编译优化`
+* 之前 dev 编译所需时间 0.98s，而现在 release 编译所需时间 1.31s
+
+
+
+<br>
+
+```diff
+-    Running `target\debug\hello_world.exe`
++    Running `target\release\hello_world.exe` 
+```
+
+* 之前 dev 时产物保存在 target\debug\ 目录，而现在 release 时产物保存在 target\release\ 目录中
+
+
+
+<br>
+
+简单来说：
+
+* dev 未做编译优化，且包含 debug 调试信息，编译所需时间较短
+* release 做了编译优化，但不再包含 debug 调试信息，编译所需时间较长
+
+所以对于日常调试来说，不需要添加 --release 参数，直接 cargo run 是最合适的。
+
+
+
+<br>
+
+**构建Rust项目：**
+
+开发 Rust 项目过程中我们不断使用 cargo run 来做调试，当项目开发完成后，则需要构建项目。
+
+```
+cargo build
+```
+
+执行上述命令后，会看到输出信息：
+
+```
+Finished dev [unoptimized + debuginfo] target(s) in 0.06s
+```
+
+
+
+<br>
+
+也可以加入 --release 参数：
+
+```
+cargo build --release
+```
+
+得到执行输出信息：
+
+```
+Finished release [optimized] target(s) in 0.04s
+```
+
+
+
+<br>
+
+**运行与构建命令的区别：**
+
+简单来说 运行(cargo run) 相当于：
+
+* 先执行构建
+* 再直接运行构建产物
+
+而 构建(cargo build) 仅执行构建，构建完成后并不会运行构建产物。
+
+
+
+<br>
+
+**运行与构建命令的相同之处：**
+
+这两个命令都可以添加 --release 参数。
+
+但是他们在 dev 和 release 所需时间却不相同：
+
+* `cargo run --release` 中 dev 要比 release 所需时间更快
+* `cargo build --release` 中 dev 要比 release 所需时间更久
+
+
+
+<br>
+
+简而言之：
+
+* 在运行模式下 dev 要比 release 更快
+* 在构建模式下 dev 要比 release 更慢
+
+
+
+<br>
+
+**特别补充：**
+
+**由于我们目前的 Rust 项目并没有安装任何依赖包，所以运行和构面时都没有对于依赖包的安装和检查。**
+
+> 当前项目中 Cargo.toml 中的 [dependencies] 下面没有任何内容
+
+如果后面我们安装了某个依赖包，那么运行和构建时还会针对依赖包进行下载和检查。
+
+
+
+<br>
+
+**检查项目是否可以通过编译：**
+
+无论在运行模式 还是 构建模式下，都需要先打包(构建)一遍项目。
+
+但是随着项目越来越复杂，每一次运行或构建都需要比较久的时间，如果我并不需要运行或构建，我只是想知道当前代码是否正确，即是否可以通过编译，那么可以使用下面命令：
+
+```
+cargo check
+```
+
+同样也支持添加 --release 参数
+
+```
+cargo check --release
+```
+
+ 
+
+<br>
+
+`cargo check` 仅仅检查当前项目代码是否可以通过编译，而并不会真正去执行编译，所以所需时间相对比较短。
+
+对于复杂项目而言，这个在编写代码过程中也非常有用。
+
+
+
+<br>
+
+**Rust中有没有热更新？**
+
+就像前端项目那样，当我修改项目代码，浏览器调试页面中会自动根据代码变动更新页面。
+
+就目前而言是没有 官方出的 Rust 热更新框架的。
+
+只有一些个人通过某些 奇淫技巧 实现的热更新，例如：https://github.com/rksm/hot-lib-reloader-rs
+
+
+
+<br>
+
+好了，关于 Rust 项目 Cargo 一些基础命令讲解完毕。
+
+
+
+<br>
+
+### cargo的全部命令
+
+如果你想了解 cargo 的全部命令，可访问官方文档：https://doc.rust-lang.org/cargo/commands/index.html
+
+大体上可以分为：
+
+* 常规相关命令，例如
+  * cargo：查看 cargo 帮助信息，等同于 cargo help
+  * cargo help：查看 cargo 帮助信息
+  * cargo version：查看 cargo 版本
+
+* 生成相关命令，例如
+  * cargo run：构建并运行
+  * cargo build：构建
+  * cargo check：检查是否可通过编译
+  * cargo test：运行单元测试
+  * cargo doc：自动生成文档
+  * ....
+* 声明相关命令，例如我们接下来就要学习的安装依赖包
+  * cargo add：安装依赖包
+  * cargo remove：删除依赖包
+  * cargo tree：输出树状结构
+  * cargo update：更新
+  * ...
+* 项目相关命令，例如
+  * cargo new：新建项目
+  * cargo install：构建并安装一个 Rust 二进制文件
+  * cargo uninstall：删除一个 Rust 二进制文件
+  * cargo search：在 crates.io 上搜索某个依赖包
+  * ...
+* 发布相关命令，即发布自己的依赖包到 crates.io 上
+  * cargo login：登录
+  * cargo logout：登出
+  * cargo owner：当前登录者信息
+  * cargo publish：发布
+  * ...
+
+
+
+<br>
+
+至此，我们对学习 Rust 已经有一个较为清晰的方向：
+
+* 第1阶段：先学习 cargo 相关命令，让我们可以了解如何创建、运行、构建 Rust 项目
+* 第2阶段：才真正进入 Rust 语法学习
+
+
+
+<br>
+
+接下来，我们学习一下 cargo 安装和删除依赖包。
+
+
+
+<br>
+
+### Rust依赖包：安装(add)与删除(remove)
+
+
+
+<br>
+
+**依赖包官方网址：https://crates.io/**
+
+这个就像前端 NPM 依赖包官网：https://www.npmjs.com/ 一样，是官方默认的依赖包平台。
+
+我们可以 查找发布依赖包、注册会员、发布自己的依赖包。
+
+
+
+<br>
+
+> 单词 crate 意思是 "大木箱"，crates 是它的复数形式。
+>
+> 而我们刚才运行项目使用的 cargo 单词本意为 "货物"。
+
+
+
+<br>
+
+**安装依赖包：**
+
+假定我们现在要安装一个和时间有关的依赖包，包名叫：time
+
+那么安装该依赖包的命令为：
+
+```
+cargo add time
+```
+
+执行完成后，我们再去看 Cargo.toml 文件，就会发现：
+
+```diff
+  [dependencies]
++ time = "0.3.28"
+```
+
+> 依赖包中就新增加了一条依赖包记录：`time = "0.3.28"`
+>
+> 即安装了 time 这个包最新版本 0.3.28
+
+
+
+<br>
+
+**但是请注意，cargo add 命令仅仅是将我们需要安装的依赖包信息添加到 Cargo.toml 中，此时并不会自动取下载该依赖包文件。**
+
+
+
+<br>
+
+**只有当我们去执行 cargo run 或 cargo build 时才会真正去下载刚才安装的依赖包。**
+
+例如我们刚才添加了 time 依赖包，那么此时去执行 `cargo run`，会得到下面输出信息：
+
+```
+...
+Downloaded time v0.3.28
+...
+```
+
+> 下载 time 依赖包，以及 time 所依赖的其他依赖包
+
+
+
+<br>
+
+**已下载的依赖包文件会被存放到  registry/ 中**。
+
+> 我之前安装 rust 时已配置 "CARGO_HOME" 环境变量，指向 "D:\rust\cargo"，那么 registry 目录实际位于 "D:\rust\cargo\registry"
+
+在 registry 目录下存在 3 个目录：
+
+* cache：依赖包编译后的缓存
+
+  > 这些缓存文件利于我们反复使用依赖包，不需要每一次都去编译一遍依赖包源码
+
+* index：依赖包索引
+
+* src：依赖包源码
+
+
+
+<br>
+
+这 3 个目录中都存在一个名为  "index.crates.io-xxxxxx" 的目录，目录名中的 `index.crates.io` 表示我们这些依赖是从 crates.io 上下载的。
+
+若将来修改其他 cargo 的安装镜像源，则会新创建对应的目录名。
+
+> 如何修改安装依赖镜像源，我们会在稍后讲解。
+
+
+
+<br>
+
+**当我们后面再次执行 cargo run 时，由于之前已经下载过 time 这个依赖包文件，所以就不需要再下载一次 time 依赖包了。**
+
+假设别的项目以后也用到了 time 这个依赖包，并且 time 版本号还相同，则也不需要重新下载了。
+
+
+
+<br>
+
+**卸载依赖包：**
+
+例如卸载 time 这个依赖包，对应命令为：
+
+```
+cargo remove time
+```
+
+执行完成后 Cargo.toml 的依赖中就没有 time 这条记录了。
+
+
+
+<br>
+
+假设执行 cargo remove 后发现当前项目没有任何依赖包，那么 Cargo.toml 中甚至连 `[dependencies]` 这条属性名都会被删除。
+
+不过不用担心，当你下次安装某个依赖包时，`[dependencies]` 如果不存在则会自动添加上的。
+
+
+
+<br>
+
+**修改依赖包安装源：**
+
+作为前端开发我们都知道如果直接从 NPM 官方下载依赖包会比较慢，通常我们会修改成 淘宝镜像源。
+
+```
+//查看当前 npm 安装源
+yarn config get registry
+
+//修改 npm 安装源
+yarn config set registry https://registry.npm.taobao.org
+
+//切换回 默认的 官方安装源
+yarn config set registry https://registry.yarnpkg.com
+```
+
+
+
+<br>
+
+同理，Rust 项目如果从官方默认的 crates.io 上下载依赖包 也会比较慢，我们也需要切换成国内的安装源。
+
+这就需要我们修改 config.toml 文件。
+
+
+
+<br>
+
+**关于config.toml文件的说明：**
+
+* config.toml 是 Rust 配置项文件
+* config.toml 中有众多配置项，例如 环境变量、依赖安装源 等等
+* 关于 config.toml 的全部配置项，可查阅官方文档：https://doc.rust-lang.org/cargo/reference/config.html
+* 对于我们本小节而言，我们先只学习 如何修改 依赖安装源
+
+
+
+<br>
+
+**config.toml文件存放位置：**
+
+* 如果只针对当前项目，在项目根目录创建 config.toml 即可
+
+  > 如果没有该文件则手工创建
+
+* 如果针对全局，则存放位置为 `$CARGO_HOME/config.toml`
+
+  > 如果没有该文件则手工创建
+
+
+
+<br>
+
+实际上配置文件可以省去文件后缀 .toml，即 `config`，里面的配置项内容和格式不变，也是可以被 cargo 识别的。
+
+> 个人推荐增加文件后缀名
+
+
+
+<br>
+
+**配置项的合并与优先级：**
+
+如果当前项目和全局都存在 config.toml，那么会对 `当前项目配置文件与全局配置文件` 进行合并。
+
+若存在相同的配置项，则当前项目的配置优先级高。
+
+
+
+<br>
+
+**好了，回到我们修改修改安装源这个话题上。**
+
+
+
+<br>
+
+官方的安装源为：https://github.com/rust-lang/crates.io-index
+
+<br>
+
+**国内镜像源一览：**
+
+* 中国科技大学镜像源：git://mirrors.ustc.edu.cn/crates.io-index
+* 清华大学镜像源：https://mirrors.tuna.tsinghua.edu.cn/git/crates.io-index.git
+* 字节跳动镜像源：https://rsproxy.cn/crates.io-index (强烈推荐)
+
+
+
+我们选择直接在 全局配置文件中 修改安装源。
+
+* 第1步：打开全局配置文件 config.toml
+
+  > 若不存在自己创建
+  >
+  > 对于我电脑而言 文件位于：D:\rust\cargo\config.toml
+
+* 第2步：添加下面的内容
+
+  ```
+  [source.crates-io]
+  replace-with = 'rsproxy-sparse'
+  [source.rsproxy]
+  registry = "https://rsproxy.cn/crates.io-index"
+  [source.rsproxy-sparse]
+  registry = "sparse+https://rsproxy.cn/index/"
+  [registries.rsproxy]
+  index = "https://rsproxy.cn/crates.io-index"
+  [net]
+  git-fetch-with-cli = true
+  ```
+
+> 修改配置后，为了确保生效，记得关闭并重新打开一次命令窗口。
+
+
+
+<br>
+
+**如何检查是不是镜像源生效了？**
+
+安装新依赖包时下载速度肯定特别快，那就证明我们启用国内镜像源成功了。
+
+也可以去 `$HOME\registry\index` 目录中查看，如果新安装过依赖包，那么会发现新增一个名为 `rsproxy.cn-xxxxxx` 的目录，已经证明我们新安装的依赖来源于 rsproxy.cn。
+
+
+
+<br>
+
+**恢复官方默认的镜像源：**
+
+当你不想使用国内镜像源了，那直接删除上面配置即可。
+
+
+
+<br>
+
+至此 Rust 开发环境、cargo 常用命令、修改成国内镜像源 都已经学习完成，可以开始真正 Rust 语法学习和实际代码编写了。
+
+
+
+<br>
+
+### Rust基础语法和概念
 
 未完待续...
