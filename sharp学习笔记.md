@@ -8,6 +8,14 @@ sharp 是基于 libvips 在 node.js 中使用的一个 NPM 包，用来做各种
 
 <br>
 
+"sharp" 单词本意是：尖锐的、锋利的、急剧的，骤然的(变化)
+
+名字想表达的是 **sharp 图片处理速度特别快！！！**
+
+
+
+<br>
+
 ### 安装sharp
 
 以下是基于 windows10 64位 操作系统而言的安装说明。
@@ -133,6 +141,7 @@ sharp(path.join(__dirname, 'aa.jpg'))
 
 
 <br>
+
 **示例2：旋转图片并另存为其他格式**
 
 > 读取当前目录下的 aa.jpg，旋转90度，并另存为 bb.png
@@ -252,7 +261,7 @@ if (data && info) {
 
 <br>
 
-接下来，我们需要再重新将 data、info 拼装成一个 PNG 图片并保持：
+接下来，我们需要再重新将 data、info 拼装成一个 PNG 图片并保存：
 
 ```
 const savePath = path.join(__dirname, 'out.png')
@@ -278,7 +287,7 @@ await sharp(new Uint8ClampedArray(data.buffer), { raw: info }).png().toFile(save
 
 那么我们只需将 示例4 与 示例5 结合即可。
 
-只不过我们这次直接使用处理后的水印的图片数据(而不是图片路径) 作为 composite 的 input 值。
+只不过我们这次直接使用处理后的水印的图片数据(不是图片路径) 作为 composite 的 input 值。
 
 ```
 const inputPath = path.join(__dirname, 'inut.jpg')
