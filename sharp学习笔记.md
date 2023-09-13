@@ -201,8 +201,8 @@ sharp(inputPath)
       {
           input: overlayPath,
           tile: false, //是否重复，默认值即 false
-          top: 0, //覆盖位置，若不填则默认水平居中
-          left: 0, //覆盖位置，若不填则默认垂直居中
+          top: 0, //覆盖位置，若不填则默认垂直居中
+          left: 0, //覆盖位置，若不填则默认水平居中
           blend: 'over' //混合方式，默认即 "over"
       }
   ])
