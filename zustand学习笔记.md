@@ -257,6 +257,14 @@ type Create = {
 
 <br>
 
+**特别提醒：在上面示例中我们都使用 create 函数来创建数据状态，在 zusatand 较新的版本中还有另外一个函数 createWithEqualityFn 也是用来创建数据状态的，在本文后面讲解 shallow 时会有详细讲解。**
+
+> 补充：createWithEqualityFn 函数只支持 React 18 版本
+
+
+
+<br>
+
 **读取并显示数据：**
 
 我们在 src/components/ 下创建一个自定义组件 user-info/index.tsx 用户展示用户信息
@@ -1210,15 +1218,25 @@ export default CurrentTodo
 import shallow from 'zustand/shallow'
 ```
 
-`shallow` 这个单词的含义为：肤浅的
+`shallow` 这个单词的含义为：肤浅的，在此处也就是对象值浅比较。
 
-`shallow` 是 zustand 为我们提供的一个函数，用于对 2 个对象值的 "浅对比"。
+zustand 默认使用的是 `Object.is` 这个对比函数，而 `shallow` 是 zustand 为我们提供的一个浅比较函数。
 
 
 
 <br>
 
 我们知道 React 中的 Diff 函数是索引加值对比，例如 {} 与 {} 虽然字面值相同，但是依然会被判定为 2 个不同的值(因为它们 2 个不属于同一个对象的引用)，而 浅对比 值判断字面值是否相同，若字面值相同即认为没有发生数据变化，因此也不需要重新渲染组件。
+
+
+
+<br>
+
+> 再说一遍，zustand 默认使用的是 Object.is 这个对比函数
+>
+> ```
+> Object.is({},{}) //false
+> ```
 
 
 
@@ -1243,6 +1261,46 @@ import shallow from 'zustand/shallow'
 <br>
 
 为了减少 A组件 和 B组件 无谓的重新渲染，我们可以使用 zustand 为我们提供的 shallow 函数了。
+
+
+
+<br>
+
+**重大更新变动：如果你想使用 shallow，那么在创建数据状态时不能再使用 create，而应该改为 createWithEqualityFun**
+
+再次补充一遍：createWithEqualityFn 函数只支持 React 18 版本
+
+
+
+<br>
+
+如果你使用 create 创建数据状态，但是却使用了 shallow，那么你会收到这样的警告信息：
+
+```
+[DEPRECATED] Use `createWithEqualityFn` instead of `create` or use `useStoreWithEqualityFn` instead of `useStore`. They can be imported from 'zustand/traditional'. https://github.com/pmndrs/zustand/discussions/1937
+```
+
+
+
+<br>
+
+**createWithEqualityFn用法：**
+
+```diff
+- import { create } from 'zustand'
++ import { createWithEqualityFn } from 'zustand/traditional'
+
+interface UseXxxData { ... }
+
+- const useXxxData = create<UseXxxData>()((set) => ({ ... }))
++ const useXxxData = createWithEqualityFn<UseXxxData>((set) => ({ ... }), Object.is)
+```
+
+
+
+<br>
+
+**使用shallow：**
 
  假定 A组件中之前获取 .a 数据字段的代码为：
 
