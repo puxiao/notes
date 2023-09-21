@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS实现文字描边</title>
+</head>
+<style>
+    .outlined-text {
+        color: #fff;
+        font-size: 24px;
+        -webkit-text-stroke: 1px #f00;
+        text-shadow:
+            -1px -1px 0 #f00,
+            1px -1px 0 #f00,
+            -1px 1px 0 #f00,
+            1px 1px 0 #f00;
+    }
+</style>
+
+<body>
+    <h1 class="outlined-text">这是带描边的文字</h1>
+</body>
+
+</html>
