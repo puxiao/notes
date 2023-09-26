@@ -14,7 +14,7 @@
 
 * vite与webpack 的目标不同之处
 
-* 创建初始化项目
+* 创建初始化 react 或 vue 项目
 
 * 使用TypeScript
 
@@ -60,7 +60,7 @@ vite 的目标就是构建适用于现代浏览器，根本不考虑旧版浏览
 
 <br>
 
-## 创建初始化项目
+## 创建初始化 react 或 vue 项目
 
 
 
@@ -80,7 +80,25 @@ vite 的目标就是构建适用于现代浏览器，根本不考虑旧版浏览
 
 
 
-**特别注意**：由于最新版 vite react-ts 模板中使用的 TypeScript 版本为 5+，因此需要比较新的 VSCode 才可以支持。
+<br>
+
+**创建一个 Vue 项目：**
+
+```
+//创建 Vue 项目
+yarn create vite xxx vue
+
+//创建 Vue + TypeScript 项目
+yarn create vite xxx --template vue-ts
+```
+
+
+
+<br>
+
+**针对 React + TypeScript 的注意事项：**
+
+由于最新版 vite react-ts 模板中使用的 TypeScript 版本为 5+，因此需要比较新的 VSCode 才可以支持。
 
 准确来说需要的是 VSCode 1.77 以上的版本才可以支持到 TS 5+，如果你的 VSCode 版本低于此版本，那么由于对 TS 5+ 的不支持，你会收到一些莫名其妙的错误警告，例如：
 
@@ -99,6 +117,49 @@ Module '"xxxx/node_modules/@types/react/index"' can only be default-imported usi
 > + "moduleResolution": "node",
 > - "allowImportingTsExtensions": true,
 > ```
+
+
+
+<br>
+
+**针对 Vue + TypeScript 的注意事项：**
+
+就目前阶段而言由于 TypeScript 默认并不能支持编译 .vue 文件，所以对于 Vue + TypeScript 项目而言必须修改 tsconfig.json
+
+```diff
+- "moduleResolution": "bundler",
++ "moduleResolution": "node",
+```
+
+
+
+<br>
+
+> 还有另外一种解决方案，不过并不特别推荐：
+>
+> 修改 vite-env.d.ts 添加下面代码
+>
+> ```
+> declare module "*.vue" {
+>   import { DefineComponent } from "vue"
+>   const component: DefineComponent<{}, {}, any>
+>   export default component
+> }
+> ```
+
+
+
+<br>
+
+**安装其他框架：**
+
+vite 除了 react 或 vue 外还支持其他众多框架，可以执行：
+
+```
+yarn create vite xxx
+```
+
+然后在候选框架中选择你要使用的框架。
 
 
 
@@ -1506,4 +1567,3 @@ export default defineConfig({
 ```
 
 > 补充：可以使用 `mkcert` 工具来生成本地 https 证书
-
