@@ -243,7 +243,9 @@ devtunnel list
 ```
 
 * 如果你本机存在有隧道，则会列出来它们
-* 如果你本机不存在任何隧道，则会显示 "Welcome to dev tunnels! ..." 相关信息
+* 如果你本机不存在任何隧道
+  * 第1次执行 devtunnel list 命令会显示 "Welcome to dev tunnels! ..."
+  * 以后执行 devtunnel list 命令会显示 "No tunnels found."
 
 
 
