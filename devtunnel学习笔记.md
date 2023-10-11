@@ -242,6 +242,9 @@ Ready to accept connections for tunnel: nj0q00v1
 devtunnel list
 ```
 
+* 如果你本机存在有隧道，则会列出来它们
+* 如果你本机不存在任何隧道，则会显示 "Welcome to dev tunnels! ..." 相关信息
+
 
 
 <br>
