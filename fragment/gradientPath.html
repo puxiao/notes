@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>渐变路径示例</title>
+    <script type="importmap">
+        {
+          "imports": {
+            "three": "https://unpkg.com/three@0.157.0/build/three.module.js"
+          }
+        }
+      </script>
+</head>
+
+<body>
+    <h3>特别说明：左侧和顶部会根据路径的实际位置留下空隙，但是右侧和底部会紧贴着图形进行裁切</h3>
+    <img id="gradientPath" />
+    <a href="https://github.com/puxiao" target="_blank"
+        style="display: block;margin-top: 18px;font-size: 18px;">代码作者：https://github.com/puxiao</a>
+    <script>
+        //第1部分：我们定义一些原始数据
+
+        /** 
+         * 在下面的注释中 "起始点" 是指路径最左侧的那个点：
+         * 1、若路径是从左向右，那么所谓 "起始点" 即 aPath 中第一个点
+         * 2、若路径是从右向左，那么所谓的 "起始点" 即 aPath 中最后一个点
+         * 
+         * 判断路径方向：aPath[0].x < aPath[aPath.length-1].x 则为从左向右，反之则路径为 从右向左
+        */
+
+        /** 
+         * 注意注意：
+         * 如果原始路径数据中存在下面情况：
+         * 1、若起始点的 x 为负数，我们记录该值为 offsetX，若不为负则 offsetX 为 0
+         * 2、若路径全部关键点中最小的 y 值为负数，我们记录该值为 offsetY，若都不为负则 offsetY 为 0
+         * 
+         * 若 offsetX 或 offsetY 为负，即不为 0 的情况时，将传递给图形绘制的将路径中所有点的 x,y 均加上 -offsetX 和 -offsetY
+         * 这样对于绘制来说，就不需要考虑路径为负这种情况了，可以简单放心的去绘制了
+         * 
+         * 等到拿到绘制结果后，可以根据 offsetX 和 offsetY 再针对绘制结果进行二次裁切调整，去掉为负不需要的那部分
+         * 这部分裁切工作由你们自己来实现吧
+         * 
+        */
+
+        //下面演示的路径坐标不存在为负这种情况
+
+        const aPath = [
+            {
+                "x": 38,
+                "y": 43
+            },
+            {
+                "x": 168,
+                "y": 61
+            },
+            {
+                "x": 243,
+                "y": 66
+            },
+            {
+                "x": 320,
+                "y": 57
+            },
+            {
+                "x": 403,
+                "y": 49
+            },
+            {
+                "x": 480,
+                "y": -11
+            },
+            {
+                "x": 579,
+                "y": -13
+            },
+            {
+                "x": 699,
+                "y": -13
+            },
+            {
+                "x": 801,
+                "y": 46
+            },
+            {
+                "x": 908,
+                "y": 53
+            },
+            {
+                "x": 1027,
+                "y": 61
+            },
+            {
+                "x": 1144,
+                "y": 56
+            },
+            {
+                "x": 1261,
+                "y": 36
+            }
+        ]
+
+        //渐变色数据
+        const gradientData = [
+            [0, '#602ce5'],
+            [0.3, '#2ce597'],
+            [0.5, '#e7bb18'],
+            [0.9, '#45c1ee'],
+            [1, '#2ce597']
+        ]
+
+        //定义路径的宽度
+        const lineWidth = 100
+
+        //我们定义平面的水平分段数量，暂定为 200，分段数越高曲线越平滑，但所耗性能越多
+        const segments = 200
+
+    </script>
+    <script type="module">
+        //第2部分：绘制核心代码
+
+        //前端开发者：杨普晓 https://github.com/puxiao
+
+        //引入我们所需要的 three.js 模块
+        import { Color, Mesh, MeshBasicMaterial, OrthographicCamera, Path, PlaneGeometry, RepeatWrapping, Scene, TextureLoader, Vector2, WebGLRenderer } from "three"
+
+
+        //---------- 下面是我们定义的几个重要函数 ----------
+
+        //创建纹理贴图图片
+        const createGradientPNG = (gradientData, height) => {
+            let canvas = document.createElement('canvas')
+            canvas.width = 1
+            canvas.height = lineWidth
+            const context = canvas.getContext('2d')
+            if (context === null) return
+            const gradient = context.createLinearGradient(0, 0, 1, height)
+            gradientData.forEach(item => {
+                gradient.addColorStop(item[0], item[1])
+            })
+            context.fillStyle = gradient
+            context.fillRect(0, 0, 1, height)
+
+            const pngSrc = canvas.toDataURL('image/png')
+
+            //执行一些销毁操作
+            canvas = undefined
+
+            return pngSrc
+        }
+
+        //绘制路径
+        const createPathByData = (pathData) => {
+            const path = new Path()
+            path.moveTo(pathData[0].x, pathData[0].y)
+            for (let i = 1; i < pathData.length; i += 3) {
+                path.bezierCurveTo(pathData[i].x, pathData[i].y, pathData[i + 1].x, pathData[i + 1].y, pathData[i + 2].x, pathData[i + 2].y)
+            }
+
+            return path
+        }
+
+        //获取路径的点和切线
+        const getPathPoints = (path, segments) => {
+
+            const points = []
+            const tangents = []
+            const total = segments + 1
+            for (let i = 0; i < total; i++) {
+                const t = i / segments
+                const point = path.getPointAt(t)
+                const tangent = path.getTangent(t)
+                points.push(point)
+                tangents.push(tangent)
+            }
+
+            const res = {
+                segments,
+                points,
+                tangents
+            }
+
+            return res
+
+        }
+
+        //绘制渐变路径的核心函数
+        const draw = (texture) => {
+            texture.wrapS = RepeatWrapping //水平方向重复
+            //texture.wrapT = RepeatWrapping //垂直方形不让重复
+            const material = new MeshBasicMaterial({ map: texture })
+
+            const pathData = aPath //我们给 aPtah 起一个别名
+
+            //创建路径
+            const path = createPathByData(pathData) //根据 pathData 得到曲线路径
+
+            //获取曲线的坐标信息
+            const pointsInfo = getPathPoints(path, segments)
+
+            //创建平面几何体
+            //由于我们创建的是水平方向的路径，需要对平面的各个分段上下挤压，因此水平分段数量设置为 segments，而垂直分段数量设置为  1
+            //请注意平面 顶部或底部 的顶点数量一定是 分段数(segment) + 1，也就是说平面顶点总数一定是 (segment+1) * 2
+            const planeGeometry = new PlaneGeometry(1, 1, segments, 1)
+            const position = planeGeometry.attributes.position
+            const count = segments + 1
+            for (let i = 0; i < count; i++) {
+                const point = pointsInfo.points[i]
+                const tangent = pointsInfo.tangents[i]
+
+                //假设以路径为中心向外扩展，则使用下面的代码
+                // tangent.multiplyScalar(lineWidth/2)
+                // position.setXY(i, point.x - tangent.y, point.y + tangent.x)
+                // position.setXY(i + count, point.x + tangent.y, point.y - tangent.x)
+
+                //假设以路径为顶端向下扩展，则使用下面的代码
+                tangent.multiplyScalar(lineWidth)
+                position.setXY(i, point.x, point.y)
+                position.setXY(i + count, point.x + tangent.y, point.y - tangent.x)
+            }
+
+            //计算包围盒
+            planeGeometry.computeBoundingBox()
+            const box3 = planeGeometry.boundingBox
+            if (box3 === null) {
+                console.error('computeBoundingBox: failed')
+                return
+            }
+
+            //请注意，这里我们假定的一个前提条件：路径的起始点坐标 x 一定是大于 0 的
+            const resultWidth = box3.max.x
+
+            /**
+             * 针对最终渲染图形宽度 resultHeight 的计算说明：
+             * 在 2D画布中起始点的 y 值是指距离顶部距离，而在 3D 中起始点 y 值是指距离底部的距离，
+             * 所以 pathData[0].y * 2 就是我们在 3D 场景中虚构出来的一个较大的矩形框
+             * 然后将这个 较大的矩形框 高度减去 包围盒的最小 y 值，就得到了我们最终需要(就好像在 2D 画布)中的那个矩形框
+             */
+            const resultHeight = pathData[0].y * 2 - box3.min.y
+
+            //根据挤压后的平面网格和渐变纹理材质，创建我们需要的路径形状网格
+            const planeMesh = new Mesh(planeGeometry, material)
+            planeMesh.position.set(-resultWidth / 2, -resultHeight / 2 - box3.min.y, 1)
+
+            //开始创建 3D 渲染场景
+            const scene = new Scene()
+            //scene.background = new Color('#333')
+            scene.add(planeMesh)
+
+            let canvas = document.createElement('canvas')
+            const renderer = new WebGLRenderer({ canvas, antialias: true })
+            renderer.setSize(Math.ceil(resultWidth), Math.ceil(resultHeight)) //对最终渲染结果的宽高尺寸进行向上取整处理
+
+            const camera = new OrthographicCamera(resultWidth / - 2, resultWidth / 2, resultHeight / 2, resultHeight / - 2, 0.1, 1000)
+            camera.position.set(0, 0, 2) //注意由于前面将平面的 z 值设置为 1，因此相机的 z 值一定要大于 1 才可以看到平面，这里只是将 z 随意设置为 2
+            camera.lookAt(0, 0, 0)
+
+            renderer.render(scene, camera)
+
+            const imgSrc = canvas.toDataURL('image/png')
+
+            //执行一些销毁操作
+            renderer.dispose()
+            material.dispose()
+            planeGeometry.dispose()
+            texture.dispose()
+            canvas = undefined
+
+            return imgSrc
+        }
+
+
+        //---------- 下面是执行步骤拆解 ----------
+
+        //第1步：首先得到渐变纹理贴图
+        const pngSrc = createGradientPNG(gradientData, lineWidth)
+
+        //第2步：加载该纹理贴图，并在加载完成事件中开始绘制
+        new TextureLoader().load(pngSrc, (texture) => {
+            const imgSrc = draw(texture)
+            const img = document.querySelector('#gradientPath')
+            img.src = imgSrc
+        })
+
+    </script>
+</body>
+
+</html>
