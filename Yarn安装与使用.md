@@ -956,9 +956,9 @@ success Using linked package for "react-dom".
 
 <br>
 
-## 通过.yarnrc修改默认的node_modules目录
+## 通过.yarnrc修改项目默认的node_modules目录
 
-默认情况下，无论 npm、cnpm、yarn、pnpm，当安装 npm 包时都会默认安装到 node_modules 目录中。
+默认情况下，无论 npm、cnpm、yarn、pnpm，当安装 npm 包时都会默认安装到当前项目的 node_modules 目录中。
 
 某些特殊情况下，你想把项目中 npm 包安装到别的目录，那么可以通过下面方式操作。
 
