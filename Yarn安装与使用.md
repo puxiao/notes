@@ -16,11 +16,11 @@
 
 Yarn 是 Facebook 推出的，快速、可靠、安全的依赖包管理工具，和 NPM 类似。
 
-* **快速：** Yarn 不同与 NPM，Yarn 会缓存所下载的每个包，当日后重新需要安装这个包时(假设包的版本并未发生变更)，则会使用本地缓存，所以相对 NPM 安装速度快一些。
+* **快速：**  Yarn 不同与 NPM，Yarn 会缓存所下载的每个包，当日后重新需要安装这个包时(假设包的版本并未发生变更)，则会使用本地缓存，所以相对 NPM 安装速度快一些。
 
-* **安全：**Yarn 会在每个安装包执行前校验其完整性。
+* **安全：** Yarn 会在每个安装包执行前校验其完整性。
 
-* **可靠：**Yarn 和 NPM 类似，也使用 依赖包版本声明文件，来确保整个项目所需依赖包的版本。
+* **可靠：** Yarn 和 NPM 类似，也使用 依赖包版本声明文件，来确保整个项目所需依赖包的版本。
 
   > NPM 和 Yarn 的依赖包版本声明文件，文件名都是：package.json
   >
@@ -44,9 +44,10 @@ yarn 对中国用户非常友好，提供中文官方文档：https://classic.ya
 
 #### Windows系统安装：
 
-**安装文件下载地址：**https://classic.yarnpkg.com/zh-Hans/docs/install
+**安装程序下载地址：** https://classic.yarnpkg.com/latest.msi
 
-**Windows系统安装：**https://classic.yarnpkg.com/latest.msi
+* 安装时建议修改安装目录到 D盘，不挤压C盘空间
+* 默认安装成功后会自动像系统环境变量 Path 中加入 yarn 对应的路径
 
 
 
@@ -141,6 +142,50 @@ yarn -v 或 yarn --version
 ```
 yarn：无法将“yarn”项识别为cmdlet、函数、脚本文件或可执行程序的名称
 ```
+
+
+
+<br>
+
+## 修改yarn缓存目录
+
+
+
+<br>
+
+**查看当前 yarn 缓存目录：**
+
+```
+yarn cache dir
+```
+
+我是 windows10 系统，我这里默认输出的缓存目录为：C:\Users\xxxx\AppData\Local\Yarn\Cache\v6
+
+
+
+<br>
+
+由于以后你安装的每个 NPM 包都会缓存到该目录，而该目录在 C盘，那么日久天长该目录会非常大，占用 C盘空间，所以，我们需要将默认的缓存目录修改到空间更大的 D盘。
+
+
+
+<br>
+
+**修改缓存目录：**
+
+假定我们希望将缓存目录修改到：d:/yarn/cache，首先我们先创建该文件夹，然后执行：
+
+```
+yarn config set cache-folder d:/yarn/cache
+```
+
+> 请注意缓存目录路径中避免出现 中文、空格等
+
+
+
+<br>
+
+接下来就可以放心开始使用 yarn 了。
 
 
 
@@ -962,4 +1007,3 @@ success Using linked package for "react-dom".
    ```
 
    > 这个方式我没试验过，有可能会遇到一些问题。
-
