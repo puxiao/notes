@@ -4,8 +4,8 @@
 
 * **[yarn简介](#yarn%E7%AE%80%E4%BB%8B)**
 * **[yarn安装](#yarn%E7%AE%80%E4%BB%8B)**
-* **[修改yarn缓存目录]()**
-* **[yarn命令](#%E4%BF%AE%E6%94%B9yarn%E7%BC%93%E5%AD%98%E7%9B%AE%E5%BD%95)**
+* **[修改yarn缓存目录](#%E4%BF%AE%E6%94%B9yarn%E7%BC%93%E5%AD%98%E7%9B%AE%E5%BD%95)**
+* **[yarn命令](#yarn%E5%91%BD%E4%BB%A4)**
 * **[yarn创建软连接](#yarn%E5%88%9B%E5%BB%BA%E8%BD%AF%E8%BF%9E%E6%8E%A5)**
 * **[通过.yarnrc修改默认的node_modules目录](#通过.yarnrc修改默认的node_modules目录)**
 
