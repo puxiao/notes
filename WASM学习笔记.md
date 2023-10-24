@@ -67,7 +67,7 @@ assembly 单词本意为：装配、会议、议会、集会，而 assembly lang
 
 <br>
 
-## 在 JS 中加载、编译、实例化 wasm
+## 在 JS 中加载、编译、实例化 wasm 模块
 
 
 
@@ -313,6 +313,8 @@ wasm-pack 官方手册：https://rustwasm.github.io/wasm-pack/book/
 
 <br>
 **安装wasm-pack：**
+
+
 
 官方安装教程：https://rustwasm.github.io/wasm-pack/installer/
 
@@ -636,12 +638,340 @@ cargo install cargo-generate
 
 <br>
 
-只此，我们终于可以开始实际编写第一个 Rust wasm 项目了。
+只此一些前置开发环境和知识点我们已经知道了，接下来看一看 wasm-pack 创建的默认 wasm 项目，重点是要学习了解一下 wasm-bindgen。
 
 
 
 <br>
 
-## 初探 Rust wasm：hello-wasm
+## 初探 Rust wasm 项目
+
+
+
+<br>
+
+本小节中，我们先通过 wasm-pack 创建一个 hello-wasm 的项目，然后再通过分析默认这个项目的一些代码和配置来了解一些新东西，并引申出一些需要学习的关键知识点。
+
+
+
+<br>
+
+### 创建一个项目
+
+**新建项目命令：**
+
+```
+wasm-pack new hello-wasm
+```
+
+> 如果你是第一次执行该命令，那么等待时间需要稍微久一些，因为需要下载安装 cargo-generate
+
+<br>
+
+如果执行顺利，我们会看到下面的输出信息：
+
+```
+[INFO]: Installing cargo-generate...
+ Generating a new rustwasm project with name 'hello-wasm'...
+ Destination: E:\rust\hello-wasm ...
+ project-name: hello-wasm ...
+ Generating template ...
+ Moving generated files into: `E:\rust\hello-wasm`...
+Initializing a fresh Git repository
+ Done! New project created E:\rust\hello-wasm
+[INFO]: 🐑 Generated new project at /hello-wasm
+```
+
+在上面的信息中，我们可以解读出这几个关键点：
+
+* wasm-pack 创建 wasm 项目时需要下载安装 cargo-generate
+* 然后实际是由 cargo-generate 来创建的项目模板
+
+因此，结论是：
+
+* wasm-pack 是 "一站式" 创建、开发、调试、构建 Rust wasm 的一个程序
+
+* 单纯就模板而言 wasm-pack 内部使用的是 cargo-generate
+
+  > 而 cargo-generate 创建的模板中又依赖 wasm-bindgen，这个我们会稍后讲解
+
+
+
+<br>
+
+**项目文件分析：**
+
+使用 VSCode 开发刚刚创建好的 hello-wasm 项目，我们先大体看看都有哪些目录和文件。
+
+目录：
+
+* .github：里面包含一个 dependabot.yml 文件，这个和我们的项目关联不大，这个 github 的一个工具配置文件，用来自动更新项目依赖、依赖包高危漏洞警告的，我们可以无需过多关注该文件。
+* src：项目源码目录，里面有 2 个文件 lib.rs、utils.rs
+* target：测试编译目标目录，这个对我们来说是暂时无用的，不用去分析
+* tests：测试文件目录
+
+文件：
+
+* .appveyor.yml：这是 github 的持续集成平台 AppVeyor 的配置文件，和我们关系研究的 wasm 关系不大，无需过多关注该文件
+* .gitignore：git 忽略文件，这个文件里，把可能用于存放构建文件的 3 个目录 /target、bin/、pkg/ 都进行忽略的
+* .travis.yml：这个也是 github 持续集成的步骤配置文件，也无需关注
+* Cargo.lock：依赖版本锁定文件，相当于前端项目中的 yarn.lock
+* Cargo.toml：项目依赖文件，相当于前端项目中的 package.json
+* LICENSE_APACHE、LICENSE_MIT：版权相关
+* README.md：说明文档，对于普通项目而言意义不大，但是如果是针对要发布成 NPM 包的项目，那么需要好好写一下该说明文档
+
+
+
+<br>
+
+除去 github、git、版权、说明文档 和其它不重要的目录(target/、tests/)，那么对我们而言真正核心有用的就是这 3 个文件：
+
+* src/lib.rs
+* src/utils.rs
+* Cargo.toml
+
+<br>
+
+那么我们依次对这 3 个文件详细解读一下。
+
+
+
+<br>
+
+### 解读 Cargo.toml
+
+**Cargo.toml：**
+
+```
+[package]
+name = "hello-wasm"
+version = "0.1.0"
+authors = ["puxiao <yangpuxiao@gmail.com>"]
+edition = "2018"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = ["console_error_panic_hook"]
+
+[dependencies]
+wasm-bindgen = "0.2.84"
+
+# The `console_error_panic_hook` crate provides better debugging of panics by
+# logging them with `console.error`. This is great for development, but requires
+# all the `std::fmt` and `std::panicking` infrastructure, so isn't great for
+# code size when deploying.
+console_error_panic_hook = { version = "0.1.7", optional = true }
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3.34"
+
+[profile.release]
+# Tell `rustc` to optimize for small code size.
+opt-level = "s"
+```
+
+我们可以看到该文件一共分为 6 部分：
+
+```
+[package]
+name = "hello-wasm"
+version = "0.1.0"
+authors = ["puxiao <yangpuxiao@gmail.com>"]
+edition = "2018"
+```
+
+* package：项目打包描述信息
+
+* 其中 `edition = "2018"` 这是指 Rust 编译包版本为 2018
+
+  > Rust 每 3 年发布一个编译包版本，目前 rust 编译包版本为 2015、2018、2021
+  >
+  > 作为前端开发者，你可以简单理解为这相当于 JS  的 ES5、ES6....
+
+
+
+<br>
+
+```
+[lib]
+crate-type = ["cdylib", "rlib"]
+```
+
+* lib：是指 libaray 的简写，表明是和 库 相关的配置
+* crate-type：创建的类型
+* ["cdylib", "rlib"]：cdylib 是指动态链接库、rlib 是指静态链接库
+
+简单来说就是告知编译器将当前项目编译成 动态链接库 + 静态链接库。
+
+这个设置在 Rust 项目中很场景，无需过多关注。
+
+
+
+<br>
+
+```
+[features]
+default = ["console_error_panic_hook"]
+```
+
+* features：特性，用来定义构建项目时才用哪些特性策略
+* default：特性的默认字段
+* ["console_error_panic_hook"]：这是和后面依赖有关的一个值，用来在网页中输出 wasm 错误信息
+
+
+
+<br>
+
+```
+[dependencies]
+wasm-bindgen = "0.2.84"
+
+# The `console_error_panic_hook` crate provides better debugging of panics by
+# logging them with `console.error`. This is great for development, but requires
+# all the `std::fmt` and `std::panicking` infrastructure, so isn't great for
+# code size when deploying.
+console_error_panic_hook = { version = "0.1.7", optional = true }
+```
+
+* dependencies：依赖，相当于前端项目 package.json 中的 "dependencies"
+
+* wasm-bindgen：当前项目依赖的包名，后面是该包的版本号
+
+  > 关于 wasm-bindgen 我们后面会单独详细讲解
+
+* console_error_panic_hook：用于网页输出错误 wasm 错误信息的包，后面的值中 `optional = true` 表明它是可选的，非必须项
+
+  > 这个和前面 `[features] default = ["console_error_panic_hook"]` 呼应上了
+
+
+
+<br>
+
+```
+[dev-dependencies]
+wasm-bindgen-test = "0.3.34"
+```
+
+* dev-dependencies：开发阶段需要的依赖包，相当于前端项目 package.json 中的 "devDependencies"
+* wasm-bindgen-test：wasm-bindgen 对应的调试包
+
+
+
+<br>
+
+```
+[profile.release]
+# Tell `rustc` to optimize for small code size.
+opt-level = "s"
+```
+
+* profile：轮廓(概述)，其含义是 构建项目时的一些概述配置项
+
+* profile.release：构建 release(正式发布) 版本时的配置项
+
+* opt-level：优化设置级别，这里它的值设置为 "s" 对应的是 size，即表明优化构建结果的二进制文件大小。
+
+  > 对应上面那行注释 "Tell `rustc` to optimize for small code size. (告诉 rsutc 优化代码大小)"
+  >
+  > 由于我们使用的 .wasm 文件最终是需要网络请求，所以编译时优化压缩代码大小对我们而言是比较重要的，但压缩代码大小有可能会降低 .wasm 执行性能，不过这个我们暂时无需过度担忧。
+
+  > 不过这样设置会导致构建所需时间久一些。
+
+
+
+<br>
+
+以上就是 Cargo.toml 内容解读，对我们而言最重要的是 3 个依赖包：
+
+* wasm-bindgen
+* console_error_panic_hook
+* wasm-bindgen-test
+
+
+
+<br>
+
+**wasm-bindgen：**
+
+wasm-bindgen 是促进 JS 与 WASM 交互的一个库和 CLI 工具。
+
+官方文档：https://rustwasm.github.io/docs/wasm-bindgen/introduction.html
+
+这里强调一下：wasm-bindgen 本身就完全可以作为一个独立的偏文章来学习，因为它足够复杂、强大、且你使用 Rust 开发 wasm 根本离不开它。
+
+
+
+<br>
+
+为什么离不开它？
+
+**因为 .wasm 是二进制文件，所以使用原生 JS 与 WASM 交互时，例如函数调用，参数只能是 整数或浮点数！**
+
+也就是说你无法像 JS 函数那样，函数的参数可以是 字符串、对象、数组 等等。
+
+如果使用原生 JS，你都需要提前把 字符串、对象、数组 等转化为 整数或浮点数。
+
+可以想象那 JS 与 WASM 互相调用时该有多艰难。
+
+**但是当你使用 wasm-bindgen 后，它会自动帮你承担很多工作，简化函数调用。**
+
+
+
+<br>
+
+> 除了 函数 调用，实际上更多的操作是在 wasm 内部去操作网页 DOM、监听网页事件等，这类交互太频繁了，所以真的离不开 wasm-bindgen。
+
+
+
+<br>
+
+对于 wasm-bindgen 我们先不去深入学习理解，只是先有个初步概念即可。
+
+
+
+<br>
+
+对于刚刚新建的项目我们已经分析完了，那么接下来我们构建一下项目，并分析构建结果。
+
+
+
+<br>
+
+### 构建项目
+
+**构建命令：**
+
+```
+wasm-pack build . --target web
+```
+
+> `.` 表示构建当前目录，该值是可以省略的，因为 build 默认值就是当前所在目录
+>
+> `--target web` 表示构建的目标平台是浏览器
+
+
+
+<br>
+
+**编译过程：**
+
+在构建过程中，我们会看到下面的信息：
+
+```
+[INFO]: Checking for the Wasm target...
+[INFO]: Compiling to Wasm...
+   Compiling proc-macro2 v1.0.69
+   Compiling unicode-ident v1.0.12
+   ...
+   warning: function `set_panic_hook` is never used
+   --> src\utils.rs:1:8
+[INFO]: Installing wasm-bindgen...
+```
+
+
+
+<br>
 
 未完待续...
