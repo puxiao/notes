@@ -1332,4 +1332,248 @@ pub fn greet() {
 
 ### pkg目录生成文件
 
-未完待续...
+**目录下的文件：**
+
+* .gitignore
+* hello_wasm_bg.wasm
+* hello_wasm_bg.wasm.d.ts
+* hello_wasm.d.ts
+* hello_wasm.js
+* package.json
+* README.md
+
+
+
+<br>
+
+**先说简单容易理解的：**
+
+* .gitignore：给 pkg/ 目录下自动添加的 git 忽略文件
+* package.json：对于生成物的描述文件
+* README.md：说明文档
+
+
+
+<br>
+
+**核心产物：**
+
+我们先抛开 wasm-bindgen ，试想一下：
+
+1、假设我们使用某个语言编写开发了一个 wasm 项目，那么最终我们肯定希望得到的是 .wasm 文件
+
+2、得到 .wasm 文件之后接下来要去编写 JS 去加载调用 .wasm
+
+如果我们是用原生 JS 去加载调用 .wasm，这个时候我们就会面临 3 个需要棘手问题：
+
+**棘手问题1**：我们需要充分了解这个 .wasm 文件内部对外暴露的可访问名称，例如 函数名
+
+* 有可能我们会在 JS 中出现手误，把函数名拼写错误而不自知
+* 也有可能这个 .wasm 并不是我们自己编写的，而是别人编写的，我们需要去看对方提供的 " 文档" 才能知道里面有哪些可调用函数名，以及参数
+
+**棘手问题2**：原生 JS 加载 .wasm 时需要提前在 JS 中先按照 .wasm 的内部结构定义一个 "类型结构体式的对象"，这个工作实际上是有点麻烦的
+
+**棘手问题3**：原生的 js 与 wasm 之间传递函数参数只能是 整数和浮点数，参数真正交互起来特别麻烦
+
+
+
+<br>
+
+无论如何棘手，总之此时此刻我们整个过程大约牵扯到 2 个文件：
+
+* .wasm：我们生成得到的 wasm 文件
+
+  > 程序生成的
+
+* .js：定义了 wasm "类型结构体式的对象" 和 方便与 wasm 交流沟通的相关封装
+
+  > 我们手工编写而成的
+
+
+
+<br>
+
+那我们再回头来看看项目通过 wasm-bindgen 生成的 pkg/ 目录下的 4 个相关文件。
+
+> 我们创建的项目名为 hello-wasm，而构建后的文件名是以 hello_wasm 为开头的
+
+* hello_wasm_bg.wasm
+* hello_wasm_bg.wasm.d.ts
+* hello_wasm.d.ts
+* hello_wasm.js
+
+
+
+<br>
+
+**hello_wasm_bg.wasm**
+
+这是我们项目生成得到的 .wasm 文件。
+
+你可能有个疑问：为什么文件名中增加了一个 "_bg" ？
+
+**"_bg" 是单词 "bindings(绑定)" 的简写，用来表明：这个 .wasm 不是普通原始的 wasm 文件，而是经过 wasm-bindgen 编译后将 wasm 与 JS 进行了绑定关系的 wasm 文件。 **
+
+换句话说，当我们看到一个 xxx_bg.wasm 文件时，我们就意识到 这可能是一个经过 wasm-bindgen 编译过后的 wasm 文件。
+
+> 文件名中出现 "_bg" 相当于一个约定。
+
+
+
+<br>
+
+**hello_wasm_bg.wasm.d.ts**
+
+```
+/* tslint:disable */
+/* eslint-disable */
+export const memory: WebAssembly.Memory;
+export function greet(): void;
+```
+
+通过查看 hello_wasm_bg.wasm.d.ts 的内容，很容易理解这个是针对导出的 .wasm 文件对应的 JS 调用的类型声明。
+
+我们可以看到目前 wasm 一共有 2 个可访问的对象：
+
+* 一个常量 memory
+* 一个不带参数的函数 greet
+
+这样我们在调用 wasm 中的方法时就可以获得对应的 TS 类型支持和代码提示，避免手误打错函数名称。
+
+> 帮我们解决 棘手问题 1
+
+
+
+<br>
+
+**hello_wasm.js**
+
+这个是 wasm-bindgen 为我们自动封装得到的一个方便加载、解析、调用 wasm 的 JS 代码。
+
+> 帮我们解决 棘手问题2、棘手问题3
+
+请注意在这个 JS 中有一个函数 `__wbg_int`，它内部直接会加载 "hello_wasm_bg.wasm" 文件
+
+
+
+<br>
+
+**hello_wasm.d.ts**
+
+这个是针对 hello_wasm.js 的类型定义文件。
+
+
+
+<br>
+
+再次总结一下这 4 个文件：
+
+* hello_wasm_bg.wasm：当前项目编译的 .wasm 结果，名称中的 "_bg" 用于表明这是经过 wasm-bindgen 编译过的 wasm
+* hello_wasm_bg.d.ts：明确 .wasm 文件对外可调用对象或函数
+* hello_wasm.js：经过 wasm-bindgen 封装后用于 加载、调用 .wasm 的 JS 文件
+* hello_wasm.d.ts：针对 hello_wasm.js 的类型定义文件
+
+
+
+<br>
+
+讲了这么多，终于该去网页里运行一下了。
+
+
+
+<br>
+
+### 在网页中实际运行一下
+
+**创建一个 http 服务：**
+
+> 本机创建 http 服务的方式有非常多 ，这里我选择最简单的，全局安装 http-server 的方式来将某个目录启动成 http 服务
+
+
+
+<br>
+
+**创建步骤：**
+
+* 第1步：全局安装 http-server：`yarn global add http-server`
+
+* 第2步：新建一个名为 demo 的目录
+
+* 第3步：初始化当前目录的 package.json：`npm init` ，然后一路按回车
+
+* 第4步：修改 package.json，添加一条启动服务的命令：
+
+  ```
+  {
+    "name": "demo",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+      "dev": "http-server ."
+    },
+    "author": "",
+    "license": "ISC"
+  }
+  ```
+
+  > 由于我们已经全局安装 http-server，所以我们的入口文件 index.js 是无需创建的
+
+* 第5步：在 demo 目录下新建一个 wasm 的目录，并将之前构建好的 pkg/ 目录下的 4 个文件 "hello_wasm_bg.wasm、hello_wasm_bg.wasm.d.ts、hello_wasm.d.ts、hello_wasm.js" 拷贝到 demo/wasm 目录中
+
+* 第6步：在 demo 目录下新建一个 index.html 网页，内容如下：
+
+  ```
+  <!DOCTYPE html>
+  <html lang="en">
+  
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>hello wasm</title>
+  </head>
+  
+  <body>
+      <script type="module">
+          import helloWasm from './wasm/hello_wasm.js';
+  
+          helloWasm()
+              .then((wasm) => {
+                  wasm.greet()
+              })
+              .catch(console.error)
+  
+      </script>
+  </body>
+  
+  </html>
+  ```
+
+* 第7步：启动项目，访问网页：`yarn dev`
+
+
+
+<br>
+
+一起顺利，我们就可以访问：http://127.0.0.1:8080 ，然后在打开的网页中看到 alert 弹窗："Hello, hello-wasm!"
+
+也就是说，我们这个项目成功运行起来了。
+
+
+
+<br>
+
+接下来，我们梳理一下运行起来的整个过程。
+
+
+
+<br>
+
+### 梳理运行过程
+
+未完待续....
+
+
+
+
+
