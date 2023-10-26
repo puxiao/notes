@@ -15,10 +15,7 @@
 </head>
 
 <body>
-    <h3>特别说明：左侧和顶部会根据路径的实际位置留下空隙，但是右侧和底部会紧贴着图形进行裁切</h3>
     <img id="gradientPath" />
-    <a href="https://github.com/puxiao" target="_blank"
-        style="display: block;margin-top: 18px;font-size: 18px;">代码作者：https://github.com/puxiao</a>
     <script>
         //第1部分：我们定义一些原始数据
 
@@ -44,7 +41,9 @@
          * 
         */
 
-        //下面演示的路径坐标不存在为负这种情况
+        //下面演示的数据中 aPath 中坐标不存在 x  为负这种情况
+
+        //重点强调一下：aPath 中的坐标是 2D 中的坐标(y 值越大越往下)，而不是 3D 中的坐标(y 值越大越往上)
 
         const aPath = [
             {
@@ -69,15 +68,15 @@
             },
             {
                 "x": 480,
-                "y": -11
+                "y": 10
             },
             {
                 "x": 579,
-                "y": -13
+                "y": 20
             },
             {
                 "x": 699,
-                "y": -13
+                "y": 30
             },
             {
                 "x": 801,
@@ -113,7 +112,22 @@
         ]
 
         //定义路径的宽度
-        const lineWidth = 100
+        const lineWidth = 60
+
+        //由于 aPath 中点的 y 值为 2D 中的坐标，即 y 值越大在画面中越往下
+        //但是在 three.js 中 y 值越大在画面中越往上
+        //所以，此处需要我们将 y 值换算一下
+        const maxY = Math.max(...aPath.map(item => item.y)) //计算出 y 的最大值
+        //const minY = Math.min(...aPath.map(item => item.y)) //计算出 y 的最小值
+        const resPath = aPath.map(item => {
+            return {
+                x: item.x,
+                y: maxY - item.y
+            }
+        })
+
+        //计算 2D 中的 y 值与 3D 转化后的 y 值的偏量
+        const offsetY = aPath[0].y - resPath[0].y
 
         //我们定义平面的水平分段数量，暂定为 200，分段数越高曲线越平滑，但所耗性能越多
         const segments = 200
@@ -193,7 +207,7 @@
             //texture.wrapT = RepeatWrapping //垂直方形不让重复
             const material = new MeshBasicMaterial({ map: texture, transparent: true })
 
-            const pathData = aPath //我们给 aPtah 起一个别名
+            const pathData = resPath //我们给 resPath 起一个别名
 
             //创建路径
             const path = createPathByData(pathData) //根据 pathData 得到曲线路径
@@ -238,8 +252,9 @@
              * 在 2D画布中起始点的 y 值是指距离顶部距离，而在 3D 中起始点 y 值是指距离底部的距离，
              * 所以 pathData[0].y * 2 就是我们在 3D 场景中虚构出来的一个较大的矩形框
              * 然后将这个 较大的矩形框 高度减去 包围盒的最小 y 值，就得到了我们最终需要(就好像在 2D 画布)中的那个矩形框
+             * 最后在增加上 2D y 坐标转换 3D y 坐标的偏量 offsetY
              */
-            const resultHeight = pathData[0].y * 2 - box3.min.y
+            const resultHeight = pathData[0].y * 2 - box3.min.y + offsetY
 
             //根据挤压后的平面网格和渐变纹理材质，创建我们需要的路径形状网格
             const planeMesh = new Mesh(planeGeometry, material)
