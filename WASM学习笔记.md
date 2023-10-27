@@ -805,7 +805,29 @@ crate-type = ["cdylib", "rlib"]
 
 简单来说就是告知编译器将当前项目编译成 动态链接库 + 静态链接库。
 
-这个设置在 Rust 项目中很场景，无需过多关注。
+> 一般来说 rust 项目都会采用这样的配置。
+
+
+
+<br>
+
+> 以下关于 静态链接 与 动态链接 的解释不够准确，但是可以比较容易帮你去理解它们的大概含义。
+
+对于编程语言来说，假定有 A、B、C 3个模块，其中 A、B 模块都需要用到 C 模块，那么：
+
+1、静态链接：相当于在 A、B 这 两个模块中采用 "**嵌入(include)**" 的方式，嵌入一份 C 模块的代码，这意味着：
+
+* 对于将来编译的结果，相当于存在 2 份 C 模块的代码(A、B 各一份)
+* 并且由于是 "嵌入"，所以每当 C 模块代码发生变动时，A、B 两个模块也需要重新编译(重新嵌入一份变更过后的 C 模块代码)
+
+2、动态链接：相当于在 A、B 这 两个模块中采用 "**引入(import)**" 的方式，引入一份 C 模块的代码，这意味着：
+
+* 对于将来编译的结果，仅存在 1 份 C 模块的代码
+* 由于是 "引入"，所以当 C 模块代码发生变动时，A、B 两个模块中的代码无需重新编译(因为 C 代码本身并不存在 A、B 两个模块中)
+
+<br>
+
+由于 JS 属于解释性语言，代码不存在编译，是在运行时由  JS 解释引擎执行的，因为 JS 可以看作是 "天生支持动态链接"。但是对于很多需要编译性的语言，例如 C/C++、Rust 等，动态链接对他们来说就比较重要，可以减轻最终代码的体积，只不过需要消耗一定的编译时间。
 
 
 
@@ -1310,6 +1332,8 @@ pub fn greet() {
 
 * `use wasm_bindgen::prelude::*;`：引入 "wasm_bindgen 下的 prelude 模块"
 
+  > 这个 prelude 模块究竟是做什么的，有什么用，我们后面再讲解
+
 * `#[wasm_bindgen] extern "C" { fn alert(s: &str); }`：
 
   * extern：声明一个外部函数
@@ -1319,6 +1343,20 @@ pub fn greet() {
 * `#[wasm_bindgen] pub fn greet() { alert("Hello, hello-wasm!"); }`：对外定义一个 greet 的函数，在该函数内部会调用 `alert("Hello, hello-wasm!")`
 
   > 注意，这里定义的 greet() 并没有使用任何 `extern` 来约束交互编程语言，那么就意味着该函数适用于 rust 默认的交互范围，那在此项目中就可以理解为与 wasm 交互。
+
+
+
+<br>
+
+**关于alert：**
+
+请注意，代码阅读至此，我们应该意识到，alert 出现了 3 次：
+
+* 原生网页中的 alert：尽管没出现，但是我们知道网页 JS 中是存在 alert 函数的
+* extern "C" 中定义的 alert ：定义可与 C/C++ 交互中调用 alert
+* pub fn greet(){ ... } 中调用的 alert：对外暴露 greet 函数中调用了 alert
+
+是不是有点乱，别担心，我们先忽略具体到底 alert 谁在定义，如何调用，后面在网页中实际运行代码时我们会详细讲解这个 alert 调用流程。
 
 
 
@@ -1571,9 +1609,417 @@ export function greet(): void;
 
 ### 梳理运行过程
 
+**第1步：以 module 形式引入 hello_wasm.js**
+
+```
+import helloWasm from './wasm/hello_wasm.js';
+```
+
+由于 hello_wasm.js 中的代码是：
+
+```
+async function __wbg_init(input) { ... }
+export default __wbg_init;
+```
+
+对外默认导出的是 __wbg_int 函数，所以我们引入的代码中 helloWasm 即对应的是 `__wbg_init` 函数。
+
+
+
+<br>
+
+**第2步：执行 helloWasm 函数**
+
+```
+helloWasm()
+```
+
+相当于执行 __wbg_init()。
+
+而 __wbg_init 函数是这样定义的：
+
+```
+async function __wbg_init(input) {
+    if (wasm !== undefined) return wasm;
+
+    if (typeof input === 'undefined') {
+        input = new URL('hello_wasm_bg.wasm', import.meta.url);
+    }
+    const imports = __wbg_get_imports();
+
+    if (typeof input === 'string' || (typeof Request === 'function' && input instanceof Request) || (typeof URL === 'function' && input instanceof URL)) {
+        input = fetch(input);
+    }
+    ...
+}
+```
+
+结合 hello_wasm.d.ts 中的定义：
+
+```
+export default function __wbg_init (module_or_path?: InitInput | Promise<InitInput>): Promise<InitOutput>;
+```
+
+也就是说：
+
+* __wbg_init 函数的可选参数 input 如果不传，则默认去加载 'hello_wasm_bg.wasm'
+* __wbg_init 会返回一个 Promise
+
+
+
+<br>
+
+**第3步：针对返回的 Promise 进行处理**
+
+```
+helloWasm()
+    .then((wasm) => {
+        wasm.greet()
+    })
+    .catch(console.error)
+```
+
+如果 __wbg_init 返回加载顺利完成，则返回 wasm 模块实例。
+
+
+
+<br>
+
+**第4步：拿到 wasm 实例后调用它对外暴露的 .greet 函数**
+
+```
+wasm.greet()
+```
+
+也就是说我们在 JS 中调用 wasm 模块实例的 .greet 函数，也就是 src/lib.rs 中定义的那个 .greet 函数。
+
+
+
+<br>
+
+我们再来看一遍 lib.rs 的代码：
+
+```
+mod utils;
+
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
+extern "C" {
+    fn alert(s: &str);
+}
+
+#[wasm_bindgen]
+pub fn greet() {
+    alert("Hello, hello-wasm!");
+}
+```
+
+
+
+<br>
+
+我们从下往上看：
+
+```
+#[wasm_bindgen]
+pub fn greet() {
+    alert("Hello, hello-wasm!");
+}
+```
+
+这个很明显：
+
+* 对外向 JS 暴露一个名为 greet 的函数
+* 在 greet 函数内部调用执行 alert 函数
+
+那么现在问题来了，greet 内部调用执行的 alert 函数是谁？是网页 JS 中的 alert 函数吗？
+
+答案是：不是网页 JS 中的那个 alert函数，而是 greet 函数上面 `extern "C" { }` 中定义的 alert 函数。
+
+
+
+<br>
+
+那么现在问题来了：
+
+```
+#[wasm_bindgen]
+extern "C" {
+    fn alert(s: &str);
+}
+```
+
+上面代码中，针对 C/C++ 编程语言中又通过 `fn alert(s: &str);` 定义的 alert 函数是怎么一回事？
+
+
+
+<br>
+
+带着这个疑问，我们在往上看这行代码：
+
+```
+use wasm_bindgen::prelude::*;
+```
+
+> 这需要你懂一些 Rust 最基础的语法
+
+这行代码作用是引入 wasm_bindgen 包下的 prelude 模块下的 全部(*) 内容。
+
+我们看一下 prelude 的官方文档：
+
+https://rustwasm.github.io/wasm-bindgen/api/wasm_bindgen/prelude/index.html
+
+
+
+<br>
+
+> **Re-exports**
+>
+> ----
+>
+> pub use crate::JsCast;
+> pub use crate::JsValue;
+> pub use crate::UnwrapThrowExt;
+> pub use crate::closure::Closure;
+> pub use crate::JsError;
+
+我们可以看到 prelude 实际上相当于一个汇总导出了很多 rust wasm 中需要用到 与 JS 沟通交互的常见模块。
+
+尽管我们目前还不知道这些模块都具体作用是什么。
+
+
+
+<br>
+
+这里我们要提到另外 2 个 wasm_bindgen 关联依赖的包：js_sys、web_sys
+
+> 对于前端而言我们会说 NPM 包，对于 Rust 而言则是 crate 包 (板条箱)，
+>
+> 对应的包管理平台为：https://crates.io/
+
+我们此刻只是先简单了解一下这 2 个包：
+
+* js_sys：让 Rust 可以访问、调用 JS 标准内置对象(含属性和方法) 的包
+
+  > 例如 Array、Object、RegExp、Map、decodeURI()、encodeURI()、eval() 等
+
+* web_sys：让 Rust 可以访问、调用 浏览器(DOM元素和事件) 的包
+
+  > 例如 DOM元素、Windows、localStorage、scroll、onblur、onclick 等
+
+有了 js_sys 和 web_sys 后 Rust 中就比较容易调用 网页和 JS 的各种对象和属性方法了。
+
+
+
+<br>
+
+我们知道网页 JS 中的 alert 函数实际上是 Window.alert。
+
+而 web_sys 中就定义 Window
+
+```
+Struct web_sys::Window
+```
+
+
+
+<br>
+
+到此，我们终于大致摸清楚了整个执行流程：
+
+* 网页 JS 加载 .wasm 完成后调用 wasm.greet()
+* 此时进入到 wasm 内部 由 lib.rs 对外定义的 greet() 函数
+* 而 greet() 函数内部调用 `extern "C" { ... }` 中定义的 alert 函数
+* 而该函数实际调用 wasm_bindgen::prelude::* 内部使用的 web_sys::Window 中的 alert 函数
+* 最终执行该函数，相当于调用网页 JS 中的 alert 函数
+
+
+
+<br>
+
+**特别说明一下**：
+
+wasm 是一套公开的标准，开发 wasm 有非常多种语言，而我这里选择的是 Rust，使用的是 wasm-pack。
+
+尽管我们花了大量时间来初步学习 wasm_bindgen，但是时刻牢记：wasm_bindgen 是比较主流的开发 web wasm 的方式之一。
+
+
+
+<br>
+
+还记得前面提到过的 binaryen 吗？
+
+他是由 C++ 开发的一系列针对 wasm 的工具，其中包括：
+
+* wasm2wat：把 .wasm 文件转成(反编译) .wat
+* wat2wasm：把 .wat 文件转成(编译) .wasm
+
+这两个工具也需要我们掌握，只不过我们现在先不去学这块。
+
+
+
+<br>
+
+**网页加载调用 greet 函数的另外一种写法套路：**
+
+我们之前的写法套路是：
+
+```
+<script type="module">
+    import helloWasm from './wasm/hello_wasm.js';
+    helloWasm()
+        .then((wasm) => {
+            wasm.greet()
+        })
+        .catch(console.error)
+</script>
+```
+
+
+
+<br>
+
+这是另外一种写法套路：
+
+```
+<script type="module">
+    import helloWasm, { greet } from './wasm/hello_wasm.js'
+    const init = async () => {
+        await helloWasm()
+        greet()
+    }
+    init()
+</script>
+```
+
+
+
+<br>
+
+实际工作中，可以根据个人喜好来决定使用哪种方式。
+
+
+
+<br>
+
+### 新建一个函数 sum：计算两数之和
+
+
+
+<br>
+
+**在 src/lib.rs 中新增加一个 sum 函数，用于计算两数之和：**
+
+```
+#[wasm_bindgen]
+pub fn sum(a: i32, b: i32) -> i32 {
+    a + b
+}
+```
+
+* `#[wasm_bindgen]`：定义 sum 的属性，表明它是给 JS 使用的
+
+* `pub fn sum(a: i32, b: i32) -> i32`：这是 rust 中定义函数参数以及返回值的写法
+
+* `a + b`：注意在 Rust 函数语法中，如果该行命令没有以  分号 ";" 结束，那么就意味着这行代码的执行结果为该函数的返回值
+
+  > 这点和 前端  JS 函数是不一样的
+
+
+
+<br>
+
+**接下来执行构建：**
+
+```
+wasm-pack build . --target web
+```
+
+
+
+<br>
+
+> 构建时默认我们用的是项目名 hello_wasm 作为前缀，如果想自定义这个前缀，例如改为 xxx 则命令如下：
+>
+> ```
+> wasm-pack build . --target web --out-name xxx
+> ```
+
+
+
+<br>
+
+**替换新的构建产物：**
+
+构建好后，从 pkg/ 将得到的 4 个文件覆盖 demo/wasm/ 中。
+
+如果你查看 hello_wasm_bg.wasm.d.ta，你会发现：
+
+```diff
+  export const memory: WebAssembly.Memory;
+  export function greet(): void;
++ export function sum(a: number, b: number): number;
+```
+
+> 我们新增的 sum 函数类型定义
+
+
+
+<br>
+
+**修改网页JS代码：**
+
+```
+<script type="module">
+    import helloWasm, { greet, sum } from './wasm/hello_wasm.js'
+    const init = async () => {
+        await helloWasm()
+        //greet()
+        console.log(sum(3, 6))
+    }
+    init()
+</script>
+```
+
+重新刷新网页，就可以在输出面板中看到 sum 计算结果 9 了。
+
+> 由于目前构建产物和之前的名字完全相同，不像 webpack/vite 那样每次都会给文件名添加随机字符确保两次文件名不相同，所以为了避免看到的是缓存，所以记得在浏览器网络面板中，禁用缓存。
+
+
+
+<br>
+
+至此，我们已经从 0 开始，对 wasm 开发有了最基础入门。
+
+接下来就开始逐渐尝试编写复杂功能了。
+
+我们一点一点来。
+
+
+
+<br>
+
+### 思考一下：我们现在开发面临的调试困境
+
+**开发调试困境：**
+
+对于前端项目开发调试，我们都使用的是 Webpack/Vit，那么我们会享受到下面 2 个便利：
+
+* 热更新：只要修改代码，网页立马自动热更新，可以看到修改后的效果
+* 文件名：每次编译后文件名中都会增加随机字符，两次生成的文件名字不会相同，避免缓存问题
+
+可是，目前我们开发 Rust wasm 项目，无法享受到上述 2 个便利。
+
+* 我们修改代码保存后，不会自动构建
+* 构建好的文件我们需要手工替换到前端项目中
+* 由于每次构建得到的文件名字相同，在浏览器中还容易产生缓存
+
+
+
+<br>
+
+那该怎么办，可以解决开发过程中的这个问题呢？
+
 未完待续....
-
-
-
-
 
