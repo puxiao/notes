@@ -6,11 +6,15 @@ SWL2 是 Winodws 10 下用来创建 Linux 虚拟系统的管理模块。之前 W
 
 
 
+<br>
+
 ### 安装或更新 WSL2 ：
 
 下载地址：https://docs.microsoft.com/zh-cn/windows/wsl/wsl2-kernel 
 
 
+
+<br>
 
 ### 打开 WSL2 命令界面：
 
@@ -21,6 +25,8 @@ SWL2 是 Winodws 10 下用来创建 Linux 虚拟系统的管理模块。之前 W
 方法2：摁着 Shift 键同时，在 win10 桌面 (或者你所在的文件夹) 点击右键，点击  “在此处打开 Powershell窗口“
 
 
+
+<br>
 
 ### 进入 Linux 虚拟系统 命令界面：
 
@@ -34,6 +40,51 @@ SWL2 是 Winodws 10 下用来创建 Linux 虚拟系统的管理模块。之前 W
 
 
 
+<br>
+
+### 打开 wsl 失败说明：
+
+假定你的 wsl 面板打开即关闭，或者你能在 PowerShell 中看到报错信息：
+
+```
+Processing fstab with mount -a failed.
+
+<3>WSL (8) ERROR: CreateProcessEntryCommon:370: getpwuid(0) failed 2
+<3>WSL (8) ERROR: CreateProcessEntryCommon:374: getpwuid(0) failed 2
+<3>WSL (8) ERROR: CreateProcessEntryCommon:577: execvpe /bin/sh failed 2
+<3>WSL (8) ERROR: CreateProcessEntryCommon:586: Create process not expected to return
+```
+
+这个原因是因为你电脑上 WSL 默认进入的系统不正确。
+
+为了确定是不是这样，我们可以执行：
+
+```
+wsl -l
+```
+
+如果输出的信息为：
+
+```
+适用于 Linux 的 Windows 子系统分发:
+docker-desktop-data (默认)
+docker-desktop
+```
+
+我们希望进入的是 docker-desktop 而不是 docker-desktop-data。
+
+我们只需执行：
+
+```
+wsl -d docker-desktop
+```
+
+就可以进入到 wsl 系统命令窗口了。
+
+
+
+<br>
+
 # WSL2 常用命令
 
 ### 基础命令
@@ -44,6 +95,8 @@ SWL2 是 Winodws 10 下用来创建 Linux 虚拟系统的管理模块。之前 W
 | wsl -h  或  wsl --help | 显示 wsl 帮助<br />(事实上只要执行错误的 wsl 命令，就会自动显示 wsl 帮助信息) |
 
 
+
+<br>
 
 ### 查看分发
 
@@ -59,6 +112,8 @@ SWL2 是 Winodws 10 下用来创建 Linux 虚拟系统的管理模块。之前 W
 
 
 
+<br>
+
 ### 管理控制分发
 
 | 命令                                                   | 含义                                                         |
@@ -71,6 +126,8 @@ SWL2 是 Winodws 10 下用来创建 Linux 虚拟系统的管理模块。之前 W
 > 特别强调：实际操作中发现，假设有A、B两个分发，使用 wsl -d A 后会自动关闭 B<br />同样 wsl -d B 后会自动关闭 A，所以不能靠这个命令来启动 docker，因为 docker 需要同时启动运行 docker-desktop 和 docker-desktop-data 两个分发
 
 
+
+<br>
 
 ### 导出或导入分发
 
@@ -92,6 +149,8 @@ SWL2 是 Winodws 10 下用来创建 Linux 虚拟系统的管理模块。之前 W
 
 
 
+<br>
+
 ### 控制分发使用 WSL 版本
 
 > WSL 存在2个版本，WSL1 和 WSL2
@@ -106,9 +165,10 @@ SWL2 是 Winodws 10 下用来创建 Linux 虚拟系统的管理模块。之前 W
 
 
 
+<br>
+
 ### 其他命令
 
 | 命令                                      | 含义                                                         |
 | ----------------------------------------- | ------------------------------------------------------------ |
 | wsl -e <命令行>  或  wsl --exec  <命令行> | 不使用 Linux shell 的前提下，直接执行 某些命令<br />备注：个人暂时不能理解该条命令存在的意义，例如 wsl -e echo "hello"<br />为什么不直接执行：echo "hello" ？ |
-
