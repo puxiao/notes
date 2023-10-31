@@ -6,8 +6,9 @@
 
 以下相关知识大部分来源于：
 
-* MDN：https://developer.mozilla.org/zh-CN/docs/WebAssembly/
+* https://developer.mozilla.org/zh-CN/docs/WebAssembly/
 * https://rustwasm.github.io/docs/book/
+* https://rustwasm.github.io/wasm-pack/book/
 
 
 
@@ -503,12 +504,13 @@ wasm-pack new <name> --template <template> --mode <normal|noinstall|force>
 
   以上模式并不是必须 三选一，也可以组合使用，例如 `--profiling --release`
 
-* --target 编译目标：一共有 4 个目标
+* --target 编译目标：一共有 5 个目标
 
   * bundler 未指定：--target 的默认值，用于编译到适用于像 webpack 的打包工具
   * nodejs：适用于 node.js
   * web：适用于浏览器
   * no--modules：同样也适用于浏览器，只不过与 "web" 的区别是不支持某些打包特性
+  * deno：适用于 deno
 
 * --scope 打包的前缀：例如 `--scope test` 那么意味着打包到 `@test/xxx`
 
@@ -1950,6 +1952,12 @@ wasm-pack build . --target web
 
 <br>
 
+> 构建时默认为 --dev 我们假定最终要发布则添加参数 --release 这样的构建产物文件大小会比较小
+
+
+
+<br>
+
 **替换新的构建产物：**
 
 构建好后，从 pkg/ 将得到的 4 个文件覆盖 demo/wasm/ 中。
@@ -1982,7 +1990,20 @@ wasm-pack build . --target web
 </script>
 ```
 
-重新刷新网页，就可以在输出面板中看到 sum 计算结果 9 了。
+或者将上面代码改成一个立即执行的剪头函数：
+
+```
+<script type="module">
+    import helloWasm, { greet, sum } from './wasm/hello_wasm.js'
+    (async () => {
+        await helloWasm()
+        //greet()
+        console.log(sum(3, 6))
+    })()
+</script>
+```
+
+无论哪种，重新刷新网页，就可以在输出面板中看到 sum 计算结果 9 了。
 
 > 由于目前构建产物和之前的名字完全相同，不像 webpack/vite 那样每次都会给文件名添加随机字符确保两次文件名不相同，所以为了避免看到的是缓存，所以记得在浏览器网络面板中，禁用缓存。
 
@@ -2004,7 +2025,7 @@ wasm-pack build . --target web
 
 **开发调试困境：**
 
-对于前端项目开发调试，我们都使用的是 Webpack/Vit，那么我们会享受到下面 3 个便利：
+对于前端项目开发调试，我们都使用的是 Webpack/Vite，那么我们会享受到下面 3 个便利：
 
 * 热更新：只要修改代码，网页立马自动热更新，可以看到修改后的效果
 * 文件名：每次编译后文件名中都会增加随机字符，两次生成的文件名字不会相同，避免缓存问题
@@ -2027,5 +2048,158 @@ wasm-pack build . --target web
 
 那该怎么办，可以解决开发过程中的这个问题呢？
 
-未完待续....
+
+
+<br>
+
+**目前有效的解决办法就是：**
+
+* 将 wasm-pack 项目放在 前端项目(例如 react 项目)的根目录，即与前端的 src/ 目录同级
+* 然后在前端项目 package.json 的 "scripts" 中增加 wasm-pack 构建命令
+* 由于前端项目框架本身都带有热更新，检测到 wasm-pack 产物发生变化后会重新更新前端网页
+
+
+
+<br>
+
+**Vite + React + TypeScript + WasmPack 示例：**
+
+* 我们先创建 前端项目：
+
+  ```
+  yarn create vite hello_react_wasm --template react-ts
+  
+  cd hello_react_wasm
+  yarn
+  ```
+
+* 我们再创建 wasmpack 项目：
+
+  ```
+  wasm-pack new wasm_src
+  ```
+
+* 修改前端项目 package.json ，增加构建 wasm 的命令：
+
+  ```diff
+    "scripts": {
+  +    "build:wasm": "wasm-pack build ./wasm_src --target web --out-dir ../public/wasm --out-name main_wasm"
+    }
+  ```
+
+  > build ./wasm_src：构建前端项目下 wasm_src/ 目录
+  >
+  > --target web：编译目标为 web
+  >
+  > --out-dir ../public/wasm：输出目录为 ../public/wasm (编译命令此时处在 wasm_src/ 目录内部)
+  >
+  > --out-name main_wasm：输出产物文件名前缀为 main_wasm
+
+  > 由于目前我们仅仅刚开始开发 wasm，根本不复杂，没必要压缩产物，所以我们先不加 --release 这个参数
+
+
+
+<br>当我们想编译 wasm 时只需执行：`yarn build:wasm`
+
+
+
+<br>
+
+**实际测试一下：**
+
+> src/App.tsx
+
+```
+import './App.css'
+import { useEffect } from 'react'
+import initWasm, { sum } from '../public/wasm/main_wasm.js'
+
+function App() {
+
+    useEffect(() => {
+
+        const init = async () => {
+            const wasm = await initWasm()
+            wasm.greet()
+            console.log(sum(1, 2))
+        }
+
+        init()
+
+    }, [])
+
+    return (
+        <>
+            'hello react wasm'
+        </>
+    )
+}
+
+export default App
+```
+
+
+
+<br>
+
+**清除构建时自动产生的 .gitignore 文件：**
+
+wasm-pack 构建的目录中会自动添加 .gitignore 文件。
+
+这个文件对于 wasm-pack 源码项目而言是有用的，但是在我们的场景中，我们不需要它，因为对于我们的 public/wasm/ 目录，我们是希望能够添加到前端项目 git 文件监控当中的。
+
+所以，我们需要再写一个 node.js 文件用来清理我们认为不需要的构建产物。
+
+
+
+<br>
+
+前端项目根目录 创建一个名为 clearWasmOtherFiles.js 文件
+
+```
+import path from 'path'
+import fs from 'fs'
+import { fileURLToPath } from 'url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+const basePath = path.resolve(__dirname, 'public/wasm/')
+
+//如果不想要构建产物中的 package.json、README.md 也可以添加到该数组中
+const delList = ['.gitignore'] 
+
+delList.forEach(item => {
+    fs.unlinkSync(path.resolve(basePath, item))
+})
+```
+
+> 特别说明：由于我们这个文件是运行在前端项目，而前端项目 package.json 中 `"type": "module"`，所以即使编写的是 node.js 代码，我们只能使用 import 引入模块，而不是 require 方式。
+>
+> 同时 import 这种方式下不存在 __dirname，所以上面代码中我们还需要自己来实现这个变量。
+
+
+
+<br>
+
+最终，我们再次修改 package.json 中构建 wasm 的命令：
+
+我们构建 wasm 完成后再执行 clearWasmOtherFiles.js
+
+```
+"scripts": "wasm-pack build ./wasm_src --target web --out-dir ../public/wasm --out-name main_wasm && node ./clearWasmOtherFiles.js",
+```
+
+
+
+<br>
+
+至此，一个 vite + react + typescript + wasm-pack 开发环境配置完成。
+
+
+
+<br>
+
+## wasm_bindgen详细用法
+
+未完待续...
 
