@@ -1825,7 +1825,7 @@ https://rustwasm.github.io/wasm-bindgen/api/wasm_bindgen/prelude/index.html
 
 * web_sys：让 Rust 可以访问、调用 浏览器(DOM元素和事件) 的包
 
-  > 例如 DOM元素、Windows、localStorage、scroll、onblur、onclick 等
+  > 例如 DOM元素、Window、localStorage、scroll、onblur、onclick 等
 
 有了 js_sys 和 web_sys 后 Rust 中就比较容易调用 网页和 JS 的各种对象和属性方法了。
 
@@ -2131,9 +2131,14 @@ import './App.css'
 import { useEffect } from 'react'
 import initWasm, { sum } from '../public/wasm/main_wasm.js'
 
+let ignore = false
+
 function App() {
 
     useEffect(() => {
+    
+        if (ignore) return //这行代码是为了避免 react18 严格模式下默认会初始化 2 次这个问题
+        ignore = true
 
         const init = async () => {
             const wasm = await initWasm()
@@ -2467,4 +2472,344 @@ fn main() {
 
 
 <br>
+
+**延展知识点：不从 web_sys 引入，而是从自定义的 .js 中引入**
+
+我们从 web_sys、js_sys 中引入定义的函数签名，实际上都是 浏览器本身就有的各种模块、属性或方法，那有没有可能引入我们自定义的 .js 函数？
+
+答案是：可以的
+
+
+
+<br>
+
+假定我们有一个 .js 文件：
+
+> my.js
+
+```
+export function name() {
+  return 'puxiao';
+}
+```
+
+那么就可以在 Rust 中引入它：
+
+```
+#[wasm_bindgen(module ="/my.js")]
+extern "C" {
+  fn name() -> String
+}
+```
+
+> 在 lib.rs 其他函数中就可以通过 name() 调用并得到该函数返回值
+
+
+
+<br>
+
+上面使用一个非常简单的  name() 函数来举例，实际中还有可能我们在 js 中定义一个类，例如 MyClass，那也对应有引入该类的方式，只不过过程稍微复杂一些(需要在 rust 中定义好 MyClass 的各个属性和方法 的 "结构体")，目前我们先不深究这一块，继续后面 web_sys 的学习。
+
+可以查看官方示例：https://rustwasm.github.io/wasm-bindgen/examples/import-js.html
+
+
+
+<br>
+
+**请注意：我们这个示例 2 代码是正常顺利运行了，可是真的该这样做吗？**
+
+明明是一个很简单的 console.log，结果还需要编写 `extern "C"`，以后用网页 web_sys 多个函数 都需要在 extern 中也定义一遍，多麻烦啊！
+
+**当然有更简单的写法，稍安勿躁，等我们看完下面的 示例 3 后，会重新用新的方式写一遍示例 2，代码极其简单。**
+
+
+
+<br>
+
+### 示例3：创建、添加 Dom 元素
+
+本示例将演示在 rust (wasm) 中创建一个 DOM 元素，并将该元素添加到网页中。
+
+经过前两个示例，我们已经大概了解了这种 wasm 与 前端网页 JS 交互的套路流程：
+
+* 在 .rs 中引入 web_sys/js_sys 中的某些函数
+* 然后在 .rs 中就可以调用该函数
+
+
+
+<br>
+
+同样，本示例中也采用这种 相似的套路流程，只不过前两个示例都是获取 某个 函数，而本示例中 "创建、添加 DOM 元素" 需要涉及到获取 winow、document、body 这些对象，所以还是有些不同的。
+
+
+
+<br>
+
+**第1步：在 Cargo.toml 中明确依赖 web-sys 的哪些特征选项**
+
+前两个示例中，我们仅仅需要引入 2 个函数，最终构建的 .wasm 文件也特别小，不到 1K。
+
+而本示例中，我们需要操作 DOM 元素，这里面涉及的对象方法太多，所以我们需要明确定义一下依赖 web-sys 中和 DOM 元素有关的特征选项。
+
+> 提前预告一下：本示例完成之后，最终构建的 .wasm 文件有 10K 左右
+
+
+
+在 Cargo.toml 中新增相关依赖特征：
+
+```diff
+[dependencies]
+wasm-bindgen = "0.2.84"
+
+# The `console_error_panic_hook` crate provides better debugging of panics by
+# logging them with `console.error`. This is great for development, but requires
+# all the `std::fmt` and `std::panicking` infrastructure, so isn't great for
+# code size when deploying.
+console_error_panic_hook = { version = "0.1.7", optional = true }
+
++ [dependencies.web-sys]
++ version = "0.3.61"
++ features = ['Document', 'Element', 'HtmlElement', 'Node', 'Window']
+```
+
+版本说明：
+
+* 我们明确依赖 wasm-bindgen 这个 crate 包
+* 而 wasm-bindgen 这个包里又依赖 web_sys、js_sys
+* wasm-bindgen 0.2.84 版本中依赖的 web_sys 包的版本就是 0.3.61
+
+**当我们这样配置过 Cargo.toml 后，再在 VScode 中的 .rs 文件里输入 web_sys 就能获得对应的语法提示了。**
+
+<br>
+
+**src/lib.rs 代码：**
+
+```
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen(start)]
+fn main() -> Result<(), JsValue> {
+
+    let window = web_sys::window().expect("no global `window` exists");
+    let document = window.document().expect("should have a document on window");
+    let body = document.body().expect("document should have a body");
+
+    let val = document.create_element("p")?;
+    val.set_text_content(Some("Hello from Rust!"));
+
+    body.append_child(&val)?;
+
+    Ok(())
+}
+```
+
+
+
+<br>
+
+我们对上面代码进行解释说明。
+
+
+
+<br>
+
+**属于 Rust 的知识点：函数返回成功或失败的结果**
+
+```
+fn main() -> Result<(), JsValue> {
+
+  xxx.xx().expect("xxxxx")
+
+  let xx = xxx?;
+  
+  Ok(())
+
+}
+```
+
+第1：为什么要给 main 增加 执行返回结果？
+
+在我们示例 2 中，由于 main 中仅仅需要执行一行输出，并且网页 JS 的 console.log() 函数本身就一定会正确执行，所以示例 2 中 main 是没必要添加 是否已正确执行的返回结果的。
+
+但本示例是创建、添加 DOM元素，这些创建和添加的过程是有可能发生报错的。
+
+为了在网页中更好的显示出报错信息，所以给 main 增加了一个返回结果 `Result<(), JsValue>`
+
+
+
+<br>
+
+**在 Rust 中处理结果 Result 几个方式：**
+
+* `Ok(())`：传递出去(返回)一个无任何有效信息的结果，用于表明执行成功
+
+  > () 在 Rust 中表示一个不包含任何信息的单一值，因此 Ok(()) 表示 "已成功，但无需所任何事(不包含任何信息) 的一个返回值"
+
+* `Err()`：表明出错，有报错信息的返回结果，但是本示例中并未使用 Err()
+
+* `xx().expect("xxxxx")`：若 `.expect("xxxxx")` 前面的函数 xx() 能够有有效的返回值则忽略并继续后面代码，若 xx() 包含错误信息则中断进程，并将错误信息传递给 Result 作为返回结果
+
+* `let xx = xxx?;`：若 ?; 前面的代码 xxx 能够成功执行则将执行结果赋值给变量 xx，若前面的代码 xxx 发生错误则中断进程，并将错误信息传递给 Result 作为返回结果
+
+
+
+<br>
+
+**Some("Hello from Rust!")**
+
+Some() 是 Rust 中一个 "some值"，它用来强调表示 "这一定是一个有效、非空" 的值。
+
+而 `Some("Hello from Rust!")` 则表达的含义是：
+
+* 这是一个 "some值"
+* 该值包含一个字符串 "Hello from Rust!"
+
+在 Rust 中 Some 通常用于明确某个 "Option" 类型，而在 web_sys 中 Element.set_text_content() 的定义是：
+
+```
+pub fn set_text_content(&self, value: Option<&str>)
+```
+
+> 与 Some 对立的，用于表示这一定是一个空值 的是 None
+
+
+
+<br>
+
+**创建 DOM 元素的相关代码：**
+
+```
+let window = web_sys::window().expect("no global `window` exists");
+let document = window.document().expect("should have a document on window");
+let body = document.body().expect("document should have a body");
+
+let val = document.create_element("p")?;
+val.set_text_content(Some("Hello from Rust!"));
+```
+
+> window()、document()、body() 这 3 个函数分别用于尝试获取 window、document、body
+
+当我们知道 Rust 中 .expect、Some 的语法含义后，上面的创建过程就比较容易看懂了。
+
+
+
+<br>
+
+再补充一个知识点：**在 rust 中声明变量是不存在 const 这个概念的**。
+
+
+
+<br>
+
+### 重写示例1、示例2：
+
+根据示例 3 中 的方式，我们重写一下 示例 1 的效果：
+
+**重写示例1：**
+
+> Cargo.toml
+
+```
+[dependencies.web-sys]
+version = "0.3.61"
+features = ['window']
+```
+
+> lib.rs
+
+```
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
+pub fn greet(name: &str) -> Result<(), JsValue> {
+    let window = web_sys::window().expect("no global `window` exists");
+    window.alert_with_message(&format!("Hello,{name}!"))?;
+    Ok(())
+}
+```
+
+> 就这么简单... 无需再编写 `extern "C" { ... }` 了
+
+
+
+<br>
+
+**补充说明：**
+
+* 由于 web_sys::window() 不一定能够正确返回 winows，所以下面那行 window.alert_with_message() 不一定能够正确执行。
+
+  > 为啥不能保证 web_sys::window() 一定能够获取到 window ？因为假定 .wasm 并不是在浏览器中运行，而是在 node.js 中执行，那本身确实获取不到 window
+
+* 但是为了避免这个问题，我们需要将 greet 函数修改成有返回结果 Realse 的形式，然后在有可能出现问题的 语句结尾出增加 `?;` 这种形式来告知如果发生错误该怎么处理。
+* 如果一切执行顺利则通过 `Ok(());` 来传递出一个无任何信息的结果
+
+
+
+<br>
+
+**重写示例2：**
+
+> Cargo.toml
+
+```
+[dependencies.web-sys]
+version = "0.3.61"
+features = ['console']
+```
+
+
+
+<br>
+
+> lib.rs
+
+```
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
+pub fn console_log(message: &str) {
+    let log_1 = web_sys::console::log_1;
+    log_1(&format!("Hello2, {message}").into());
+}
+```
+
+> 就这么简单... 无需再编写 `extern "C" { ... }` 了
+
+
+
+<br>
+
+**补充说明：**
+
+为什么 console_log() 并不需要像 greet() 那样定义有返回结果 Result ?
+
+因为在 console_log() 中的代码是一定会执行的，所以无需使用 `?;`，自然也不需要将函数定义有 返回结果 Result 了。
+
+
+
+<br>
+
+重写后的代码比较简单，相对于最早时候还需要编写 `extern "C"`，两者的区别是：
+
+* 前者无需配置 Cargo.toml，构建结果文件比较小
+
+* 后者需要配置 Cargo.toml，构建结果文件稍微大一点
+
+  > 文件大小增加几 K 是完全可以忽略的
+
+以后类似交互，我们都使用后面这种写法。
+
+
+
+<br>
+
+未完待续...
+
+
+
+
+
+
+
+
 
