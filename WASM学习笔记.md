@@ -9,6 +9,7 @@
 * https://developer.mozilla.org/zh-CN/docs/WebAssembly/
 * https://rustwasm.github.io/docs/book/
 * https://rustwasm.github.io/wasm-pack/book/
+* https://rustwasm.github.io/docs/wasm-bindgen/
 
 
 
@@ -1338,13 +1339,19 @@ pub fn greet() {
 
 * `#[wasm_bindgen] extern "C" { fn alert(s: &str); }`：
 
-  * extern：声明一个外部函数
-  * "C"：表明与编程语言 C/C++ 进行交互
-  * fn alert(s: &str)：定义一个提供给 C/C++ 调用的一个 alert 函数
+  * extern：对内引入外部 C/C++ 定义的某些函数签名(引用)
 
-* `#[wasm_bindgen] pub fn greet() { alert("Hello, hello-wasm!"); }`：对外定义一个 greet 的函数，在该函数内部会调用 `alert("Hello, hello-wasm!")`
+    这里的 内 是指 Rust 内部，外 是指 web_sys 中帮我们定义好的一些 JS 等价的函数，
 
-  > 注意，这里定义的 greet() 并没有使用任何 `extern` 来约束交互编程语言，那么就意味着该函数适用于 rust 默认的交互范围，那在此项目中就可以理解为与 wasm 交互。
+    **而 "函数签名" 是指用来描述该函数的一些信息**，例如 名称空间、函数名、参数、返回值等信息
+
+  * "C"：表明与编程语言 C 进行交互，注意这里的 "C/C++" 可以理解为泛指外部可以交互的汇编语言
+
+  * fn alert(s: &str)：引入 alert 函数签名
+
+    请注意由于在 JS 中 alert 函数属于全局函数，因此这里我们可以简单直接引入定义函数签名，若是其他非全局函数，则还需要通过定义属性(#[wasm_bindgen(...)])来明确究竟该如何 引入并绑定
+
+* `#[wasm_bindgen] pub fn greet() { alert("Hello, hello-wasm!"); }`：对外定义一个 greet 的函数，在该函数内部会调用在 extern 中引入定义的 alert 函数， `alert("Hello, hello-wasm!")`
 
 
 
@@ -1355,10 +1362,10 @@ pub fn greet() {
 请注意，代码阅读至此，我们应该意识到，alert 出现了 3 次：
 
 * 原生网页中的 alert：尽管没出现，但是我们知道网页 JS 中是存在 alert 函数的
-* extern "C" 中定义的 alert ：定义可与 C/C++ 交互中调用 alert
-* pub fn greet(){ ... } 中调用的 alert：对外暴露 greet 函数中调用了 alert
+* extern "C" 中定义的 alert ：从外部(web_sys)引入并定义 alert 函数签名 (可在 rust 内部调用该函数)
+* pub fn greet(){ ... } 中调用 extern "C" 中定义的 alert
 
-是不是有点乱，别担心，我们先忽略具体到底 alert 谁在定义，如何调用，后面在网页中实际运行代码时我们会详细讲解这个 alert 调用流程。
+是不是感觉多少有点懵，别担心，我们先忽略具体到底 alert 谁在定义，如何调用，后面在网页中实际运行代码时我们会详细讲解这个 alert 调用流程。
 
 
 
@@ -1456,7 +1463,7 @@ pub fn greet() {
 
 换句话说，当我们看到一个 xxx_bg.wasm 文件时，我们就意识到 这可能是一个经过 wasm-bindgen 编译过后的 wasm 文件。
 
-> 文件名中出现 "_bg" 相当于一个约定。
+> 文件名中出现 "_bg" 相当于一个命名约定。
 
 
 
@@ -1486,13 +1493,25 @@ export function greet(): void;
 
 <br>
 
+**特别补充：**
+
+随着以后功能复杂，我们会定义更多函数，但是请记住一条：无论你定义函数究竟参数是那种类型，在 xx.wasm.d.ts 中该函数参数的类型都会是 number。
+
+这是因为对于原生 wasm 来说传递参数只能是数字，你要是想传递字符串也必须先将字符串转换为数字后才能传递进来。
+
+但是无需担心，因为我们日常开发中并不会直接使用 xx.wasm.d.ts 中定义的函数，而是会使用产物中 xx.d.ts 中定义的类型。
+
+
+
+<br>
+
 **hello_wasm.js**
 
 这个是 wasm-bindgen 为我们自动封装得到的一个方便加载、解析、调用 wasm 的 JS 代码。
 
 > 帮我们解决 棘手问题2、棘手问题3
 
-请注意在这个 JS 中有一个函数 `__wbg_int`，它内部直接会加载 "hello_wasm_bg.wasm" 文件
+请注意在这个 JS 中有一个函数 `__wbg_int`，它内部直接会加载 "hello_wasm_bg.wasm" 文件。
 
 
 
@@ -1502,6 +1521,8 @@ export function greet(): void;
 
 这个是针对 hello_wasm.js 的类型定义文件。
 
+在该文件中 export 导出的函数和函数类型，才是我们实际中用到的函数类型。
+
 
 
 <br>
@@ -1509,9 +1530,9 @@ export function greet(): void;
 再次总结一下这 4 个文件：
 
 * hello_wasm_bg.wasm：当前项目编译的 .wasm 结果，名称中的 "_bg" 用于表明这是经过 wasm-bindgen 编译过的 wasm
-* hello_wasm_bg.d.ts：明确 .wasm 文件对外可调用对象或函数
+* hello_wasm_bg.d.ts：明确 .wasm 文件对外可调用对象或函数，但是函数参数永远都是 number
 * hello_wasm.js：经过 wasm-bindgen 封装后用于 加载、调用 .wasm 的 JS 文件
-* hello_wasm.d.ts：针对 hello_wasm.js 的类型定义文件
+* hello_wasm.d.ts：针对 hello_wasm.js 的类型定义文件，这里面 export 导出的函数类型才是我们最终使用到的类型
 
 
 
@@ -1733,11 +1754,7 @@ pub fn greet() {
 这个很明显：
 
 * 对外向 JS 暴露一个名为 greet 的函数
-* 在 greet 函数内部调用执行 alert 函数
-
-那么现在问题来了，greet 内部调用执行的 alert 函数是谁？是网页 JS 中的 alert 函数吗？
-
-答案是：不是网页 JS 中的那个 alert函数，而是 greet 函数上面 `extern "C" { }` 中定义的 alert 函数。
+* 在 greet 函数内部调用执行 extern "C" 中从 web_sys 引入定义的 alert 函数
 
 
 
@@ -1752,13 +1769,13 @@ extern "C" {
 }
 ```
 
-上面代码中，针对 C/C++ 编程语言中又通过 `fn alert(s: &str);` 定义的 alert 函数是怎么一回事？
+上面代码中，对内引入一个函数签名： `fn alert(s: &str);`
 
 
 
 <br>
 
-带着这个疑问，我们在往上看这行代码：
+我们再往上看这行代码：
 
 ```
 use wasm_bindgen::prelude::*;
@@ -1788,13 +1805,13 @@ https://rustwasm.github.io/wasm-bindgen/api/wasm_bindgen/prelude/index.html
 
 我们可以看到 prelude 实际上相当于一个汇总导出了很多 rust wasm 中需要用到 与 JS 沟通交互的常见模块。
 
-尽管我们目前还不知道这些模块都具体作用是什么。
+> 尽管我们目前还不太知道这些模块都具体作用是什么，后面会慢慢学习。
 
 
 
 <br>
 
-这里我们要提到另外 2 个 wasm_bindgen 关联依赖的包：js_sys、web_sys
+这里我们要提到 2 个 wasm_bindgen 关联依赖的包：js_sys、web_sys
 
 > 对于前端而言我们会说 NPM 包，对于 Rust 而言则是 crate 包 (板条箱)，
 >
@@ -1831,8 +1848,8 @@ Struct web_sys::Window
 到此，我们终于大致摸清楚了整个执行流程：
 
 * 网页 JS 加载 .wasm 完成后调用 wasm.greet()
-* 此时进入到 wasm 内部 由 lib.rs 对外定义的 greet() 函数
-* 而 greet() 函数内部调用 `extern "C" { ... }` 中定义的 alert 函数
+* 找到 Rust 内部定义的 greet 函数
+* 找到由  `extern "C" { ... }` 中引入的 alert 函数
 * 而该函数实际调用 wasm_bindgen::prelude::* 内部使用的 web_sys::Window 中的 alert 函数
 * 最终执行该函数，相当于调用网页 JS 中的 alert 函数
 
@@ -2201,5 +2218,253 @@ delList.forEach(item => {
 
 ## wasm_bindgen详细用法
 
-未完待续...
+
+
+<br>
+
+接下来，我们将按照 https://rustwasm.github.io/docs/wasm-bindgen/examples/index.html 上的例子，过一遍。
+
+**特别说明：**
+
+* wasm-bindgen 示例文档中的一些 rust 语法比较老，我们将采用较新的 rust  语法
+* 为了可以使用较新的 rust 语法，记得配置 Cargo.toml 中的 `edition = "2021"` 
+* 侧重点在 Rust，对于 JS 中调用，若无特别之处就不演示 JS 代码了
+
+
+
+<br>
+
+### 示例1：alert
+
+```
+mod utils;
+
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
+extern "C" {
+    fn alert(s: &str);
+}
+
+#[wasm_bindgen]
+pub fn greet(name: &str) {
+    alert(&format!("Hello,{name}!"));
+}
+```
+
+代码说明：
+
+* rust 函数中是不存在 "可选参数" 这个概念的
+
+* &str：这种强调的是 "使用值"，而非引用(指针)
+
+* &format!("Hello,{name}!")：这是较新的写法，旧的写法是
+
+  ```
+  alert(&format!("Hello, {}!", name))
+  ```
+
+  > 变量 name 会替换 "Hello, {}!" 中的 `{}`
+
+* 请注意在 rust 语法中字符串要用 双引号，不能使用单引号 或 反引号
+
+  > 单引号有自己特殊的含义用途
+
+
+
+<br>
+
+### 示例2：console.log
+
+再次强调一下：extern "C" { .. } 中定义的函数是指 引入外部的定义好的函数，并对其进行定义函数签名
+
+> **"引入并定义函数签名"** 这个解释完全是我个人当下的理解，不一定严格正确。
+
+
+
+<br>
+
+**先讲一下 Rust 函数的一个知识点：Rust 中的函数不支持重载**
+
+还记得 示例 1 中我们提到的一句话：**rust 函数中是不存在 "可选参数" 这个概念的**
+
+实际上 函数参数是可选的 这个本身就是 函数重载 的一种形式，即：
+
+* 这个函数有一种没有参数，即有  0 个参数
+* 这个函数有一种情况有 1 个参数
+* ...
+* 这个函数有一种情况有 n 个参数
+
+> 我们这里仅仅说了参数数量，实际就算参数数量相同，但是参数值类型不同，也视作 重载
+
+
+
+<br>
+
+而 函数重载 这个问题在 JS 中是不存在的，JS 的函数天生支持重载！
+
+所以这就造成一个问题：**在 JS 中的函数是无法直接、完全和 Rust 中的函数重叠一模一样的**。
+
+> 注：这里的 Rust 是指 wasm_bindgen、web_sys、js_sys
+
+
+
+<br>
+
+我们再看一下 JS 中 console.log 函数：
+
+* 参数数量不限
+* 参数类型不限
+
+因此 JS 中的 console.log 妥妥的符合 函数重载 的一个函数。
+
+
+
+<br>
+
+我们看一下 web_sys 中关于 console.log  的实现：
+
+https://rustwasm.github.io/wasm-bindgen/api/web_sys/console/index.html
+
+> 我们只看 console.log，不看 console.info、console.warn、console.error 这些
+
+
+
+<br>
+
+**和 log 有关的：**
+
+在该文档中可以看到和 log 有关的有：log、log_0、log_1、log_2、log_3、...、log_7
+
+他们分别表示的含义：
+
+* log：对应有 1 个参数，且参数类型为数组的 JS 中的 console.log()
+* log_0：对应有 0 个参数的 JS 中的 console.log()
+* log_1：对应有 1 个参数的 JS 中的 console.log()
+* log_2：对应有 2 个参数的 JS 中的 console.log()
+* ...
+* log_7：对应有 7 个参数的 JS 中的 console.log()
+
+> console.info、console.warn、console.error 也都是这样的
+
+<br>
+
+也就是说在 web_sys 中通过这种字面形式，定义多个函数来尽量模拟 "函数重载"、向 JS 中的 console.log 函数靠近。
+
+
+
+**JsValue：**
+
+特别说明：上面提到的 "参数" 值类型对应 wasm_pack 中定义的 JsValue
+
+https://rustwasm.github.io/wasm-bindgen/api/wasm_bindgen/struct.JsValue.html
+
+简单来说 JsValue 是指 JS 中简单类型的值，例如：undefined、null、string、boolean、数字(f32、f64、i32、i64)
+
+
+
+<br>
+
+在我们了解了 Rust 中 `extern "C"` 和 web_sys 中众多字面形式的 log 后，我们来写我们的示例吧。
+
+
+
+<br>
+
+**示例代码：**
+
+```
+mod utils;
+
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
+}
+
+#[wasm_bindgen(start)]
+fn main() {
+    log("Hello, this is main()")
+}
+
+#[wasm_bindgen]
+pub fn console_log(message: &str) {
+    log(&format!("Hello, {message}"));
+}
+
+```
+
+
+
+<br>
+
+**代码说明：**
+
+```
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
+}
+```
+
+在 extern 对内通过 `#[wasm_bindgen(js_namespace = console)]` 引入 web_sys 中 console 模块下的 log 函数
+
+
+
+<br>
+
+```
+#[wasm_bindgen]
+pub fn console_log(message: &str) {
+    log(&format!("Hello, {message}"));
+}
+```
+
+通过 pub fn 对外定义导出一个名为 console_log 的函数，在该函数内部执行 `extern "C"` 中引入的 web_sys 中的 log 函数。
+
+
+
+<br>
+
+```
+#[wasm_bindgen(start)]
+fn main() {
+    log("Hello, this is main()")
+}
+```
+
+在代码中我们还通过 `#[wasm_bindgen(start)]` 定义了一个内部默认执行的函数 main
+
+
+
+<br>
+
+也就是说，上面代码中我们实现了：
+
+* 在 rust (wasm) 内部我们可以通过 log 函数在浏览器中输出信息
+
+* 在外部网页 JS 我们可以通过调用 wasm 中的 console_log 函数，引发浏览器执行 log 函数
+
+  > 注：这个 console_log 函数纯粹是我们为了练习而加上的，实际上外部网页 JS 中没有必要绕这个弯，直接执行 console.log() 就好了
+
+
+
+<br>
+
+**为什么之前示例中 alert 不需要 #[wasm_bindgen] ？**
+
+这是因为 alert 是 window 下的，也就是 全局函数，即在 JS 中可以直接调用的函数。
+
+而 log 实际是 console 下的，它是 console 名下的一个函数，在 JS 中必须通过 console.log 才能使用
+
+**对于 JS 中的全局函数在进行 wasm 和 JS 绑定关联时是不需要使用 #[wasm_bindgen] 的，只有非全局函数菜需要。 **
+
+这就是为什么 alert 不需要，而 log 需要 #[wasm_bindgen]。
+
+
+
+<br>
 
