@@ -27,6 +27,12 @@
 
 <br>
 
+谷歌安卓团队出的教程：https://google.github.io/comprehensive-rust/zh-CN/index.html
+
+
+
+<br>
+
 **Rust中文社区：** https://rustwiki.org/
 
 为爱发电的一群人，翻译更新维护大量 Rust 官方文档和书籍。
@@ -748,7 +754,7 @@ rustc src/main.rs
   * cargo build：构建
   * cargo check：检查是否可通过编译
   * cargo test：运行单元测试
-  * cargo doc：自动生成文档
+  * cargo doc：查看或生成文档
   * ....
 * 声明相关命令，例如我们接下来就要学习的安装依赖包
   * cargo add：安装依赖包
@@ -1052,6 +1058,18 @@ yarn config set registry https://registry.yarnpkg.com
 
 <br>
 
+**如何找到靠谱的 安装包？**
+
+当我们在官网 https://crates.io/ 上检索某个关键词时，会出来很多相关结果，那如何确定哪个包比较靠谱些呢？
+
+一个比较简单的办法，就是你去查看 https://lib.rs/ 这个网站。
+
+该网站针对你不同功能分类，罗列出比较靠谱的相关安装包，可以作为你的借鉴参考。
+
+
+
+<br>
+
 至此 Rust 开发环境、cargo 常用命令、修改成国内镜像源 都已经学习完成，可以开始真正 Rust 语法学习和实际代码编写了。
 
 
@@ -1077,6 +1095,37 @@ yarn config set registry https://registry.yarnpkg.com
 
 * Rust 代码中使用变量对象分为：引用 或 使用该值，而 JS 最对象全部为引用
 
+
+
+<br>
+
+**声明变量：**
+
+* let：在代码作用域声明一个 值不变 的变量
+* let mut：在代码作用域生命一个 值可以改变 的变量
+* const：声明一个全局常量，由于是全局，所以在不同作用域下都可以访问
+
+
+
+<br>
+
+**变量类型：**
+
+* 变量都需要明确数据类型是什么
+* 在声明变量时 rust 会进行简单的类型推导，这时可以省略不写 变量类型
+
+
+
+<br>
+
+**不支持函数重载：**
+
+在 Rust 中函数不支持重载，即：
+
+* 函数参数个数必须固定
+* 参数值类型也必须固定
+
+> 在 JS 中是支持函数重载的，例如 console.log 函数的参数个数和值类型就是随意，非固定的，但是在 Rust 中则不行
 
 
 
@@ -1237,6 +1286,20 @@ use std::xxx
 
 <br>
 
+不包括哪些内容：
+
+* 生成随机数字
+* 对 JSON 处理
+* ...
+
+这些 "看似" 应该在标准库中的模块并不在，需要你自己去安装对应处理依赖包。
+
+> 标准库中之所以没有，是因为为了让标准库足够精简，况且有非常完善的第三方依赖包，所以就没有加到标准库中。
+
+
+
+<br>
+
 **宏(macros) ？**
 
 这是和 进程 相关的一个名词，目前我也不是很掌握理解，但是你知道这是一个非常重要的概念即可。
@@ -1318,6 +1381,23 @@ https://rustwiki.org/zh-CN/rust-by-example/
 对应的教程是：
 
 https://rustwasm.github.io/docs/book/
+
+
+
+<br>
+
+需要学习的有：
+
+* wasm-pack：创建工程
+* wasm-bindgen：自动产生 胶水代码
+* web_sys：rust 中写好针对 浏览器 的对应对象、属性、函数
+* js_sys：rust 中写好针对 JS 的数据类型
+
+
+
+<br>
+
+欢迎查看我写的 [WASM学习笔记](https://github.com/puxiao/notes/blob/master/WASM学习笔记.md)
 
 
 
