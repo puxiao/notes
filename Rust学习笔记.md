@@ -1118,6 +1118,14 @@ yarn config set registry https://registry.yarnpkg.com
 
 <br>
 
+**相等判断中 没有、不需要 隐式转换：**
+
+由于变量类型都是已知的，所以在 rust 中不存在 ===，只需使用 == 即可。
+
+
+
+<br>
+
 **不支持函数重载：**
 
 在 Rust 中函数不支持重载，即：
@@ -1126,6 +1134,15 @@ yarn config set registry https://registry.yarnpkg.com
 * 参数值类型也必须固定
 
 > 在 JS 中是支持函数重载的，例如 console.log 函数的参数个数和值类型就是随意，非固定的，但是在 Rust 中则不行
+
+
+
+<br>
+
+**数字 _ 的写法：**
+
+* 数字 1000 可以写成 1_000
+* 同理 1_000_000 对应 1000000
 
 
 
@@ -1152,18 +1169,189 @@ Rust 代码中对于字符串必须使用双引号 `""`，单引号 `''`在 Rust
 Rust 代码中使用变量对象分为：引用 或 使用该值，而 JS 最对象全部为引用。
 
 * 使用该值：直接使用变量则表示为 使用该变量此刻的值，以后变量值变了也不会受影响，继续使用当初那个值
-
 * 引用值：在变量前增加 `&` 表示使用 引用，以后变量值变了就也会跟着变
 
 
 
 <br>
 
-**打印：println!()**
+**关于注释与 ///：**
 
-Rust 中打印输出使用的是 `println!()` 函数，切记 println 后面要加一个 感叹号 `!`
+* //：使用双斜杠来表达注释
+* ///：使用三斜杠来 除可用作注释，后面的内容还会被编译到文档中
+
+
+
+<br>
+
+**关于 #[] 的用法：**
+
+#[] 表示对下面一行代码的 "属性" 描述，编译器会根据这个描述来对下面的代码进行有针对性的编译和执行(运行)。
+
+
+
+<br>
+
+**打印：print!()、println!()**
+
+Rust 中打印输出使用的是 `print!()` 和 `println!()` 函数，切记它们后面要加一个 感叹号 `!`
 
 加感叹号的含义是："将以宏形式运行"，具体含义等以后慢慢学习再深入理解吧
+
+* print!()：将打印内容打印出来，但不会新起一行
+
+  ```
+  print!("hello");
+  print!("hello");
+  ```
+
+  最终命令窗口中显示的打印结果为：hellohello
+
+* println!()：将打印内容打印出来，会新起一行
+
+  > 注意：ln 中的 l 是小写字母 L，不是大写字母 i
+  >
+  > println!() 就像 JS 中的 console.log() 
+
+
+
+<br>
+
+**模板字符：**
+
+在 JS 中可以使用 `${}` 模板字符串：
+
+```
+let s1 = "puxiao"
+console.log(`hi,${s1}`)
+```
+
+但是在 Rust 中使用 `{}`，具体写法是：
+
+```
+let s1: String = String::from("Rust");
+println!("hi,{s1}")
+```
+
+
+
+<br>
+
+**不存在一对多的引用(所有权)：**
+
+在 JS 中若变量值为 简单对象则为 复制：
+
+```
+let str1 = "abc"
+let str2 = str1
+str2 = "cba"
+
+console.log(str1) //"abc"
+console.log(str2) //"cba"
+```
+
+若变量值为 复杂对象则为引用：
+
+```
+let obj1 = { name: "yang" }
+let obj2 = obj1
+obj2.name = "puxiao"
+
+console.log(obj1) // { name: "puxiao" }
+console.log(obj2) // { name: "puxiao" }
+```
+
+<br>
+
+但是在 Rust 中上面的逻辑完全不同：
+
+像 `let xx2 = xx1` 这样的代码相当于 将 xx1 的值 "所有权(访问、修改)" 转移给了 xx2，而 xx1 不再拥有对之前值的 "所有权(访问、修改)"。
+
+当你对一个已经失去所有权的变量名访问时，会报错误。
+
+```
+let s1: String = String::from("Rust");
+let s2: String = s1;
+```
+
+如果执行下面代码，会正确输出 "Rust"：
+
+```
+print!("{s2}")
+```
+
+但如果执行下面代码，则会报错：
+
+```
+print!("{s1}")
+```
+
+> 因为此时 s1 已经不关联任何值，在 Rust 中并不会像 JS 那样输出 "undefined"，而是直接程序报错
+
+
+
+<br>
+
+**但是 数字 是一个特例，数字执行的是复制。**
+
+
+
+<br>
+
+**函数参数也会引发所有权转移：**
+
+上面讲的是通过 `let xx2 = xx1;` 会引发 xx1 失去所有权，在 rust 中如果将 xx1 作为某个函数的参数，依然会让 xx1 失去所有权。
+
+```
+fn say_hello(name: String) {
+    println!("Hello {name}")
+}
+
+fn main() {
+    let name = String::from("Alice");
+    say_hello(name);
+    // say_hello(name);
+}
+```
+
+> 在 main() 函数内部由于将 name 作为 say_hello 函数的参数：
+>
+> * say_heool 函数的参数获得所有权
+> * main 函数中的 name 失去所有权
+> * 如果在 main 函数中再添加执行 println!("{name}"); 则会报错，会输出类似 "value borrowed here after move" 的信息，表明 name 该值一杯借用走了，无权再访问了。
+
+
+
+<br>
+
+**借用：临时转让所有权**
+
+使用 `&xx` 可以表明仅为临时转让、借出所有权，等对方执行完成后，所有权又回归到自己。
+
+
+
+<br>
+
+**结构体：**
+
+相当于 TypeScript 中的 interface，用来定义某种对象的属性和方法的类型。
+
+使用 struct Xxx {} 这种方式来定义结构体，例如：
+
+```
+struct Xxx {
+    name: String,
+    age: u8,
+}
+```
+
+
+
+<br>
+
+**继续添结构体内容：**
+
+假设先定义了结构体 A，此时可以通过 `impl A { ... }` 这种形式，继续向 A 增加新的内容。
 
 
 
