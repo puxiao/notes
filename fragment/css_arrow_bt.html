@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>CSS箭头按钮</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .arrow {
+            display: flex;
+            align-items: center;
+
+            padding-right: 10px;
+
+            min-width: 50px;
+            height: 30px;
+
+            font-size: 16px;
+            color: rgb(8, 168, 186);
+            line-height: 1;
+
+            border: solid rgb(8, 168, 186);
+            border-width: 2px 2px 2px 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .arrow::before {
+
+            content: "";
+            display: inline-block;
+
+            /* 
+            由于箭头是一个正方形旋转 135度，所以此时的高度实际是边长的 Math.SQRT2 (1.414)
+            而 1/1.414 ≈ 0.707，即 0.7，但是为了好算，这里取 0.8
+            所以假定长方形高度为 30px，那么绘制三角形时高宽就应该设置为 calc(30px * 0.8)
+            同理，为了让箭头往左偏移，就需要让它偏移一半，即 0.8 的一半，即 0.4
+            */
+
+            width: calc(30px * 0.8);
+            height: calc(30px * 0.8);
+            margin-left: calc(30px * -0.4);
+
+            border: solid rgb(8, 168, 186);
+            border-width: 0 2px 2px 0;
+            border-radius: 4px;
+
+            transform: rotate(135deg);
+            -webkit-transform: rotate(135deg);
+        }
+
+        .arrow-circle {
+            content: "";
+            display: inline-block;
+            margin-left: -12px;
+            margin-right: 8px;
+            width: 6px;
+            height: 6px;
+            border: solid rgb(8, 168, 186);
+            border-width: 2px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+
+<body>
+    <span class="arrow">
+        <span class="arrow-circle"></span>
+        <span>按钮文字</span>
+    </span>
+</body>
+
+</html>
