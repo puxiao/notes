@@ -214,9 +214,33 @@ Umi 默认使用 dva 来管理整个项目的全局数据状态。
 
 **开始吧，Hello World!**
 
-初始化一个 Umi 项目：https://umijs.org/zh-CN/docs/getting-started
+**初始化一个 antd-pro 项目：**
 
-初始化一个 Antd Pro 项目：https://pro.ant.design/zh-CN/docs/getting-started
+1. 先创建一个项目目录，例如 myadmin
+
+2. 进入到 myadmin，然后执行：
+
+   ```
+   yarn create umi
+   ```
+
+   > 注意你无需提前安装 umi
+
+3. 根据提示，通过键盘上下箭头，将模板选则为 antd-pro
+
+4. 后面根据提示，一路按回车
+
+这样一个 antd-pro 项目就创建完成了。
+
+
+
+<br>
+
+具体细节可参考：
+
+> 初始化一个 Umi 项目：https://umijs.org/zh-CN/docs/getting-started
+>
+> 初始化一个 Antd Pro 项目：https://pro.ant.design/zh-CN/docs/getting-started
 
 
 
@@ -238,4 +262,3 @@ Umi 默认使用 dva 来管理整个项目的全局数据状态。
 | ahooks              | 提供各种通用的自定义 hooks         | https://github.com/alibaba/hooks    |
 | Ant Motion          | 提供组件动画                       | https://motion.ant.design/index-cn  |
 | Scaffolds           | 发布各种脚手架的平台(不限于React)  | https://scaffold.ant.design         |
-
