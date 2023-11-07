@@ -40,18 +40,19 @@
 
             /* 
             由于箭头是一个正方形旋转 135度，所以此时的高度实际是边长的 Math.SQRT2 (1.414)
-            而 1/1.414 ≈ 0.707，即 0.7，但是为了好算，这里取 0.8
-            所以假定长方形高度为 30px，那么绘制三角形时高宽就应该设置为 calc(30px * 0.8)
-            同理，为了让箭头往左偏移，就需要让它偏移一半，即 0.8 的一半，即 0.4
+            而 1/1.414 ≈ 0.707，大约 0.7，
+            请注意：实际中高度不同、边框粗细不同，导致最终参数值也有细微区别，我们这个示例中取 0.72
+            所以假定长方形高度为 30px，那么绘制三角形时高宽就应该设置为 calc(30px * 0.72)
+            同理，为了让箭头往左偏移，就需要让它偏移一半，即 0.72 的一半，本来应该是 0.35，但实际中我们取 0.4
             */
 
-            width: calc(30px * 0.8);
-            height: calc(30px * 0.8);
+            width: calc(30px * 0.72);
+            height: calc(30px * 0.72);
             margin-left: calc(30px * -0.4);
 
             border: solid rgb(8, 168, 186);
             border-width: 0 2px 2px 0;
-            border-radius: 4px;
+            border-radius: 0px 0px 4px 0px;
 
             transform: rotate(135deg);
             -webkit-transform: rotate(135deg);
