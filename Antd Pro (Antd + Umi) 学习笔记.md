@@ -214,7 +214,11 @@ Umi 默认使用 dva 来管理整个项目的全局数据状态。
 
 **开始吧，Hello World!**
 
-**初始化一个 antd-pro 项目：**
+
+
+<br>
+
+**初始化一个 umi 项目：**
 
 1. 先创建一个项目目录，例如 myadmin
 
@@ -230,7 +234,53 @@ Umi 默认使用 dva 来管理整个项目的全局数据状态。
 
 4. 后面根据提示，一路按回车
 
-这样一个 antd-pro 项目就创建完成了。
+这样一个 umi 项目就创建完成了。
+
+
+
+<br>
+
+**初始化一个 antd-pro 项目：**
+
+1. 全局安装：
+
+   ```
+   npm i @ant-design/pro-cli -g
+   ```
+
+2. 创建项目：
+
+   ```
+   pro create myadmin
+   ```
+
+3. 在命令选择相中，选择 umi4
+
+
+
+<br>
+
+**注意：假设第 2 步中报错：**
+
+```
+pro: The term 'pro' is not recognized as a name of a cmdlet, function, script file, or executable program.
+```
+
+这是因为你本机没有把 npm 全局安装目录添加到系统环境路径中。
+
+你需要做的是：
+
+1. 先找到自己当前的 npm 全局目录：
+
+   ```
+   npm root -g
+   ```
+
+2. 假定上面命令输出结果为："C:\Users\Administrator\AppData\Roaming\npm\node_modules"
+
+   那么你需要把 "C:\Users\Administrator\AppData\Roaming\npm\" 添加到系统环境变量 Path 中，
+
+   然后重启命令窗口 或 VSCode，这样再去执行 `pro create myadmin`  就能找到 pro 了。
 
 
 
@@ -241,6 +291,15 @@ Umi 默认使用 dva 来管理整个项目的全局数据状态。
 > 初始化一个 Umi 项目：https://umijs.org/zh-CN/docs/getting-started
 >
 > 初始化一个 Antd Pro 项目：https://pro.ant.design/zh-CN/docs/getting-started
+
+
+
+<br>
+
+**初始化项目的差异：**
+
+* 使用 umi 初始化创建的项目页面功能要比 antd-pro 的少一些，适用于需要大量自定义页面
+* 使用 antd-pro 初始化的项目页面、路由 等各项配置比较齐全，适用于通用管理后台
 
 
 
