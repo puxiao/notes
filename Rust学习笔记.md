@@ -1052,7 +1052,63 @@ yarn config set registry https://registry.yarnpkg.com
 
 **恢复官方默认的镜像源：**
 
-当你不想使用国内镜像源了，那直接删除上面配置即可。
+当你不想使用国内镜像源了，那直接删除上面配置文件、或者将 config.toml 临时重命名其他名字。
+
+
+
+<br>
+
+**什么时候需要恢复官方默认的镜像源：当你需要向 cargo.io 发布自己的包时**
+
+如果你不恢复成官方的镜像源，那么当你尝试向 cargo.io 发布自己的包时，会收到下面的错误信息：
+
+```
+error: crates-io is replaced with non-remote-registry source registry `rsproxy-sparse`;
+include `--reqistry crates-io` to use crates.io
+```
+
+> 恢复官方默认镜像源后，再次执行发布即可。
+
+
+
+<br>
+
+**如何发布自己的包到 cargo.io ？**
+
+* 首先创建自己的 rust 项目
+
+* 修改项目的 Cargo.toml 文件，填写以下内容 (仅仅举例)：
+
+  ```
+  [package]
+  name = "webgpu"
+  version = "0.0.1"
+  edition = "2021"
+  description = "Hello WebGPU"
+  authors = ["puxiao <yangpuxiao@gmail.com>"]
+  repository = "https://github.com/puxiao/webgpu"
+  keywords = ["webpug"]
+  license = "MIT"
+  readme = "README.md"
+  
+  
+  [dependencies]
+  
+  ```
+
+* 上述配置项中，最核心的是  `name = "webgpu"`，一定提前去 cargo.io 上查询确保 name 的值是未被使用的
+
+* 你需要去 cargo.io 注册账户，并且生成自己的 token，保存好并复制该 token 值
+
+* 先本地 VSCode 中登录：`cargo login`，命令行会让你输入你的 token，输入后按回车
+
+  > 在 VSCode 命令窗口中不是按 ctr+v 粘贴 token，而是点击鼠标右键即自动粘贴上
+
+* 接着执行：`cargo publish --allow-dirty`，接着等待上传即可
+
+* 若一切顺利即发布成功
+
+  > 目前 cargo.io 上还有比较多好的包名未被占用，赶紧去抢注一些吧
 
 
 
