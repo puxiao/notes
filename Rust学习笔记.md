@@ -27,12 +27,6 @@
 
 <br>
 
-谷歌安卓团队出的教程：https://google.github.io/comprehensive-rust/zh-CN/index.html
-
-
-
-<br>
-
 **Rust中文社区：** https://rustwiki.org/
 
 为爱发电的一群人，翻译更新维护大量 Rust 官方文档和书籍。
@@ -451,6 +445,32 @@ Cargo.toml
 
 <br>
 
+> 最近开始看 极客时间 上 张卫东 老师 2021年时候录的 Rust 课程，在他的视频中将 "编译包保本号" 称之为 "版次"。
+>
+> "版次" 是书籍印刷上的一个词语，用于表示 "第几次印刷该书籍"。
+
+
+
+<br>
+
+**关于 不同编译包版本 的兼容说明：**
+
+* 过早的 2015 我们就不说了，说一下 2018 与 2021
+
+* 首先你在编写 Rust 代码时都可以使用最新的语法，也就是说开发过程中你无需关心编译包版本号
+
+* 当你决定编译时，假设你选择编译包为 2018，你所写的最新 Rust 语法会被编译为 2018 所能执行、理解 的对应代码
+
+* 简单来说：**你无需担心由于选择了 2018 而不敢使用新的 Rust 语法**
+
+* 当然这里面有一个最大的前提：那就是 **该年号版次 依然处于未冻结状态**，也就是说 依然处于维护阶段
+
+  > 当前最新的编译包版本为 2021，但 2018  依然处于未冻结、维护状态中
+
+
+
+<br>
+
 **运行Rust项目：**
 
 由于我们默认创建的项目入口代码 main.rs 中的入口函数 main() 已经自动被创建好，所以我们可以直接在命令中输入：
@@ -754,7 +774,7 @@ rustc src/main.rs
   * cargo build：构建
   * cargo check：检查是否可通过编译
   * cargo test：运行单元测试
-  * cargo doc：查看或生成文档
+  * cargo doc：自动生成文档
   * ....
 * 声明相关命令，例如我们接下来就要学习的安装依赖包
   * cargo add：安装依赖包
@@ -1052,75 +1072,7 @@ yarn config set registry https://registry.yarnpkg.com
 
 **恢复官方默认的镜像源：**
 
-当你不想使用国内镜像源了，那直接删除上面配置文件、或者将 config.toml 临时重命名其他名字。
-
-
-
-<br>
-
-**什么时候需要恢复官方默认的镜像源：当你需要向 cargo.io 发布自己的包时**
-
-如果你不恢复成官方的镜像源，那么当你尝试向 cargo.io 发布自己的包时，会收到下面的错误信息：
-
-```
-error: crates-io is replaced with non-remote-registry source registry `rsproxy-sparse`;
-include `--reqistry crates-io` to use crates.io
-```
-
-> 恢复官方默认镜像源后，再次执行发布即可。
-
-
-
-<br>
-
-**如何发布自己的包到 cargo.io ？**
-
-* 首先创建自己的 rust 项目
-
-* 修改项目的 Cargo.toml 文件，填写以下内容 (仅仅举例)：
-
-  ```
-  [package]
-  name = "webgpu"
-  version = "0.0.1"
-  edition = "2021"
-  description = "Hello WebGPU"
-  authors = ["puxiao <yangpuxiao@gmail.com>"]
-  repository = "https://github.com/puxiao/webgpu"
-  keywords = ["webpug"]
-  license = "MIT"
-  readme = "README.md"
-  
-  
-  [dependencies]
-  
-  ```
-
-* 上述配置项中，最核心的是  `name = "webgpu"`，一定提前去 cargo.io 上查询确保 name 的值是未被使用的
-
-* 你需要去 cargo.io 注册账户，并且生成自己的 token，保存好并复制该 token 值
-
-* 先本地 VSCode 中登录：`cargo login`，命令行会让你输入你的 token，输入后按回车
-
-  > 在 VSCode 命令窗口中不是按 ctr+v 粘贴 token，而是点击鼠标右键即自动粘贴上
-
-* 接着执行：`cargo publish --allow-dirty`，接着等待上传即可
-
-* 若一切顺利即发布成功
-
-  > 目前 cargo.io 上还有比较多好的包名未被占用，赶紧去抢注一些吧
-
-
-
-<br>
-
-**如何找到靠谱的 安装包？**
-
-当我们在官网 https://crates.io/ 上检索某个关键词时，会出来很多相关结果，那如何确定哪个包比较靠谱些呢？
-
-一个比较简单的办法，就是你去查看 https://lib.rs/ 这个网站。
-
-该网站针对你不同功能分类，罗列出比较靠谱的相关安装包，可以作为你的借鉴参考。
+当你不想使用国内镜像源了，那直接删除上面配置即可。
 
 
 
@@ -1153,54 +1105,6 @@ include `--reqistry crates-io` to use crates.io
 
 
 
-<br>
-
-**声明变量：**
-
-* let：在代码作用域声明一个 值不变 的变量
-* let mut：在代码作用域生命一个 值可以改变 的变量
-* const：声明一个全局常量，由于是全局，所以在不同作用域下都可以访问
-
-
-
-<br>
-
-**变量类型：**
-
-* 变量都需要明确数据类型是什么
-* 在声明变量时 rust 会进行简单的类型推导，这时可以省略不写 变量类型
-
-
-
-<br>
-
-**相等判断中 没有、不需要 隐式转换：**
-
-由于变量类型都是已知的，所以在 rust 中不存在 ===，只需使用 == 即可。
-
-
-
-<br>
-
-**不支持函数重载：**
-
-在 Rust 中函数不支持重载，即：
-
-* 函数参数个数必须固定
-* 参数值类型也必须固定
-
-> 在 JS 中是支持函数重载的，例如 console.log 函数的参数个数和值类型就是随意，非固定的，但是在 Rust 中则不行
-
-
-
-<br>
-
-**数字 _ 的写法：**
-
-* 数字 1000 可以写成 1_000
-* 同理 1_000_000 对应 1000000
-
-
 
 <br>
 
@@ -1225,189 +1129,18 @@ Rust 代码中对于字符串必须使用双引号 `""`，单引号 `''`在 Rust
 Rust 代码中使用变量对象分为：引用 或 使用该值，而 JS 最对象全部为引用。
 
 * 使用该值：直接使用变量则表示为 使用该变量此刻的值，以后变量值变了也不会受影响，继续使用当初那个值
+
 * 引用值：在变量前增加 `&` 表示使用 引用，以后变量值变了就也会跟着变
 
 
 
 <br>
 
-**关于注释与 ///：**
+**打印：println!()**
 
-* //：使用双斜杠来表达注释
-* ///：使用三斜杠来 除可用作注释，后面的内容还会被编译到文档中
-
-
-
-<br>
-
-**关于 #[] 的用法：**
-
-#[] 表示对下面一行代码的 "属性" 描述，编译器会根据这个描述来对下面的代码进行有针对性的编译和执行(运行)。
-
-
-
-<br>
-
-**打印：print!()、println!()**
-
-Rust 中打印输出使用的是 `print!()` 和 `println!()` 函数，切记它们后面要加一个 感叹号 `!`
+Rust 中打印输出使用的是 `println!()` 函数，切记 println 后面要加一个 感叹号 `!`
 
 加感叹号的含义是："将以宏形式运行"，具体含义等以后慢慢学习再深入理解吧
-
-* print!()：将打印内容打印出来，但不会新起一行
-
-  ```
-  print!("hello");
-  print!("hello");
-  ```
-
-  最终命令窗口中显示的打印结果为：hellohello
-
-* println!()：将打印内容打印出来，会新起一行
-
-  > 注意：ln 中的 l 是小写字母 L，不是大写字母 i
-  >
-  > println!() 就像 JS 中的 console.log() 
-
-
-
-<br>
-
-**模板字符：**
-
-在 JS 中可以使用 `${}` 模板字符串：
-
-```
-let s1 = "puxiao"
-console.log(`hi,${s1}`)
-```
-
-但是在 Rust 中使用 `{}`，具体写法是：
-
-```
-let s1: String = String::from("Rust");
-println!("hi,{s1}")
-```
-
-
-
-<br>
-
-**不存在一对多的引用(所有权)：**
-
-在 JS 中若变量值为 简单对象则为 复制：
-
-```
-let str1 = "abc"
-let str2 = str1
-str2 = "cba"
-
-console.log(str1) //"abc"
-console.log(str2) //"cba"
-```
-
-若变量值为 复杂对象则为引用：
-
-```
-let obj1 = { name: "yang" }
-let obj2 = obj1
-obj2.name = "puxiao"
-
-console.log(obj1) // { name: "puxiao" }
-console.log(obj2) // { name: "puxiao" }
-```
-
-<br>
-
-但是在 Rust 中上面的逻辑完全不同：
-
-像 `let xx2 = xx1` 这样的代码相当于 将 xx1 的值 "所有权(访问、修改)" 转移给了 xx2，而 xx1 不再拥有对之前值的 "所有权(访问、修改)"。
-
-当你对一个已经失去所有权的变量名访问时，会报错误。
-
-```
-let s1: String = String::from("Rust");
-let s2: String = s1;
-```
-
-如果执行下面代码，会正确输出 "Rust"：
-
-```
-print!("{s2}")
-```
-
-但如果执行下面代码，则会报错：
-
-```
-print!("{s1}")
-```
-
-> 因为此时 s1 已经不关联任何值，在 Rust 中并不会像 JS 那样输出 "undefined"，而是直接程序报错
-
-
-
-<br>
-
-**但是 数字 是一个特例，数字执行的是复制。**
-
-
-
-<br>
-
-**函数参数也会引发所有权转移：**
-
-上面讲的是通过 `let xx2 = xx1;` 会引发 xx1 失去所有权，在 rust 中如果将 xx1 作为某个函数的参数，依然会让 xx1 失去所有权。
-
-```
-fn say_hello(name: String) {
-    println!("Hello {name}")
-}
-
-fn main() {
-    let name = String::from("Alice");
-    say_hello(name);
-    // say_hello(name);
-}
-```
-
-> 在 main() 函数内部由于将 name 作为 say_hello 函数的参数：
->
-> * say_heool 函数的参数获得所有权
-> * main 函数中的 name 失去所有权
-> * 如果在 main 函数中再添加执行 println!("{name}"); 则会报错，会输出类似 "value borrowed here after move" 的信息，表明 name 该值一杯借用走了，无权再访问了。
-
-
-
-<br>
-
-**借用：临时转让所有权**
-
-使用 `&xx` 可以表明仅为临时转让、借出所有权，等对方执行完成后，所有权又回归到自己。
-
-
-
-<br>
-
-**结构体：**
-
-相当于 TypeScript 中的 interface，用来定义某种对象的属性和方法的类型。
-
-使用 struct Xxx {} 这种方式来定义结构体，例如：
-
-```
-struct Xxx {
-    name: String,
-    age: u8,
-}
-```
-
-
-
-<br>
-
-**继续添结构体内容：**
-
-假设先定义了结构体 A，此时可以通过 `impl A { ... }` 这种形式，继续向 A 增加新的内容。
 
 
 
@@ -1449,6 +1182,31 @@ use xx::xxx::yyy
 
 yyy()
 ```
+
+
+
+<br>
+
+**变量名、函数名、参数名：**
+
+* 和绝大多数编程语言一样，Rust 禁止用户使用一些关键词来作为 变量名、函数名、参数名
+* 不允许数字作为开头，但是允许以 下划线 _ 开头
+
+
+
+<br>
+
+**Rust中的：严格关键词、保留关键词、弱保留关键词**
+
+Rust 中的关键词就分为上述 3 中：
+
+* 严格(strick)：严格明确为 Rust 已经使用的关键词，禁止用户声明变量时使用
+* 保留(reserved)：保留关键词，虽然当前还未使用，但是也不允许声明变量时使用
+* 弱保留(weak)：虽然当下并不是保留关键词，但是官方认为有可能将来提升为保留关键词，所以也尽量不用这类关键词
+
+以上 3 种关键词都不可用于 变量名、函数名、函数的参数名。
+
+具体都有哪些，可查阅：https://doc.rust-lang.org/beta/reference/keywords.html
 
 
 
@@ -1525,20 +1283,6 @@ use std::xxx
 
 * bool(布尔)、array(数组)、char(字符)、nerver
 * f32、i32、f64、i64、u8、u16、u32、u64 ...
-
-
-
-<br>
-
-不包括哪些内容：
-
-* 生成随机数字
-* 对 JSON 处理
-* ...
-
-这些 "看似" 应该在标准库中的模块并不在，需要你自己去安装对应处理依赖包。
-
-> 标准库中之所以没有，是因为为了让标准库足够精简，况且有非常完善的第三方依赖包，所以就没有加到标准库中。
 
 
 
@@ -1625,23 +1369,6 @@ https://rustwiki.org/zh-CN/rust-by-example/
 对应的教程是：
 
 https://rustwasm.github.io/docs/book/
-
-
-
-<br>
-
-需要学习的有：
-
-* wasm-pack：创建工程
-* wasm-bindgen：自动产生 胶水代码
-* web_sys：rust 中写好针对 浏览器 的对应对象、属性、函数
-* js_sys：rust 中写好针对 JS 的数据类型
-
-
-
-<br>
-
-欢迎查看我写的 [WASM学习笔记](https://github.com/puxiao/notes/blob/master/WASM学习笔记.md)
 
 
 
