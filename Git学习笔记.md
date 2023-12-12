@@ -1136,6 +1136,11 @@ git log --author=puxiao --encoding=UTF-8 >> ~/Desktop/puxiao_commit_history.txt
 > * 如果将 `~/Desktop/puxiao_commit_history.txt` 改为 `puxiao_commit_history.txt` 则文件会保存在当前目录中
 
 
+<br>
+如果你想将导出的 .txt 转换成 Excel 文件，可查阅这个转换代码：
+https://github.com/puxiao/notes/blob/master/fragment/git_commit_history_to_xlsx.js
+
+<br>
 
 <br>
 
