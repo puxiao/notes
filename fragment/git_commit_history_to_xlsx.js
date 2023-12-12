@@ -4,7 +4,7 @@
  * 1、手工创建一个 package.json 文件，内容如下：
  * {
     "type": "module",
-    "name": "node_xls",
+    "name": "node_xlsx",
     "version": "1.0.0",
     "description": "",
     "main": "app.js",
@@ -18,7 +18,8 @@
     }
    }
  * 2、执行安装依赖命令：yarn
- * 3、执行命令：node app.js
+ * 3、把本js文件名 git_commit_history_to_xlsx.js 修改成 app.js
+ * 4、执行命令：node app.js
  */
 
 /**
