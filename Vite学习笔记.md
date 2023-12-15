@@ -141,9 +141,9 @@ Module '"xxxx/node_modules/@types/react/index"' can only be default-imported usi
 >
 > ```
 > declare module "*.vue" {
->   import { DefineComponent } from "vue"
->   const component: DefineComponent<{}, {}, any>
->   export default component
+> import { DefineComponent } from "vue"
+> const component: DefineComponent<{}, {}, any>
+> export default component
 > }
 > ```
 
@@ -1172,15 +1172,22 @@ export default defineConfig({
   export default defineConfig({
   -  plugins: [react()],
   +  plugins: [react(), basicSsl()],
+  +  server: {
+  +        https: true,
+  +        host: true,
+  +        port: 443,
+  +    },
   })
   ```
 
-* 修改 package.json 中 "scripts"
+* 补充：在 package.json 的 "scripts" 中启用 https 参数
 
   ```diff
   - "dev": "vite",
   + "dev": "vite --https --host",
   ```
+
+  > 原本在 scripts 中这样设置是没有问题的，但是不清楚为什么最近我在 node.js 20 版本上就遇到问题了：CACError: Unknown option `--https`，所以还是直接修改 vite.config.js 吧。
 
 这样就可以在 react + vite 项目调试中启用 https 了。
 
