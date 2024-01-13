@@ -83,6 +83,46 @@ sharp 需要 libvips 这个 c++ 二进制运行程序，安装 sharp 会默认�
 
 <br>
 
+### 另外一种报错情况：
+
+或许你遇到的是另外一种情况。
+
+**安装 sharp 成功，可是引入使用 sharp 时却报错：Could not load the "sharp" module using the win32-x64 runtime**
+
+```
+Error: Could not load the "sharp" module using the win32-x64 runtime
+Possible solutions:
+- Ensure optional dependencies can be installed:
+    npm install --include=optional sharp
+    yarn add sharp --ignore-engines
+- Ensure your package manager supports multi-platform installation:
+    See https://sharp.pixelplumbing.com/install#cross-platform
+- Add platform-specific dependencies:
+    npm install --os=win32 --cpu=x64 sharp
+- Consult the installation documentation:
+    See https://sharp.pixelplumbing.com/install
+```
+
+
+
+<br>
+
+**目前的解决方案是：**
+
+除了安装 sharp 之外，再安装下面这个包
+
+```
+npm install --force @img/sharp-win32-x64
+```
+
+> 这个 `@img/sharp-win32-x64` NPM 包也是由 sharp 官方提供的。
+
+安装成功之后，引入使用 sharp 时就不会再报上面错误了。
+
+
+
+<br>
+
 ### 使用sharp
 
 <br>
