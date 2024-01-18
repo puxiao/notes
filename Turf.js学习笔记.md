@@ -231,6 +231,8 @@ console.log(turf.points([[1, 2], [4, 5], [7, 8]]))
 
   > 在本文中，我个人喜欢将 features 称呼为 实例，实际上使用 `特征实例` 更加精准
 
+  > 像其他 GIS 相关库中 也是使用 features 这个单词，例如 cesium.js 对应的瓦片数据规范(3DTitle) 也是用了 features 这个单词
+
 * collection：集合、聚集、一批
 
 * geometry：几何体、几何形状
@@ -249,9 +251,9 @@ console.log(turf.points([[1, 2], [4, 5], [7, 8]]))
 >
 > ```
 > {
->   type: 'Feature',
->   properties: { name: 'myp' },
->   geometry: { type: 'Point', coordinates: [ 20, 30 ] }
+> type: 'Feature',
+> properties: { name: 'myp' },
+> geometry: { type: 'Point', coordinates: [ 20, 30 ] }
 > }
 > ```
 
@@ -593,6 +595,138 @@ console.log(collection)
 
 <br>
 
+上面这些方法中坐标值都是明确的，turf.js 还为我们提供了一几个用于创建随机坐标相关的函数。
+
+
+
+<br>
+
+**随机生成一个坐标：**
+
+```
+const randomPosition = turf.randomPosition()
+console.log(JSON.stringify(randomPosition))
+```
+
+```
+[ 101.8014475664456, -5.510356300390078 ]
+```
+
+
+
+<br>
+
+**限定随机坐标范围：bbox**
+
+在 turf.js 官方文档中 bbox 是单词 bounding box (包围盒) 的简写。
+
+生成随机坐标的方法中，bbox 默认值为 [-180,-90,180,90]，该值对应的包围盒含义为：
+
+* x 值的随机范围为 -180 ~ 180
+* y 值的随机范围为 -90 ~ 90
+
+
+
+<br>
+
+我们可以自定义限制 bbox 的范围：
+
+```
+const randomPosition = turf.randomPosition([-10, -10, 10, 10])
+console.log(randomPosition)
+```
+
+
+
+<br>
+
+除了随机生成点坐标的方法 .randomPosition()，turf.js 还为我们延展出其他几个方法：
+
+* .randomPoint()：随机生成由 N 个点构成的 点集合
+* .randomLineString()：随机生成由 N 个线段构成的 线段集合
+* .randomPolygon()：随机生成由 N 个多边形构成的 多边形集合
+
+
+
+<br>
+
+**创建 随机点集合：**
+
+```
+const randomPoint = turf.randomPoint()
+console.log(JSON.stringify(randomPoint))
+```
+
+> 为了方便看到具体完整的输出结果，我们输出前使用 JSON.stringify() 包裹一下
+
+```
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[-157.7366790143802,73.14109337395016]}}]}
+```
+
+
+
+<br>
+
+此外还可以设置生成点的数量，举例：
+
+我们随机生成 3 个点，每个点的坐标取值范围(包围盒范围)为 [-10, -5, 10, 5]
+
+```
+const randomPoint = turf.randomPoint(3, { bbox: [-10, -5, 10, 5] })
+console.log(JSON.stringify(randomPoint))
+```
+
+```
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[6.504353438919068,-2.1927245825959063]}},{"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[7.14243009630756,-3.6507192336380667]}},{"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[-7.947142388429023,-3.7930832516245117]}}]}
+```
+
+
+
+<br>
+
+**创建 随机线段：**
+
+随机创建由 1 个线段构成的 线段集合，其中我们提供了可选参数，对应要求：
+
+* `bbox: [-10, -5, 10, 5]`：线段的每个坐标值取值范围为 [-10, -5, 10, 5]
+* `num_vertices: 10`：线段由 10 个关键点构成
+* `max_length: 1`：每 2 个关键点之间的最大距离为 1
+* `max_rotation: Math.PI / 8`：每  2 个关键点之间的最大角度差为 Math.PI / 8
+
+```
+const randomLine = turf.randomLineString(1, { bbox: [-10, -5, 10, 5], num_vertices: 10, max_length: 1, max_rotation: Math.PI / 8 })
+console.log(JSON.stringify(randomLine))
+```
+
+```
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"LineString","coordinates":[[3.229047175113413,-1.0544520982760153],[3.2290497230247612,-1.054464896157753],[3.228984370518046,-1.054462302297186],[3.229043501104713,-1.054446958389796],[3.2290917372993864,-1.0544478306244958],[3.2290993739437663,-1.0544509878756745],[3.2291796157031087,-1.0544572251392244],[3.2292481382201754,-1.0544352722636818],[3.2293042862002994,-1.0544054118033268],[3.229333670980465,-1.0543889641613367]]}}]}
+```
+
+
+
+<br>
+
+**创建 随机多边形集合：**
+
+创建由 1 个多边形构成的 多边形几何，其中可选参数我们设定：
+
+* `bbox: [-10, -5, 10, 5]`：该多边形的包围盒，即多边形所有点都在该范围内
+* `num_vertices: 10`：多边形的顶点数量
+* `max_radial_length`：多边形的顶点最大辐射长度，即从多边形的中心点向外辐射的最远距离，该参数决定了这个多边形的形状和大小
+
+```
+const randomPolygon = turf.randomPolygon(1, { bbox: [-10, -5, 10, 5], num_vertices: 10, max_radial_length: 10 })
+console.log(JSON.stringify(randomPolygon))
+```
+
+```
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"Polygon","coordinates":[[[-4.02729622196555,2.6679116742757065],[3.3397836498759554,5.402964857676213],[1.0575460612519203,-1.8783013418007473],[-0.4246964091071499,-5.632227308161819],[-5.9009600358520995,-5.927595354448803],[-6.905542761639225,-5.304564359183412],[-10.497012158935258,-2.5332055726116196],[-4.91127001151212,1.3193696121835423],[-7.520693361130173,4.384053871455923],[-8.003219414520748,7.737138213064533],[-4.02729622196555,2.6679116742757065]]]}}]}
+```
+
+
+
+<br>
+
 **小总结：**
 
 到目前为止，我们已经初步学习掌握了：
@@ -601,6 +735,7 @@ console.log(collection)
 * 创建同一类型实例的集合：点集合(points)、线集合(lines)、多边形集合(polygons)
 * 创建几何体或实例：geometry()、feature()
 * 创建不同类型的几何体几何或实例集合：geometryCollection()、featureCollection()
+* 根据配置创建随机的 坐标(randomPosition)、随机点集合(randomPoint)、随机线段集合(randomLineString)、随机多边形集合(randomPolygon)
 
 
 
@@ -613,3 +748,4 @@ console.log(collection)
 <br>
 
 未完待续...
+
