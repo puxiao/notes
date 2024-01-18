@@ -3,7 +3,7 @@
 前端组件库：Echarts/Antd/Antd-Pro/Web Components/Material-UI  
 数据状态：Zustand/immer.js  
 3D相关：图形学、Three.js、GIS、Cesium.js、Blender  
-2D相关：CanvasKit、sharp  
+2D相关：Turf.js、CanvasKit、sharp  
 数据库：Mysql/MongoDB/IndexedDB  
 后端技术栈：Nodejs/Koa/Middleware/Redis/Nginx/Npm/Yarn/fnm  
 运维部署：Git/PM2/Docker/Docker-Compose/CentOS  
