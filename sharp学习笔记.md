@@ -119,6 +119,12 @@ npm install --force @img/sharp-win32-x64
 
 安装成功之后，引入使用 sharp 时就不会再报上面错误了。
 
+<br>
+
+当然我说的是 windows 系统，如果你是其他系统，则去找对应的包，例如：`@img/sharp-linux-x64`
+
+https://www.npmjs.com/search?q=%40img&page=0&perPage=20
+
 
 
 <br>
