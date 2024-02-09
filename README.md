@@ -13,4 +13,7 @@
 持续添加更新中...
 
 ##### 欢迎与我交流
-QQ或微信：78657141
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/puxiao/notes/master/imgs/wechat.jpg" alt="wechat.jpg"/>
+</p>
