@@ -1,12 +1,8 @@
 # zustand学习笔记
 
-**zustand是目前 React 最好的状态管理库，没有之一。**
+**我个人认为 zustand 是目前 React 最好的状态管理库，没有之一。**
 
 zustand 比 Recoil、jotai 还都要好。
-
-当然也有人喜欢使用 valtio，认为 valtio 也很好。
-
-> 我个人没有使用过 valtio，我看了它的一些简单示例后我认为还是 zustand 好。
 
 > 顺带说一句：jotai、valtio、zustand 都归属于 pmndrs。
 
@@ -14,68 +10,21 @@ zustand 比 Recoil、jotai 还都要好。
 
 <br>
 
-## zustand的优势(赞美之词)
+## zustand与其他状态库的对比
 
-**zustand相对于 Recoil、jotai 的优势：**
+官方列出了 zustand 与其他几个状态库对比。
 
-Recoil、jotai 核心理念都是 “原子状态，即数据为最小不可分割”。
+他们分别是：Redux、Valtio、Jotai、Recoil
 
-> 我实际项目中只使用过 Reoil，并没有使用过 jotai，但二者几乎相同
-
-在这个理念之下，就会造成面对管理复杂对象时，数据管理颗粒不够细，捉襟见肘。
-
-举一个例子：假设有一个批次，该批次中包含 50 个帧数据，每一条帧数据中包含 100-200 个子元素，每一个子元素又包含自己的一些属性。
-
-这个状态可能结构如下：
-
-```
-{
-  bid: 'xxxxx',
-  ...,
-  list:[
-    {
-      id: 'xxxx',
-      list: [
-        {
-          uid: 'xxx',
-          attrs: { ... }
-        },
-        ...
-      ]
-    },
-    ...
-  ]
-}
-```
-
-面对如此复杂的数据对象，此时使用 Recoil 时，当想更新某一个子元素的值，你可能需要：
-
-* 添加 `dangerouslyAllowMutability:true` 配置项
-* 被迫克隆整个数据，然后修改其中的某个子项，再将克隆修改后的数据整体替换之前的
-
-实际操作起来，真的会难受。
+https://docs.pmnd.rs/zustand/getting-started/comparison
 
 
 
 <br>
 
-zustand 来了，如果使用 zustand 就比较容易解决上面这些问题。
+**zustand的优点：**
 
-
-
-<br>
-
-**zustand 继承和超越了 Recoil、jotai 这些状态库的全部优点，并且在这些之上还有更多灵活、强大的特性。**
-
-但是请不用担心 zustand 会比较难，恰恰相反，zustand 非常简单，很容易上手。
-
-
-
-<br>
-
-**zustand的优点有：**
-
-* Recoil、jotai 有的优点 zustand 都有
+* Recoil、jotai ... 有的优点 zustand 都有
 * zustand 消费对象(使用者)类似于钩子(hooks)函数
 * 但 zustand 不仅可以在函数组件中使用，还可以在类组件、甚至普通 JS (非 React) 中都可以共用执行
 * zustand 对于数据状态管理的颗粒度非常只有，甚至是可以无限任你发挥
@@ -84,9 +33,31 @@ zustand 来了，如果使用 zustand 就比较容易解决上面这些问题。
 
 <br>
 
+**针对 Recoil 的补充说明：**
+
+虽然 Recoil 是 React 官方核心人员开发的状态管理库，但就我个人使用而言，觉得 zustand 继承和超越了 Recoil 的全部优点，并且在这些之上还有更多灵活、强大的特性。
+
+并且请不用担心 zustand 会比较难，恰恰相反，zustand 非常简单，很容易上手。
+
+
+
+<br>
+
+**针对 Valtio 的特别说明：**
+
+如果你的项目数据状态比较简单，并且需要有类似 `历史记录(撤销/重做)` 这样的功能，那么推荐你使用 Valtio 而不是 zustand。
+
+> Valtio 通过 JS 中的 Proxy(对象的属性修改代理) 来实现对数据状态对象属性值修改的代理劫持和备份。
+
+但是如果你的数据状态比较复杂，那么还是使用 zustand 吧。
+
+> 如果想基于 zustand 实现 `历史记录(撤销/重做)`，需要借助 zustand 的第三方中间件。
+
+
+
+<br>
+
 ## zustand基础用法
-
-
 
 <br>
 
@@ -257,9 +228,13 @@ type Create = {
 
 <br>
 
-**特别提醒：在上面示例中我们都使用 create 函数来创建数据状态，在 zusatand 较新的版本中还有另外一个函数 createWithEqualityFn 也是用来创建数据状态的，在本文后面讲解 shallow 时会有详细讲解。**
-
-> 补充：createWithEqualityFn 函数只支持 React 18 版本
+> 特别补充：
+>
+> 在 zustand 历史中曾经出现了一个名为  createWithEqualityFn 的函数，几乎等价于 create 函数，它主要用来结合 shallow 配合使用。
+>
+> 但是后来 createWithEqualityFn 和 shallow 被抛弃，取而代之的是新增的 useShallow。
+>
+> 关于 useShallow 本文后面会讲到。
 
 
 
@@ -340,7 +315,25 @@ const {userId, userName} = useUserData(state => ({
 }))
 ```
 
-> 请注意我们将原始的 id 在组件内部对应的变量名改为 userId
+> `(state) => ({ xx: xxx, ... })` 这种形式 是有返回值的箭头函数的简写形式，实际对应的是：`(state) => { return { xx:xxx, ...}}`
+
+> 另外请注意，在上面代码中我们将原始的 id 在组件内部对应的变量名改为 userId
+
+
+
+<br>
+
+上面的形式是 对象解构，我们也可以采用另外一种形式：数组解构
+
+```
+const [userId, userName] = useUserData(state => [state.id, state.userName])
+```
+
+> 实际工作使用中，我个人推荐统一使用 对象解构
+
+
+
+<br>
 
 组件代码则改为：
 
@@ -449,7 +442,13 @@ setData: (newData: Partial<UserData>) => void
 setData: (newData) => set(newData)
 ```
 
-> 再重复一遍：(newData) => set(newData) 是箭头函数  (newData) => { set(newData) } 的简写
+> 重复一遍：(newData) => set(newData) 是箭头函数  (newData) => { set(newData) } 的简写
+
+
+
+<br>
+
+**特别说明一下上述代码中的 setData 仅仅是我们给自己的数据状态实例定义的一个方法名而已，你可以根据实际操作目的改成其他的，例如 setId、setInfo 等等。**
 
 
 
@@ -457,10 +456,11 @@ setData: (newData) => set(newData)
 
 **set：** 用于设置修改当前数据状态
 
-set 有 2 种形式：
+set 有 3 种形式：
 
 * 具体的值
-* 一个回调函数
+* 一个有返回值的函数
+* 一个有返回值的异步函数
 
 
 
@@ -482,7 +482,7 @@ set 有 2 种形式：
 
 <br>
 
-第2中形式：一个回调函数
+第2种形式：一个回调函数
 
 该回调函数形式为 `set((state)=>{ return ... })`，其中 state 为当前数据状态的值：
 
@@ -496,6 +496,16 @@ setData: (newData) => set((state) => {
 ```
 
 > 上述代码相当于 (newData) => set(newData)
+
+
+
+<br>
+
+第3种形式：一个异步函数：
+
+```
+updateData: async () => set({ xx: await getWebData() })
+```
 
 
 
@@ -638,40 +648,6 @@ updateTodoData: (id, newData) => {
 
 关于 "删" 我就不再举例了。
 
-
-
-<br>
-
-**关于自定义函数的特别说明：异步函数**
-
-zustand 的修改函数中，是支持异步函数的。
-
-> 在本文上面中，我们所展示的示例函数 都不是异步的。
-
-假设有一个数据为从服务器上根据用户id 获取他的 文章列表，那么我们的网络请求都可以直接写在 状态对象中。
-
-例如：
-
-> 下面是伪代码
-
-```
-const useArticleList = create((set) => ({
-    list: [],
-    fetch: async (id:string) =>{
-        const response = await fetch( ... ) //发起网络请求
-        set({list: response....}) //将网络请求结果处理并通过 set 赋值给 list
-    }
-}))
-```
-
-> 实际上我个人并不建议将网络请求相关代码也放到 useXxxxData 中，还是应该将网络请求和返回结果数据处理的代码抽离出来。
-
-
-
-<br>
-
-好，让我们暂时忘掉 异步函数，回到 增删改查 中。
-
 接下来重点说一下 "查"。
 
 
@@ -771,13 +747,33 @@ export default unTodoListSelector
 而是改用 api 中提供的方法来获取或修改数据。
 
 ```
-import create from 'zustand/vanilla'
+import { createStore } from 'zustand/vanilla'
 
-const store = create(() => ({ ... }))
+const store = createStore((set) => ...)
 const { getState, setState, subscribe, destroy } = store
 ```
 
-> 实际中我也没有使用过，所以不做过多讲解
+
+
+<br>
+
+> vanilla 是 `原生JS` 的一种戏谑称呼，当你听到别说人 `我不使用 React 框架，而是 vanilla 框架` 就是指 `使用原生 JS`。
+
+
+
+<br>
+
+> 注意上面的写法是 v4 以后的最新写法，在 v4 之前，旧版写法为：
+>
+> ```
+> import create from 'zustand/vanilla'
+> const store = create(() => ({ ... }))
+> const { getState, setState, subscribe, destroy } = store
+> ```
+
+<br>
+
+实际中我并未在原生 JS 中使用创建过 zustand 状态库，所以不做过多讲解。
 
 
 
@@ -1171,7 +1167,7 @@ export default useCurrentTodoData
 > src/components/current-todo/index.tsx
 
 ```
-import useCurrentTodoData from "../../hooks/useCurrentTodoData"
+import useCurrentTodoData from "../hooks/useCurrentTodoData"
 
 const CurrentTodo = () => {
 
@@ -1212,39 +1208,25 @@ export default CurrentTodo
 
 <br>
 
-**性能优化之：shallow**
+**性能优化之：避免无用数据变化引发的 react 组件重绘**
+
+这里提到的 '无用' 是指下面几种情况。
+
+**情况1：** 数据状态中值的实际字面值并未发生变化，例如之前的值是 {}，而新赋值依然是 {}
+
+zustand 默认使用的是 `Object.is` 这个对比函数，我们知道在 JS 中  {} 与 {} 虽然字面值相同，但 {} === {} 的结果为 false，也会被 React 的 Diff 算法 判定为 2 个不同的值而引发组件重绘。
 
 ```
-import shallow from 'zustand/shallow'
+Object.is({},{}) //false
 ```
 
-`shallow` 这个单词的含义为：肤浅的，在此处也就是对象值浅比较。
-
-zustand 默认使用的是 `Object.is` 这个对比函数，而 `shallow` 是 zustand 为我们提供的一个浅比较函数。
-
 
 
 <br>
 
-我们知道 React 中的 Diff 函数是索引加值对比，例如 {} 与 {} 虽然字面值相同，但是依然会被判定为 2 个不同的值(因为它们 2 个不属于同一个对象的引用)，而 浅对比 值判断字面值是否相同，若字面值相同即认为没有发生数据变化，因此也不需要重新渲染组件。
+**情况2：** 数据状态中用不到的某个属性字段值发生了改变引发的重绘
 
-
-
-<br>
-
-> 再说一遍，zustand 默认使用的是 Object.is 这个对比函数
->
-> ```
-> Object.is({},{}) //false
-> ```
-
-
-
-<br>
-
-**举个例子：**
-
-假定 useXxxData 数据状态包含 .a、.b、.c 3 个数据字段，那么就会存在下面这种情况：
+举例，假定 useXxxData 数据状态包含 .a、.b、.c 3 个数据字段，那么就会存在下面这种情况：
 
 * 假定 A组件中只用到了 .a 数据字段
 
@@ -1252,7 +1234,7 @@ zustand 默认使用的是 `Object.is` 这个对比函数，而 `shallow` 是 zu
 
 * 假定 C组件中可以修改 .c 的数据字段
 
-* 当 C组件 修改了 数据状态 .c 的值后，引发了 useXxxData 的更新，此时会牵连到 A组件和 B组件也同步更新
+* 当 C组件 修改了 数据状态 .c 的值后，引发了 useXxxData 的更新，此时也可能会牵连到 A组件和 B组件也同步更新
 
   尽管 A 组件和 B组件中 并没有使用到 .c 字段
 
@@ -1260,31 +1242,49 @@ zustand 默认使用的是 `Object.is` 这个对比函数，而 `shallow` 是 zu
 
 <br>
 
-为了减少 A组件 和 B组件 无谓的重新渲染，我们可以使用 zustand 为我们提供的 shallow 函数了。
+综上所述，我们需要采取一些操作，减少组件无谓的重新渲染。
+
+也就是说当数据状态发生变化后，我们需要 `浅对比` 值是否发生了变化，如果子面值没变则忽略，从而减少组件重绘。
 
 
 
 <br>
 
-**重大更新变动：如果你想使用 shallow，那么在创建数据状态时不能再使用 create，而应该改为 createWithEqualityFun**
+"浅对比" 对应的单词是 "shallow"
 
-再次补充一遍：createWithEqualityFn 函数只支持 React 18 版本
-
-
-
-<br>
-
-如果你使用 create 创建数据状态，但是却使用了 shallow，那么你会收到这样的警告信息：
-
-```
-[DEPRECATED] Use `createWithEqualityFn` instead of `create` or use `useStoreWithEqualityFn` instead of `useStore`. They can be imported from 'zustand/traditional'. https://github.com/pmndrs/zustand/discussions/1937
-```
+> shallow：浅的、肤浅的、表面的
 
 
 
 <br>
 
-**createWithEqualityFn用法：**
+情况讲清楚了，那么接下来看如何实际写代码。
+
+
+
+<br>
+
+**在 zustand v4.4.2 之前使用的是：createWithEqualityFun + shallow**
+
+**在 zustand v4.4.2 以后使用的是：useShallow**
+
+v4.4.2 发布日期是 2023.10.02，也就是说在这个日期之前，使用的都是 `createWithEqualityFun + shallow`。
+
+为了能够维护老项目，我们这里先讲一下 `createWithEqualityFun + shallow` 的简单用法。
+
+
+
+<br>
+
+**旧版性能优化：createWithEqualityFun + shallow**
+
+
+
+<br>
+
+**第1步：定义数据状态**
+
+不再使用 create 函数，改使用 createWithEqualityFn 函数，并且遵循下面的写法
 
 ```diff
 - import { create } from 'zustand'
@@ -1296,11 +1296,37 @@ interface UseXxxData { ... }
 + const useXxxData = createWithEqualityFn<UseXxxData>((set) => ({ ... }), Object.is)
 ```
 
+> 我们将 Object.is 这个函数作为 createWithEqualityFn 的第二个参数
+
 
 
 <br>
 
-**使用shallow：**
+补充一点：createWithEqualityFn 函数只支持 React 18 版本
+
+如果你使用 create 创建数据状态，但是却使用了 shallow，那么你会收到这样的警告信息：
+
+```
+[DEPRECATED] Use `createWithEqualityFn` instead of `create` or use `useStoreWithEqualityFn` instead of `useStore`. They can be imported from 'zustand/traditional'. https://github.com/pmndrs/zustand/discussions/1937
+```
+
+
+
+<br>
+
+**第2步：组件中使用数据状态**
+
+先引入 shallow
+
+```
+import shallow from 'zustand/shallow'
+```
+
+准确来说 `shallow` 是 zustand 为我们提供的一个浅比较函数。
+
+
+
+<br>
 
  假定 A组件中之前获取 .a 数据字段的代码为：
 
@@ -1322,12 +1348,6 @@ const a = useXxxData(state => state.a, shallow)
 
 * 只有当 state.a 的值发生变化后才会重新渲染该组件
 * 当 .b、.c 的值发生变化并不会重新渲染该组件
-
-
-
-<br>
-
-这算是 zustand 最简单有效的一种性能优化方式。
 
 
 
@@ -1370,11 +1390,11 @@ declare function shallow<T>(objA: T, objB: T): boolean;
 > src/components/show-todo-list/index.tsx
 
 ```
-import useUserData from "../../store/useUserData"
-import { TodoData } from "../../types"
+import useUserData from "../store/useUserData"
+import { UserData } from '../types' //这里假定给 useUserData 定义的结构为 UserData
 
-const customShallow = (objA: TodoData[], objB: TodoData[]): boolean => {
-    return objB.length < 3
+const customShallow = (objA: UserData, objB: UserData): boolean => {
+    return objB.todoList.length < 3
 }
 
 const ShowTodoList = () => {
@@ -1391,6 +1411,72 @@ const ShowTodoList = () => {
 
 export default ShowTodoList
 ```
+
+
+
+<br>
+
+以上就是旧版 createWithEqualityFun + shallow 的用法。
+
+下面学一下新版 useShallow 的用法。
+
+
+
+<br>
+
+**新版性能优化：useShallow**
+
+首先对于创建状态库实例时，createWithEqualityFun 被废弃，我们正常使用 create 即可。
+
+> 和之前定义数据状态实例没有任何不一样。
+
+
+
+<br>
+
+用法主要体现在 React 组件中。
+
+用法也极其简单：只需引入 useShallow 函数，并使用 useShallow 函数包裹住原本的 (state) => ({ ... }) 即可。
+
+```diff
++ import { useShallow } from 'zustand/react/shallow'
+import useUserData from "../store/useUserData"
+
+//对象解构形式
+- const { curIndex, todoList } = useUserData((state) => ({ curIndex: state.curIndex, todoList: state.todoList}))
+
+//使用 useShallow() 包裹住之前的 (state)=>({ ... })
++ const { curIndex, todoList } = useUserData(useShallow((state) => ({ curIndex: state.curIndex, todoList: state.todoList})))
+```
+
+也可以使用数组解构形式：
+
+```
+const [ curIndex, todoList ] = useUserData(useShallow((state) => [state.curIndex,state.todoList]))
+```
+
+
+
+<br>
+
+同样，useShallow 函数的第 2 个参数也可以传入一个自定函数：
+
+> 该自定义函数必须返回 boolean 值
+
+```
+import { useShallow } from 'zustand/react/shallow'
+import useUserData from "../store/useUserData"
+
+import { UserData } from '../types' //这里假定给 useUserData 定义的结构为 UserData
+
+const customShallow = (objA: UserData, objB: UserData): boolean => {
+    return objB.todoList.length < 3
+}
+
+const todoList = useUserData(useShallow((state) => state.todoList), customShallow))
+```
+
+> 也就是说只有当 todoList 的 .length 小于 3 不回去触发检查更新
 
 
 
@@ -1814,7 +1900,8 @@ https://github.com/reduxjs/redux-devtools/blob/main/extension/docs/API/Arguments
 >
 > ```
 > devtools(
-> persist(
+>   persist( ... )
+> )
 > ```
 
 
@@ -1839,7 +1926,7 @@ https://github.com/reduxjs/redux-devtools/blob/main/extension/docs/API/Arguments
 * 到目前为止，我们已经学习掌握了 zustand 的基础用法
 * 如何在 类组件中 使用 zustand
 * 衍生(派生)数据 的使用方法
-* 使用 shallow 和自定义 shallow 函数来做一些基础的性能优化
+* 使用 shallow(旧版)、useShallow(新版) 和自定义 shallow 函数来做一些基础的性能优化
 * zustand 的一些中间件用法
 
 已经算是对 zustand 有了足够的认知，可以满足绝大多数 数据状态管理场景 需求了。
