@@ -1021,7 +1021,7 @@ export default defineConfig({
 
 <br>
 
-**多页面模式：**
+**构建多页面：**
 
 vite 支持多页面应用模式，也就是说不再是单页面，可以是多目录、多页面。
 
@@ -1057,6 +1057,128 @@ export default defineConfig({
 * nested(自定义的目录)：入口文件 'nested/index.html'
 
   > 对应访问地址 '/nested/'
+
+
+
+<br>
+
+**vite构建多页面实际示例：**
+
+下面以  vite + vue 项目为例。
+
+第1步：在 src 目录下创建 pages 目录，用于存放多个页面
+
+> 这下和 nextjs 就很像了
+
+* 首页：src/pages/index/
+  * App.vue
+  * main.js
+  * style.css
+* 子页面AA：src/pages/aa/
+  * App.vue
+  * main.js
+  * style.css
+* 子页面BB：src/pages/bb/
+  * ...
+
+
+
+<br>
+
+第2步：在项目根目录(root) ，也就是之前 index.html 页面同级目录 创建和修改子页面 .html 内容
+
+我们将默认的 index.html 复制出来 2 份，并分别修改为 aa.html、bb.html
+
+* 首页：index.html
+
+  > 我们需要修改 index.html 中对 JS 入口文件的引入地址
+
+  ```diff
+  - <script type="module" src="/src/main.ts"></script>
+  + <script type="module" src="/src/pages/index/main.js"></script>
+  ```
+
+  > 同理，我们需要对其他页面分别进行设置
+
+* 子页面AA：aa.html
+
+  ```
+  <script type="module" src="/src/pages/aa/main.js"></script>
+  ```
+
+* 子页面BB：bb.html
+
+  ```
+  <script type="module" src="/src/pages/bb/main.js"></script>
+  ```
+
+
+
+<br>
+
+第3步：修改 vite.config.js 中 build.rollupOptions.input 的配置
+
+```
+import { fileURLToPath, URL } from 'node:url'
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import path from 'node:path'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+    plugins: [vue()],
+    base: './',
+    build: {
+        rollupOptions: {
+            input: {
+                index: path.resolve(__dirname, 'index.html'),
+                aa: path.resolve(__dirname, 'aa.html'),
+                bb: path.resolve(__dirname, 'bb.html')
+            }
+        }
+    },
+    resolve: {
+        alias: {
+            '@/src': fileURLToPath(new URL('./src', import.meta.url)),
+            '@/index': fileURLToPath(new URL('./src/pages/index', import.meta.url)),
+            '@/aa': fileURLToPath(new URL('./src/pages/aa', import.meta.url)),
+            '@/bb': fileURLToPath(new URL('./src/pages/bb', import.meta.url))
+        }
+    }
+})
+
+```
+
+> 为了方便引入代码，我们还添加配套的 alias
+
+
+
+<br>
+
+这样基础源码结构就配置好了。
+
+* 如果是所有页面的公共组件，那么我们可以继续存放在 src/components/
+* 如果是某子页面单独使用的组件，那么可以存放在 src/pages/xx/components
+
+
+
+<br>
+
+最后，当我们执行编译：`yarn build`，就会在 dist 中分别看到构建好的 index.html、aa.html、bb.html。
+
+> 默认这些页面引用的 js 会被分别存放在 assets 目录中，并且以他们的名字来作为 JS 文件前缀。
+>
+> * index_xxxxxx.js
+> * aa_xxxxxxx.js
+> * bb_xxxxxxx.js
+
+> vite 会针对每个需要构建的页面进行 摇树(tree shaking)，即仅打包进去当前页面所需最小代码
+
+
+
+<br>
+
+**关于 build.rollupOptions.input 等多配置介绍，可查阅：https://cn.rollupjs.org/configuration-options/#input**
 
 
 
