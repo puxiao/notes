@@ -864,6 +864,40 @@ vite preview [参数]
 
 <br>
 
+**虽然名字是 "插件"，但其实也各类包含 "中间件"。**
+
+> 你也可以自定义插件或中间件，前提是需要你会一些 nodejs。
+
+Vite 独有的钩子(hook)：
+
+https://www.vitejs.net/guide/api-plugin.html#vite-specific-hooks
+
+你可以利用 vite 提供的钩子，编写自己的中间件。
+
+例如可以针对资源请求针对 `configureServer` 钩子编写一些自己的逻辑。
+
+
+
+<br>
+
+例如我编写的这个：`public404Middleware.ts`
+
+https://github.com/puxiao/notes/blob/master/fragment/public404Middleware.ts
+
+用来检查 public 中图片资源若不存在则返回 404 而不是 vite 默认的 index.html 内容。
+
+> 这个主要是用来避免开发阶段中，因为手抖而把图片资源写错却不容易被发现的问题。
+
+
+
+<br>
+
+**请注意：vite 插件中的 中间件都只针对 dev 模式，而不是 build 模式。**
+
+
+
+<br>
+
 从另外一个角度，以插件开发者身份的角度来看一共有 4 类：
 
 * vite 官方维护插件
@@ -1021,6 +1055,16 @@ export default defineConfig({
 
 <br>
 
+**更为复杂的基础路径配置：**
+
+vite 还支持将不同文件存放在不同的路径中，这样做的目的是为了在部署时可以有更大的自由度，例如有些目录需要启用 CDN 加速，而有些不需要。
+
+具体配置方式：https://cn.vitejs.dev/guide/build.html#advanced-base-options
+
+
+
+<br>
+
 **构建多页面：**
 
 vite 支持多页面应用模式，也就是说不再是单页面，可以是多目录、多页面。
@@ -1030,39 +1074,25 @@ vite 支持多页面应用模式，也就是说不再是单页面，可以是多
 1. 你需要指定 N 个页面目录路径
 2. 指定每个目录页面的入口文件
 
-例如 vite 官方给出的一个示例：
 
-```
-import { resolve } from 'path'
-import { defineConfig } from 'vite'
 
-export default defineConfig({
-  build: {
-    rollupOptions: {
-      input: {
-        main: resolve(__dirname, 'index.html'),
-        nested: resolve(__dirname, 'nested/index.html'),
-      },
-    },
-  },
-})
-```
+<br>
 
-上面配置项中，分别定义了 2 个页面应用目录：
+构建多页面大体上可以分为 2 种实现方式：
 
-* main(主目录)：入口文件 'index.html'
+* 手工创建N个编译入口和模板文件
 
-  > 对应访问地址 '/'
+  > 这适用于页面数量不多的项目
 
-* nested(自定义的目录)：入口文件 'nested/index.html'
+* 使用 vite 社区插件 vite-plugin-multi-pages
 
-  > 对应访问地址 '/nested/'
+  > 这适用于页面数量非常多的项目
 
 
 
 <br>
 
-**vite构建多页面实际示例：**
+**vite构建多页面 - 手工实现方式：**
 
 下面以  vite + vue 项目为例。
 
@@ -1184,11 +1214,11 @@ export default defineConfig({
 
 <br>
 
-**更为复杂的基础路径配置：**
+**vite构建多页面 - 插件实现方式：**
 
-vite 还支持将不同文件存放在不同的路径中，这样做的目的是为了在部署时可以有更大的自由度，例如有些目录需要启用 CDN 加速，而有些不需要。
+该插件的具体用法，可查阅插件官方文档：
 
-具体配置方式：https://cn.vitejs.dev/guide/build.html#advanced-base-options
+https://github.com/Miofly/vite-plugin-multi-pages
 
 
 
