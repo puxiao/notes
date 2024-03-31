@@ -95,23 +95,67 @@ const puppeteer = require('puppeteer')
 
 <br>
 
-**安装：**
+**安装：推荐 npm 而不是  yarn 安装**
+
+根据个人经验，如果使用 `yarn add puppeteer` 安装时容易报错：
+
+即使有梯子也会容易收到这样的报错信息：
 
 ```
+Error: ERROR: Failed to set up chrome-headless-shell v123.0.6312.58! Set "PUPPETEER_SKIP_DOWNLOAD" env variable to skip download.
+...
+```
+
+按照网上使用下面的方式，依然不行：
+
+```
+#先配置环境变量
+set PUPPETEER_SKIP_DOWNLOAD=true
+
+#然后再次执行
 yarn add puppeteer
 ```
-
-```
-yarn add puppeteer-core
-```
-
-> 它们默认自带有 index.d.ts，方便我们在 TypeScript 中使用。
 
 
 
 <br>
 
-**特别强调：puppeteer 中的各种方法几乎都是异步的。**
+**推荐使用 npm 安装 puppeteer：**
+
+先确保自己修改了 npm 国内源：
+
+```
+npm config set registry https://registry.npmmirror.com/
+```
+
+然后执行 npm 安装命令：
+
+```
+npm i puppeteer
+
+#或
+npm i puppeteer-core
+```
+
+> 补充说明：它们默认自带有 index.d.ts，方便我们在 TypeScript 中使用。
+
+
+
+<br>
+
+如果你不想全局修改 npm 国内镜像源，那么可以通过增加命令参数，仅本次使用国内镜像源：
+
+```
+npm i puppeteer --registry https://registry.npmmirror.com
+```
+
+
+
+<br>
+
+安装成功后就可以开始使用 puppeteer 了。
+
+**提前强调：puppeteer 中的各种方法几乎都是异步的。**
 
 
 
