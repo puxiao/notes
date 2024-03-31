@@ -577,6 +577,10 @@ yarn config get registry
 yarn config set registry https://registry.npmmirror.com
 ```
 
+```
+npm config set registry https://registry.npmmirror.com/
+```
+
 > 注：2023年之前 淘宝NPM 的地址是 https://registry.npm.taobao.org ，但是 2024 年后该域名已更换为 https://registry.npmmirror.com
 
 
