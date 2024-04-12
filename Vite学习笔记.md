@@ -36,6 +36,7 @@
   * 使用prettier
   * 使用sass
   * 配置路径映射alias
+  * 依赖优化选项中添加esbuild配置选项
 
 * 使用过程中的一些常见问题
 
@@ -1597,6 +1598,49 @@ export default defineConfig({
 ```
 
 > "vite/client" 泛指各类客户端静态资源文件，例如 .svg、.jpg 等
+
+
+
+<br>
+
+### 依赖优化选项中添加esbuild配置选项
+
+具体用法可查看：
+
+https://cn.vitejs.dev/config/dep-optimization-options.html#optimizedeps-esbuild-options
+
+
+
+<br>
+
+这里重点说一下日常中可能会遇到的一个报错。
+
+假设你使用了某些第三方库，可能因为里面使用了 **"某些新的 JS 语法"** (例如 await )，开发调试时收到这样的报错：
+
+```
+Top-level await is not available in the configured target environment ("chrome87", "edge88", "es2020", "firefox78", "safari14" + 2 overrides)
+```
+
+**请注意上面说的 某些新的 JS 语法是加了引号的，也就是说这些 新的 JS 语法实际上并不是特别新，就好像上面那个因为第三方库使用了 await 这个语法。**
+
+> 我是在使用 threejs 中的 WebGPURenderer 时收到上面的报错信息的。
+
+
+
+<br>
+
+目前的解决方案是：在 vite.config.js 中增加 esbuildOptions 配置
+
+```
+export default defineConfig({
+    ...
+    optimizeDeps: {
+        esbuildOptions: {
+            target: 'esnext'
+        }
+    }
+})
+```
 
 
 
