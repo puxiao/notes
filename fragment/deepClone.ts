@@ -1,8 +1,10 @@
-//注意：deepClone 并不能完全正确克隆各种类型，下面代码只是增加了对 Map 类型的处理(且仅为一层拷贝)
+//注意：deepClone 并不能完全正确克隆各种类型
 export const deepClone = (obj: any) => {
     if (obj === null) return null;
     if (obj instanceof Map) {
         return new Map(obj)
+    } else if (obj instanceof Object === false) {
+        return obj
     } else {
         let clone = { ...obj };
         Object.keys(clone).forEach(
