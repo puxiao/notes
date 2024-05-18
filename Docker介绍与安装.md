@@ -17,6 +17,10 @@
 4. 难于迁移和扩展
 5. 受硬件限制
 
+
+
+<br>
+
 ### 虚拟化技术出现以后
 
 实施方式：
@@ -30,9 +34,17 @@
 2. 容易扩展：加物理机器或加虚拟机
 3. 容易云化：例如 阿里云 腾讯云
 
+
+
+<br>
+
 ### 虚拟化的局限性
 
 1. 每个虚拟机都是一个完整的操作系统，要给其分配资源，操作系统本身消耗资源
+
+
+
+<br>
 
 ### 开发和运维面临的问题
 
@@ -40,6 +52,10 @@
 2. 运维人员有一套运维流程和服务器环境：程序部署、服务监控等
 
 以上情况造成开发人员和运维人员没有统一有效的沟通方式(中介)、一个标准、一个模式，这就造成开发人员部署软件时与服务器环境不一致。
+
+
+
+<br>
 
 ### 容器解决了什么问题
 
@@ -49,6 +65,10 @@ Docker 图标为一个集装箱，含义是：开发和运维环境都以“集�
 
 > Docker进行了拟物化，用集装箱来表示容器。
 
+
+
+<br>
+
 ### 什么容器？
 
 1. 对软件和其依赖的标注打包
@@ -56,11 +76,19 @@ Docker 图标为一个集装箱，含义是：开发和运维环境都以“集�
 3. 共享一个OS Kernel
 4. 可以运行在很多主流操作系统中
 
+
+
+<br>
+
 ### 容器和虚拟机的区别
 
 1. 容器是APP程序层面的隔离
 2. 虚拟化是物理资源层面的隔离
 3. 在腾讯云服务器上使用容器(Docker)，相当于 虚拟化+容器
+
+
+
+<br>
 
 ### 容器技术的实现
 
@@ -69,7 +97,13 @@ Docker 图标为一个集装箱，含义是：开发和运维环境都以“集�
 3. 只不过目前Docker最流行
 4. Docker也分为免费社区版和收费企业版
 
+
+
+<br>
+
 # Docker安装
+
+
 
 ## Win10安装Docker桌面版
 
@@ -78,11 +112,84 @@ Docker 图标为一个集装箱，含义是：开发和运维环境都以“集�
 > 因为 Docker 本质上是一个 Linux 程序，所谓 Docker桌面版 其实是一个 Docker 官方制作的具有虚拟机性质的外壳。
 > 而只有 win10 系统才开始支持 WSL 2 Linux 内核模块。
 
+
+
+<br>
+
 ### 第1步：下载安装包
 
 下载地址：https://www.docker.com/get-started  点击 Download for Windows
 
 目前最新版本为：2.3.0.3
+
+
+
+<br>
+
+-------以下内容更新于 2024.05.18-------
+
+
+
+<br>
+
+### 修改默认安装目录
+
+如果你下载好了 桌面版安装文件 `Docker Desktop Installer.exe`，直接双击安装的话会默认安装到 C 盘。
+
+(安装过程中是不会给你自定义安装路径的)
+
+为了避免 C 盘空间不够，所以我们不要直接双击安装，而是使用命令安装。
+
+
+
+<br>
+
+**windows11安装 docker desktop 安装命令：**
+
+> 在 `Docker Desktop Installer.exe` 文件目录下打开  powershell 命令窗口，输入下面命令
+
+```
+Start-Process -Wait -FilePath "Docker Desktop Installer.exe" -ArgumentList "install", "-accept-license", "--installation-dir=D:\Docker\Docker", "--wsl-default-data-root=D:\Docker\wsl", "--windows-containers-default-data-root=D:\\Docker"
+```
+
+> 上述命令:
+>
+> * 将 docker 桌面版安装到 `D:\Docker\Docker`
+> * 同时配置 wsl 运行 docker 的根目录和数据存储目录 `D:\Docker\wsl`、`D:\Docker`
+
+
+
+<br>
+
+如果你不需要配置 wsl，仅自定义安装 docker 桌面版的目录，那么上面安装命令你可以简化为：
+
+```
+Start-Process -Wait -FilePath "Docker Desktop Installer.exe" -ArgumentList "install -accept-license --installation-dir=D:\Docker"
+```
+
+> 注意这次我们将 docker 安装到了 `D:\Docker`
+
+
+
+<br>
+
+**补充说明：**
+
+* 如果你是 windows10，那么对应安装命令自己百度搜吧。
+
+* 或者查阅这个网页：
+
+  https://stackoverflow.com/questions/75727062/how-to-install-docker-desktop-on-a-different-drive-location-on-windows
+
+
+
+<br>
+
+-------以上内容更新于 2024.05.18-------
+
+
+
+<br>
 
 ### 第2步：解决Windows系统低版本无法安装的问题
 
@@ -95,6 +202,10 @@ Docker Desktop requires Windows 10 Pro/Enterprise (15063+) or Windows 10 Home (1
 无法安装，默认要求 win10 专业版(15063+) 或 win10 家庭版(19018+)
 
 > 总不至于为了安装 docker 要更换操作系统吧，别急，有以下几种解决方案。
+
+
+
+<br>
 
 ### 解决方式1：升级系统
 
@@ -122,6 +233,8 @@ Docker Desktop requires Windows 10 Pro/Enterprise (15063+) or Windows 10 Home (1
 
 
 
+<br>
+
 ### 解决方式2：修改系统文件，欺骗 Docker 检测工具
 
 具体方法，请参阅：https://itnext.io/install-docker-on-windows-10-home-d8e621997c1d
@@ -129,6 +242,8 @@ Docker Desktop requires Windows 10 Pro/Enterprise (15063+) or Windows 10 Home (1
 > 个人不推荐如此操作，不确定会有什么隐患。
 
 
+
+<br>
 
 ## Win10以下版本安装Docker
 
@@ -145,6 +260,8 @@ Docker Desktop requires Windows 10 Pro/Enterprise (15063+) or Windows 10 Home (1
 安装 Linux 虚拟机，然后在虚拟机中安装 Docker。
 
 
+
+<br>
 
 ## CentOS安装Docker
 
@@ -200,6 +317,8 @@ curl -fsSL https://get.docker.com -o get-docker.sh | sh
 
 
 
+<br>
+
 ### 安装方式2：使用存储库安装
 
 #### 第1步：设置存储库
@@ -253,7 +372,9 @@ docker run hello-world
 
 
 
-### 第3中方式：使用安装包安装
+<br>
+
+### 第3种方式：使用安装包安装
 
 #### 第1步：找到对应的安装包 .rpm 文件
 
@@ -347,6 +468,8 @@ yum remove docker-ce docker-ce-cli containerd.io
 ```
 
 
+
+<br>
 
 ## 补充说明
 
