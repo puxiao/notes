@@ -144,7 +144,7 @@ Docker 图标为一个集装箱，含义是：开发和运维环境都以“集�
 
 <br>
 
-**windows11安装 docker desktop 安装命令：**
+**windows10、11安装 docker desktop 安装命令：**
 
 > 在 `Docker Desktop Installer.exe` 文件目录下打开  powershell 命令窗口，输入下面命令
 
@@ -171,19 +171,6 @@ Start-Process -Wait -FilePath "Docker Desktop Installer.exe" -ArgumentList "inst
 
 
 
-<br>
-
-**补充说明：**
-
-* 如果你是 windows10，那么对应安装命令自己百度搜吧。
-
-* 或者查阅这个网页：
-
-  https://stackoverflow.com/questions/75727062/how-to-install-docker-desktop-on-a-different-drive-location-on-windows
-
-
-
-<br>
 
 -------以上内容更新于 2024.05.18-------
 
