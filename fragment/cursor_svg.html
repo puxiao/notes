@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="cn-ZH">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cursor svg</title>
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .content {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+
+            height: 100px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class='content'>
+        <div>
+            <span>光标大小：</span>
+            <input type='number' value='16' step='1' min='4' max='64' oninput='handleSizeInput(event)' />
+        </div>
+        <div>
+            <span>光标颜色：</span>
+            <input type='color' value='#ff0000' oninput='handleColorInput(event)' />
+        </div>
+    </div>
+    <script>
+
+        let size = 16
+        let color = '#ff0000'
+
+        const updateCursor = () => {
+            const svgStr = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg"><circle cx="${size / 2}" cy="${size / 2}" r="${size / 2}" fill="${color}" opacity="1" /></svg>`
+            const dataURL = `data:image/svg+xml;base64,${btoa(svgStr)}`
+            const cursorValue = `url(${dataURL}) ${size / 2} ${size / 2}, auto`
+
+            document.body.style.cursor = cursorValue
+        }
+        updateCursor()
+
+        const handleSizeInput = (eve) => {
+            size = eve.target.value
+            updateCursor()
+        }
+
+        const handleColorInput = (eve) => {
+            color = eve.target.value
+            updateCursor()
+        }
+
+    </script>
+</body>
+
+</html>
