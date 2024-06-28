@@ -3,12 +3,14 @@ import { access, constants } from "fs/promises"
 import path from "path"
 import { Plugin } from "vite"
 
+const checkFileExt = ['.json', '.jpg', '.png', '.mp3']
 const public404Middleware = (): Plugin => ({
     name: 'public-404-middleware',
     configureServer(server) {
         server.middlewares.use(async (req, res, next) => {
-            if (req.url && (req.url.endsWith('.jpg') || req.url.endsWith('.png'))) {
-                const filePath = path.join(path.resolve(__dirname, 'public'), req.url)
+            const reqUrl = req.url
+            if (reqUrl && checkFileExt.some(v => reqUrl.toLowerCase().endsWith(v))) {
+                const filePath = path.join(path.resolve(__dirname, './public'), reqUrl)
                 try {
                     await access(filePath, constants.F_OK)
                     next()
