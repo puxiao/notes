@@ -10,7 +10,7 @@ const public404Middleware = (): Plugin => ({
         server.middlewares.use(async (req, res, next) => {
             const reqUrl = req.url
             if (reqUrl && checkFileExt.some(v => reqUrl.toLowerCase().endsWith(v))) {
-                const filePath = path.join(path.resolve(__dirname, './public'), reqUrl)
+                const filePath = path.join(path.resolve(__dirname, './public'), decodeURIComponent(reqUrl))
                 try {
                     await access(filePath, constants.F_OK)
                     next()
