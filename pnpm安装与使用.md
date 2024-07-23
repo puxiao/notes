@@ -280,3 +280,33 @@ pnpm create vue
 pnpm create vite
 ```
 
+
+
+<br>
+
+### 与monorepo(同一仓库多子项目)结合
+
+
+
+<br>
+
+**pnpm-workspace.yaml**
+
+在 monorepo 项目中，需要在项目根目录创建 `pnpm-workspace.yaml` 文件。
+
+```
+packages:
+  - 'monorepo/*'
+```
+
+像上面这样的配置含义为：
+
+* monorepo目录下所有的子目录(子项目) 中需要 pnpm 安装的包都会集中到 根目录下的 node_modules 中
+* 而所有子目录下创建的 node_modules 中的 npm 包仅仅是根目录下 node_modules 的文件引用
+
+**这样的好处就是：各个子项目中相同的 npm 包文件实际上只会存在一份，节省本地磁盘空间。**
+
+
+
+<br/>
+
