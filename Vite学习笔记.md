@@ -20,6 +20,8 @@
 
 * 关于CSS、sass样式
 
+* px 转 viewport
+
 * 引入静态文件资源
 
 * 命令参数
@@ -403,6 +405,54 @@ mydiv.className = xx.aa
 ```
 import xx from './xx.css?inline'
 ```
+
+
+
+<br>
+
+## px 转 viewport
+
+需要将 css 或 scss 中的 `px` 单位 自动转成 `viewport` 单位，可以使用：`postcss-px-to-viewport` 这个插件
+
+<br>
+
+**第1步：安装该插件**
+
+```
+pnpm add -D postcss-px-to-viewport
+```
+
+
+
+<br>
+
+**第2步：修改postcss配置项**
+
+> vite.config.ts
+
+```
+export default defineConfig({
+    ...
+    css: {
+        postcss: {
+            plugins: [
+                postcsspxtoviewport({
+                    viewportWidth: 375, //假定设计稿宽度为 375px
+                    ... //还有其他配置，不设置则使用默认值
+                })
+            ]
+        }
+    },
+})
+```
+
+
+
+<br>
+
+具体都有哪些配置值，可查阅：
+
+https://github.com/evrone/postcss-px-to-viewport/blob/master/README_CN.md#%E9%85%8D%E7%BD%AE%E5%8F%82%E6%95%B0
 
 
 
