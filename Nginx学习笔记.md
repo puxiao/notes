@@ -594,6 +594,36 @@ server {
 
 <br>
 
+#### https代理http请求
+
+使用 https 代理转发 http 请求。
+
+举个例子，假设在内部开发阶段，后端提供的 API 接口地址为：`http://192.168.0.50:8000` ，原本他只响应 http 接口请求，但是如果你在开发阶段需要使用 https，而 https 页面中不能够请求 http 的 API 接口 ，那么就可以通过下面方式，自己本机创建一个 http 代理。
+
+```
+server {
+    listen 443 ssl;
+    server_name localhost;
+
+    ssl_certificate ../pems/localhost.pem;
+    ssl_certificate_key ../pems/localhost-key.pem;
+
+    location / {
+        proxy_pass http://192.168.0.50:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+假设你本机局域网 IP 为 192.168.0.28，那么有了这个代理后，再发起 API 请求，则可以将 `http://192.168.0.50:8000` 改为 `https://192.168.0.28:443`。
+
+
+
+<br>
+
 #### Nodejs与Nginx的搭配使用
 
 理论上 Nodejs 可以独立创建 http 或 https 服务，但是从性能角度来讲，还是把一部分工作交给 Nginx 比较合适。
