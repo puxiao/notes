@@ -1084,7 +1084,168 @@ yarn config set registry https://registry.yarnpkg.com
 
 <br>
 
-### Rust基础语法和概念
+## 发布自己的crates.io包
+
+<br>
+
+**首先需要去 crates.io 上面查找 包名是否已存在。**
+
+如果搜不到即表示我们可以使用该包名。
+
+假定我们设定的包名为 `myxxx`，接下来说一下后续操作流程。
+
+
+
+<br>
+
+**第1步：创建一个名为 myxxx 的项目**
+
+```
+cargo new myxxx
+```
+
+然后我们开始编写我们的项目代码。
+
+
+
+<br>
+
+**第2步：添加包的相关信息**
+
+打开 `Cargo.toml`，添加下面的信息：
+
+```
+name = "myxxx"
+version = "0.0.1"
+edition = "2021"
+description = "Hello, My name is Puxiao!"
+license = "MIT"
+documentation = "https://docs.rs/myxxx"
+homepage = "https://github.com/xxx/xxxx"
+repository = "https://github.com/xxx/myxxx"
+```
+
+
+
+这几条信息建议都填写：
+
+* description：在 crates.io 介绍页或列表页中展示该包的介绍信息。
+* license：版权
+* documentation：文档地址，这个会 https://docs.rs 会自动生成文档的
+* homepage：包的官网
+* repository：包的仓库地址，对于开源项目而言这一项非常重要
+
+
+
+**特别强调：**
+
+* name：包的名称，这个决定了在 crates.io 上的名字，**请注意 crates.io 规定一旦提交该包那么将永远不可以修改包名字、不允许删除该包。**
+* version：版本号，**请注意 crates.io 规定后续每一次升级该包都必须修改提升版本号，同一个版本号只能用一次。**
+
+
+
+<br>
+
+**重要的事情再说一遍：crates.io 规定一旦提交了该包，那么永远不可以删除该包！**
+
+**crates.io 仅允许你删除该包的某个版本。**
+
+
+
+<br>
+
+**第3步：添加自述文件**
+
+项目根目录新建 README.md，填写包的自述内容。
+
+
+
+<br>
+
+**第4步：git 保存项目**
+
+```
+git add .
+git commit -a -m 'Initial commit'
+```
+
+对于你的项目而言 你可以不执行 `git push`。
+
+确保当前项目所有文件改动都已经 git 暂存 起来即可。
+
+
+
+<br>
+
+至此，我们前期准备工作已经完成了。接下来走正式发布流程。
+
+
+
+<br>
+
+**第1步：注册 crates.io 账户，获取 token**
+
+注册账户后，访问 https://crates.io/settings/tokens 点击 `New Token` 按钮，创建一个 token。
+
+接下来是创建 token 流程，记得把各种权限都勾选上。
+
+**请注意该 token 对应的哈西值 仅仅在第一次创建时可见，你需要复制保存起来。**
+
+> 补充一下：你自己创建的 token 名称是可以重复的。
+
+
+
+<br>
+
+**第2步：在本机命令窗口中执行登录**
+
+先登录
+
+```
+cargo login
+```
+
+**根据提示粘贴刚才我们创建的 token 哈希值。**
+
+
+
+<br>
+
+>你也可以查询当前登录者信息状态：
+>
+>```
+>cargo owner
+>```
+>
+>执行过后打开 https://crates.io 首页就知道当前账户是哪个了。
+
+
+
+<br>
+
+**第3步：提交发布**
+
+```
+cargo publish
+```
+
+> 该命令一旦正确执行不可撤销，所以一定检查确认各项后再执行该命令。
+
+
+
+<br>
+
+如果一切顺利那么就发布成功了，再去 crates.io 上就可以找到自己的这个 myxxx 包了。
+
+如果不顺利 ，则根据错误提示信息对应解决即可。
+
+
+
+
+
+<br>
+
+## Rust基础语法和概念
 
 在开始学习 Rust 语法之前，我先说一下我本身会的编程语言：
 
