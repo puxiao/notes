@@ -2701,10 +2701,33 @@ git merge upstream/dev
 至此完成代码更新与合并。
 
 
+<br>
+
+**另外一种情况：非合并而是新建分支**
+
+如果你不想整体合并，而是想基于别人的 main 分支重新创建一个自己的分支 xxxx，那么可以将上面第 4 步骤修改为：
+
+```
+git checkout -b xxxx upstream/main
+```
+
+
 
 <br>
 
-此时，你不再需要 upstream 这个远程仓库了，你可以选择删除该远程仓库。
+提交自己新建的这个分支 xxxx：
+
+```
+git push origin xxxx
+```
+
+
+
+<br>
+
+**删除远程仓库：**
+
+无论是合并还是新建分支，当你操作完不再需要 upstream 这个远程仓库了，你可以选择删除该远程仓库。
 
 ```
 git remote remove upstream
