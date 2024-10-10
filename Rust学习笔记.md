@@ -300,6 +300,56 @@ rustup self uninstall
 
 <br>
 
+管理编译目标平台(`rustup target`)相关。
+
+查看目前全部支持的目标平台：
+
+```
+rustup target list
+```
+
+
+
+<br>
+
+仅查看当前已安装的目标平台：
+
+```
+rustup target list --installed
+```
+
+
+
+<br>
+
+安装新的目标平台：
+
+```
+rustup target add xxxxx
+```
+
+> 假设要使用 Tauri 将前端项目编译成移动端应用，则可能需要添加编译目标平台有：
+>
+> ```
+> rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
+> ```
+
+
+
+<br>
+
+删除某编译目标平台：
+
+```
+rustup target remove xxxx
+```
+
+
+
+
+
+<br>
+
 如果你不使用 `rustup-init.exe` 安装 Rust，那可以从上面第 2 步开始可以直接改为下面方式安装。
 
 **修改安装请求下载地址并使用命令方式安装 Rust：**
