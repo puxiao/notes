@@ -32,6 +32,107 @@
 
 <br>
 
+## 如何检测当前是否支持ktx2？
+
+
+
+<br>
+
+**ktx2纹理容器概念解释：**
+
+ktx2 本身并不是指某一种具体的压缩纹理。它是一个压缩纹理容器，用来储存多种纹理的一种 “容器”(格式/规范)。
+
+> ktx2 是 ktx 的第 2 个升级版本，本文不讲解 ktx，只讲解最新的 ktx2。
+
+最新的 ktx2 容器储存的纹理有：UASTC、ASTC 等等。
+
+> uastc 是 astc 的一个扩展分支，我们可以简单理解为：凡是支持 astc 即表明也支持 uastc。
+
+
+
+<br>
+
+**本文讲解的都是基于 .ktx2 + uastc 这种组合。**
+
+
+
+<br>
+
+**纹理扩展列表：**
+
+对于 WebGL 来说，可以通过查看 WebGL 扩展列表 来检测当前都支持哪些扩展。
+
+完整的扩展列表，请查看：
+
+https://developer.mozilla.org/zh-CN/docs/Web/API/WebGL_API/Using_Extensions
+
+
+
+<br>
+
+**ktx2(uastc)的转码特性：**
+
+ktx2 的解码器在运行时会将 ktx2 中的纹理转码为当前平台所支持的纹理扩展格式。
+
+> 这里说的平台 是指：硬件和浏览器
+
+* 对于 PC 来说：通常被优先转码为 BC7 (EXT_texture_compression_bptc)，或降级为 S3TC/DXT
+* 对于 移动端来说：会被转码为 ASTC (WEBGL_compressed_texture_astc)
+
+
+
+<br>
+
+也就是说：
+
+* 对于 PC 浏览器环境，我们只需要判定 WebGL 扩展列表中是否支持 `EXT_texture_compression_bptc`
+* 对于 移动端浏览器，我们只需要判定 WebGL 扩展列表中是否支持 `WEBGL_compressed_texture_astc`
+
+就可以知道当前浏览器环境是否支持 .ktx2(uastc) 了。
+
+> 如果不支持，我们做好切换回 .jpg 这种纹理资源方式。
+
+
+
+<br>
+
+**原生JS中的检测方式：**
+
+```
+const canvas = document.createElement('canvas')
+const gl = canvas.getContext('webgl')
+const supportUASTC = gl.getExtension('EXT_texture_compression_bptc') || gl.getExtension('WEBGL_compressed_texture_astc')
+```
+
+
+
+<br>
+
+**Threejs 中的检测方式：**
+
+```
+const renderer = new WebGLRenderer({ ... })
+const supportUASTC = renderer.extensions.has('EXT_texture_compression_bptc') || renderer.extensions.has('WEBGL_compressed_texture_astc')
+```
+
+
+
+<br>
+
+或者是：
+
+```
+const renderer = new WebGLRenderer({ ... })
+
+const ktx2Loader = new KTX2Loader()
+ktx2Loader.detectSupport(renderer)
+const supportUASTC = ktx2Loader.workerConfig.bptcSupported || ktx2Loader.workerConfig.astcSupported 
+```
+
+
+
+<br>
+
 ## KTX-Software：.ktx2 最佳转换工具
 
 
@@ -108,7 +209,7 @@ ktx create --encode uastc --format R8G8B8_SRGB input.jpg output.ktx2
 
 **请注意：**
 
-如果没有使用压缩参数，那么转化  .ktx2 时不会进行压缩，这样的结果是 .ktx2 文件会比 .jpg 稍微大一点。
+如果没有使用**压缩参数**，那么转化  .ktx2 时不会进行压缩，这样的结果是 .ktx2 文件会比 .jpg 稍微大一点。
 
 因为 .ktx2 中包含了很多其他优化代码，所以文件体积稍微大一点也没有关系，不影响降低显存的占用。
 
@@ -116,7 +217,35 @@ ktx create --encode uastc --format R8G8B8_SRGB input.jpg output.ktx2
 
 <br>
 
-**ktx 新版 4.3.2 与旧版的区别：**
+> **压缩参数：**
+>
+> 在旧版的 ktx 中，通过增加参数 `--encode-basisLZ` 来明确使用压缩。
+>
+> 但是在新版 ktx 中如果转 UASTC 则参数为 `--uastc-quality 1` 这种形式来设定 压缩级别。uastc-quality 可设置值范围为 0 ~ 4，默认值为 1。该值越大转换所需时间越久，压缩效果越高(文件体积越小)。
+
+
+
+<br>
+
+> **将多张图片压缩到一个 .ktx2 中：**
+>
+> 可以通过 `--layers`  参数来设定纹理的层级数量，例如将 6 张图片分别设置为 6 个图层当中：
+>
+> ```
+> ktx create --layers 6 --encode uastc --format R8G8B8_SRGB run1.png run2.png run3.png run4.png run5.png run6.png running_animation.ktx2
+> ```
+>
+> **使用场景：**
+>
+> 假设有一个平面，需要每隔 1 秒切换一个纹理图片内容，那么就可以通过自定义着色器材质，每隔 1秒修改 uniform 中 layer 对应的变量值，切换使用该纹理中不同 layer 中的纹理。这样的好处是不会产生纹理切换传输数据。
+
+> 在本文中不存在这种场景需求，因此不做过多讲解。
+
+
+
+<br>
+
+**补充：ktx 新版 4.3.2 与旧版的区别：**
 
 * ktx create --encode 参数 --encode 的值仅支持 basis-lz 和 uastc
 * 不再支持 astc
@@ -498,4 +627,3 @@ await writeFile(outputGltf, JSON.stringify(gltf, null, 2))
 
 console.log(`覆写 ${outputGltf} 成功，任务完成`)
 ```
-
