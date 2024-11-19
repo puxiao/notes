@@ -38,6 +38,44 @@
 
 <br>
 
+**先说一个结论：只有 WebGL2 才支持 .ktx2 + uastc，而 WebGL 1 是不支持的！**
+
+> WebGL 1 仅支持 .ktx 所支持的纹理，不支持 .ktx2 + uastc。
+
+在实际项目中，如果你是 iPhone 12，那么由于不支持 WebGL2，所以就无法使用本文所讲解的 .ktx2 + uastc。
+
+那么遇到这种情况就降级使用 .jpg/.png 这种吧。
+
+> 为了可以在这种较旧的手机上运行，你可能需要把纹理图片尺寸变小一些，例如改为 512x512。
+
+
+
+
+
+<br>
+
+在 threejs 中可以通过下面代码判定当前渲染器是否为 WebGL2
+
+```
+console.log(myRenderer.capabilities.isWebGL2)
+```
+
+
+
+<br>
+
+**特别强调：在 threejs 0.163.0 版本中已经移除了对 WebGL 1 的支持，仅支持 WebGL2 和 WebGPU。**
+
+
+
+<br>
+
+--------- 如果判定支持 WebGL2，那么才可以往下阅读 ---------
+
+
+
+<br>
+
 **ktx2纹理容器概念解释：**
 
 ktx2 本身并不是指某一种具体的压缩纹理。它是一个压缩纹理容器，用来储存多种纹理的一种 “容器”(格式/规范)。
@@ -100,7 +138,7 @@ ktx2 的解码器在运行时会将 ktx2 中的纹理转码为当前平台所支
 
 ```
 const canvas = document.createElement('canvas')
-const gl = canvas.getContext('webgl')
+const gl = canvas.getContext('webgl2')
 const supportUASTC = gl.getExtension('EXT_texture_compression_bptc') || gl.getExtension('WEBGL_compressed_texture_astc')
 ```
 
