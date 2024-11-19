@@ -38,7 +38,7 @@
 
 <br>
 
-**先说一个结论：只有 WebGL2 才支持 .ktx2 + uastc，而 WebGL 1 是不支持的！**
+**先说一个"伪结论"：只有 WebGL2 才支持 .ktx2 + uastc，而 WebGL 1 是不支持的！**
 
 > WebGL 1 仅支持 .ktx 所支持的纹理，不支持 .ktx2 + uastc。
 
@@ -49,6 +49,48 @@
 > 为了可以在这种较旧的手机上运行，你可能需要把纹理图片尺寸变小一些，例如改为 512x512。
 
 
+
+<br>
+
+**伪结论？？？**
+
+因为理论上 uastc 这种 通用纹理会在实际运行时被转码成当前目标平台所支持的纹理格式，也就是说理论上 uastc 纹理并没有限定仅运行在 WebGL2上。
+
+> UASTC 中第一个字母 U 是单词 Universal(通用) 的简写。
+
+理论知识可以查看下面这张图：
+
+![UASTC](https://raw.githubusercontent.com/KhronosGroup/3D-Formats-Guidelines/refs/heads/main/figures/UASTC_targets.png)
+
+
+
+从上面这张图可以看到，当实际使用 UASTC 时：
+
+* 会先检测当前目标平台是否支持 ASTC，若支持则转码为 ASTC
+* 如果不支持 ASTC 则检测是否支持 BC7，若支持则转码为 BC7
+* 如果不支持BC7 则检测是否支持 HQ，若支持则编译为 AGBA8
+* 如果不支持 HQ 则继续检测是否支持 ETC，若支持则....
+* ...
+
+也就是说理论上：UASTC 会逐步降级编译成各种目标平台所支持的纹理。
+
+
+
+<br>
+
+> 更多详细信息请查阅：
+>
+> https://github.com/KhronosGroup/3D-Formats-Guidelines/blob/main/KTXDeveloperGuide.md#additional-transcode-targets-rgb-and-rgba
+
+
+
+<br>
+
+**但是，Threejs 中对于 .ktx2 + UASTC 的相关 KTX2Loader、WASM 转码包是有版本之分的。**
+
+**并且 UASTC 也仅仅是一种纹理，UASTC 内部也存在多种格式的颜色规范和压缩级别。**
+
+**经过实际项目试验，确确实实并不是所有的目标平台、UASTC 都可以正常运行的，因此我才得出一个 伪结论：仅 WebGL2 支持 .ktx2 + uastc。**
 
 
 
@@ -114,7 +156,7 @@ ktx2 的解码器在运行时会将 ktx2 中的纹理转码为当前平台所支
 
 > 这里说的平台 是指：硬件和浏览器
 
-* 对于 PC 来说：通常被优先转码为 BC7 (EXT_texture_compression_bptc)，或降级为 S3TC/DXT
+* 对于 PC 来说：通常被优先转码为 BC7 (EXT_texture_compression_bptc)，或降级为其他
 * 对于 移动端来说：会被转码为 ASTC (WEBGL_compressed_texture_astc)
 
 
