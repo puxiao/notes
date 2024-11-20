@@ -273,7 +273,7 @@ const supportUASTC = ktx2Loader.workerConfig.bptcSupported || ktx2Loader.workerC
 
 <br>
 
-**将图片转 .ktx2 的命令：**
+**将图片转 .ktx2 + uastc 的命令：**
 
 ```
 ktx create --encode uastc --format R8G8B8_SRGB input.jpg output.ktx2
@@ -282,6 +282,18 @@ ktx create --encode uastc --format R8G8B8_SRGB input.jpg output.ktx2
 > 更多参数请执行 ktx create --help 来查看。
 >
 > * 例如 是否生成 mipmap：--generate-mipmap
+
+
+
+<br>
+
+**如果你的纹理对于清晰度要求不高，那么你可以不转 uastc，而是改为 basis-lz ，这样生成的 .ktx2 文件体积会大幅减小，但是纹理清晰度不如 uastc。**
+
+```
+ktx create --encode basis-lz --format R8G8B8_SRGB input.jpg output.ktx2
+```
+
+**由于我的项目对于纹理清晰度有要求，因此我选择 uastc，所以本文讲的都是 .ktx2 + uastc。**
 
 
 
