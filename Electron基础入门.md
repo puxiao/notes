@@ -184,9 +184,34 @@ RequestError: connect ETIMEDOUT
 
 <br>
 
-你可以尝试将 npm 源修改为 国内的淘宝 npm，但是我个人实际使用时，发现即使修改成 淘宝NPM源，也会存在安装失败的情况。
+你可以尝试将 npm 源修改为 国内的淘宝 npm。
 
-这里，我教大家一个 “手工安装” 的方式，来解决这个问题。
+
+
+<br>
+
+> -------- 以下更新于 2024.12.07 --------
+
+直接在项目根目录下新建 `.npmrc` 文件：
+
+```
+registry=https://registry.npmmirror.com/
+electron_mirror=https://registry.npmmirror.com/-/binary/electron/
+```
+
+**一定要重启 VSCode ！**
+
+然后再次安装就应该可以了。
+
+> -------- 以上更新于 2024.12.07 --------
+
+
+
+<br>
+
+> 以下这种 手工安装方式 已经不推荐了！！！
+
+我教大家一个 “手工安装” 的方式，来解决这个问题。
 
 
 
