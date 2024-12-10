@@ -24,6 +24,24 @@ Electron 官网：https://www.electronjs.org/
 
 <br>
 
+## Chromium VS Chrome
+
+**一定要记住 electron 内嵌的是 Chromium 内核，而不是 谷歌浏览器 Chrome！**
+
+所以当你在运行 electron 应用时如果出现了某些异常，即 直接使用浏览器访问没有问题但是在 electron 应用中有问题的，要考虑排查一下是不是因为 Chromium 与 Chrome 差异的原因。
+
+
+
+<br>
+
+**常见的一个差异是：Chromium 只支持 H.246 格式的 mp4 文件，而 Chrome 确支持更多格式的 mp4 格式文件。**
+
+> 实际的表现为 electron 应用运行包含视频的网页时，如果 mp4 格式非 H.246 编码，那么可能会出现视频只显示进度条但没有画面内容的情况。
+
+
+
+<br>
+
 ## 快速创建Electron项目
 
 > 下面执行命令中使用 yarn，如果你使用 npm 请将命令替换为 npm 对应命令
