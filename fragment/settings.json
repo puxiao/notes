@@ -1,0 +1,17 @@
+{
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit"
+    },
+    "editor.detectIndentation": false,
+    "editor.tabSize": 4,
+    "javascript.format.insertSpaceBeforeFunctionParenthesis": true,
+    "compile-hero.disable-compile-files-on-did-save-code": false,
+    "workbench.editor.customLabels.patterns": {
+        "**/src/**/index.js": "${dirname} - index.js",
+        "**/src/**/index.ts": "${dirname} - index.ts",
+        "**/src/**/index.jsx": "${dirname} - index.jsx",
+        "**/src/**/index.tsx": "${dirname} - index.tsx",
+        "**/src/**/index.vue": "${dirname} - index.vue",
+    }
+}
