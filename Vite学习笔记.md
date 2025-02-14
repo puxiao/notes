@@ -20,7 +20,11 @@
 
 * 关于CSS、sass样式
 
-* px 转 viewport
+* px 转 rem
+
+* px 转 rem 后兼容PC端
+
+* px 转 vw/vh
 
 * 引入静态文件资源
 
@@ -410,9 +414,108 @@ import xx from './xx.css?inline'
 
 <br>
 
-## px 转 viewport
+## px 转 rem
 
-需要将 css 或 scss 中的 `px` 单位 自动转成 `viewport` 单位，可以使用：`postcss-px-to-viewport` 这个插件
+若需要将 css 或 scss 中的 `px` 单位 自动转成 `rem` 单位，可以使用：`postcss-pxtorem` 这个插件
+
+<br>
+
+**第1步：安装该插件**
+
+```
+pnpm add -D postcss-pxtorem
+```
+
+
+
+<br>
+
+**第2步：新增配置文件**
+
+项目根目录新建 postcss.config.js 文件
+
+```
+module.exports = {
+    plugins: {
+        'postcss-pxtorem': {
+            rootValue: 37.5, // 设计稿宽度的1/10，假设设计稿是375px
+            unitPrecision: 5, // 转换后的小数位数
+            propList: ['*'], // 需要转换的属性，这里表示全部都进行转换
+            selectorBlackList: ['.norem'], // 过滤掉.norem开头的class，不进行rem转换
+            replace: true,
+            mediaQuery: false, // 是否在媒体查询的css代码中也进行转换
+            minPixelValue: 0, // 小于或等于12px不转换为rem
+            exclude: /node_modules/i // 排除node_modules文件(node_modules内文件禁止转换)
+        }
+    }
+}
+```
+
+> * 无需针对 vite.config.ts 中 css.postcss 做任何配置
+> * 375px 的移动设计稿上元素尺寸为多少像素，那么在编写 css 时就使用具体多少像素
+
+
+
+<br>
+
+**第3步：动态计算网页根元素的 rem 值**
+
+定义一个 setRem 的函数用于动态计算修改当前网页的 rem 值
+
+```
+function setRem() {
+    const baseSize = 37.5
+    const scale = document.documentElement.clientWidth / 375
+    document.documentElement.style.fontSize = baseSize * Math.min(scale, 2) + 'px'
+}
+```
+
+**在页面初始化 和 resize 时调用 setRem() 函数，这样就可以每次重新计算 rem 的值。**
+
+
+
+<br>
+
+## px 转 rem 后兼容PC端
+
+上面步骤中我们已经将宽 375px 的移动端设计稿实现了 css 转 rem，但是如果该网页还需兼容 PC 端，那么就可以通过下面方式实现。
+
+<br>
+
+**添加 CSS 媒体查询 添加不同尺寸下的适配**
+
+> 假设我们使用的是 scss 语法
+
+```diff
+.mydiv {
+    width:40px;
+    height:40px;
+    
+    .label: {
+      font-size: 9px;
+    }
+    
++    @media screen and (min-width: 1024px) {
++        width: 50px;
++        height: 50px;
++
++        .label {
++            font-size: 12px;
++        }
++    }
+}
+```
+
+> * 这里我们假定网页宽度超过 1024px 即可视为 PC 端
+> * scss 支持像上面示例中那样在 .mydiv { ... } 内部定义专属 媒体查询
+
+
+
+<br>
+
+## px 转 vw/vh
+
+若需要将 css 或 scss 中的 `px` 单位 自动转成 `viewport` 单位，可以使用：`postcss-px-to-viewport` 这个插件
 
 <br>
 
@@ -427,6 +530,8 @@ pnpm add -D postcss-px-to-viewport
 <br>
 
 **第2步：修改postcss配置项**
+
+不同于 px 转 rem 插件 `postcss-pxtorem` 需要新建 `postcss.config.js` 文件才可以配置，本次使用的 `postcss-px-to-viewport` 可直接通过 vite.config.ts 来配置。
 
 > vite.config.ts
 
