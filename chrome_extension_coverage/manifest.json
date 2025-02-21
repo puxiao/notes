@@ -1,0 +1,17 @@
+{
+    "appid": "example",
+    "description": "替换网站指定JS文件",
+    "name": "coverage",
+    "version": "1.0",
+    "manifest_version": 2,
+    "permissions": [
+        "webRequest",
+        "webRequestBlocking",
+        "*://*.example.com/*"
+    ],
+    "background": {
+        "scripts": [
+            "background.js"
+        ]
+    }
+}
