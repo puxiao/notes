@@ -166,6 +166,94 @@ createApp(App).mount('#app')du
 
 <br>
 
+
+## tsx中使用pinia
+
+在 vue 的 tsx 函数式组件中，使用 pinia 定义的状态很简单。
+
+<br>
+
+假设我们定义了一个 useMyData 状态：
+
+```
+import { defineStore } from "pinia";
+
+interface MyDataState {
+    name: string;
+    age: number;
+}
+
+const useMyData = defineStore("myData", {
+    state: (): MyDataState => ({
+        name: "puxiao",
+        age: 39,
+    }),
+    actions: {
+        addAge() {
+            this.age++
+        }
+    }
+})
+
+export default useMyData
+```
+
+<br>
+
+我们把之前的 HelloWorld 组件改造一下：
+
+```diff
++ import { useMyData } from '../stores'
+import './index.scss'
+
+interface HelloWorldProps {
+    msg: string,
+    url: string
+    list: { label: string, value: string }[]
+    footVisible: boolean
+    click: (str: string) => void
+}
+
+const HelloWorld = ({ msg, url, list, footVisible, click }: HelloWorldProps) => {
+
++    const myDataStore = useMyData()
+
+    return (
+        <div class='hello-world-container'>
++            <h1>{myDataStore.name} - {myDataStore.age}</h1>
++            <button onClick={() => myDataStore.addAge()}>add age</button>
+            <a href={url}>{msg}</a>
+            <div>
+                {
+                    list.map((item, index) => {
+                        return (
+                            <span
+                                class={"item"}
+                                key={index}
+                                onClick={() => click(item.value)}
+                            >
+                                {item.label}
+                            </span>
+                        )
+                    })
+                }
+            </div>
+            {
+                footVisible ? (
+                    <footer>Footer</footer>
+                ) : null
+            }
+        </div>
+    )
+}
+
+export default HelloWorld
+```
+
+> 在 .tsx 组件中不需要 .vue 中 storeToRefs
+
+<br>
+
 ## 实际开发中的一些冲突
 
 能够想到的冲突有以下几点。
@@ -175,8 +263,6 @@ createApp(App).mount('#app')du
 - 同样，如果父组件是 xx.tsx，而子组件是 xx.vue，那么又该如何配置子组件属性？
   
 - xx.tsx 组件中如何编写 组件的各种生命周期函数？
-  
-- xx.tsx 组件中如何使用 pinia 状态管理？
   
 - xx.tsx 组件中如何组织 css 样式？
   
