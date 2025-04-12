@@ -607,7 +607,7 @@ git add .
 > 注意：该方法有一定的危险性，应谨慎操作
 
 ```
-git rm -r --cached .
+git rm -r --cached data/config.ini
 git add .
 git commit -m 'update .gitignore'
 git push
