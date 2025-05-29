@@ -54,3 +54,12 @@ notepad $PROFILE
 $env:HTTP_PROXY = "http://127.0.0.1:7890"
 $env:HTTPS_PROXY = "http://127.0.0.1:7890"
 ```
+
+<br>
+
+**查看代理配置**
+
+```
+$env:HTTP_PROXY
+$env:HTTPS_PROXY
+```
