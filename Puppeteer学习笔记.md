@@ -77,7 +77,7 @@ https://pptr.dev/#?product=Puppeteer&version=v13.5.1&show=api-class-page
 
    > 所以当你安装它时，它会自动下载一份最新的谷歌浏览器到 node_modules 中
 
-2. puppetter-core：仅包含 puppeteer 核心代码 但不包含谷歌浏览器的 NPM 包
+2. puppeteer-core：仅包含 puppeteer 核心代码 但不包含谷歌浏览器的 NPM 包
 
    > 它会默认使用你当前系统中已安装的 谷歌浏览器
 
