@@ -11,6 +11,7 @@
 - Squirrel启动检测：electron-squirrel-startup
 - 日志：electron-log
 - 数据状态：electron-store
+- 软件防盗版：systeminformation、crypto-js
 
 <br>
 
@@ -507,7 +508,7 @@ console.log = log.log
 
 <br>
 
-## 数据状态：electron-store
+## 数据状态：electron-store
 
 **安装：**
 
@@ -517,11 +518,46 @@ yarn add electron-store
 
 <br>
 
-**使用：**
+**初始化：**
 
 ```
 import Store from 'electron-store'
 const store = new Store() 
+```
+
+> 默认情况下会把数据存储在 `c:\用户\xxx\AppData\Roaming\your-app`
+
+<br>
+
+**自定义数据存储位置：**
+
+```
+const store = new Store({
+    cwd: process.resourcesPath,//将数据存储在软件安装后的 "resources" 目录下
+    name: 'locales', //文件名称，默认为 config
+}) 
+```
+
+> 上述配置后，最终数据存储在程序安装目录的 `resources/locales.json` 中。
+
+<br>
+
+注意事项：
+
+- 如果软件默认安装到了 C 盘，那么上述配置后，需要以管理员身份才可以有写入权限。
+  
+  > 读文件则不需要管理员权限
+  
+- 这样做相当于把应用程序做成了 "绿色版"，随意拷贝随意携带数据使用。
+  
+
+<br>
+
+**使用：**
+
+```
+import Store from 'electron-store'
+const store = new Store({ ... }) 
 
 //检测是否存在
 store.has('xxx')
@@ -558,9 +594,9 @@ store.clear()
   
   ```
   new BrowserWindow({ 
-    webPreferences: { 
-      preload: path.join(__dirname, 'preload.cjs') 
-    }, 
+  webPreferences: { 
+    preload: path.join(__dirname, 'preload.cjs') 
+  }, 
   })
   ```
   
@@ -570,7 +606,193 @@ store.clear()
   
   ```
   if (squirrelStartup) {
-      app.quit();
-      //return; //若此行代码不删除则程序运行会报错
+    app.quit();
+    //return; //若此行代码不删除则程序运行会报错
   }
   ```
+  
+
+<br>
+
+## 软件防盗版：systeminformation、crypto-js
+
+假设我们不希望别人可以轻易复制拷贝我们的应用软件，那么可以做一些简单的防盗版策略。
+
+<br>
+
+**策略如下：**
+
+1. 软件安装成功第一次启动时，需要输入一个验证授权码(一个固定的字符串)
+  
+2. 若授权码与软件内置的密码字符串相同，此时则将当前电脑系统的 `硬件+网卡` 组合成唯一的 "机器身份ID" 写入到本地数据中
+  
+3. 后续每次启动应用程序时，都会获取一次当前电脑的 `硬件+网卡` 信息与之前写入的信息进行对比，若一致则跳转到正式的网页中，若不一致则跳转至 版本信息页。
+  
+
+这样做就会启到一定的防盗版效果：
+
+- 如果别人拿到了我们的应用安装包，但是他不知道授权码，仅可以进入到安装授权界面，无法正常运行软件。
+  
+- 如果已经安装成功了 ，别人通过整体拷贝安装目录到其他电脑上，由于另外一台电脑 `硬件+网卡` 信息与软件安装目录中已存在的信息不一致，也无法正常运行软件。
+  
+
+<br>
+
+接下来讲一下实现中的几个关键技术点。
+
+<br>
+
+**信息加密：**
+
+我们使用 crypto-js、js-base64、js-md5 来对授权码和机器码进行加密，让别人看不出、无法手工修改。
+
+> 即使知道 加密前 和 加密后 的字符串，但是别人也无法反推加密过程。
+
+<br>
+
+**不同的界面：授权页、版权页**
+
+我们在项目中创建 2 个 html 页面：config.html、copyright.html
+
+**config.html 授权页：**
+
+里面有输入 授权码 的输入框，点击确认后将授权码发送给 electron 主程序。
+
+```
+if (window.electronAPI) {
+    window.electronAPI.saveConfig({ xxx });
+}
+```
+
+electron 主程序接收到授权码后进行加密，然后与 JS 中定义的授权码(已加密)进行对比。
+
+若不一致，则告诉前端页面：
+
+```
+ mainWindow.webContents.executeJavaScript(`alert('安装授权码错误')`)
+```
+
+若一致，则开始尝试获取硬盘和网卡信息组成的当前电脑唯一机器标识。
+
+<br>
+
+**获取当前电脑唯一机器标识：**
+
+我们使用 `systeminformation` 这个 NPM 包。
+
+<br>
+
+获取硬盘唯一编号：
+
+```
+const getDiskNum = () => {
+    return new Promise((resolve, _) => {
+        si.diskLayout().then((originDisks) => {
+            const disks = originDisks.filter(d => d.serialNum && d.serialNum.trim() !== '')
+                .sort((a, b) => a.device.localeCompare(b.device));
+            if (disks.length === 0) {
+                resolve('');
+            };
+            resolve(disks[0].serialNum);
+        }).catch((err) => {
+            console.error(err);
+            resolve('');
+        });
+    })
+}
+```
+
+<br>
+
+获取网卡号：
+
+```
+const getMac = () => {
+    return new Promise((resolve, _) => {
+        si.networkInterfaces().then((originNetworkInterfaces) => {
+            const list = Array.isArray(originNetworkInterfaces) ? originNetworkInterfaces : [originNetworkInterfaces];
+            const networkInterfaces = list.filter(n => n.mac && n.mac !== '00:00:00:00:00:00' && !n.internal)
+                .sort((a, b) => a.iface.localeCompare(b.iface));
+            if (networkInterfaces.length === 0) {
+                resolve('');
+            };
+            resolve(networkInterfaces[0].mac);
+        }).catch((err) => {
+            console.error(err);
+            resolve('');
+        });
+    })
+}
+```
+
+<br>
+
+整合得到唯一的自定义的机器 ID 字符串：
+
+```
+//我们设定一个加密强度 encStrength：0=无加密;1=硬盘加密;2=网卡加密;3=硬盘+网卡
+
+const getDiskInfo = async (encStrength) => {
+
+    let serialNum = 'disk';
+    let mac = 'network';
+
+    try {
+        switch (encStrength) {
+            case 0:
+                break
+            case 1:
+                serialNum = await getDiskNum();
+                break
+            case 2:
+                mac = await getMac();
+                break
+            case 3:
+                serialNum = await getDiskNum();
+                mac = await getMac();
+                break
+            default:
+                throw new Error('不支持的加密强度');
+        }
+    } catch (err) {
+        console.error(err);
+        throw new Error('获取硬盘/网卡信息失败：', }
+
+    return `${orgName}-${serialNum}-${mac}-${encStrength}`
+
+}
+```
+
+> 请注意我们将加密强度也写入到了机器ID 里。
+
+接下来我们就将得到的唯一机器 ID 通过 `crypto-js` 加密，然后通过前面讲的 `electron-store` 写入到本地中。
+
+```
+const str = encryptoData(machineUUID, Base64.encode(md5(key)))
+store.set('machineUUID', str)
+```
+
+写入完成后，我们可以自动重启应用程序。
+
+<br>
+
+**核心点：每一次启动应用时进行校验**
+
+当软件刚启动时，我们先通过 `store.get('machineUUID')` 尝试读取。
+
+- 若不存在则将跳转至 config.html 页面进行授权配置
+  
+- 若存在则读取并进行解密，并从解密后的字符串中提取到加密强度 encStrengt，然后调用 `getDiskInfo(encStrengt)` 获取当前电脑的机器 ID ，接下来将 2 者进行对比，若一致则 electron 程序跳转至正式内容页，若不一致则跳转至版权页。
+  
+
+<br>
+
+**copyright.html 版权页：**
+
+静态页面，就显示 "软件授权信息异常，请联系 xxx 。"
+
+<br>
+
+**上述操作对于不懂编程的人来说，起到了防盗版效果。**
+
+但是对于懂 electron 编程的人来说，他们可以通过去分析你的 app.asar 来获取你的全部 JS 代码，自然就知道如何破解了。
