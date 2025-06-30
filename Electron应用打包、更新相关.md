@@ -204,6 +204,7 @@ yarn add electron-updater
         "allowToChangeInstallationDirectory": true,
         "createDesktopShortcut": true,
         "createStartMenuShortcut": true,
+        "runAfterFinish": true, //安装完成最后一步是否显示 "启动 xxx"，默认值为 true
         "deleteAppDataOnUninstall": true, //卸载软件时是否清空用户本机数据
         "installerIcon": "icon.ico",
         "uninstallerIcon": "icon.ico",
