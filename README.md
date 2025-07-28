@@ -14,6 +14,7 @@
 
 ##### 欢迎与我交流
 
-<p align="center">
-<img src="https://raw.githubusercontent.com/puxiao/notes/master/imgs/wechat.jpg" alt="wechat.jpg"/>
-</p>
+<div style="display: flex; justify-content: center; align-items: center;">
+    <img width="400" src="https://raw.githubusercontent.com/puxiao/notes/master/imgs/wechat.jpg" alt="wechat.jpg" />
+    <img width="280" src="https://github.com/puxiao/notes/blob/master/imgs/zsxq.jpg?raw=true alt=" 加入知识星球二维码.jpg" />
+</div>
