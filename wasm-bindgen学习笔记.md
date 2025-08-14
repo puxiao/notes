@@ -126,11 +126,23 @@ pub fn add(a: i32, b: i32) -> i32 {
 
 ### 构建
 
+<br>
+
+**添加构建目标(仅第一次运行)：**
+
+```
+rustup target add wasm32-unknown-unknown
+```
+
+> 查询当前系统支持的目标列表命令为 `rustup target list`
+
+<br>
+
 **生成wasm文件：**
 
 ```
 # 生成未优化的 wasm
-cargo build --target wasm32-unknow-unknow
+cargo build --target wasm32-unknown-unknown
 
 # 生产环境构建(优化版)
 cargo build --release --target wasm32-unknow-unknow
