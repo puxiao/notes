@@ -523,3 +523,311 @@ export default __wbg_init;
 <br>
 
 好了，我们第一个 wasm-bindgen 项目至此完成。
+
+<br>
+
+### Rust中操控网页：web-sys
+
+上面示例中 rust 代码提供一个 add() 方法供网页 JS 调用。如果 rust 代码中想操控网页，那么就需要使用到 web-sys 这个包。
+
+<br>
+
+**安装web-sys：**
+
+首先我们肯定想到安装 web-sys 依赖的命令代码为 `cargo add web-sys` 。
+
+对应的 Cargo.toml 为：
+
+```
+[dependencies]
+wasm-bindgen = "0.2.100"
+web-sys = "0.3.77"
+```
+
+上面这样定义仅仅表明依赖和打包 wb-sys 默认的 `std` 特征(feature)。
+
+相当于下面的写法：
+
+```
+[dependencies]
+wasm-bindgen = "0.2.100"
+web-sys = { version = "0.3.77", features = ["std"] }
+```
+
+**web-sys 的 std 特征仅仅包含与 js-sys、wasm-bindgen 依赖关联，如果直接使用几乎做不了什么事情，哪怕 console.log() 都无法使用。**
+
+<br>
+
+**对于 web-sys 来说，当你在 rust 使用绝大多数 DOM操作、浏览器API 和 Web API，都需要在依赖的 features 中加入该特征名。并且目前来说这个事情只能是手工添加完成，无法自动化。**
+
+<br>
+
+**特征名查询：**
+
+web-sys 都支持哪些特征名，可以去官方文档查询：
+
+https://wasm-bindgen.github.io/wasm-bindgen/api/web_sys/index.html
+
+> 目前最新版 0.3.77 中已经有 1656 个特征名。
+
+<br>
+
+如果有些 JS 常用的你没有找到，例如 Math、JSON、Array 等，这些是由 js-sys 提供的。
+
+https://wasm-bindgen.github.io/wasm-bindgen/api/js_sys/index.html
+
+> - 模块：Atomics、JSON、Math、WebAssembly 等
+>   
+> - 数据类型：Array、ArrayBuffer、Boolean、Date、Error、Map、Set、Symbol、Object 等
+>   
+> - 函数：decode_uri_component、encode_uri_component、parse_float、parse_int、escape、eval 等
+>   
+
+<br>
+
+如果我们一开始就知道自己会是用哪些特征名，例如 console，那么对应安装命令：
+
+```
+cargo add web-sys --features console
+```
+
+> 如果有多个特征名则命令为：
+> 
+> `cargo add web-sys --features console,Window,Document`
+
+<br>
+
+Cargo.toml 依赖内容为：
+
+```
+[dependencies]
+wasm-bindgen = "0.2.100"
+web-sys = { version = "0.3.77", features = ["console"] }
+```
+
+<br>
+
+还有另外一种写法：
+
+```
+[dependencies]
+wasm-bindgen = "0.2.100"
+
+[dependencies.web-sys]
+version = "0.3.77"
+features = ["console"]
+```
+
+> 上面 2 种写法完全一致，但我个人偏向于使用第 1 种写法。
+
+<br>
+
+**web-sys特征名这么多，有些还是 js-sys 提供的，我怎么记得住？**
+
+首先 web-sys 特征名和我们日常编写 JS 中的名称类似。
+
+正常的做法是：你在 rust 代码中该怎么写就先怎么写，当你运行 rust 代码时他会自动检查并且把 Cargo.toml 依赖遗漏的特征名 作为错误信息给你提示，你根据提示自己加上就好。
+
+<br>
+
+**特别提醒：web-sys 的特征名首字母都是大写的，但唯独 console 是个例外。**
+
+<br>
+
+**关于 web-sys 的内部依赖补充说明：**
+
+尽管 web-sys 内部明确依赖 js-sys 和 wasm-bindgen，但是实际中 Cargo.toml 依赖可以不写 js-sys，但一定要写 wasm-bindgen 。
+
+因为我们本身就需要用到 wasm-bindgen 提供的一些宏和类型。
+
+<br>
+
+对于 web-sys 讲了这么多，那么回到我们的 rust 代码中。
+
+<br>
+
+**修改lib.rs代码：**
+
+我们在 add 函数中使用 web-sys 的 console 模块，先输出一些信息，然后才返回计算值和。
+
+```
+use wasm_bindgen::prelude::*;
+use web_sys::console;
+
+#[wasm_bindgen]
+pub fn add(a: i32, b: i32) -> i32 {
+    let num = a + b;
+    console::log_1(&format!("{a} + {b} = {num}").into());
+    num
+}
+```
+
+> 本文并不会讲解 rust 语法，所以前端开发人员第一次看 rust 代码会觉得非常别扭。
+
+<br>
+
+上面代码也可以修改为：
+
+```
+use wasm_bindgen::prelude::*;
+use web_sys::console::log_1;
+
+#[wasm_bindgen]
+pub fn add(a: i32, b: i32) -> i32 {
+    let num = a + b;
+    log_1(&format!("{a} + {b} = {num}").into());
+    num
+}
+```
+
+<br>
+
+**log_1是？**
+
+由于 rust 是一门类型定义极其严格的语言，`log_1` 就表示 "参数数量为 1 的 log 函数"。
+
+如果查看 web-sys 中关于 console 的文档，你会发现和 log 相关的有：
+
+- log：参数为一个数组
+  
+- log_0：没有参数
+  
+- log_1：参数数量为 1
+  
+- ...
+  
+- log_7：参数数量为 7
+  
+
+与 log 对应的还有：clear、debug、dir、error、info、warn 等。
+
+<br>
+
+**web-sys示例：写入DOM元素**
+
+我们再通过一个简单示例来学习 web-sys 如何写入 DOM 元素：当 wasm 初始化完成后向网页插入一个 h3 元素，内容为 "Hello, wasm!"
+
+<br>
+
+和本次 DOM 操作相关的特征名有：Window、Document、Element、HtmlElement
+
+```
+[dependencies]
+wasm-bindgen = "0.2.100"
+web-sys = { version = "0.3.77", features = [
+    "console",
+    "Window",
+    "Document",
+    "Element",
+    "HtmlElement",
+] }
+```
+
+> 你可能疑惑为什么我知道本示例相关的几个特征名？因为当你写多了自然就知道哪些操作对应哪些特征名了。
+
+> 再次提醒：web-sys 特征名首字母都是大写的，唯独 console 是个特例。
+
+<br>
+
+**lib.rs代码更新：**
+
+```
+use wasm_bindgen::JsValue;
+use wasm_bindgen::prelude::*;
+use web_sys::{console, window};
+
+#[wasm_bindgen(start)]
+fn start() -> Result<(), JsValue> {
+    let window = window().expect("no global `window` exists");
+    let document = window.document().expect("should have a document on window");
+    let body = document.body().expect("document should have a body");
+    let h1 = document.create_element("h1")?;
+    h1.set_inner_html("Hello, wasm!");
+    body.append_child(&h1)?;
+    Ok(())
+}
+
+#[wasm_bindgen]
+pub fn add(a: i32, b: i32) -> i32 {
+    let num = a + b;
+    console::log_1(&format!("{a} + {b} = {num}").into());
+    num
+}
+```
+
+> 通过 `#[wasm_bindgen(start)]` 语义注释来表明下面的 start 为 wasm 初始化后就自动执行的函数。
+
+<br>
+
+抛开 rust 本身的语法，这里有一个让人很容易难以理解的点：
+
+- Cargo.toml 中依赖的特征名是 Window
+  
+- 而 lib.rs 代码中引入的是 window，使用时又是 window()
+  
+- 而 window() 函数又返回一个 Window
+  
+
+<br>
+
+**Window、window与Window：**
+
+在 web-sys 官方文档中，通过 Ctrl + F 可以找到：
+
+- 在结构体(structs) 中有 Window
+  
+- 在函数(functions) 中有 window
+  
+
+<br>
+
+也就是说目前一共有 3 处：
+
+- A：Cargo.toml 中的 Window
+  
+- B：使用 use 引入的 window 函数
+  
+- C：window() 返回的 Window
+  
+
+它们的区别是什么，以及为什么 web-sys 要这样设计？
+
+<br>
+
+**它们三个是完全不同的概念，只是恰好名字相似。**
+
+<br>
+
+**A：Window**
+
+Cargo.toml 中的 Window 是编译特性，它告诉 rust/web-sys "请为浏览器中的 Window 对象生成 Rust 绑定代码"。
+
+- 作用阶段：编译时
+  
+- 目的：控制哪些 web api 代码会被编译到最终的二进制文件中
+  
+- 本质：一个条件编译开关
+  
+- 命名约定：首字母大写的驼峰命名
+  
+
+<br>
+
+**B：window：**
+
+`use web_sys::window` 引入 web-sys 提供的 window 函数。
+
+- 作用阶段：代码组织与编写时
+  
+- 目的：将 web-sys 模块根部的 window 函数引入到当前作用域
+  
+- 本质：调用该函数返回一个 web_sys::Window 结构实例，也就是 **`C：Window`**
+  
+  > 前面提到过 web-sys 文档中结构体包含 Window
+  
+- 命名约定：首字母小写的驼峰命名
+  
+
+<br>
+
+多写代码，多练习！
