@@ -1,7 +1,5 @@
 # pnpm安装与使用
 
-
-
 <br>
 
 ### 修改PowerShell安全策略
@@ -13,27 +11,24 @@ pnpm : 无法加载文件 C:\Users\xiao\AppData\Roaming\npm\pnpm.ps1，因为在
 link/?LinkID=135170 中的 about_Execution_Policies。
 ```
 
-
-
 <br>
 
 #### 修改方式：
 
 1. windows > 开始 > 列表中找到 Windows PowerShell
-
+  
 2. 鼠标放到 PowerShell 上面点击右键，在 `更多` 中点击 `以管理员身份运行`
-
+  
 3. 输入下面命令后按回车键：
-
-   ```
-   set-ExecutionPolicy RemoteSigned
-   ```
-
+  
+  ```
+  set-ExecutionPolicy RemoteSigned
+  ```
+  
 4. 输入 A 或者 Y 都可以
-
+  
 5. 重启 PowerShell 就可以放心使用 pnpm 了。
-
-
+  
 
 <br>
 
@@ -47,13 +42,9 @@ link/?LinkID=135170 中的 about_Execution_Policies。
 npm i -g pnpm
 ```
 
-
-
 <br>
 
 ### 常用命令
-
-
 
 <br>
 
@@ -62,8 +53,6 @@ npm i -g pnpm
 ```
 pnpm
 ```
-
-
 
 <br>
 
@@ -84,8 +73,6 @@ pnpm config list -g --json
 pnpm config list --global --json
 ```
 
-
-
 <br>
 
 **查看或修改某个配置项**
@@ -98,8 +85,6 @@ pnpm config get xxx
 pnpm config set xxx
 ```
 
-
-
 <br>
 
 **查看全局npm源**
@@ -109,8 +94,6 @@ pnpm config get registry
 ```
 
 > 默认的 NPM 源为：https://registry.npmjs.org/
-
-
 
 <br>
 
@@ -122,8 +105,6 @@ pnpm config set registry https://registry.npmmirror.com
 
 > 修改 淘宝镜像源 的方式和 npm 、yarn 都是一模一样的
 
-
-
 <br>
 
 **初始化项目**
@@ -134,8 +115,6 @@ pnpm init
 
 > 若当前目录不存在 package.json 则会自动创建
 
-
-
 <br>
 
 **安装到生产依赖(dependencies)**
@@ -143,8 +122,6 @@ pnpm init
 ```
 pnpm add xxx
 ```
-
-
 
 <br>
 
@@ -157,8 +134,6 @@ pnpm add -D xxx
 pnpm --save-dev xxx
 ```
 
-
-
 <br>
 
 **安装到非必须的选项依赖(optionalDependencies)**
@@ -169,8 +144,6 @@ pnpm add -O xxx
 #或
 pnpm add --save-option xxx
 ```
-
-
 
 <br>
 
@@ -183,8 +156,6 @@ pnpm add -g xxx
 pnpm add --global xxx
 ```
 
-
-
 <br>
 
 **安装依赖**
@@ -195,8 +166,6 @@ pnpm i
 #不使用简写
 pnpm install
 ```
-
-
 
 <br>
 
@@ -213,8 +182,6 @@ pnpm up --lastest
 pnpm update
 ```
 
-
-
 <br>
 
 **删除依赖**
@@ -229,9 +196,7 @@ pnpm remove -g xxx
 pnpm remove -D xxx
 ```
 
-> remove  还可以使用其他词语替代：rm、uninstall、un
-
-
+> remove 还可以使用其他词语替代：rm、uninstall、un
 
 <br>
 
@@ -240,8 +205,6 @@ pnpm remove -D xxx
 ```
 pnpm aduit
 ```
-
-
 
 <br>
 
@@ -254,8 +217,6 @@ pnpm list
 pnpm ls
 ```
 
-
-
 <br>
 
 **运行自定义的脚本**
@@ -265,8 +226,6 @@ pnpm run xxx
 ```
 
 > 如果是 package.json 中自定义的脚本命令，则无需 `run`，直接 `pnpm xxx`
-
-
 
 <br>
 
@@ -280,13 +239,9 @@ pnpm create vue
 pnpm create vite
 ```
 
-
-
 <br>
 
 ### 与monorepo(同一仓库多子项目)结合
-
-
 
 <br>
 
@@ -301,12 +256,47 @@ packages:
 
 像上面这样的配置含义为：
 
-* monorepo目录下所有的子目录(子项目) 中需要 pnpm 安装的包都会集中到 根目录下的 node_modules 中
-* 而所有子目录下创建的 node_modules 中的 npm 包仅仅是根目录下 node_modules 的文件引用
+- monorepo目录下所有的子目录(子项目) 中需要 pnpm 安装的包都会集中到 根目录下的 node_modules 中
+- 而所有子目录下创建的 node_modules 中的 npm 包仅仅是根目录下 node_modules 的文件引用
 
 **这样的好处就是：各个子项目中相同的 npm 包文件实际上只会存在一份，节省本地磁盘空间。**
 
-
-
 <br/>
 
+**三级目录：**
+
+如果你的 monorepo/xx/ 下面还有子项目目录，那么你需要这样的配置：
+
+```
+packages:
+  - 'monorepo/**'
+```
+
+<br>
+
+**在根目录中运行monorepo中的子项目：**
+
+假设子项目 xx 目录为 /monorepo/xx/ ，若想在根目录中执行子项目 xx 的 dev ，那么按照传统的写法，需要在 /package.json 中增加这样的配置：
+
+```
+"scripts": {
+    "devXx": "cd ./monorepo/xx && pnpm dev",
+}"
+```
+
+但是在配置了 pnpm-workspace.yaml 的情况下，可以通过 pnpm 特有的 `--filter` 参数简化上述配置：
+
+```
+"scripts": {
+    "devXx": "pnpm --filter xx dev",
+}"
+```
+
+`pnpm --filter xx dev` 包含 2 个行为：
+
+- 在工作空间(workspace)，也就是 `monorepo` 目录下面查找到 xx 目录
+  
+- 然后执行 xx 目录下 package.json 中配置的 `dev` 命令
+  
+
+> 整个过程中无需用户 `cd` 到该子项目目录。
