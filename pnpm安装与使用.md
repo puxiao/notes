@@ -288,15 +288,10 @@ packages:
 
 ```
 "scripts": {
-    "devXx": "pnpm --filter xx dev",
+    "devXx": "pnpm --filter ./monorepo/xx dev",
 }"
 ```
 
-`pnpm --filter xx dev` 包含 2 个行为：
+> 也可以把 `--filter` 简写成 `-F`
 
-- 在工作空间(workspace)，也就是 `monorepo` 目录下面查找到 xx 目录
-  
-- 然后执行 xx 目录下 package.json 中配置的 `dev` 命令
-  
-
-> 整个过程中无需用户 `cd` 到该子项目目录。
+整个过程中无需用户 `cd` 到该子项目目录。
