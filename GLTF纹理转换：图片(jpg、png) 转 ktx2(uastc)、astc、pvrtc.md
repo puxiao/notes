@@ -1,4 +1,4 @@
-## GLTF纹理转换：图片(jpg、png) 转 ktv2(uastc)、astc、pvrtc
+## GLTF纹理转换：图片(jpg、png) 转 ktx2(uastc)、astc、pvrtc
 
 <br>
 
@@ -10,9 +10,9 @@
 
 因为移动端通常来说分配给一个网页或 WebView 的内存、显存大小是有限制的，尤其是苹果手机。
 
-通过将传统的 jpg/png 图片转成 GPU 压缩纹理，例如目前最主流的 .ktv2，会大幅降低在移动端运行所占的内存、显存。
+通过将传统的 jpg/png 图片转成 GPU 压缩纹理，例如目前最主流的 .ktx2，会大幅降低在移动端运行所占的内存、显存。
 
-一般来说 .ktv2 可以降低 70% 的显存占用，没错就是如此夸张。
+一般来说 .ktx2 可以降低 70% 的显存占用，没错就是如此夸张。
 
 <br>
 
@@ -209,14 +209,14 @@ const supportUASTC = ktx2Loader.workerConfig.bptcSupported || ktx2Loader.workerC
 | ktx encode | 将 ktx2 文件编码为 Basis Universal 格式 | ktxsc |
 | ktx transcode | 转码 ktx2 文件 |     |
 | ktx info | 查看 ktx2 文件信息 | ktxinfo |
-| ktv validate | 验证 ktx2 文件 | ktx2check |
+| ktx validate | 验证 ktx2 文件 | ktx2check |
 | ktx help | 显示有关 ktx 工具的帮助信息 |     |
 
 <br>
 
 对于纹理转换，主要用到的命令是 `ktx create` 相关的。
 
-如果你想查看 create 相关的帮助信息，可以使用：`ktv create --help`
+如果你想查看 create 相关的帮助信息，可以使用：`ktx create --help`
 
 <br>
 
