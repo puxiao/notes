@@ -544,11 +544,21 @@ for (let i = 0; i < gltf.images.length; i++) {
 
     const sharpPic = sharp(inputPic)
 
-    const { width } = await sharpPic.metadata()
+    const { width, height } = await sharpPic.metadata()
 
+    //这里假定限制图片最大宽度为 1024px
     if (width > 1024) {
         sharpPic.resize(1024)
     }
+
+    //请注意：uastc 要求图片宽高需要是 4 的倍数
+    const blockSize = 4 //压缩文理要求为 4 的倍数
+    const scale = 1 //缩小倍数
+    const resWidth = Math.ceil(width * scale / blockSize) * blockSize
+    const resHeight = Math.ceil(height * scale / blockSize) * blockSize
+    
+    console.log(`当前图片最终尺寸为 ${resWidth}x${resHeight}`)
+    sharpPic.resize(resWidth, resHeight)
 
     sharpPic.jpeg({ mozjpeg: true })
     await sharpPic.toFile(outputPic)
