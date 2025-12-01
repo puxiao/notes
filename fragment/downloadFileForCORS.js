@@ -12,12 +12,15 @@
 //实现的逻辑：请求该文件地址、当加载完成后将该内容转换成一个临时的URL、再通过添加 <a> 的方式来实现内部下载这个文件
 //这样就绕开了跨域问题
 
-const downloadFile = (url) => {
+//假设禁止用户打开浏览器调试工具，那么这种方式还可以隐藏文件下载地址
 
-    const fileName = url.split('/').pop().split('?')[0]
+const downloadFile = (url,name) => {
+
+    const fileName = name || url.split('/').pop().split('?')[0]
 
     var x = new XMLHttpRequest();
     x.open("GET", url, true);
+    //x.setRequestHeader('Authorization', `Bearer ...`);
     x.responseType = 'blob';
     x.onload = function (e) {
         var url = window.URL.createObjectURL(x.response)
