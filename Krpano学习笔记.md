@@ -156,3 +156,71 @@ ath 和 atv 是热区对应场景的 `球坐标` 坐标值。
     
 
 > 注意：根据 ath 和 atv 的正负值，我个人推测 krpano 使用是 `左手坐标系`
+
+------
+
+<br>
+
+**隐藏默认工具栏：**
+
+有些场景需要我们自定义交互界面，在开发自定义交互按钮之前，首先要做的就是隐藏默认工具栏。
+
+> 注意我们此处说的是 `仅仅隐藏工具栏`，并不是隐藏 krapno 自带的其他图层元素，例如 VR 模式下的指示箭头、退出 VR 模式按钮等。
+
+
+<br>
+
+**第1步：初始化时折叠工具栏**
+
+> tour.xml
+
+```
+<action autorun="onstart">
+    skin_hideskin('instant');
+</action>
+```
+
+<br>
+
+**第2步：网页元素渲染后，找到并清空工具栏元素内容**
+
+> tour.html
+
+```
+<div id="pano" style="width:100%; height:100dvh;"></div>
+<script src="tour.js"></script>
+<script>
+  embedpano({
+    target: "pano",
+    swf: false,
+    xml: "tour.xml",
+    passQueryParameters: "startscene,startlookat",
+    onready: (krpano) => {
+      setTimeout(() => {
+        const childEleList = krpano.display.controllayer.childNodes[1]
+
+        //可以输出一下查看都有哪些元素，并根据需求进行清除(隐藏)
+        //console.log(childEleList.childNodes[i].kobject)
+
+        for (let i = 0; i < childEleList.childNodes.length; i++) {
+          if (childEleList.childNodes[i].kobject?.name === 'skin_layer') {
+            childEleList.childNodes[i].innerHTML = ''
+          }
+        }
+      }, 1000)
+    },
+    onerror: (err) => {
+       console.error(err)
+    },
+  })
+</script>
+```
+
+> 提醒：
+> 
+> - 为了避免 krapno 代码可能对 skin_layer 层的调用出错，这里采用的是 `innerHTML = ''` 方式，而不是 `.remove()`
+>   
+> - 不要采用 `.style.display='none'` 这种方式，因为当退出 VR 模式后 krapno 会自动重新配置 skin_layer 的 display 导致工具栏重新可见。
+>   
+> - 上述方式完全兼容 PC端和移动端。
+>
