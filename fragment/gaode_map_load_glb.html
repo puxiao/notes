@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <link rel="stylesheet" href="//cache.amap.com/lbs/static/main1119.css" />
+    <script type="importmap">
+        {
+          "imports": {
+            "three": "https://unpkg.com/three@0.162.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.162.0/examples/jsm/"
+          }
+        }
+    </script>
+</head>
+
+<body>
+    <div id="container"></div>
+    <script src="//webapi.amap.com/maps?v=1.4.15&key=xxx-your-key-xxx&plugin=Map3D"></script>
+    <script type="module">
+
+        import * as THREE from "three";
+        import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+
+        // 等待 THREE.js 加载完成
+        window.addEventListener('load', function () {
+            var map = new AMap.Map('container', {
+                viewMode: '3D',
+                showBuildingBlock: false,
+                center: [116.472605, 39.992075],
+                pitch: 55,
+                zoom: 17
+            });
+            map.AmbientLight = new AMap.Lights.AmbientLight([1, 1, 1], 1);
+            map.DirectionLight = new AMap.Lights.DirectionLight([1, 0, -0.5], [1, 1, 1], 1);
+
+            var loadModel = function () {
+                var gltfLoader = new GLTFLoader(); // 创建 GLTFLoader 实例用于加载 .glb 文件
+
+                // 替换为你的 .glb 文件路径
+                var glbPath = './demo.glb'; // 请替换为实际的 .glb 文件路径
+
+                gltfLoader.load(
+                    glbPath,
+                    function (gltf) { // 加载成功的回调函数
+                        var object3Dlayer = new AMap.Object3DLayer(); // 创建高德地图的 3D 图层对象
+                        var scene = gltf.scene; // 获取加载的场景对象
+
+                        // 遍历场景中的所有网格
+                        scene.traverse(function (child) {
+                            if (child.geometry) { // 如果是网格对象
+                                var geometry = child.geometry;
+                                var material = child.material;
+
+                                // 创建高德地图的 3D 网格对象
+                                var mesh = new AMap.Object3D.MeshAcceptLights();
+                                var amapGeometry = mesh.geometry;
+
+                                // 获取顶点数据
+                                var positions = geometry.attributes.position;
+                                var normals = geometry.attributes.normal;
+                                var uvs = geometry.attributes.uv;
+
+                                var vertexCount = positions.count;
+
+                                // 获取材质颜色和透明度
+                                var color = material.color || new THREE.Color(1, 1, 1);
+                                var opacity = material.opacity !== undefined ? material.opacity : 1;
+
+                                // 获取索引数据（三角面连接关系）
+                                var indices = geometry.index ? geometry.index.array : null;
+
+                                // 如果存在索引数据，使用索引；否则需要生成顺序索引
+                                if (indices) {
+                                    // 直接使用 GLTF 的索引
+                                    for (var i = 0; i < indices.length; i++) {
+                                        amapGeometry.faces.push(indices[i]);
+                                    }
+                                } else {
+                                    // 如果没有索引，创建顺序索引（0,1,2,3,4,5...）
+                                    var vertexCount = geometry.attributes.position.count;
+                                    for (var i = 0; i < vertexCount; i++) {
+                                        amapGeometry.faces.push(i);
+                                    }
+                                }
+
+                                // 处理顶点数据
+                                for (var j = 0; j < vertexCount; j++) {
+                                    var s = j * 3;
+
+                                    // 添加顶点位置（调整坐标系：y和z互换，z取反）
+                                    amapGeometry.vertices.push(
+                                        positions.array[s],
+                                        positions.array[s + 2],
+                                        -positions.array[s + 1]
+                                    );
+
+                                    // 添加法线
+                                    if (normals) {
+                                        amapGeometry.vertexNormals.push(
+                                            normals.array[s],
+                                            normals.array[s + 2],
+                                            -normals.array[s + 1]
+                                        );
+                                    }
+
+                                    // 添加UV坐标
+                                    if (uvs) {
+                                        amapGeometry.vertexUVs.push(
+                                            uvs.array[j * 2],
+                                            1 - uvs.array[j * 2 + 1]
+                                        );
+                                    }
+
+                                    // 添加顶点颜色
+                                    amapGeometry.vertexColors.push(color.r, color.g, color.b, opacity);
+                                }
+
+                                // 处理纹理
+                                if (material.map && material.map.image) {
+                                    // GLB 文件中的纹理已经嵌入，需要转换为 URL
+                                    var canvas = document.createElement('canvas');
+                                    canvas.width = material.map.image.width;
+                                    canvas.height = material.map.image.height;
+                                    var ctx = canvas.getContext('2d');
+                                    ctx.drawImage(material.map.image, 0, 0);
+                                    var textureUrl = canvas.toDataURL();
+                                    mesh.textures.push(textureUrl);
+                                }
+
+                                // 设置网格属性
+                                mesh.transparent = opacity < 1;
+                                mesh.scale(1000, 1000, 1000); // 缩放比例，可根据需要调整
+                                //mesh.rotateZ(-48); // 旋转角度，可根据需要调整
+                                mesh.position(new AMap.LngLat(116.472605, 39.992075)); // 设置位置
+
+                                console.log(mesh);
+
+                                // 添加到图层
+                                object3Dlayer.add(mesh);
+                            } else {
+                                console.log(child);
+                            }
+                        });
+
+                        // 将图层添加到地图
+                        map.add(object3Dlayer);
+                        console.log('GLB 模型加载成功！');
+                    },
+                    function (xhr) { // 加载进度回调
+                        console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+                    },
+                    function (error) { // 加载错误回调
+                        console.error('加载 GLB 模型时出错:', error);
+                    }
+                );
+            };
+
+            loadModel();
+        })
+    </script>
+</body>
+
+</html>
