@@ -1,0 +1,38 @@
+{
+    "format_on_save": "on",
+    "tab_size": 4,
+    "formatter": {
+        "language_server": {
+            "name": "oxfmt",
+        },
+    },
+    "lsp": {
+        "eslint": {
+            "allowed": false,
+        },
+        "prettier": {
+            "allowed": false,
+            "singleQuote": true,
+        },
+        "oxlint": {
+            "initialization_options": {
+                "settings": {
+                    "configPath": null,
+                    "run": "onType",
+                    "disableNestedConfig": false,
+                    "fixKind": "safe_fix",
+                    "unusedDisableDirectives": "deny",
+                },
+            },
+        },
+        "oxfmt": {
+            "initialization_options": {
+                "settings": {
+                    "fmt.configPath": null,
+                    "run": "onSave",
+                    "singleQuotes": true,
+                },
+            },
+        },
+    },
+}
