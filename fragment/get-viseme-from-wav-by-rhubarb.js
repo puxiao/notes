@@ -7,6 +7,12 @@
  * ffmpeg -i ./xx.mp4 -vn -acodec pcm_s16le -ar 16000 -ac 1 ./xx.wav
  */
 
+ /**
+  * 概念解释：
+  * 音素(phonese)：指语音的最小单位，对应汉语中的声母与韵母、英语中的音节。
+  * 视素(viseme)：指发音时在视觉上的嘴型，也就是可区分的口形、唇形、舌位等特征。
+*/
+ 
 /**
  * rhubarb-lip-sync-wasm 将人类所有发音归并为 9 种嘴型：
  * X：静默/放松/闭嘴，无声或极短停顿时的自然休息状态 —— 嘴唇轻轻闭合，下颌微松。发音：不发音
@@ -27,9 +33,9 @@ const pcmBuffer = readFileSync('./sound.pcm')
 
 const result = await Rhubarb.getLipSync(pcmBuffer)
 const jsonStr = JSON.stringify(result.mouthCues)
-writeFileSync('./phoneme.json', jsonStr)
+writeFileSync('./viseme.json', jsonStr)
 /**
- * phoneme.json 内容为：
+ * viseme.json 内容为：
  * [
      { "start": 0, "end": 0.08, "value": "X" },
      { "start": 0.08, "end": 0.2, "value": "B" },
@@ -39,20 +45,20 @@ writeFileSync('./phoneme.json', jsonStr)
 
 
 // 网页JS使用示例：
-// interface Phoneme {
+// interface Viseme {
 //   start: number
 //   end: number
 //   value: string
 // }
 
-// const phonemeArr: Phoneme[] = [...]
+// const visemeArr: Viseme[] = [...]
 
 // const audio = new Audio()
 // audio.src = "./xx.wav"
 
 // const onTimeUpdate = () => {
 //     const t = audio.currentTime
-//     const hit = phonemeArr.find((p) => t >= p.start && t < p.end)
+//     const hit = visemeArr.find((p) => t >= p.start && t < p.end)
 //     console.log(`此时嘴型为：${hit?.value || 'X'}`)
 // }
 // audio.addEventListener('timeupdate', onTimeUpdate)
