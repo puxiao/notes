@@ -1,15 +1,20 @@
 interface AlphaVideoConfig {
-    videoSrc: string;
+    videoSrc?: string;
     width: number;
     height: number;
     container: HTMLDivElement;
     bgClearColor: string;
+    poster: string;
+    autoplay?: boolean;
+    muted?: boolean;
+    loop?: boolean;
 }
 
 //绿幕视频背景透明播放显示
 class AlphaVideo {
     private video: HTMLVideoElement;
     private canvas: HTMLCanvasElement;
+    private img: HTMLImageElement;
     private gl: WebGLRenderingContext;
     private config: AlphaVideoConfig;
     private program: WebGLProgram | null = null;
@@ -17,49 +22,77 @@ class AlphaVideo {
     private keyColor: [number, number, number] = [0, 1, 0];
     private threshold: number = 0.2;
     private smoothing: number = 0.02;
+    private isPlayingVideo: boolean = false;
+    private hasPlayedVideo: boolean = false;
+    private _visible: boolean = true;
 
     constructor(config: AlphaVideoConfig) {
         this.config = config;
-        this.video = document.createElement('video');
-        this.canvas = document.createElement('canvas');
+        this.video = document.createElement("video");
+        this.canvas = document.createElement("canvas");
+        this.img = document.createElement("img");
 
         this.setupCanvas();
         this.setupVideo();
 
-        const gl = this.canvas.getContext('webgl');
+        const gl = this.canvas.getContext("webgl");
         if (!gl) {
-            throw new Error('WebGL not supported');
+            throw new Error("WebGL not supported");
         }
         this.gl = gl;
 
         this.parseColor(config.bgClearColor);
         this.initWebGL();
+
+        if (config.videoSrc) {
+            this.videoSrc = config.videoSrc;
+        }
+
+        if (config.autoplay) {
+            this.video.autoplay = true;
+        }
+        if (config.muted) {
+            this.video.muted = true;
+        }
+        if (config.loop) {
+            this.video.loop = true;
+        }
+
+        // 初始化时开始渲染海报图片
+        this.img.onload = () => {
+            this.render();
+        };
     }
 
-    private setupCanvas (): void {
+    private setupCanvas(): void {
         this.canvas.width = this.config.width;
         this.canvas.height = this.config.height;
         this.config.container.appendChild(this.canvas);
     }
 
-    private setupVideo (): void {
-        this.video.src = this.config.videoSrc;
-        this.video.crossOrigin = 'anonymous';
-        this.video.loop = true;
-        //this.video.muted = true;
+    private setupVideo(): void {
+        this.img.src = this.config.poster;
+        this.img.crossOrigin = "anonymous";
+        this.video.volume = 1;
+        this.video.crossOrigin = "anonymous";
+        //this.video.loop = true;
+        this.video.muted = false;
         this.video.playsInline = true;
-        this.video.style.display = 'none';
+        this.video.preload = "auto";
+        this.video.style.display = "none";
     }
 
-    private parseColor (colorStr: string): void {
-        let r = 0, g = 0, b = 0;
+    private parseColor(colorStr: string): void {
+        let r = 0,
+            g = 0,
+            b = 0;
 
-        if (colorStr.startsWith('#')) {
+        if (colorStr.startsWith("#")) {
             const hex = colorStr.substring(1);
             r = parseInt(hex.substring(0, 2), 16) / 255;
             g = parseInt(hex.substring(2, 4), 16) / 255;
             b = parseInt(hex.substring(4, 6), 16) / 255;
-        } else if (colorStr.startsWith('rgb')) {
+        } else if (colorStr.startsWith("rgb")) {
             const matches = colorStr.match(/\d+/g);
             if (matches && matches.length >= 3) {
                 r = parseInt(matches[0]) / 255;
@@ -73,7 +106,7 @@ class AlphaVideo {
         this.keyColor = [r, g, b];
     }
 
-    private initWebGL (): void {
+    private initWebGL(): void {
         const gl = this.gl;
 
         // 顶点着色器
@@ -81,7 +114,7 @@ class AlphaVideo {
       attribute vec2 a_position;
       attribute vec2 a_texCoord;
       varying vec2 v_texCoord;
-      
+
       void main() {
         gl_Position = vec4(a_position, 0.0, 1.0);
         v_texCoord = a_texCoord;
@@ -97,32 +130,32 @@ class AlphaVideo {
       uniform float u_threshold;
       uniform float u_smoothing;
       uniform vec2 u_resolution;
-      
+
       void main() {
         vec4 color = texture2D(u_texture, v_texCoord);
-        
+
         // 计算当前像素的实际坐标
         vec2 pixelCoord = v_texCoord * u_resolution;
-        
+
         // 检查是否在边缘2像素内
         float borderWidth = 2.0;
-        bool isNearEdge = pixelCoord.x < borderWidth || 
+        bool isNearEdge = pixelCoord.x < borderWidth ||
                          pixelCoord.x > u_resolution.x - borderWidth ||
-                         pixelCoord.y < borderWidth || 
+                         pixelCoord.y < borderWidth ||
                          pixelCoord.y > u_resolution.y - borderWidth;
-        
-        // 如果在边缘2像素内，直接设置为完全透明
+
+        // 如果在边缘2像素内,直接设置为完全透明
         if (isNearEdge) {
           gl_FragColor = vec4(color.rgb, 0.0);
           return;
         }
-        
+
         // 计算当前像素与键控颜色的距离
         float dist = distance(color.rgb, u_keyColor);
-        
+
         // 使用平滑过渡计算透明度
         float alpha = smoothstep(u_threshold, u_threshold + u_smoothing, dist);
-        
+
         gl_FragColor = vec4(color.rgb, color.a * alpha);
       }
     `;
@@ -131,31 +164,21 @@ class AlphaVideo {
         const fragmentShader = this.createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
 
         if (!vertexShader || !fragmentShader) {
-            throw new Error('Failed to create shaders');
+            throw new Error("Failed to create shaders");
         }
 
         this.program = this.createProgram(gl, vertexShader, fragmentShader);
         if (!this.program) {
-            throw new Error('Failed to create program');
+            throw new Error("Failed to create program");
         }
 
-        // 设置几何体（两个三角形组成矩形）
-        const positions = new Float32Array([
-            -1, -1,
-            1, -1,
-            -1, 1,
-            1, 1,
-        ]);
+        // 设置几何体(两个三角形组成矩形)
+        const positions = new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]);
 
-        const texCoords = new Float32Array([
-            0, 1,
-            1, 1,
-            0, 0,
-            1, 0,
-        ]);
+        const texCoords = new Float32Array([0, 1, 1, 1, 0, 0, 1, 0]);
 
-        this.setupBuffer(gl, this.program, 'a_position', positions, 2);
-        this.setupBuffer(gl, this.program, 'a_texCoord', texCoords, 2);
+        this.setupBuffer(gl, this.program, "a_position", positions, 2);
+        this.setupBuffer(gl, this.program, "a_texCoord", texCoords, 2);
 
         // 创建纹理
         const texture = gl.createTexture();
@@ -170,7 +193,7 @@ class AlphaVideo {
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     }
 
-    private createShader (gl: WebGLRenderingContext, type: number, source: string): WebGLShader | null {
+    private createShader(gl: WebGLRenderingContext, type: number, source: string): WebGLShader | null {
         const shader = gl.createShader(type);
         if (!shader) return null;
 
@@ -178,7 +201,7 @@ class AlphaVideo {
         gl.compileShader(shader);
 
         if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-            console.error('Shader compile error:', gl.getShaderInfoLog(shader));
+            console.error("Shader compile error:", gl.getShaderInfoLog(shader));
             gl.deleteShader(shader);
             return null;
         }
@@ -186,7 +209,7 @@ class AlphaVideo {
         return shader;
     }
 
-    private createProgram (gl: WebGLRenderingContext, vertexShader: WebGLShader, fragmentShader: WebGLShader): WebGLProgram | null {
+    private createProgram(gl: WebGLRenderingContext, vertexShader: WebGLShader, fragmentShader: WebGLShader): WebGLProgram | null {
         const program = gl.createProgram();
         if (!program) return null;
 
@@ -195,7 +218,7 @@ class AlphaVideo {
         gl.linkProgram(program);
 
         if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-            console.error('Program link error:', gl.getProgramInfoLog(program));
+            console.error("Program link error:", gl.getProgramInfoLog(program));
             gl.deleteProgram(program);
             return null;
         }
@@ -203,7 +226,7 @@ class AlphaVideo {
         return program;
     }
 
-    private setupBuffer (gl: WebGLRenderingContext, program: WebGLProgram, attributeName: string, data: Float32Array, size: number): void {
+    private setupBuffer(gl: WebGLRenderingContext, program: WebGLProgram, attributeName: string, data: Float32Array, size: number): void {
         const buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
         gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
@@ -213,8 +236,25 @@ class AlphaVideo {
         gl.vertexAttribPointer(location, size, gl.FLOAT, false, 0, 0);
     }
 
-    private render (): void {
-        if (!this.program || this.video.readyState < this.video.HAVE_CURRENT_DATA) {
+    private render(): void {
+        if (this._visible === false) {
+            this.animationId = requestAnimationFrame(() => this.render());
+            return;
+        }
+
+        if (!this.program) {
+            this.animationId = requestAnimationFrame(() => this.render());
+            return;
+        }
+
+        // 如果正在播放视频,但视频还没准备好,继续等待
+        if (this.isPlayingVideo && this.video.readyState < this.video.HAVE_CURRENT_DATA) {
+            this.animationId = requestAnimationFrame(() => this.render());
+            return;
+        }
+
+        // 如果不是播放视频状态,但图片还没加载完成,继续等待
+        if (!this.isPlayingVideo && !this.img.complete) {
             this.animationId = requestAnimationFrame(() => this.render());
             return;
         }
@@ -227,19 +267,26 @@ class AlphaVideo {
 
         gl.useProgram(this.program);
 
-        // 更新视频纹理
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.video);
+        // 根据状态更新纹理:视频或图片
+        const source = this.hasPlayedVideo ? this.video : this.img;
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
 
         // 设置 uniforms
-        const keyColorLocation = gl.getUniformLocation(this.program, 'u_keyColor');
-        const thresholdLocation = gl.getUniformLocation(this.program, 'u_threshold');
-        const smoothingLocation = gl.getUniformLocation(this.program, 'u_smoothing');
-        const resolutionLocation = gl.getUniformLocation(this.program, 'u_resolution');
+        const keyColorLocation = gl.getUniformLocation(this.program, "u_keyColor");
+        const thresholdLocation = gl.getUniformLocation(this.program, "u_threshold");
+        const smoothingLocation = gl.getUniformLocation(this.program, "u_smoothing");
+        const resolutionLocation = gl.getUniformLocation(this.program, "u_resolution");
 
         gl.uniform3fv(keyColorLocation, this.keyColor);
         gl.uniform1f(thresholdLocation, this.threshold);
         gl.uniform1f(smoothingLocation, this.smoothing);
-        gl.uniform2f(resolutionLocation, this.video.videoWidth, this.video.videoHeight);
+
+        // 根据源设置分辨率
+        if (this.isPlayingVideo) {
+            gl.uniform2f(resolutionLocation, this.video.videoWidth, this.video.videoHeight);
+        } else {
+            gl.uniform2f(resolutionLocation, this.img.width, this.img.height);
+        }
 
         // 绘制
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -248,61 +295,102 @@ class AlphaVideo {
     }
 
     // 公共方法
-    public play (): Promise<void> {
-        return this.video.play().then(() => {
-            if (!this.animationId) {
-                this.render();
-            }
+
+    public get videoEle(): HTMLVideoElement {
+        return this.video;
+    }
+
+    public get canvasEle(): HTMLCanvasElement {
+        return this.canvas;
+    }
+
+    public get playing(): boolean {
+        return this.isPlayingVideo;
+    }
+
+    public get visible(): boolean {
+        return this._visible;
+    }
+
+    public set visible(boo: boolean) {
+        this._visible = boo;
+    }
+
+    public get videoSrc(): string {
+        return this.video.src;
+    }
+
+    public set videoSrc(src: string) {
+        this.video.src = src;
+    }
+
+    public play() {
+        return new Promise<boolean>((resolve, reject) => {
+            this.isPlayingVideo = true;
+            void this.video
+                .play()
+                .then(() => {
+                    this.hasPlayedVideo = true;
+                    if (!this.animationId) {
+                        this.render();
+                    }
+                    resolve(true);
+                })
+                .catch((err) => {
+                    console.error(err);
+                    reject(false);
+                });
         });
     }
 
-    public pause (): void {
+    public pause(): void {
         this.video.pause();
+        this.isPlayingVideo = false;
     }
 
-    public stop (): void {
+    public stop(): void {
         this.video.pause();
         this.video.currentTime = 0;
     }
 
-    public setThreshold (value: number): void {
+    public setThreshold(value: number): void {
         this.threshold = Math.max(0, Math.min(1, value));
     }
 
-    public setSmoothing (value: number): void {
+    public setSmoothing(value: number): void {
         this.smoothing = Math.max(0, Math.min(1, value));
     }
 
-    public seek (time: number): void {
+    public seek(time: number): void {
         this.video.currentTime = time;
     }
 
-    public getCurrentTime (): number {
+    public getCurrentTime(): number {
         return this.video.currentTime;
     }
 
-    public getDuration (): number {
+    public getDuration(): number {
         return this.video.duration;
     }
 
-    public setVolume (volume: number): void {
+    public setVolume(volume: number): void {
         this.video.volume = Math.max(0, Math.min(1, volume));
     }
 
-    public mute (): void {
+    public mute(): void {
         this.video.muted = true;
     }
 
-    public unmute (): void {
+    public unmute(): void {
         this.video.muted = false;
     }
 
-    public destroy (): void {
+    public destroy(): void {
         if (this.animationId) {
             cancelAnimationFrame(this.animationId);
         }
         this.video.pause();
-        this.video.src = '';
+        this.video.src = "";
         this.config.container.removeChild(this.canvas);
 
         if (this.gl && this.program) {
@@ -320,14 +408,17 @@ class AlphaVideo {
 //       width: 630,
 //       height: 1200,
 //       bgClearColor: '#6da047', // 需要扣除的绿幕颜色
+//       poster: '/poster.jpg'  // 海报图片
 //   })
 // alphaVideo.value.setThreshold(0.24);
 // alphaVideo.value.setSmoothing(0);
 
-// 若像缩小显示尺寸，可让视频保持原尺寸，然后使用 CSS 通过 canvas 进行缩放
+// 若想缩小显示尺寸,可让视频保持原尺寸,然后使用 CSS 通过 canvas 进行缩放
 // #video-container canvas {
 //     transform-origin: left top;
 //     transform: scale(0.355556);
 // }
+// 或者通过 JS 采用下面方式：
+// alphaVideo.canvasEle.style.transform = "scale(0.5) translateY(50%)";
 
 export default AlphaVideo;
